@@ -1,0 +1,11 @@
+# represents any number
+
+c#a.json -> coordinates of territories
+c#sr.json -> coordinates of sea routes
+c#cp.json -> coordinates of where to display the arrow
+
+c#ns -> reserved space for displaying name
+c#ts -> reserved space for displaying troop numbers
+c#cs -> reserved space for displaying capital
+c#ds -> reserved space for displaying city and any development
+c#is -> reserved space for displaying insignia
