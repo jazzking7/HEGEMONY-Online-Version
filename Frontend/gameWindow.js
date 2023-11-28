@@ -19,10 +19,7 @@ let cps = [];
 function setup() {
   createCanvas(1000, 1000)
   for (let i = 1; i < 7; i++){
-    if (i === 10){continue;}
-    loadJSON(`c${i}a.json`, loadPolygonsData);
-    loadJSON(`c${i}sr.json`, loadSR);
-    loadJSON(`c${i}cp.json`, loadCP);
+    loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
   }
 }
 
