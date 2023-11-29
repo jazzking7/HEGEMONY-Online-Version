@@ -20,6 +20,7 @@ function setup() {
   createCanvas(1000, 1000)
   for (let i = 1; i < 7; i++){
     loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
+    loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
   }
 }
 
@@ -64,16 +65,18 @@ function draw() {
     pop();
     tmp_id++;
   }
+
+  for (let coord of srs){
+    push();
+    fill(0,255,0)
+    circle(coord.x, coord.y, 10);
+    pop();
+  }
+
   // Offset dragging
   translate(-offsetX, -offsetY);
   pop();
   
-  // push();
-  // // Display the coordinates on the screen
-  // fill(0); // Sets the fill color to black
-  // text(`MouseX: ${mouseX}, MouseY: ${mouseY}`, 20, 20);
-  // text(`Scale: ${scaleFactor}`, 20, 40);
-  // pop();
 }
 
 function keyPressed(){
