@@ -11,10 +11,11 @@ let previousMouseY;
 let tmp_id = 0;
 let hover_over = {'pts': [], 'id': 0};
 
-// Objects to be displayed
+// Components to be displayed
 let polygons = [];
 let srs = [];
 let cps = [];
+let seaRoutes = [];
 
 function setup() {
   createCanvas(1000, 1000)
@@ -22,6 +23,7 @@ function setup() {
     loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
     loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
   }
+  loadJSON(`../MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
 }
 
 function draw() {
@@ -56,7 +58,6 @@ function draw() {
      hover_over.pts = polygon;
      hover_over.id = tmp_id;
     }
-    // Draw your polygon
   beginShape();
   for (let p of polygon) {
     vertex(p.x, p.y);
@@ -71,6 +72,10 @@ function draw() {
     fill(0,255,0)
     circle(coord.x, coord.y, 10);
     pop();
+  }
+
+  for (let route of seaRoutes){
+    drawDottedLine(route.x1, route.y1, route.x2, route.y2);
   }
 
   // Offset dragging
@@ -100,6 +105,12 @@ function loadSR(data){
 function loadCP(data){
     for (let p of data) {
     cps.push(p);
+  }
+}
+
+function loadSeaRoutes(data){
+  for (let sr of data){
+    seaRoutes.push(sr);
   }
 }
 
@@ -184,4 +195,16 @@ function isMouseInsidePolygon(mouseX, mouseY, polygon) {
   return pointInPolygon(createVector(finalX, finalY), polygon);
 }
 
-
+function drawDottedLine(x1, y1, x2, y2){
+  push();
+  stroke(0); 
+  strokeWeight(5); 
+  let lineLength = dist(x1, y1, x2, y2);
+  let dotSpacing = 6;
+  for (let i = 0; i <= lineLength; i += dotSpacing * 2) {
+    let x = map(i, 0, lineLength, x1, x2);
+    let y = map(i, 0, lineLength, y1, y2);
+    point(x, y);
+  }
+  pop();
+}
