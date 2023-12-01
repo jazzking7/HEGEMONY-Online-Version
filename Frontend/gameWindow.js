@@ -42,7 +42,7 @@ function draw() {
     let dx = mouseX - previousMouseX;
     let dy = mouseY - previousMouseY;
     
-    offsetX = constrain(offsetX + dx, -1500, 0); // Adjust according to canvas size
+    offsetX = constrain(offsetX + dx, -1500, 500); // Adjust according to canvas size
     offsetY = constrain(offsetY + dy, -500, 500); // Adjust according to canvas size
   }
   // Dragging
