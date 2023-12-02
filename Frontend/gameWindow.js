@@ -16,6 +16,11 @@ let polygons = [];
 let srs = [];
 let cps = [];
 let seaRoutes = [];
+let contBorders = [];
+let contBonusBoxes = [];
+
+// Toggles
+let showContBorders = false;
 
 function setup() {
   createCanvas(1000, 1000)
@@ -24,11 +29,13 @@ function setup() {
     loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
   }
   loadJSON(`../MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
+  loadJSON(`../MAPS/MichaelMap1/contBorders.json`, loadBorders);
+  loadJSON(`../MAPS/MichaelMap1/contBonusDisplay.json`, loadContBonus);
 }
 
 function draw() {
   background(0, 150, 200);
-  
+
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;
@@ -78,8 +85,44 @@ function draw() {
     drawDottedLine(route.x1, route.y1, route.x2, route.y2);
   }
 
+  if(showContBorders){
+    for (let border of contBorders){
+      push();
+      fill(128,128,128,100);
+      beginShape();
+      for (let p of border){
+        vertex(p.x, p.y);
+      }
+      endShape(CLOSE);
+      pop();
+    }
+    
+    for (let bonus of contBonusBoxes){
+      push();
+      fill(255,255,255);
+      rect(bonus.x, bonus.y, bonus.dx, bonus.dy);
+      fill(0,0,0);
+      textStyle(BOLD);
+      textSize(15);
+      textAlign(CENTER, CENTER);
+      text(bonus.message, bonus.cx, bonus.cy);
+      pop();
+    }
+  }
+
   // Offset dragging
   translate(-offsetX, -offsetY);
+  pop();
+
+  
+  push();
+  fill(220,0,50)
+  rect(25, 25, 80, 50);
+  fill(0,0,0)
+  textStyle(BOLD);
+  text("\t\t\tSHOW\nCONTINENTS", 25, 48);
+  showContBorders = (mouseX < 105 && mouseX > 25 && mouseY < 75 && mouseY > 25);
+
   pop();
   
 }
@@ -105,6 +148,18 @@ function loadSR(data){
 function loadCP(data){
     for (let p of data) {
     cps.push(p);
+  }
+}
+
+function loadBorders(data){
+  for (let border of data){
+    contBorders.push(border);
+  }
+}
+
+function loadContBonus(data){
+  for (let display of data){
+    contBonusBoxes.push(display);
   }
 }
 
