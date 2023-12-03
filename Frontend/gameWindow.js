@@ -219,7 +219,6 @@ function mouseClicked() {
     console.log(hover_over.id);
   }
 }
-
 // Function to check if a point is inside a polygon
 function pointInPolygon(P, vertices) {
   let x = P.x, y = P.y;
