@@ -14,6 +14,9 @@ let hover_over = {'pts': [], 'id': 0};
 // Components to be displayed
 let polygons = [];
 let srs = [];
+let nameSpaces = [];
+let territoryNames = [];
+let neighborTerritoryNames = {};
 let cps = [];
 let seaRoutes = [];
 let contBorders = [];
@@ -22,11 +25,26 @@ let contBonusBoxes = [];
 // Toggles
 let showContBorders = false;
 
-function setup() {
-  createCanvas(1000, 1000)
+async function setup() {
+  createCanvas(1000, 1000);
+  let tempArray = [];
   for (let i = 1; i < 7; i++){
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ns.json`, loadNS);
+    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}tnames.txt`)
+      .then((res) => res.text())
+      .then((text) => {
+        territoryNames.push(...text.split(/\r?\n/).filter(n => n));
+      }).catch((e) => console.error(e));
+    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}nt.txt`)
+      .then((res) => res.text())
+      .then((text) => {
+        tempArray.push(...text.split(/\r?\n/).filter(n => n));
+      }).catch((e) => console.error(e));
+  }
+  for (let j = 0; j < territoryNames.length; j++){
+    neighborTerritoryNames[territoryNames[j]] = tempArray[j].split(",");
   }
   loadJSON(`/static/MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
   loadJSON(`/static/MAPS/MichaelMap1/contBorders.json`, loadBorders);
@@ -78,6 +96,14 @@ function draw() {
     push();
     fill(0,255,0)
     circle(coord.x, coord.y, 10);
+    pop();
+  }
+
+  let nameIndex = 0
+  for (let coord of nameSpaces){
+    push();
+    text(territoryNames[nameIndex], coord.x, coord.y);
+    nameIndex++;
     pop();
   }
 
@@ -142,6 +168,12 @@ function loadPolygonsData(data){
 function loadSR(data){
     for (let p of data) {
     srs.push(p);
+  }
+}
+
+function loadNS(data){
+  for (let p of data) {
+    nameSpaces.push(p)
   }
 }
 
