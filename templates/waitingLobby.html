@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="current_players">
+    <h2>Lobby Code: {{code}}</h2>
+    <div class="players" id="players"></div>
+</div>
+
+<script type="text/javascript">
+    var socketio = io(); // initiate connection, which is handled by function from server side with decorator @socketio.on('connect')
+    const players = document.getElementById("players")
+    let pNames = []
+
+    const displayPlayer = (name) => {
+        const content = `<div class="text">
+            <span> <strong>${name}</strong>: Active</span>
+        </div>`;
+        players.innerHTML += content;
+    };
+
+    const updatePNames = () => {
+        players.innerHTML = ``;
+        for (let name in pNames){
+            const content = `<div class="text">
+            <span> <strong>${pNames[name]}</strong>: Active</span>
+            </div>`;
+            players.innerHTML += content;
+        }
+    }
+
+    socketio.on("playerIn", (data) => {
+        pNames = data
+        console.log(pNames)
+        updatePNames();
+    });
+
+    socketio.on("playerOut", (data) => {
+        pNames = data
+        updatePNames();
+    });
+
+</script>
+
+<!-- {% for player in stats.pNames %}
+<script type="text/javascript">
+    displayPlayer("{{player}}");
+</script>
+{% endfor %} -->
+
+{% endblock %}

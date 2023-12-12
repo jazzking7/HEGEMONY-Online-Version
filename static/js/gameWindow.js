@@ -25,12 +25,12 @@ let showContBorders = false;
 function setup() {
   createCanvas(1000, 1000)
   for (let i = 1; i < 7; i++){
-    loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
-    loadJSON(`../MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
   }
-  loadJSON(`../MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
-  loadJSON(`../MAPS/MichaelMap1/contBorders.json`, loadBorders);
-  loadJSON(`../MAPS/MichaelMap1/contBonusDisplay.json`, loadContBonus);
+  loadJSON(`/static/MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
+  loadJSON(`/static/MAPS/MichaelMap1/contBorders.json`, loadBorders);
+  loadJSON(`/static/MAPS/MichaelMap1/contBonusDisplay.json`, loadContBonus);
 }
 
 function draw() {
