@@ -78,6 +78,7 @@ def waitingLobby():
 def connect(auth):
     name = session.get("name")
     lobby = session.get("lobby")
+
     if not lobby or not name:
         return
     if lobby not in lobbies:
