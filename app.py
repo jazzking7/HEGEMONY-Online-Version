@@ -45,7 +45,7 @@ def home():
         
         session["lobby"] = lobby
 
-        return redirect(url_for("waitingLobby"))
+        return redirect(url_for("gameLobby"))
     
     return render_template("home.html")
 
@@ -59,20 +59,20 @@ def createLobby():
         # a lobby is virtually created and identified by a 4-letter long code
         # the unique code serves as the channel number
         lobby = generate_unique_code(4)
-        lobbies[lobby] = {"players": 0, "maxPlayer": numPlayers, "alliesAllowed": allianceOn, "pNames": []}
+        lobbies[lobby] = {"players": 0, "maxPlayer": numPlayers, "alliesAllowed": allianceOn, "pNames": [], "host": session["name"]}
 
         session["lobby"] = lobby
 
-        return redirect(url_for("waitingLobby"))
+        return redirect(url_for("gameLobby"))
         
     return render_template("createLobby.html")
 
-@app.route("/waitingLobby")
-def waitingLobby():
+@app.route("/gameLobby")
+def gameLobby():
     lobby = session.get("lobby")
     if lobby is None or session.get("name") is None or lobby not in lobbies:
         return redirect(url_for("home"))
-    return render_template("waitingLobby.html", code=lobby, stats=lobbies[lobby])
+    return render_template("gameLobby.html", code=lobby, stats=lobbies[lobby], playerName=session.get("name"))
 
 @socketio.on('connect')
 def connect(auth):
@@ -113,9 +113,16 @@ def disconnect():
         if lobbies[lobby]["players"] <= 0:
             del lobbies[lobby]
 
-@app.route("/gameWindow")
-def gameWindow():
-    return render_template("index.html")
+@socketio.on('changeSettings')
+def changeSettings(data):
+    lobby = session.get("lobby")
+    if lobby not in lobbies:
+        return
+    lobbies[lobby]['maxPlayer'] = int(data['maxPlayer'])
+    lobbies[lobby]['alliesAllowed'] = True if data['allianceOn'] == 'yes' else False
+
+    socketio.emit('changeSettings', {'maxPlayer':int(data['maxPlayer']), 'allianceOn': lobbies[lobby]['alliesAllowed']})
+
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

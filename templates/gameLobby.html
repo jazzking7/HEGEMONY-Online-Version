@@ -5,18 +5,37 @@
     <h2>Lobby Code: {{code}}</h2>
     <div class="players" id="players"></div>
 </div>
+<div class="settings" id="currentSettings">
+    <h2>Current Settings</h2>
+    <p>Max number of players: {{stats.maxPlayer}}</p>
+    <p>Alliance mode: {% if stats.alliesAllowed %}On{% else %}Off{% endif %}</p>
+</div>
+{% if playerName == stats.host %}
+<div class="change_settings">
+    <form id="change_settings">
+        <div>
+            <label>Number of players: </label>
+            <input type="number" name="numPlayers" min="5" max="10" step="1" value="5">
+        </div>
+        <div>
+            <label>Alliance mode: </label>
+            <label>
+                <input type="radio" name="alliesOn" value="yes" checked> On
+              </label>
+              <label>
+                <input type="radio" name="alliesOn" value="no"> Off
+              </label>
+        </div>
+        <button type="button" name="change" onClick="changeSettings()">Change Settings</button>
+</div>
+{% endif %}
 
 <script type="text/javascript">
     var socketio = io(); // initiate connection, which is handled by function from server side with decorator @socketio.on('connect')
     const players = document.getElementById("players")
+    const settings = document.getElementById("currentSettings")
     let pNames = []
-
-    const displayPlayer = (name) => {
-        const content = `<div class="text">
-            <span> <strong>${name}</strong>: Active</span>
-        </div>`;
-        players.innerHTML += content;
-    };
+    let currSettings = {}
 
     const updatePNames = () => {
         players.innerHTML = ``;
@@ -28,9 +47,35 @@
         }
     }
 
+    const updateSettings = () => {
+        settings.innerHTML = ``;
+        const content = `<h2>Current Settings</h2>
+    <p>Max number of players: ${currSettings.maxPlayer}</p>
+    <p>Alliance mode: ${currSettings.allianceOn}</p>`;
+        settings.innerHTML += content
+    }
+
+    const changeSettings = () => {
+
+        const form = document.getElementById('change_settings');
+        const numPlayersInput = form.elements['numPlayers'];
+        const alliesOnInputs = form.elements['alliesOn'];
+
+        const numPlayers = numPlayersInput.value;
+        let alliesOn;
+
+        for (let btn of alliesOnInputs) {
+        if (btn.checked) {
+            alliesOn = btn.value;
+            break;
+            }
+        }
+
+        socketio.emit("changeSettings", {'maxPlayer': numPlayers, 'allianceOn': alliesOn});
+    }
+
     socketio.on("playerIn", (data) => {
         pNames = data
-        console.log(pNames)
         updatePNames();
     });
 
@@ -39,12 +84,12 @@
         updatePNames();
     });
 
-</script>
+    socketio.on("changeSettings", (data) => {
+        currSettings = data;
+        currSettings.allianceOn = currSettings.allianceOn ? "On" : "Off";
+        updateSettings();
+    });
 
-<!-- {% for player in stats.pNames %}
-<script type="text/javascript">
-    displayPlayer("{{player}}");
 </script>
-{% endfor %} -->
 
 {% endblock %}
