@@ -120,8 +120,8 @@ def changeSettings(data):
         return
     lobbies[lobby]['maxPlayer'] = int(data['maxPlayer'])
     lobbies[lobby]['alliesAllowed'] = True if data['allianceOn'] == 'yes' else False
-
-    socketio.emit('changeSettings', {'maxPlayer':int(data['maxPlayer']), 'allianceOn': lobbies[lobby]['alliesAllowed']})
+    onOff = "On" if lobbies[lobby]['alliesAllowed'] else "Off"
+    socketio.emit('changeSettings', {'maxPlayer':int(data['maxPlayer']), 'allianceOn': onOff})
 
 
 if __name__ == "__main__":
