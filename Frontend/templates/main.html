@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>HEGEMONY</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='css/homeStyle.css')}}"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="content" id="main"></div>
+
+        <script>
+            // Load main_menu
+            $(document).ready(function(){
+
+                // home page
+                $.ajax({
+                    url: 'http://127.0.0.1:8080/main_menu',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#main').html(response);
+                        $('#create_btn').click(function(){
+                            if($('#username').val().trim().length){
+                                console.log("REACHED")
+                                console.log('create lobby');
+                                socket.emit('createLobby', $('#username').val());
+                            } else {
+                                $('#homeError').html(`Must enter a name!`);
+                            }
+                        });
+                        $('#join_btn').click(function(){
+                            console.log('join lobby');
+                            socket.emit('createLobby', $('#username').val());
+                        });
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            
+
+                // Initiate socket connection
+                var socket = io.connect('http://127.0.0.1:8081');
+                
+                socket.on('connect', function() {
+                    console.log('connected');
+                });
+    
+                socket.on('lobbyCreated', function(data) {
+                    console.log(data);
+                    $.ajax({
+                        url: 'http://127.0.0.1:8080/lobby',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#main').html(response);
+                            $('#lobbyId').val(data);
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+                });
+                
+
+
+            });
+        </script>
+
+    </body>
+</html>

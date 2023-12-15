@@ -18,36 +18,40 @@ def generate_unique_code(length):
             break
     return code
 
-@app.route("/", methods=["POST", "GET"])
-def home():
-    session.clear()
-    if request.method == "POST":
-        name = request.form.get("name")
-        code = request.form.get("code")
-        join = request.form.get("join", False)
-        create = request.form.get("create", False)
+@app.route("/")
+def main():
+    return render_template('main.html')
 
-        if not name:
-            return render_template("home.html", error="Please enter a name.", code=code, name=name)
-        if join != False and not code:
-            return render_template("home.html", error="Please enter a lobby code.", code=code, name=name)
+@app.route("/main_menu", methods=["POST", "GET"])
+def main_menu():
+    # session.clear()
+    # if request.method == "POST":
+    #     name = request.form.get("name")
+    #     code = request.form.get("code")
+    #     join = request.form.get("join", False)
+    #     create = request.form.get("create", False)
 
-        lobby = code
+    #     if not name:
+    #         return render_template("home.html", error="Please enter a name.", code=code, name=name)
+    #     if join != False and not code:
+    #         return render_template("home.html", error="Please enter a lobby code.", code=code, name=name)
 
-        session["name"] = name
+    #     lobby = code
 
-        # Create new lobby
-        if create != False:
-            return redirect(url_for("createLobby"))
-        # Fail to join a lobby
-        elif code not in lobbies:
-            return render_template("home.html", error="Room does not exist", code=code, name=name)
+    #     session["name"] = name
+
+    #     # Create new lobby
+    #     if create != False:
+    #         return redirect(url_for("createLobby"))
+    #     # Fail to join a lobby
+    #     elif code not in lobbies:
+    #         return render_template("home.html", error="Room does not exist", code=code, name=name)
         
-        session["lobby"] = lobby
+    #     session["lobby"] = lobby
 
-        return redirect(url_for("gameLobby"))
+    #     return redirect(url_for("gameLobby"))
     
-    return render_template("home.html")
+    return render_template("main_menu.html")
 
 @app.route("/createLobby", methods=["POST", "GET"])
 def createLobby():
@@ -125,4 +129,4 @@ def changeSettings(data):
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)

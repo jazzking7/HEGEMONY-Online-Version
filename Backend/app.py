@@ -1,11 +1,21 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
-import 
+import random
+from string import ascii_uppercase
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 lobbies = {}
+
+def generate_unique_code(length):
+    while True:
+        code = ""
+        for _ in range(length):
+            code += random.choice(ascii_uppercase)
+        if code not in lobbies:
+            break
+    return code
 
 @socketio.on('connect')
 def connect():
