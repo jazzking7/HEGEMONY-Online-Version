@@ -23,8 +23,27 @@ def connect(auth):
     print('Client connected with socket ID:', request.sid)
 
 @socketio.on('disconnect')
-def disconnet():
+def disconnect():
     print('Client disconnected with socket ID:', request.sid)
+
+@socketio.on('joinLobby')
+def joinLobby(data):
+    lobby_code = data.get('lobby_code')
+    username = data.get('username')
+    if lobby_code not in lobbies:
+        print(f"ERROR: The lobby {lobby_code} does not exist!")
+        socketio.emit('joinLobbyError', {'msg': "Invalid lobby code!"}, room=request.sid)
+        return
+    lobby = lobbies[lobby_code]
+    if lobby['numPlayersIn'] + 1 >= lobby['maxPlayers']:
+        print(f"ERROR: The lobby {lobby_code} is full!")
+        socketio.emit('joinLobbyError', {'msg': "The lobby is full!"}, room=request.sid)
+    if username in lobby['players']:
+        username += "_|"
+    join_room(lobby_code)
+    lobby['players'].append(username)
+    lobby['numPlayersIn'] += 1
+    socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
 
 @socketio.on('createLobby')
 def createLobby(data):
