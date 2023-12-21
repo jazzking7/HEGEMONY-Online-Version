@@ -11,9 +11,20 @@ let previousMouseY;
 let tmp_id = 0;
 let hover_over = {'pts': [], 'id': 0};
 
+// images
+let capitalImage;
+let cityImage;
+let insigImage;
+
 // Components to be displayed
 let polygons = [];
 let srs = [];
+let nameSpaces = [];
+let capitalSpaces = [];
+let devSpaces = [];
+let insigSpaces = [];
+let territoryNames = [];
+let neighborTerritoryNames = {};
 let cps = [];
 let seaRoutes = [];
 let contBorders = [];
@@ -22,11 +33,32 @@ let contBonusBoxes = [];
 // Toggles
 let showContBorders = false;
 
-function setup() {
-  createCanvas(1000, 1000)
+async function setup() {
+  createCanvas(1000, 1000);
+  capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
+  cityImage = loadImage('/static/Assets/Dev/city.png');
+  insigImage = loadImage('/static/Assets/Insig/insignia27.PNG');
+  let tempArray = [];
   for (let i = 1; i < 7; i++){
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ns.json`, loadNS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}cs.json`, loadCS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ds.json`, loadDS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}is.json`, loadIS);
+    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}tnames.txt`)
+      .then((res) => res.text())
+      .then((text) => {
+        territoryNames.push(...text.split(/\r?\n/).filter(n => n));
+      }).catch((e) => console.error(e));
+    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}nt.txt`)
+      .then((res) => res.text())
+      .then((text) => {
+        tempArray.push(...text.split(/\r?\n/).filter(n => n));
+      }).catch((e) => console.error(e));
+  }
+  for (let j = 0; j < territoryNames.length; j++){
+    neighborTerritoryNames[territoryNames[j]] = tempArray[j].split(",");
   }
   loadJSON(`/static/MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
   loadJSON(`/static/MAPS/MichaelMap1/contBorders.json`, loadBorders);
@@ -78,6 +110,32 @@ function draw() {
     push();
     fill(0,255,0)
     circle(coord.x, coord.y, 10);
+    pop();
+  }
+
+  let nameIndex = 0
+  for (let coord of nameSpaces){
+    push();
+    text(territoryNames[nameIndex], coord.x, coord.y);
+    nameIndex++;
+    pop();
+  }
+
+  for (let coord of capitalSpaces){
+    push();
+    image(capitalImage, coord.x, coord.y, coord.dx, coord.dy);
+    pop();
+  }
+
+  for (let coord of devSpaces){
+    push();
+    image(cityImage, coord.x, coord.y, coord.dx, coord.dy);
+    pop();
+  }
+
+  for (let coord of insigSpaces){
+    push();
+    image(insigImage, coord.x, coord.y, coord.dx, coord.dy);
     pop();
   }
 
@@ -142,6 +200,30 @@ function loadPolygonsData(data){
 function loadSR(data){
     for (let p of data) {
     srs.push(p);
+  }
+}
+
+function loadNS(data){
+  for (let p of data) {
+    nameSpaces.push(p)
+  }
+}
+
+function loadCS(data){
+  for (let c of data){
+    capitalSpaces.push(c);
+  }
+}
+
+function loadDS(data){
+  for (let c of data){
+    devSpaces.push(c);
+  }
+}
+
+function loadIS(data){
+  for (let i of data){
+    insigSpaces.push(i);
   }
 }
 
