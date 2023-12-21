@@ -13,21 +13,24 @@
 <body data-bs-theme="dark">
 
 <div id="main"></div>
-<div id="popup" class="popup"><div>
+<div id="popupBackground">
+    <div id="popup"><div>
+</div>
 
 <script>
 
 function popup(msg, duration) {
-    var popup = document.getElementById("popup");
+    let popup_background = document.getElementById("popupBackground");
+    let popup = document.getElementById("popup");
     popup.innerHTML = msg;
+    popup_background.style.display = 'flex';
     setTimeout(function() {
         popup.innerHTML = '';
+        popup_background.style.display = 'none';
     }, duration);
 }
 
 $(document).ready(function() {
-
-    popup("Welcome to Hegemony!", 2000);
 
     // main_menu page
     $.ajax({
@@ -36,17 +39,9 @@ $(document).ready(function() {
         success: function(response) {
             $('#main').html(response);
             $('#btn_createLobby').click(function() {
-                let username = $('#username').val();
-                /*
+                let username = $('#nickname').val();
                 if (username.trim() === '') {
-                    $('#homeError').html(`<h3>Must enter a name!</h3>`);
-                } else {
-                    console.log('create lobby');
-                    socket.emit('createLobby', {'username': username});
-                }
-                */
-                if (username.trim() === '') {
-                    popup("Must enter a name!", 2000);
+                    popup("Must enter a name!", 1000);
                     return;
                 }
                 socket.emit('createLobby', {'username': username});
