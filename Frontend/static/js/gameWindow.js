@@ -11,10 +11,18 @@ let previousMouseY;
 let tmp_id = 0;
 let hover_over = {'pts': [], 'id': 0};
 
+// images
+let capitalImage;
+let cityImage;
+let insigImage;
+
 // Components to be displayed
 let polygons = [];
 let srs = [];
 let nameSpaces = [];
+let capitalSpaces = [];
+let devSpaces = [];
+let insigSpaces = [];
 let territoryNames = [];
 let neighborTerritoryNames = {};
 let cps = [];
@@ -27,11 +35,17 @@ let showContBorders = false;
 
 async function setup() {
   createCanvas(1000, 1000);
+  capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
+  cityImage = loadImage('/static/Assets/Dev/city.png');
+  insigImage = loadImage('/static/Assets/Insig/insignia27.PNG');
   let tempArray = [];
   for (let i = 1; i < 7; i++){
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
     loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ns.json`, loadNS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}cs.json`, loadCS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ds.json`, loadDS);
+    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}is.json`, loadIS);
     await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}tnames.txt`)
       .then((res) => res.text())
       .then((text) => {
@@ -107,6 +121,24 @@ function draw() {
     pop();
   }
 
+  for (let coord of capitalSpaces){
+    push();
+    image(capitalImage, coord.x, coord.y, coord.dx, coord.dy);
+    pop();
+  }
+
+  for (let coord of devSpaces){
+    push();
+    image(cityImage, coord.x, coord.y, coord.dx, coord.dy);
+    pop();
+  }
+
+  for (let coord of insigSpaces){
+    push();
+    image(insigImage, coord.x, coord.y, coord.dx, coord.dy);
+    pop();
+  }
+
   for (let route of seaRoutes){
     drawDottedLine(route.x1, route.y1, route.x2, route.y2);
   }
@@ -174,6 +206,24 @@ function loadSR(data){
 function loadNS(data){
   for (let p of data) {
     nameSpaces.push(p)
+  }
+}
+
+function loadCS(data){
+  for (let c of data){
+    capitalSpaces.push(c);
+  }
+}
+
+function loadDS(data){
+  for (let c of data){
+    devSpaces.push(c);
+  }
+}
+
+function loadIS(data){
+  for (let i of data){
+    insigSpaces.push(i);
   }
 }
 
