@@ -17,17 +17,6 @@
     align-items: center;
 }
 
-#popup {
-    width: 50%;
-    height: 50%;
-    background-color: white;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-}
-
 .card {
 	margin: 4vh auto;
 	padding: 2rem;
