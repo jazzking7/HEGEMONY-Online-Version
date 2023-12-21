@@ -15,13 +15,8 @@
 
 .card {
 	margin: 4vh auto;
-	padding: 2rem;
-}
-
-.card-header {
-	margin: 0rem 0rem 1rem 0rem;
 }
 
 .space {
-	margin: 0.5rem;
+	margin: 1rem 0;
 }
