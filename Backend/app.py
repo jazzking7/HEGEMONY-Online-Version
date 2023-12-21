@@ -18,7 +18,7 @@ def generate_unique_code(length):
     return code
 
 @socketio.on('connect')
-def connect():
+def connect(auth):
     print('Client connected with socket ID:', request.sid)
 
 @socketio.on('disconnect')
@@ -27,10 +27,16 @@ def disconnet():
 
 @socketio.on('createLobby')
 def createLobby(data):
-    print('Create lobby')
+    print(f'{data.get("username")} is creating a lobby')
+    socketio.emit('createLobby', data)
+
+@socketio.on('lobbyCreation')
+def lobbyCreation(data):
+    print(data.get('username'))
+    print(data.get('maxPlayers'))
+    print(data.get('allianceOn'))
     print(data)
-    lobbies[data] = data
-    socketio.emit('lobbyCreated', data)
+    socketio.emit('gameLobby', data)
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

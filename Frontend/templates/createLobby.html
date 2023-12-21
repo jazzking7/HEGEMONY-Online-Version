@@ -1,26 +1,18 @@
-{% extends 'base.html' %}
-{% block content %}
-<form method="post" class="buttons">
+<div class="buttons">
     <h3>HEGEMONY</h3>
     <h4>Basic Setups</h4>
     <div>
         <label>Number of players: </label>
-        <input type="number" name="numPlayers" min="5" max="10" step="1" value="5">
+        <input type="number" id="numPlayers" min="5" max="10" step="1" value="5">
     </div>
     <div>
         <label>Alliance mode: </label>
         <label>
-            <input type="radio" name="alliesOn" value="yes" checked> On
+            <input type="radio" id="allianceOn" value="yes" checked> On
           </label>
           <label>
-            <input type="radio" name="alliesOn" value="no"> Off
+            <input type="radio" id="allianceOn" value="no"> Off
           </label>
     </div>
-    <button type="submit" name="create" class="create-btn">Create Lobby</button>
-    {% if error %}
-    <ul>
-        <li>{{error}}</li>
-    </ul>
-    {% endif %}
-</form>
-{% endblock %}
+    <button  id="createLobby" class="create-btn">Create Lobby</button>
+    </div>
