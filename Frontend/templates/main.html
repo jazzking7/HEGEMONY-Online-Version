@@ -13,20 +13,20 @@
 <body data-bs-theme="dark">
 
 <div id="main"></div>
-<div id="popupBackground">
-    <div id="popup" class="card"><div>
-</div>
+<div id="alert" class="alert alert-danger"></div>
 
 <script>
 
+var popup_timeout = null;
+
 function popup(msg, duration) {
-    let popup_background = document.getElementById("popupBackground");
-    let popup = document.getElementById("popup");
+    if (popup_timeout) clearTimeout(popup_timeout);
+    let popup = document.getElementById("alert");
     popup.innerHTML = msg;
-    popup_background.style.display = 'flex';
-    setTimeout(function() {
+    popup.style.display = 'flex';
+    popup_timeout = setTimeout(() => {
         popup.innerHTML = '';
-        popup_background.style.display = 'none';
+        popup.style.display = 'none';
     }, duration);
 }
 
@@ -47,7 +47,11 @@ $(document).ready(function() {
                 socket.emit('createLobby', {'username': username});
             });
             $('#btn_joinLobby').click(function() {
-                console.log('join lobby');
+                let lobbyID = $('#joinLobbyCode').val();
+                if (lobbyID.trim() === '') {
+                    popup("Must enter a lobby ID!", 1000);
+                    return;
+                }
                 socket.emit('createLobby', $('#username').val());
             });
         },
