@@ -13,7 +13,7 @@
 <body data-bs-theme="dark">
 
 <div id="main"></div>
-<div id="popup"><div>
+<div id="popup" class="popup"><div>
 
 <script>
 
@@ -35,7 +35,7 @@ $(document).ready(function() {
         type: 'GET',
         success: function(response) {
             $('#main').html(response);
-            $('#create_btn').click(function() {
+            $('#btn_createLobby').click(function() {
                 let username = $('#username').val();
                 /*
                 if (username.trim() === '') {
@@ -51,7 +51,7 @@ $(document).ready(function() {
                 }
                 socket.emit('createLobby', {'username': username});
             });
-            $('#join_btn').click(function() {
+            $('#btn_joinLobby').click(function() {
                 console.log('join lobby');
                 socket.emit('createLobby', $('#username').val());
             });
