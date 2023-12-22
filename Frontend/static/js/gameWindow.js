@@ -35,6 +35,7 @@ let showContBorders = false;
 
 async function setup() {
   createCanvas(1000, 1000);
+  console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
   cityImage = loadImage('/static/Assets/Dev/city.png');
   insigImage = loadImage('/static/Assets/Insig/insignia27.PNG');

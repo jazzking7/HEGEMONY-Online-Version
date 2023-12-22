@@ -68,6 +68,7 @@ def lobbyCreation(data):
     socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
     # Display setting panel to host only
     socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    socketio.emit('startGameBtn', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
 
 @socketio.on('changeSettings')
 def changeSettings(data):
@@ -84,6 +85,12 @@ def changeSettings(data):
     # Display setting panel to host only
     socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
 
+@socketio.on('START_GAME')
+def startGame(data):
+    lobby_code = data.get('lobby')
+    lobby = lobbies[lobby_code]
+    # BACKEND GAME START SEQUENCES
+    socketio.emit('gameView', data, room=lobby_code)
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

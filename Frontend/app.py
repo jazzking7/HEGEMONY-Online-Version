@@ -23,5 +23,13 @@ def gameLobby():
 def changeSettings():
     return render_template("lobbySettings.html")
 
+@app.route("/startGameBtn")
+def startGameBtn():
+    return render_template("startGameBtn.html")
+
+@app.route("/gameMap")
+def gameMap():
+    return render_template('gameMap.html')
+
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8080, debug=True)

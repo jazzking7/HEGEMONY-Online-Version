@@ -15,9 +15,15 @@
 
 <div id="main"></div>
 <div id="lobbySettings"></div>
+
+<div id="START_GAME"></div>
+
+<div id="gameMap"></div>
+
 <div id="popupBackground">
     <div id="popup" class="card"><div>
 </div>
+
 
 <script>
 
@@ -30,6 +36,12 @@ function popup(msg, duration) {
         popup.innerHTML = '';
         popup_background.style.display = 'none';
     }, duration);
+}
+
+function cleanPreStartDivContent() {
+    document.getElementById("main").innerHTML = ""; 
+    document.getElementById("lobbySettings").innerHTML = "";
+    document.getElementById("START_GAME").innerHTML = "";
 }
 
 $(document).ready(function() {
@@ -150,6 +162,38 @@ $(document).ready(function() {
         });
     });
 
+    // Start game button
+    socket.on('startGameBtn', function(data){
+        $.ajax({
+            url: 'http://127.0.0.1:8080/startGameBtn',
+            type: 'GET',
+            success: function(response) {
+                $('#START_GAME').html(response);
+                $('#START_GAME_BTN').click(function(){
+                    socket.emit('START_GAME', data)
+                });
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+
+    // Game View
+    socket.on('gameView', function(data){
+        cleanPreStartDivContent();
+        console.log("IN GAME")
+        $.ajax({
+            url: 'http://127.0.0.1:8080/gameMap',
+            type: 'GET',
+            success: function(response) {
+                $('#gameMap').html(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
 
 });
 </script>
