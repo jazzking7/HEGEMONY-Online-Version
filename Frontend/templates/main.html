@@ -14,6 +14,7 @@
 <body data-bs-theme="dark">
 
 <div id="main"></div>
+<div id="lobbySettings"></div>
 <div id="popupBackground">
     <div id="popup" class="card"><div>
 </div>
@@ -74,7 +75,7 @@ $(document).ready(function() {
         console.log('connected');
     });
 
-    socket.on('joinLobbyError', function(data){
+    socket.on('errorPopup', function(data){
         popup(data.msg, 1000);
     });
 
@@ -114,12 +115,41 @@ $(document).ready(function() {
                 $('#allianceOn').append('<h4></h4>');
                 let onOff = data.allianceOn ? "On" : "Off"
                 $('#allianceOn h4').text("Alliance Mode: " + onOff);
+                let plist = "";
+                for (let player of data.players) {
+                    plist += '<h4>' + player + '</h4>';
+                }
+                $('#playerList').append(plist);
             },
             error: function(error) {
                 console.log(error);
             }
         });
     });
+
+    // Change settings
+    socket.on('lobbySettings', function(data){
+        $.ajax({
+            url: 'http://127.0.0.1:8080/changeSettings',
+            type: 'GET',
+            success: function(response) {
+                $('#lobbySettings').html(response);
+                $('#changeSettings').click(function(){
+                    let numPlayers = $('#numPlayers').val();
+                    let allianceMode = $('input[name="allianceMode"]:checked').val();
+                    socket.emit('changeSettings', {
+                    'numPlayers': numPlayers,
+                    'allianceMode': allianceMode,
+                    'lobby': data.lobby
+                    });
+                });
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+
 
 });
 </script>

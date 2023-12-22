@@ -32,12 +32,13 @@ def joinLobby(data):
     username = data.get('username')
     if lobby_code not in lobbies:
         print(f"ERROR: The lobby {lobby_code} does not exist!")
-        socketio.emit('joinLobbyError', {'msg': "Invalid lobby code!"}, room=request.sid)
+        socketio.emit('errorPopup', {'msg': "Invalid lobby code!"}, room=request.sid)
         return
     lobby = lobbies[lobby_code]
-    if lobby['numPlayersIn'] + 1 >= lobby['maxPlayers']:
+    if lobby['numPlayersIn'] + 1 > lobby['maxPlayers']:
         print(f"ERROR: The lobby {lobby_code} is full!")
-        socketio.emit('joinLobbyError', {'msg': "The lobby is full!"}, room=request.sid)
+        socketio.emit('errorPopup', {'msg': "The lobby is full!"}, room=request.sid)
+        return
     if username in lobby['players']:
         username += "_|"
     join_room(lobby_code)
@@ -58,12 +59,31 @@ def lobbyCreation(data):
     lobby_code = generate_unique_code(5)
     lobbies[lobby_code] = {
         'lobby_code': lobby_code,
+        'host': request.sid,
         'players': [data.get('username')],
         'maxPlayers': int(data.get('maxPlayers')),
         'numPlayersIn': 1,
         'allianceOn': allianceOn}
     join_room(lobby_code)
     socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
+    # Display setting panel to host only
+    socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+
+@socketio.on('changeSettings')
+def changeSettings(data):
+    lobby_code = data.get('lobby')
+    lobby = lobbies[lobby_code]
+    numP = int(data.get('numPlayers'))
+    ally = data.get('allianceMode') == "yes"
+    if numP < lobby['numPlayersIn']:
+        socketio.emit('errorPopup', {'msg': "Invalid player number!"}, room=lobby['host'])
+        return
+    lobby['maxPlayers'] = numP
+    lobby['allianceOn'] = ally
+    socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
+    # Display setting panel to host only
+    socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)
