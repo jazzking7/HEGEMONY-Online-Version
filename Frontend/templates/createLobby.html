@@ -10,12 +10,12 @@
         <div class="input-group space">
             <label for="alliance" class="input-group-text">Alliance</label>
             <select class="form-select" id="alliance">
-                <option value="0">Off</option>
-                <option value="1">On</option>
+                <option value="no">Off</option>
+                <option value="yes">On</option>
             </select>
         </div>
         <div class="input-group space">
-            <input id="numPlayers" class="form-control" type="number" min="2" max="10" placeholder="Number of Players" />
+            <input id="numPlayers" class="form-control" type="number" min="5" max="10" value="5" step="1" placeholder="Number of Players" />
             <button id="btn_createLobby" class="btn btn-primary">Create Lobby</button>
         </div>
     </div>

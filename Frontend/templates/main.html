@@ -87,8 +87,7 @@ $(document).ready(function() {
                 $('#main').html(response);
                 $('#btn_createLobby').click(function() {
                     let numPlayers = $('#numPlayers').val();
-                    // let alliesOn = $('input[name="allianceMode"]:checked').val();
-                    let alliesOn = $('#alliance').val() == 1;
+                    let alliesOn = $('#alliance').val() == "yes";
                     socket.emit('lobbyCreation', {'username': data.username,
                     'maxPlayers': numPlayers, 'allianceOn': alliesOn});
                 });
@@ -132,6 +131,7 @@ $(document).ready(function() {
             url: 'http://127.0.0.1:8080/changeSettings',
             type: 'GET',
             success: function(response) {
+                console.log("REACHED")
                 $('#lobbySettings').html(response);
                 $('#changeSettings').click(function(){
                     let numPlayers = $('#numPlayers').val();

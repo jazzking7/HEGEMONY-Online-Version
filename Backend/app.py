@@ -45,6 +45,9 @@ def joinLobby(data):
     lobby['players'].append(username)
     lobby['numPlayersIn'] += 1
     socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
+    # Display setting panel to host only
+    socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    socketio.emit('startGameBtn', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
 
 @socketio.on('createLobby')
 def createLobby(data):
@@ -69,6 +72,7 @@ def lobbyCreation(data):
     # Display setting panel to host only
     socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
     socketio.emit('startGameBtn', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    print("DONE")
 
 @socketio.on('changeSettings')
 def changeSettings(data):
@@ -84,11 +88,15 @@ def changeSettings(data):
     socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
     # Display setting panel to host only
     socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    socketio.emit('startGameBtn', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
 
 @socketio.on('START_GAME')
 def startGame(data):
     lobby_code = data.get('lobby')
     lobby = lobbies[lobby_code]
+    if lobby['numPlayersIn'] < 5:
+        socketio.emit('errorPopup', {'msg': "Not enough players!"}, room=lobby['host'])
+        return
     # BACKEND GAME START SEQUENCES
     socketio.emit('gameView', data, room=lobby_code)
 
