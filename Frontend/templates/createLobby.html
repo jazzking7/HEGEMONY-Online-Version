@@ -1,18 +1,22 @@
-<div class="buttons">
-    <h3>HEGEMONY</h3>
-    <h4>Basic Setups</h4>
-    <div>
-        <label>Number of players: </label>
-        <input type="number" id="numPlayers" min="5" max="10" step="1" value="5">
+<!-- Game Title -->
+<div class="text-center" style="margin: 5vh 0">
+    <h1>Hegemony</h1>
+</div>
+
+<!-- Lobby Settings -->
+<div class="card text-center" style="width: 40vw">
+    <h4 class="card-header">Lobby Setup</h4>
+    <div class="card-body">
+        <div class="input-group space">
+            <label for="alliance" class="input-group-text">Alliance</label>
+            <select class="form-select" id="alliance">
+                <option value="0">Off</option>
+                <option value="1">On</option>
+            </select>
+        </div>
+        <div class="input-group space">
+            <input id="numPlayers" class="form-control" type="number" min="2" max="10" placeholder="Number of Players" />
+            <button id="btn_createLobby" class="btn btn-primary">Create Lobby</button>
+        </div>
     </div>
-    <div>
-        <label>Alliance mode: </label>
-        <label>
-            <input type="radio" name="allianceMode" value="yes" checked> On
-          </label>
-          <label>
-            <input type="radio" name="allianceMode" value="no"> Off
-          </label>
-    </div>
-    <button  id="createLobby" class="create-btn">Create Lobby</button>
 </div>
