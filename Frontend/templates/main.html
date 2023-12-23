@@ -20,21 +20,20 @@
 
 <div id="gameMap"></div>
 
-<div id="popupBackground">
-    <div id="popup" class="card"><div>
-</div>
-
+<div id="alert" class="alert alert-danger"></div>
 
 <script>
 
+var popup_timeout = null;
+
 function popup(msg, duration) {
-    let popup_background = document.getElementById("popupBackground");
-    let popup = document.getElementById("popup");
+    if (popup_timeout) clearTimeout(popup_timeout);
+    let popup = document.getElementById("alert");
     popup.innerHTML = msg;
-    popup_background.style.display = 'flex';
-    setTimeout(function() {
+    popup.style.display = 'flex';
+    popup_timeout = setTimeout(() => {
         popup.innerHTML = '';
-        popup_background.style.display = 'none';
+        popup.style.display = 'none';
     }, duration);
 }
 
@@ -99,10 +98,11 @@ $(document).ready(function() {
             type: 'GET',
             success: function(response) {
                 $('#main').html(response);
-                $('#createLobby').click(function() {
+                $('#btn_createLobby').click(function() {
                     let numPlayers = $('#numPlayers').val();
-                    let alliesOn = $('input[name="allianceMode"]:checked').val();
-                    socket.emit('lobbyCreation', {'username': data.username, 
+                    // let alliesOn = $('input[name="allianceMode"]:checked').val();
+                    let alliesOn = $('#alliance').val() == 1;
+                    socket.emit('lobbyCreation', {'username': data.username,
                     'maxPlayers': numPlayers, 'allianceOn': alliesOn});
                 });
             },
