@@ -14,11 +14,6 @@
 <body data-bs-theme="dark">
 
 <div id="main"></div>
-<div id="lobbySettings"></div>
-
-<div id="START_GAME"></div>
-
-<div id="gameMap"></div>
 
 <div id="alert" class="alert alert-danger"></div>
 
@@ -35,12 +30,6 @@ function popup(msg, duration) {
         popup.innerHTML = '';
         popup.style.display = 'none';
     }, duration);
-}
-
-function cleanPreStartDivContent() {
-    document.getElementById("main").innerHTML = ""; 
-    document.getElementById("lobbySettings").innerHTML = "";
-    document.getElementById("START_GAME").innerHTML = "";
 }
 
 $(document).ready(function() {
@@ -68,7 +57,7 @@ $(document).ready(function() {
                     return;
                 }
                 if (lobby_code.trim() === ''){
-                    popup("Must enter a lobby code!", 1000);
+                    popup("Must enter a lobby ID!", 1000);
                     return;
                 }
                 socket.emit('joinLobby', {'username': username, 'lobby_code': lobby_code});
@@ -181,7 +170,7 @@ $(document).ready(function() {
 
     // Game View
     socket.on('gameView', function(data){
-        cleanPreStartDivContent();
+        $('#main').html('');
         console.log("IN GAME")
         $.ajax({
             url: 'http://127.0.0.1:8080/gameMap',
