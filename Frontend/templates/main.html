@@ -5,8 +5,8 @@
     <title>HEGEMONY</title>
     <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js"></script>
+    <script src=""></script>
+    <script src=""></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
@@ -170,13 +170,31 @@ $(document).ready(function() {
 
     // Game View
     socket.on('gameView', function(data){
-        $('#main').html('');
         console.log("IN GAME")
         $.ajax({
             url: 'http://127.0.0.1:8080/gameMap',
             type: 'GET',
             success: function(response) {
-                $('#gameMap').html(response);
+                // Populate main
+                $('#main').html(response);
+
+                // Load p5 sketch
+                let p5Sketch = document.createElement('script');
+                p5Sketch.src = "{{url_for('static', filename='js/gameWindow.js')}}";
+                p5Sketch.async = false;
+                document.head.appendChild(p5Sketch);
+
+                // Load p5.js
+                let p5Script = document.createElement('script');
+                p5Script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js';
+                p5Script.async = false;
+
+                let p5SoundScript = document.createElement('script');
+                p5SoundScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js';
+                p5SoundScript.async = false;
+
+                document.head.appendChild(p5Script);
+                document.head.appendChild(p5SoundScript);
             },
             error: function(error) {
                 console.log(error);

@@ -34,7 +34,8 @@ let contBonusBoxes = [];
 let showContBorders = false;
 
 async function setup() {
-  createCanvas(1000, 1000);
+  var canvas = createCanvas(1000, 1000);
+  canvas.parent('canvasContainer');
   console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
   cityImage = loadImage('/static/Assets/Dev/city.png');
