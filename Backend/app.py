@@ -26,6 +26,11 @@ def connect(auth):
 def disconnect():
     print('Client disconnected with socket ID:', request.sid)
 
+@socketio.on('updateLobbyInfo')
+def updateLobbyInfo(data):
+    lobby_code = data.get('lobby')
+    socketio.emit('gameLobby', {**lobbies[lobby_code], **{'isHost': request.sid == lobbies[lobby_code]['host']}}, room=request.sid)
+
 @socketio.on('joinLobby')
 def joinLobby(data):
     lobby_code = data.get('lobby_code')
@@ -43,8 +48,10 @@ def joinLobby(data):
         username += "_|"
     join_room(lobby_code)
     lobby['players'].append(username)
+    lobby['player_sids'][username] = request.sid
     lobby['numPlayersIn'] += 1
-    socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
+    print(lobby)
+    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
 @socketio.on('createLobby')
 def createLobby(data):
@@ -61,14 +68,13 @@ def lobbyCreation(data):
         'lobby_code': lobby_code,
         'host': request.sid,
         'players': [data.get('username')],
+        'player_sids': {data.get('username'): request.sid},
         'maxPlayers': int(data.get('maxPlayers')),
         'numPlayersIn': 1,
         'allianceOn': allianceOn}
+    print(lobbies[lobby_code])
     join_room(lobby_code)
-    socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
-    # Display setting panel to host only
-    socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
-    socketio.emit('startGameBtn', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
 @socketio.on('changeSettings')
 def changeSettings(data):
@@ -81,14 +87,15 @@ def changeSettings(data):
         return
     lobby['maxPlayers'] = numP
     lobby['allianceOn'] = ally
-    socketio.emit('gameLobby', lobbies[lobby_code], room=lobby_code)
-    # Display setting panel to host only
-    socketio.emit('lobbySettings', {'lobby': lobby_code}, room=lobbies[lobby_code]['host'])
+    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
 @socketio.on('START_GAME')
 def startGame(data):
     lobby_code = data.get('lobby')
     lobby = lobbies[lobby_code]
+    if lobby['numPlayersIn'] < 5:
+        socketio.emit('errorPopup', {'msg': "Not enough players!"}, room=lobby['host'])
+        return
     # BACKEND GAME START SEQUENCES
     socketio.emit('gameView', data, room=lobby_code)
 

@@ -8,7 +8,7 @@ from game_runner.preload_game import *
 
 class Player:
 
-    def __init__(self, name, G):
+    def __init__(self, name, sid, G):
         self.name = name
         self.territories = []
         self.industrial = 6
@@ -25,6 +25,7 @@ class Player:
         self.capital = None
         self.conquered = False
         self.game = G
+        self.sid
         # visuals
         self.insignia = None
         self.capital_icon = None
