@@ -14,14 +14,14 @@ function popup(msg, duration) {
 
 // Load page
 const URL_FRONTEND = 'http://127.0.0.1:8080/';
-const MAIN = document.getElementById('main');
+var main;
 
 function loadPage(page_route) {
     $.ajax({
         url: URL_FRONTEND + page_route,
         type: 'GET',
         success: function(response) {
-            MAIN.innerHTML = response;
+            main.innerHTML = response;
         },
         error: function(error) {
             console.log(error);
@@ -35,6 +35,8 @@ var socket = io.connect(URL_BACKEND);
 
 // Main logic
 $(document).ready(function() {
+
+    main = document.getElementById('main');
 
     // main_menu page
     loadPage('main_menu');
