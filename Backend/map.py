@@ -16,8 +16,8 @@ class Territory:
         self.isTransportcenter = False
         # self.isSEZ = False
         
-        # self.owner = None
-        # self.mem_stats = []
+        self.owner = None
+        self.mem_stats = []
 
 
 class Map:
@@ -33,7 +33,7 @@ class Map:
         file = open(self.mappath+'/properties.txt', 'r')
         numContent = int(file.read().split('\n')[0])
         file.close()
-        
+
         # Get the territory names and neighbor list continent by continent
         for i in range(1, numContent+1):
             file = open(self.mappath+f'/C{i}/c{i}tnames.txt', 'r')
