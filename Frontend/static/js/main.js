@@ -67,7 +67,7 @@ $(document).ready(function() {
                 $('#main').html(response);
                 $('#btn_createLobby').click(function() {
                     let numPlayers = $('#numPlayers').val();
-                    let alliesOn = $('#alliance').val() == "yes";
+                    let alliesOn = $('#alliance').val() == "true";
                     socket.emit('lobbyCreation', {'username': data.username,
                     'maxPlayers': numPlayers, 'allianceOn': alliesOn});
                 });
