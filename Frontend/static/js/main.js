@@ -159,7 +159,7 @@ $(document).ready(function() {
 
                 // Load p5 sketch
                 let p5Sketch = document.createElement('script');
-                p5Sketch.src = "{{url_for('static', filename='js/gameWindow.js')}}";
+                p5Sketch.src = "{{url_for('static', filename='js/game_window.js')}}";
                 p5Sketch.async = false;
                 document.head.appendChild(p5Sketch);
 
