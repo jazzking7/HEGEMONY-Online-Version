@@ -1,3 +1,4 @@
+// Popup
 var popup_timeout = null;
 
 function popup(msg, duration) {
@@ -11,43 +12,32 @@ function popup(msg, duration) {
     }, duration);
 }
 
-$(document).ready(function() {
+// Load page
+const URL_FRONTEND = 'http://127.0.0.1:8080/';
+const MAIN = document.getElementById('main');
 
-    // main_menu page
+function loadPage(page_route) {
     $.ajax({
-        url: 'http://127.0.0.1:8080/main_menu',
+        url: URL_FRONTEND + page_route,
         type: 'GET',
         success: function(response) {
-            $('#main').html(response);
-            $('#btn_createLobby').click(function() {
-                let username = $('#nickname').val();
-                if (username.trim() === '') {
-                    popup("Must enter a name!", 1000);
-                    return;
-                }
-                socket.emit('createLobby', {'username': username});
-            });
-            $('#btn_joinLobby').click(function() {
-                let lobby_code = $("#joinLobbyCode").val();
-                let username = $('#nickname').val();
-                if (username.trim() === '') {
-                    popup("Must enter a name!", 1000);
-                    return;
-                }
-                if (lobby_code.trim() === ''){
-                    popup("Must enter a lobby ID!", 1000);
-                    return;
-                }
-                socket.emit('joinLobby', {'username': username, 'lobby_code': lobby_code});
-            });
+            MAIN.innerHTML = response;
         },
         error: function(error) {
             console.log(error);
         }
     });
+}
 
-    // Initiate socket connection
-    var socket = io.connect('http://127.0.0.1:8081');
+// Initiate socket connection
+const URL_BACKEND = 'http://127.0.0.1:8081';
+var socket = io.connect(URL_BACKEND);
+
+// Main logic
+$(document).ready(function() {
+
+    // main_menu page
+    loadPage('main_menu');
     
     socket.on('connect', function() {
         console.log('connected');
