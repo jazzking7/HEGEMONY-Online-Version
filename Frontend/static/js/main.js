@@ -29,6 +29,19 @@ function loadPage(page_route) {
     });
 }
 
+function loadScript(script_src, id=null, async=false) {
+    let script = document.createElement('script');
+    script.src = script_src;
+    if (id) script.id = id;
+    script.async = async;
+    document.head.appendChild(script);
+}
+
+function unloadScript(script_id) {
+    let script = document.getElementById(script_id);
+    if (script) script.remove();
+}
+
 // Initiate socket connection
 const URL_BACKEND = 'http://127.0.0.1:8081';
 var socket = io.connect(URL_BACKEND);
@@ -40,6 +53,7 @@ $(document).ready(function() {
 
     // main_menu page
     loadPage('main_menu');
+    loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
     
     socket.on('connect', function() {
         console.log('connected');
