@@ -1,3 +1,4 @@
+// Popup
 var popup_timeout = null;
 
 function popup(msg, duration) {
@@ -11,43 +12,48 @@ function popup(msg, duration) {
     }, duration);
 }
 
-$(document).ready(function() {
+// Load page
+const URL_FRONTEND = 'http://127.0.0.1:8080/';
+var main;
 
-    // main_menu page
+function loadPage(page_route) {
     $.ajax({
-        url: 'http://127.0.0.1:8080/main_menu',
+        url: URL_FRONTEND + page_route,
         type: 'GET',
         success: function(response) {
-            $('#main').html(response);
-            $('#btn_createLobby').click(function() {
-                let username = $('#nickname').val();
-                if (username.trim() === '') {
-                    popup("Must enter a name!", 1000);
-                    return;
-                }
-                socket.emit('createLobby', {'username': username});
-            });
-            $('#btn_joinLobby').click(function() {
-                let lobby_code = $("#joinLobbyCode").val();
-                let username = $('#nickname').val();
-                if (username.trim() === '') {
-                    popup("Must enter a name!", 1000);
-                    return;
-                }
-                if (lobby_code.trim() === ''){
-                    popup("Must enter a lobby ID!", 1000);
-                    return;
-                }
-                socket.emit('joinLobby', {'username': username, 'lobby_code': lobby_code});
-            });
+            main.innerHTML = response;
         },
         error: function(error) {
-            console.log(error);
+            throw error;
         }
     });
+}
 
-    // Initiate socket connection
-    var socket = io.connect('http://127.0.0.1:8081');
+function loadScript(script_src, id=null, async=false) {
+    let script = document.createElement('script');
+    script.src = script_src;
+    if (id) script.id = id;
+    script.async = async;
+    document.head.appendChild(script);
+}
+
+function unloadScript(script_id) {
+    let script = document.getElementById(script_id);
+    if (script) script.remove();
+}
+
+// Initiate socket connection
+const URL_BACKEND = 'http://127.0.0.1:8081';
+var socket = io.connect(URL_BACKEND);
+
+// Main logic
+$(document).ready(function() {
+
+    main = document.getElementById('main');
+
+    // main_menu page
+    loadPage('main_menu');
+    loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
     
     socket.on('connect', function() {
         console.log('connected');
@@ -55,27 +61,6 @@ $(document).ready(function() {
 
     socket.on('errorPopup', function(data){
         popup(data.msg, 1000);
-    });
-
-    // Lobby creation page
-    socket.on('createLobby', function(data) {
-        console.log("Creating lobby");
-        $.ajax({
-            url: 'http://127.0.0.1:8080/createLobby',
-            type: 'GET',
-            success: function(response) {
-                $('#main').html(response);
-                $('#btn_createLobby').click(function() {
-                    let numPlayers = $('#numPlayers').val();
-                    let alliesOn = $('#alliance').val() == "true";
-                    socket.emit('lobbyCreation', {'username': data.username,
-                    'maxPlayers': numPlayers, 'allianceOn': alliesOn});
-                });
-            },
-            error: function(error) {
-                console.log(error);
-            }
-        });
     });
 
     // GameLobby Page

@@ -11,18 +11,26 @@ def main():
 def main_menu():
     return render_template("main_menu.html")
 
+@app.route("/lobby")
+def lobby():
+    return render_template("lobby.html")
+
+# TODO delete me
 @app.route("/createLobby")
 def createLobby():
     return render_template("createLobby.html")
 
+# TODO delete me
 @app.route("/gameLobby")
 def gameLobby():
     return render_template("gameLobby.html")
 
+# TODO delete me
 @app.route("/changeSettings")
 def changeSettings():
     return render_template("lobbySettings.html")
 
+# TODO delete me
 @app.route("/startGameBtn")
 def startGameBtn():
     return render_template("startGameBtn.html")
