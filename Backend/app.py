@@ -7,6 +7,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Contains all lobbies
+players = {}
 lobbies = {}
 
 def generate_unique_code(length):
@@ -24,13 +25,47 @@ def connect(auth):
 
 @socketio.on('disconnect')
 def disconnect():
-    print('Client disconnected with socket ID:', request.sid)
+    sid = request.sid
+    print('Client disconnected with socket ID:', sid)
+    if not sid in players:
+        return
+    lobby_id = players[sid]['lobby_id']
+    del players[sid]
+    leave_room(lobby_id)
+    if lobby_id is None:
+        return
+    lobby = lobbies[lobby_id]
+    lobby['players'].remove(sid)
+    if len(lobby['players']) == 0:
+        del lobbies[lobby_id]
+        return
+    if lobby['host'] == sid:
+        lobby['host'] = random.choice(lobby['players'])
+    socketio.emit('updateLobbyInfo', {"lobby": lobby_id}, room=lobby_id)  # TODO update me
 
-@socketio.on('updateLobbyInfo')
-def updateLobbyInfo(data):
-    lobby_code = data.get('lobby')
-    socketio.emit('gameLobby', {**lobbies[lobby_code], **{'isHost': request.sid == lobbies[lobby_code]['host']}}, room=request.sid)
+### Main menu functions ###
+    
+# TODO update me
+@socketio.on('create_lobby')
+def createLobby(data):
+    print('create_lobby', data)
+    sid = request.sid
+    username = data.get('username')
+    print(f'{username} is creating a lobby')    # TODO delete me
+    lobby_code = generate_unique_code(5)
+    players[request.sid] = {    # TODO add me to joinLobby
+        'username': username,
+        'lobby_id': lobby_code
+    }
+    join_room(lobby_code)
+    # TODO populate lobbies dict better
+    lobbies[lobby_code] = {
+        'host': sid,
+        'players': [sid]
+    }
+    socketio.emit('lobby_created', room=sid)
 
+# TODO update me
 @socketio.on('joinLobby')
 def joinLobby(data):
     lobby_code = data.get('lobby_code')
@@ -53,11 +88,34 @@ def joinLobby(data):
     print(lobby)
     socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
-@socketio.on('createLobby')
-def createLobby(data):
-    print(f'{data.get("username")} is creating a lobby')
-    socketio.emit('createLobby', data, room=request.sid)
+### Lobby functions ###
 
+@socketio.on('get_lobby_data')
+def get_lobby_data():
+    sid = request.sid
+    if sid not in players:
+        return
+    lobby_id = players[sid]['lobby_id']
+    if lobby_id is None:
+        return
+    lobby = lobbies[lobby_id]
+    lobby_players = []
+    for player_sid in lobby['players']:
+        lobby_players.append(players[player_sid]['username'])
+    out_data = {
+        'host': lobby['host'],
+        'lobby_id': lobby_id,
+        'players': lobby_players
+    }
+    socketio.emit('lobby_data', out_data, room=sid)
+
+# TODO update me
+@socketio.on('updateLobbyInfo')
+def updateLobbyInfo(data):
+    lobby_code = data.get('lobby')
+    socketio.emit('gameLobby', {**lobbies[lobby_code], **{'isHost': request.sid == lobbies[lobby_code]['host']}}, room=request.sid)
+
+# TODO delete me
 @socketio.on('lobbyCreation')
 def lobbyCreation(data):
     print(data)
@@ -76,6 +134,7 @@ def lobbyCreation(data):
     join_room(lobby_code)
     socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
+# TODO delete me
 @socketio.on('changeSettings')
 def changeSettings(data):
     lobby_code = data.get('lobby')
@@ -89,6 +148,7 @@ def changeSettings(data):
     lobby['allianceOn'] = ally
     socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
+# TODO update me
 @socketio.on('START_GAME')
 def startGame(data):
     lobby_code = data.get('lobby')
@@ -98,6 +158,8 @@ def startGame(data):
         return
     # BACKEND GAME START SEQUENCES
     socketio.emit('gameView', data, room=lobby_code)
+
+### Game functions ###
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

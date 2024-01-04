@@ -24,7 +24,7 @@ function loadPage(page_route) {
             main.innerHTML = response;
         },
         error: function(error) {
-            console.log(error);
+            throw error;
         }
     });
 }
@@ -61,27 +61,6 @@ $(document).ready(function() {
 
     socket.on('errorPopup', function(data){
         popup(data.msg, 1000);
-    });
-
-    // Lobby creation page
-    socket.on('createLobby', function(data) {
-        console.log("Creating lobby");
-        $.ajax({
-            url: 'http://127.0.0.1:8080/createLobby',
-            type: 'GET',
-            success: function(response) {
-                $('#main').html(response);
-                $('#btn_createLobby').click(function() {
-                    let numPlayers = $('#numPlayers').val();
-                    let alliesOn = $('#alliance').val() == "true";
-                    socket.emit('lobbyCreation', {'username': data.username,
-                    'maxPlayers': numPlayers, 'allianceOn': alliesOn});
-                });
-            },
-            error: function(error) {
-                console.log(error);
-            }
-        });
     });
 
     // GameLobby Page

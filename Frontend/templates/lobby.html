@@ -8,6 +8,42 @@
 <div class="container" style="margin: 0 15vw">
 <div class="row">
 
+    <div class="col"></div>
+
+    <!-- Lobby Code -->
+    <div class="col">
+    <div class="card text-center">
+        <h4 class="card-header">Lobby Code</h4>
+        <div class="card-body">
+            <h1 id="lobby_code"></h1>
+        </div>
+    </div>
+    </div>
+
+    <div class="col"></div>
+
+</div>
+<div class="row">
+
+    <!-- Map Select -->
+    <div class="col">
+    <div class="card text-center">
+        <!-- TODO implement this -->
+        map select
+    </div>
+    </div>
+
+    <!-- Gamemode Select -->
+    <div class="col">
+    <div class="card text-center">
+        <!-- TODO implement this -->
+        gamemode select
+    </div>
+    </div>
+
+</div>
+<div class="row">
+
     <!-- Lobby Settings -->
     <div class="col">
     <div class="card text-center">
@@ -16,7 +52,7 @@
             <!-- Alliance -->
             <div class="input-group space">
                 <label for="alliance" class="input-group-text">Alliance</label>
-                <select class="form-select" id="alliance">
+                <select class="form-select" id="alliance" disabled>
                     <option value="false">Off</option>
                     <option value="true">On</option>
                 </select>
@@ -24,7 +60,7 @@
             <!-- Turn Time -->
             <div class="input-group space">
                 <label for="turnTime" class="input-group-text">Turn Time</label>
-                <select id="turnTime" class="form-select">
+                <select id="turnTime" class="form-select" disabled>
                     <option value="30">30 seconds</option>
                     <option value="60">1 minute</option>
                     <option value="120">2 minutes</option>
@@ -44,6 +80,16 @@
             <ul id="player_list" class="list-group"></ul>
         </div>
     </div>
+    </div>
+
+</div>
+<div class="row">
+
+    <div class="col"></div>
+    <div class="col"></div>
+
+    <div class="col text-center">
+        <button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem;">Start Game</button>
     </div>
 
 </div>

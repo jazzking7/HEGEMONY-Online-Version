@@ -6,7 +6,8 @@ $(document).ready(function() {
             popup("Must enter a name!", 1000);
             return;
         }
-        socket.emit('createLobby', {'username': username});
+        console.log('create_lobby');
+        socket.emit('create_lobby', {'username': username});
     });
     
     $('#btn_joinLobby').click(function() {
@@ -21,6 +22,18 @@ $(document).ready(function() {
             return;
         }
         socket.emit('joinLobby', {'username': username, 'lobby_code': lobby_code});
+    });
+
+    socket.on('lobby_created', function() {
+        console.log('lobby_created');
+        try {
+            loadPage('lobby');
+        } catch (error) {
+            return;
+        }
+        unloadScript('page_script');
+        loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+        socket.off('createLobby');
     });
 
 });
