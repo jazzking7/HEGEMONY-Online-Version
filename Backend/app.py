@@ -66,27 +66,33 @@ def createLobby(data):
     socketio.emit('lobby_created', room=sid)
 
 # TODO update me
-@socketio.on('joinLobby')
+@socketio.on('join_lobby')
 def joinLobby(data):
-    lobby_code = data.get('lobby_code')
+    print('join_lobby', data)
+    sid = request.sid
     username = data.get('username')
+    lobby_code = data.get('lobby_code')
+
+    # Check if lobby exists
     if lobby_code not in lobbies:
         print(f"ERROR: The lobby {lobby_code} does not exist!")
-        socketio.emit('errorPopup', {'msg': "Invalid lobby code!"}, room=request.sid)
+        socketio.emit('error', {'msg': "Invalid lobby code!"}, room=sid)
         return
+    
+    # Add player
+    players[sid] = {
+        'username': username,
+        'lobby_id': lobby_code
+    }
+
+    # Add player to lobby
     lobby = lobbies[lobby_code]
-    if lobby['numPlayersIn'] + 1 > lobby['maxPlayers']:
-        print(f"ERROR: The lobby {lobby_code} is full!")
-        socketio.emit('errorPopup', {'msg': "The lobby is full!"}, room=request.sid)
-        return
-    if username in lobby['players']:
-        username += "_|"
+    lobby['players'].append(sid)
     join_room(lobby_code)
-    lobby['players'].append(username)
-    lobby['player_sids'][username] = request.sid
-    lobby['numPlayersIn'] += 1
-    print(lobby)
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
+
+    # Update lobby info
+    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)     # TODO make me better
+    socketio.emit('lobby_joined', room=sid)
 
 ### Lobby functions ###
 

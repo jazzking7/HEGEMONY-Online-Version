@@ -45,4 +45,9 @@ $(document).ready(function() {
 
     });
 
+    // Get lobby updates
+    socket.on('update_lobby', function(data) {
+        // TODO
+    });
+
 });

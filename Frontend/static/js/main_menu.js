@@ -21,7 +21,7 @@ $(document).ready(function() {
             popup("Must enter a lobby ID!", 1000);
             return;
         }
-        socket.emit('joinLobby', {'username': username, 'lobby_code': lobby_code});
+        socket.emit('join_lobby', {'username': username, 'lobby_code': lobby_code});
     });
 
     socket.on('lobby_created', function() {
@@ -33,7 +33,19 @@ $(document).ready(function() {
         }
         unloadScript('page_script');
         loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
-        socket.off('createLobby');
+        socket.off('lobby_created');
+    });
+
+    socket.on('lobby_joined', function() {
+        console.log('lobby_joined');
+        try {
+            loadPage('lobby');
+        } catch (error) {
+            return;
+        }
+        unloadScript('page_script');
+        loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+        socket.off('lobby_joined');
     });
 
 });

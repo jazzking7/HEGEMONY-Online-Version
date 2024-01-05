@@ -54,13 +54,11 @@ $(document).ready(function() {
     // main_menu page
     loadPage('main_menu');
     loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
-    
-    socket.on('connect', function() {
-        console.log('connected');
-    });
 
-    socket.on('errorPopup', function(data){
-        popup(data.msg, 1000);
+    // Error handling
+    const ERROR_POPUP_DURATION = 1000;
+    socket.on('error', function(data) {
+        popup(data.msg, (data.duration ? data.duration : ERROR_POPUP_DURATION));
     });
 
     // GameLobby Page
