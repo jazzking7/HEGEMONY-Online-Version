@@ -15,7 +15,7 @@ $(document).ready(function() {
         $('#start_game').click(function() {
             console.log('start_game');
             let data = {
-                'allies_on': $('#alliance').val() == "true",
+                'alliance': $('#alliance').val() == "true",
                 'turn_time': $('#turn_time').val()
             };
             socket.emit('start_game', data);
@@ -48,7 +48,6 @@ $(document).ready(function() {
 
     socket.on('game_started', function() {
         console.log('game_started');
-        // TODO Load game page
         try {
             loadPage('game');
         } catch (error) {

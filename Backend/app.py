@@ -47,7 +47,6 @@ def disconnect():
 
 ### Main menu functions ###
     
-# TODO update me
 @socketio.on('create_lobby')
 def createLobby(data):
     print('create_lobby', data)
@@ -55,7 +54,7 @@ def createLobby(data):
     username = data.get('username')
     print(f'{username} is creating a lobby')    # TODO delete me
     lobby_code = generate_unique_code(5)
-    players[request.sid] = {    # TODO add me to joinLobby
+    players[request.sid] = {
         'username': username,
         'lobby_id': lobby_code
     }
@@ -67,7 +66,6 @@ def createLobby(data):
     }
     socketio.emit('lobby_created', room=sid)
 
-# TODO update me
 @socketio.on('join_lobby')
 def joinLobby(data):
     print('join_lobby', data)
@@ -117,32 +115,6 @@ def get_lobby_data():
     }
     socketio.emit('lobby_data', out_data, room=sid)
 
-# TODO update me
-@socketio.on('updateLobbyInfo')
-def updateLobbyInfo(data):
-    lobby_code = data.get('lobby')
-    socketio.emit('gameLobby', {**lobbies[lobby_code], **{'isHost': request.sid == lobbies[lobby_code]['host']}}, room=request.sid)
-
-# TODO delete me
-@socketio.on('lobbyCreation')
-def lobbyCreation(data):
-    print(data)
-    allianceOn = data.get('allianceOn') == "yes"
-    # Create lobby
-    lobby_code = generate_unique_code(5)
-    lobbies[lobby_code] = {
-        'lobby_code': lobby_code,
-        'host': request.sid,
-        'players': [data.get('username')],
-        'player_sids': {data.get('username'): request.sid},
-        'maxPlayers': int(data.get('maxPlayers')),
-        'numPlayersIn': 1,
-        'allianceOn': allianceOn}
-    print(lobbies[lobby_code])
-    join_room(lobby_code)
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
-
-# TODO update me
 @socketio.on('start_game')
 def startGame(data):
     sid = request.sid
@@ -154,6 +126,13 @@ def startGame(data):
     if len(lobby['players']) < 1:   # TODO testing only - setup a constant
         socketio.emit('error', {'msg': "Not enough players!"}, room=sid)
         return
+    
+    # Setup lobby settings
+    lobby['alliance'] = data.get('alliance')
+    lobby['turn_time'] = int(data.get('turn_time'))
+    print(lobby)
+    print(lobbies[lobby_id])
+
     # BACKEND GAME START SEQUENCES
     socketio.emit('game_started', room=lobby_id)
 
