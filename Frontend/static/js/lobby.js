@@ -10,6 +10,16 @@ $(document).ready(function() {
 
         // Display start game button
         $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem;">Start Game</button></div>');
+
+        // Connect start_game button
+        $('#start_game').click(function() {
+            console.log('start_game');
+            let data = {
+                'allies_on': $('#alliance').val() == "true",
+                'turn_time': $('#turn_time').val()
+            };
+            socket.emit('start_game', data);
+        });
     }
 
     // Query backend for lobby data
@@ -36,17 +46,19 @@ $(document).ready(function() {
         displayHostOptions();
     });
 
-    // Connect start_game button
-    $('#start_game').click(function() {
-        let data = {
-            'allies_on': $('#alliance').val() == "true",
-            'turn_time': $('#turn_time').val()
-        };
-        socket.emit('start_game', data);
-    });
-
-    socket.on('start_game', function(data) {
-
+    socket.on('game_started', function() {
+        console.log('game_started');
+        // TODO Load game page
+        try {
+            loadPage('game');
+        } catch (error) {
+            return;
+        }
+        unloadScript('page_script');
+        loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+        socket.off('lobby_data')
+        socket.off('update_lobby');
+        socket.off('game_started');
     });
 
     // Get lobby updates

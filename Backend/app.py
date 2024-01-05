@@ -142,30 +142,20 @@ def lobbyCreation(data):
     join_room(lobby_code)
     socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
 
-# TODO delete me
-@socketio.on('changeSettings')
-def changeSettings(data):
-    lobby_code = data.get('lobby')
-    lobby = lobbies[lobby_code]
-    numP = int(data.get('numPlayers'))
-    ally = data.get('allianceMode') == "yes"
-    if numP < lobby['numPlayersIn']:
-        socketio.emit('errorPopup', {'msg': "Invalid player number!"}, room=lobby['host'])
-        return
-    lobby['maxPlayers'] = numP
-    lobby['allianceOn'] = ally
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
-
 # TODO update me
-@socketio.on('START_GAME')
+@socketio.on('start_game')
 def startGame(data):
-    lobby_code = data.get('lobby')
-    lobby = lobbies[lobby_code]
-    if lobby['numPlayersIn'] < 5:
-        socketio.emit('errorPopup', {'msg': "Not enough players!"}, room=lobby['host'])
+    sid = request.sid
+    lobby_id = players[sid]['lobby_id']
+    lobby = lobbies[lobby_id]
+    if lobby['host'] != sid:
+        socketio.emit('error', {'msg': "Only the host can start the game!"}, room=sid)
+        return
+    if len(lobby['players']) < 1:   # TODO testing only - setup a constant
+        socketio.emit('error', {'msg': "Not enough players!"}, room=sid)
         return
     # BACKEND GAME START SEQUENCES
-    socketio.emit('gameView', data, room=lobby_code)
+    socketio.emit('game_started', room=lobby_id)
 
 ### Game functions ###
 

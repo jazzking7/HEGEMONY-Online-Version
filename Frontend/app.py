@@ -35,9 +35,9 @@ def changeSettings():
 def startGameBtn():
     return render_template("startGameBtn.html")
 
-@app.route("/gameMap")
+@app.route("/game")
 def gameMap():
-    return render_template('gameMap.html')
+    return render_template('game.html')
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=8080, debug=True)
