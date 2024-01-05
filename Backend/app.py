@@ -29,6 +29,7 @@ def disconnect():
     print('Client disconnected with socket ID:', sid)
     if not sid in players:
         return
+    username = players[sid]['username']
     lobby_id = players[sid]['lobby_id']
     del players[sid]
     leave_room(lobby_id)
@@ -41,11 +42,11 @@ def disconnect():
         return
     if lobby['host'] == sid:
         lobby['host'] = random.choice(lobby['players'])
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_id}, room=lobby_id)  # TODO update me
+        socketio.emit('update_lobby', {"event": "change_host", "target": lobby['host']}, room=lobby_id)
+    socketio.emit('update_lobby', {"event": "disconnect", "target": username}, room=lobby_id)
 
 ### Main menu functions ###
     
-# TODO update me
 @socketio.on('create_lobby')
 def createLobby(data):
     print('create_lobby', data)
@@ -53,7 +54,7 @@ def createLobby(data):
     username = data.get('username')
     print(f'{username} is creating a lobby')    # TODO delete me
     lobby_code = generate_unique_code(5)
-    players[request.sid] = {    # TODO add me to joinLobby
+    players[request.sid] = {
         'username': username,
         'lobby_id': lobby_code
     }
@@ -65,28 +66,33 @@ def createLobby(data):
     }
     socketio.emit('lobby_created', room=sid)
 
-# TODO update me
-@socketio.on('joinLobby')
+@socketio.on('join_lobby')
 def joinLobby(data):
-    lobby_code = data.get('lobby_code')
+    print('join_lobby', data)
+    sid = request.sid
     username = data.get('username')
+    lobby_code = data.get('lobby_code')
+
+    # Check if lobby exists
     if lobby_code not in lobbies:
         print(f"ERROR: The lobby {lobby_code} does not exist!")
-        socketio.emit('errorPopup', {'msg': "Invalid lobby code!"}, room=request.sid)
+        socketio.emit('error', {'msg': "Invalid lobby code!"}, room=sid)
         return
+    
+    # Add player
+    players[sid] = {
+        'username': username,
+        'lobby_id': lobby_code
+    }
+
+    # Add player to lobby
     lobby = lobbies[lobby_code]
-    if lobby['numPlayersIn'] + 1 > lobby['maxPlayers']:
-        print(f"ERROR: The lobby {lobby_code} is full!")
-        socketio.emit('errorPopup', {'msg': "The lobby is full!"}, room=request.sid)
-        return
-    if username in lobby['players']:
-        username += "_|"
+    lobby['players'].append(sid)
     join_room(lobby_code)
-    lobby['players'].append(username)
-    lobby['player_sids'][username] = request.sid
-    lobby['numPlayersIn'] += 1
-    print(lobby)
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
+
+    # Update lobby info
+    socketio.emit('update_lobby', {"event": "join", "target": username}, room=lobby_code)
+    socketio.emit('lobby_joined', room=sid)
 
 ### Lobby functions ###
 
@@ -109,55 +115,26 @@ def get_lobby_data():
     }
     socketio.emit('lobby_data', out_data, room=sid)
 
-# TODO update me
-@socketio.on('updateLobbyInfo')
-def updateLobbyInfo(data):
-    lobby_code = data.get('lobby')
-    socketio.emit('gameLobby', {**lobbies[lobby_code], **{'isHost': request.sid == lobbies[lobby_code]['host']}}, room=request.sid)
-
-# TODO delete me
-@socketio.on('lobbyCreation')
-def lobbyCreation(data):
-    print(data)
-    allianceOn = data.get('allianceOn') == "yes"
-    # Create lobby
-    lobby_code = generate_unique_code(5)
-    lobbies[lobby_code] = {
-        'lobby_code': lobby_code,
-        'host': request.sid,
-        'players': [data.get('username')],
-        'player_sids': {data.get('username'): request.sid},
-        'maxPlayers': int(data.get('maxPlayers')),
-        'numPlayersIn': 1,
-        'allianceOn': allianceOn}
-    print(lobbies[lobby_code])
-    join_room(lobby_code)
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
-
-# TODO delete me
-@socketio.on('changeSettings')
-def changeSettings(data):
-    lobby_code = data.get('lobby')
-    lobby = lobbies[lobby_code]
-    numP = int(data.get('numPlayers'))
-    ally = data.get('allianceMode') == "yes"
-    if numP < lobby['numPlayersIn']:
-        socketio.emit('errorPopup', {'msg': "Invalid player number!"}, room=lobby['host'])
-        return
-    lobby['maxPlayers'] = numP
-    lobby['allianceOn'] = ally
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)
-
-# TODO update me
-@socketio.on('START_GAME')
+@socketio.on('start_game')
 def startGame(data):
-    lobby_code = data.get('lobby')
-    lobby = lobbies[lobby_code]
-    if lobby['numPlayersIn'] < 5:
-        socketio.emit('errorPopup', {'msg': "Not enough players!"}, room=lobby['host'])
+    sid = request.sid
+    lobby_id = players[sid]['lobby_id']
+    lobby = lobbies[lobby_id]
+    if lobby['host'] != sid:
+        socketio.emit('error', {'msg': "Only the host can start the game!"}, room=sid)
         return
+    if len(lobby['players']) < 1:   # TODO testing only - setup a constant
+        socketio.emit('error', {'msg': "Not enough players!"}, room=sid)
+        return
+    
+    # Setup lobby settings
+    lobby['alliance'] = data.get('alliance')
+    lobby['turn_time'] = int(data.get('turn_time'))
+    print(lobby)
+    print(lobbies[lobby_id])
+
     # BACKEND GAME START SEQUENCES
-    socketio.emit('gameView', data, room=lobby_code)
+    socketio.emit('game_started', room=lobby_id)
 
 ### Game functions ###
 
