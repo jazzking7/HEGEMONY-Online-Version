@@ -29,6 +29,7 @@ def disconnect():
     print('Client disconnected with socket ID:', sid)
     if not sid in players:
         return
+    username = players[sid]['username']
     lobby_id = players[sid]['lobby_id']
     del players[sid]
     leave_room(lobby_id)
@@ -41,7 +42,8 @@ def disconnect():
         return
     if lobby['host'] == sid:
         lobby['host'] = random.choice(lobby['players'])
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_id}, room=lobby_id)  # TODO update me
+        socketio.emit('update_lobby', {"event": "change_host", "target": lobby['host']}, room=lobby_id)
+    socketio.emit('update_lobby', {"event": "disconnect", "target": username}, room=lobby_id)
 
 ### Main menu functions ###
     
@@ -91,7 +93,7 @@ def joinLobby(data):
     join_room(lobby_code)
 
     # Update lobby info
-    socketio.emit('updateLobbyInfo', {"lobby": lobby_code}, room=lobby_code)     # TODO make me better
+    socketio.emit('update_lobby', {"event": "join", "target": username}, room=lobby_code)
     socketio.emit('lobby_joined', room=sid)
 
 ### Lobby functions ###

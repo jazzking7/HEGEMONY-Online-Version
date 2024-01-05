@@ -1,5 +1,17 @@
 $(document).ready(function() {
 
+    // Display host only options
+    function displayHostOptions() {
+        // TODO Display kick player option
+
+        // Display enable settings
+        $("#alliance").prop("disabled", false);
+        $("#turn_time").prop("disabled", false);
+
+        // Display start game button
+        $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem;">Start Game</button></div>');
+    }
+
     // Query backend for lobby data
     socket.emit('get_lobby_data');
     socket.on('lobby_data', function(data) {
@@ -20,16 +32,8 @@ $(document).ready(function() {
         // Thats it for non-host players
         if (sid != data.host) return;
 
-        // Host only options //
-        // TODO Display kick player option
-
-        // Display enable settings
-        $("#alliance").prop("disabled", false);
-        $("#turn_time").prop("disabled", false);
-
-        // Display start game button
-        $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem;">Start Game</button></div>');
-
+        // Host only options
+        displayHostOptions();
     });
 
     // Connect start_game button
@@ -47,7 +51,29 @@ $(document).ready(function() {
 
     // Get lobby updates
     socket.on('update_lobby', function(data) {
-        // TODO
+        switch (data.event) {
+            case 'join':
+                // Add player to player list
+                let player_html = '<li class="list-group-item">' + data.target + '</li>';
+                $("#player_list").append(player_html);
+                break;
+            case 'disconnect':
+                // Remove player from player list
+                let player = data.target;
+                $("#player_list li").each(function() {
+                    if ($(this).html() == player) {
+                        $(this).remove();
+                    }
+                });
+                break;
+            case 'change_host':
+                // Check if this client is the new host
+                if (socket.id == data.target) {
+                    // Display host only options
+                    displayHostOptions();
+                }
+                break;
+        }
     });
 
 });
