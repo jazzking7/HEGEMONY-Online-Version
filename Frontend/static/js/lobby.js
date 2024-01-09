@@ -46,20 +46,6 @@ $(document).ready(function() {
         displayHostOptions();
     });
 
-    socket.on('game_started', function() {
-        console.log('game_started');
-        try {
-            loadPage('game');
-        } catch (error) {
-            return;
-        }
-        unloadScript('page_script');
-        loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
-        socket.off('lobby_data')
-        socket.off('update_lobby');
-        socket.off('game_started');
-    });
-
     // Get lobby updates
     socket.on('update_lobby', function(data) {
         switch (data.event) {
@@ -85,6 +71,21 @@ $(document).ready(function() {
                 }
                 break;
         }
+    });
+
+    // start game
+    socket.on('game_started', function() {
+        console.log('game_started');
+        try {
+            loadPage('game');
+        } catch (error) {
+            return;
+        }
+        unloadScript('page_script');
+        loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+        socket.off('lobby_data')
+        socket.off('update_lobby');
+        socket.off('game_started');
     });
 
 });
