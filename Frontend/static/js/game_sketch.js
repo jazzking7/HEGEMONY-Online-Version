@@ -30,11 +30,17 @@ let seaRoutes = [];
 let contBorders = [];
 let contBonusBoxes = [];
 
+let currWinWid;
+let currWinHeight;
+
 // Toggles
 let showContBorders = false;
 
 async function setup() {
-  var canvas = createCanvas(1000, 1000);
+  // var canvas = createCanvas(1000, 800);
+  var canvas = createCanvas(windowWidth, windowHeight);
+  currWinWid = windowWidth;
+  currWinHeight = windowHeight * 2/3;
   canvas.parent('canvasContainer');
   console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
@@ -68,8 +74,12 @@ async function setup() {
 }
 
 function draw() {
+  if (currWinHeight != windowHeight || currWinWid != windowWidth){
+    resizeCanvas(windowWidth, windowHeight);
+    currWinWid = windowWidth;
+    currWinHeight = windowHeight;
+  }
   background(0, 150, 200);
-
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;
@@ -84,7 +94,7 @@ function draw() {
     let dy = mouseY - previousMouseY;
     
     offsetX = constrain(offsetX + dx, -1500, 500); // Adjust according to canvas size
-    offsetY = constrain(offsetY + dy, -500, 500); // Adjust according to canvas size
+    offsetY = constrain(offsetY + dy, -1000, 1000); // Adjust according to canvas size
   }
   // Dragging
   translate(offsetX, offsetY);

@@ -73,7 +73,3 @@ class Map:
         # self.sea_routes = []
         # self.sea_side_territories = []
         # self.pre_existed_sea_routes = []
-
-a = Map("MichaelMap1")
-print(a.num_nations)
-print(a.conts)
