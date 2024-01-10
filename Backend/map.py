@@ -23,9 +23,12 @@ class Territory:
 class Map:
 
     def __init__(self, mapName):
-
+        
+        # temp attributs
         self.tnames = []
         self.tneighbors = []
+
+        self.conts = {}
         self.territories = []
         self.mappath = f'MAPS/{mapName}'
         
@@ -36,50 +39,41 @@ class Map:
 
         # Get the territory names and neighbor list continent by continent
         for i in range(1, numContent+1):
+            # get continent properties
+            file = open(self.mappath+f'/C{i}/c{i}p.txt', 'r')
+            contp = [p for p in file.read().split('\n') if p != '']
+            file.close()
+
+            # get name of territories belonging to the continent
             file = open(self.mappath+f'/C{i}/c{i}tnames.txt', 'r')
             tnames = [name for name in file.read().split('\n') if name != '']
             self.tnames += tnames
             file.close()
+
+            # get neighbor relationship of territories
             file = open(self.mappath+f'/C{i}/c{i}nt.txt', 'r')
             tneighbors = [name.split(',') for name in file.read().split('\n') if name != '']
             self.tneighbors += tneighbors
             file.close()
 
+            # add continent
+            self.conts[contp[0]] = {'bonus': int(contp[1]), 'trtys': tnames}
+        
         # Create territory object for each name + list of neighbors
         for tname, tneighbors in zip(self.tnames, self.tneighbors):
             territory = Territory(tname, tneighbors)
             self.territories.append(territory)
         
-        
+        self.tnames = None
+        self.tneighbors = None
+        self.num_nations = len(self.territories)
 
-        self.num_nations = 0
-        # self.initialize_world()
         # self.biohazard = []
         # # For Route Planner
         # self.sea_routes = []
         # self.sea_side_territories = []
         # self.pre_existed_sea_routes = []
-        # # Continents
-        # self.continents = {"NA": ["Alaska", "British-Colombia", "California", "Johanville",
-        #                           "New-York", "Ontario", "Alberta", "Nunavut", "Northern Territory"],
-        #                    "CA": ["Nicaragua", "Mexico", "Colombia", "Haiti", "Port-au-Prince", "Aztec", "Panama"],
-        #                    "SA": ["Peru", "Venezuela", "Argentina", "Brazil", "Uruguay"],
-        #                    "SNOW": ["Yeti", "Mujik", "Jornik", "Objika"],
-        #                    "ATL": ["Kassyria", "Emmett", "Kylo", "Lugnica", "Burkina Faso", "Avalon", "Akasha",
-        #                            "Valka", "Lucana", "Roland", "Gastark", "Allepo", "Atis"],
-        #                    "FA": ["Greenland", "Floro", "Fjord", "Iceland"],
-        #                    "EU": ["Denmark", "Rotterdam", "Neuschberg", "Heisenberg", "Otter", "Britain", "Saint-Jean",
-        #                           "Flandre", "Edinburgh", "Ukraine", "Zurich", "Dusseldorf", "Italia", "Rome",
-        #                           "Normandie", "Munich"],
-        #                    "AF": ["Algeria", "Sahara", "Egypt", "Nigeria", "Kenya", "Angola", "Botswana",
-        #                           "South Africa",
-        #                           "Zimbabwe", "Madagascar"],
-        #                    "AS": ["Iran", "Pakistan", "Ural", "Omsk", "Sochi", "Siberia", "Yakutsk", "Bering",
-        #                           "Tunguska", "Israel",
-        #                           "Kazakhstan", "Middle-East", "Sri Lanka", "India", "Kashmir", "Tarim", "Tibet",
-        #                           "Siam", "China",
-        #                           "Mongolia", "Joseon", "Tokugawa", "Edo"],
-        #                    "OC": ["Darwin", "Canberra", "Townsville", "Sydney"],
-        #                    "JA": ["Javana", "Brunei", "Guinea", "Palau", "Hawaii"]}
 
 a = Map("MichaelMap1")
+print(a.num_nations)
+print(a.conts)
