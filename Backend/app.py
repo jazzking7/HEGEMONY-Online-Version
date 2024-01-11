@@ -137,6 +137,10 @@ def startGame(data):
     socketio.emit('game_started', room=lobby_id)
 
 ### Game functions ###
+@socketio.on('clicked')
+def handle_clicks(data):
+    print(f'{request.sid} has clicked on {data.get("id")}')
+
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

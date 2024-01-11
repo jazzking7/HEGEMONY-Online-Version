@@ -8,6 +8,7 @@ class Player:
 
     def __init__(self, name, sid, G):
         self.name = name
+        self.mission = None
         self.territories = []
         self.industrial = 6
         self.infrastructure = 3

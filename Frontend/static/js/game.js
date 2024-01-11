@@ -15,4 +15,61 @@ $(document).ready(function() {
     document.head.appendChild(p5Script);
     document.head.appendChild(p5SoundScript);
 
+
 });
+
+
+function mouseWheel(event) {
+    // Check if the mouse is within the canvas bounds
+    if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+      event.preventDefault(); 
+      // Adjust the scale factor based on the mouse scroll direction
+      if (event.delta > 0) {
+        // Zoom out (reduce scale factor)
+        scaleFactor *= 0.9; // You can adjust the zoom speed by changing the multiplier
+      } else {
+        // Zoom in (increase scale factor)
+        scaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
+      }
+  
+      // Limit the scale factor to prevent zooming too far in or out
+      scaleFactor = constrain(scaleFactor, 0.5, 3); // Adjust the range as needed
+    }
+  }
+  
+  function mousePressed() {
+    if(mouseX <= width && mouseY <= height){
+      isDragging = true;
+      previousMouseX = mouseX;
+      previousMouseY = mouseY;
+    }
+  }
+  
+  function mouseReleased() {
+    isDragging = false;
+  }
+  
+  function mouseDragged() {
+    if (isDragging) {
+      let dx = mouseX - previousMouseX;
+      let dy = mouseY - previousMouseY;
+  
+      offsetX += dx;
+      offsetY += dy;
+  
+      previousMouseX = mouseX;
+      previousMouseY = mouseY;
+  
+    }
+  }
+  
+  function mouseClicked() {
+    // Check if you clicked on a polygon
+    if(mouseX <= width && mouseY <= height){
+      console.log(hover_over.id);
+      if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
+        // socket.emit("clicked", {"id": hover_over.id})
+        socket.emit("clicked", {"id": hover_over.id})
+      }
+    }
+  }

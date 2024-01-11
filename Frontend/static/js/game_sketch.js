@@ -80,6 +80,7 @@ function draw() {
     currWinHeight = windowHeight;
   }
   background(0, 150, 200);
+  
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;
@@ -108,7 +109,7 @@ function draw() {
       fill(255,0,0);
      hover_over.pts = polygon;
      hover_over.id = tmp_id;
-    }
+    } 
   beginShape();
   for (let p of polygon) {
     vertex(p.x, p.y);
@@ -187,11 +188,11 @@ function draw() {
   
   push();
   fill(220,0,50)
-  rect(25, 25, 80, 50);
+  rect(width*0.05, height*0.05, 80, 50); //25,25
   fill(0,0,0)
   textStyle(BOLD);
-  text("\t\t\tSHOW\nCONTINENTS", 25, 48);
-  showContBorders = (mouseX < 105 && mouseX > 25 && mouseY < 75 && mouseY > 25);
+  text("\t\t\tSHOW\nCONTINENTS", width*0.05, height*0.05+23); //25,48
+  showContBorders = (mouseX < width*0.05+80 && mouseX > width*0.05 && mouseY < height*0.05+50 && mouseY > height*0.05);
 
   pop();
   
@@ -263,56 +264,6 @@ function loadSeaRoutes(data){
   }
 }
 
-function mouseWheel(event) {
-  // Check if the mouse is within the canvas bounds
-  if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-    event.preventDefault(); 
-    // Adjust the scale factor based on the mouse scroll direction
-    if (event.delta > 0) {
-      // Zoom out (reduce scale factor)
-      scaleFactor *= 0.9; // You can adjust the zoom speed by changing the multiplier
-    } else {
-      // Zoom in (increase scale factor)
-      scaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
-    }
-
-    // Limit the scale factor to prevent zooming too far in or out
-    scaleFactor = constrain(scaleFactor, 0.5, 3); // Adjust the range as needed
-  }
-}
-
-function mousePressed() {
-  if(mouseX <= width && mouseY <= height){
-    isDragging = true;
-    previousMouseX = mouseX;
-    previousMouseY = mouseY;
-  }
-}
-
-function mouseReleased() {
-  isDragging = false;
-}
-
-function mouseDragged() {
-  if (isDragging) {
-    let dx = mouseX - previousMouseX;
-    let dy = mouseY - previousMouseY;
-
-    offsetX += dx;
-    offsetY += dy;
-
-    previousMouseX = mouseX;
-    previousMouseY = mouseY;
-
-  }
-}
-
-function mouseClicked() {
-  // Check if you clicked on a polygon
-  if(mouseX <= width && mouseY <= height){
-    console.log(hover_over.id);
-  }
-}
 // Function to check if a point is inside a polygon
 function pointInPolygon(P, vertices) {
   let x = P.x, y = P.y;
