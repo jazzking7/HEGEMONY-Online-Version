@@ -127,7 +127,7 @@ def startGame(data):
         socketio.emit('error', {'msg': "Not enough players!"}, room=sid)
         return
     
-    # Setup lobby settings
+    # Setup lobby settings ## TO BE UPDATED
     lobby['alliance'] = data.get('alliance')
     lobby['turn_time'] = int(data.get('turn_time'))
     print(lobby)
@@ -137,6 +137,19 @@ def startGame(data):
     socketio.emit('game_started', room=lobby_id)
 
 ### Game functions ###
+
+@socketio.on('get_game_settings')
+def get_game_settings():
+    sid = request.sid
+    if sid not in players:
+        return
+    lobby_id = players[sid]['lobby_id']
+    if lobby_id is None:
+        return
+    lobby = lobbies[lobby_id]
+    # FILL IN MAP CHOSEN
+    socketio.emit('game_settings', {'map': 'MichaelMap1'}, room=sid)
+
 @socketio.on('clicked')
 def handle_clicks(data):
     print(f'{request.sid} has clicked on {data.get("id")}')

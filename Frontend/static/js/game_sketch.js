@@ -8,69 +8,131 @@ let previousMouseX;
 let previousMouseY;
 
 // Speed up clicks
-let tmp_id = 0;
-let hover_over = {'pts': [], 'id': 0};
+let tmp_id;
+let hover_over = {'id': 0, 'pts': {}};
 
 // images
 let capitalImage;
 let cityImage;
 let insigImage;
 
+// tmp
+let colors = [
+  "#F26101",
+  "#CAF200",
+  "#7FACD6",
+  "#BAC94A",
+  "#96D7C6",
+  "#6C8CDF",];
+
 // Components to be displayed
-let polygons = [];
-let srs = [];
-let nameSpaces = [];
-let capitalSpaces = [];
-let devSpaces = [];
-let insigSpaces = [];
-let territoryNames = [];
-let neighborTerritoryNames = {};
-let cps = [];
+let territories = [];
+let mapProperties;
+
 let seaRoutes = [];
 let contBorders = [];
 let contBonusBoxes = [];
 
+// canvas size
 let currWinWid;
 let currWinHeight;
 
 // Toggles
 let showContBorders = false;
 
-async function setup() {
+function setup() {
   // var canvas = createCanvas(1000, 800);
   var canvas = createCanvas(windowWidth, windowHeight);
   currWinWid = windowWidth;
-  currWinHeight = windowHeight * 2/3;
+  currWinHeight = windowHeight;
   canvas.parent('canvasContainer');
   console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
-  cityImage = loadImage('/static/Assets/Dev/city.png');
-  insigImage = loadImage('/static/Assets/Insig/insignia27.PNG');
-  let tempArray = [];
-  for (let i = 1; i < 7; i++){
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}a.json`, loadPolygonsData);
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/c${i}sr.json`, loadSR);
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ns.json`, loadNS);
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}cs.json`, loadCS);
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}ds.json`, loadDS);
-    loadJSON(`/static/MAPS/MichaelMap1/C${i}/displaySections/c${i}is.json`, loadIS);
-    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}tnames.txt`)
+  cityImage = loadImage('/static/Assets/Dev/transhub.png');
+  insigImage = loadImage('/static/Assets/Insig/neutral.PNG');
+  loadMapComponents(game_settings.map)
+}
+
+async function loadMapComponents(mapName){
+
+  await fetch(`/static/MAPS/${mapName}/properties.json`)
+  .then((res) => res.json())
+  .then((data) => {mapProperties = data;}).catch(e => console.error(e));
+
+  for (let i = 1; i < mapProperties.numConts+1; i++){
+    let tnames = [];
+    let tneighbors = [];
+    let sr_per_trty;
+    let polygons = [];
+    let srs = [];
+    let cps = [];
+    let nameSpaces = [];
+    let troopSpaces = [];
+    let capitalSpaces = [];
+    let devSpaces = [];
+    let insigSpaces = [];
+    // Names and properties
+    await fetch(`/static/MAPS/${mapName}/C${i}/properties.json`)
+    .then((res) => res.json())
+    .then((data) => {sr_per_trty = data.numSrp;}).catch(e => console.error(e));
+    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}tnames.txt`)
       .then((res) => res.text())
-      .then((text) => {
-        territoryNames.push(...text.split(/\r?\n/).filter(n => n));
-      }).catch((e) => console.error(e));
-    await fetch(`/static/MAPS/MichaelMap1/C${i}/c${i}nt.txt`)
+      .then((text) => {tnames = text.split(/\r?\n/).filter(n => n);}).catch((e) => console.error(e));
+    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}nt.txt`)
       .then((res) => res.text())
-      .then((text) => {
-        tempArray.push(...text.split(/\r?\n/).filter(n => n));
-      }).catch((e) => console.error(e));
+      .then((text) => {tneighbors = text.split(/\r?\n/).map(line => line.split(',')).filter(names => names.length > 0 && names[0].length > 0);})
+      .catch((e) => console.error(e));
+    // Territory outlines, Center points, sea route coordinates
+    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}a.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let trty of data){polygons.push([...trty])}}).catch(e => console.error(e));
+    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}sr.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let sr of data){srs.push(sr)}}).catch(e => console.error(e));
+    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}cp.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let cp of data){cps.push(cp)}}).catch(e => console.error(e));
+    // Display sections
+    await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}ns.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let ns of data){nameSpaces.push(ns)}}).catch(e => console.error(e));  
+    await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}ts.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let ts of data){troopSpaces.push(ts)}}).catch(e => console.error(e));  
+    await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}cs.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let cs of data){capitalSpaces.push(cs)}}).catch(e => console.error(e));  
+    await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}ds.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let ds of data){devSpaces.push(ds)}}).catch(e => console.error(e));  
+    await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}is.json`)
+      .then((res) => res.json())
+      .then((data) => {for(let is of data){insigSpaces.push(is)}}).catch(e => console.error(e)); 
+    for (let i = 0; i < tnames.length; i++){
+      territories.push(
+        {
+          "name": tnames[i],
+          "neighbors": tneighbors[i], 
+          "outline": polygons[i],
+          "srcs": [srs[sr_per_trty*i], srs[sr_per_trty*i+1]],
+          "cps": cps[i],
+          "ns": nameSpaces[i],
+          "ts": troopSpaces[i],
+          "cs": capitalSpaces[i],
+          "ds": devSpaces[i],
+          "is": insigSpaces[i],
+          "troops": 1000,
+          "color": random(colors),
+          "isCapital": true,
+          "devImg": cityImage,
+          "insig": insigImage
+        }
+      );
+    }
   }
-  for (let j = 0; j < territoryNames.length; j++){
-    neighborTerritoryNames[territoryNames[j]] = tempArray[j].split(",");
-  }
-  loadJSON(`/static/MAPS/MichaelMap1/seaRoutes.json`, loadSeaRoutes);
-  loadJSON(`/static/MAPS/MichaelMap1/contBorders.json`, loadBorders);
-  loadJSON(`/static/MAPS/MichaelMap1/contBonusDisplay.json`, loadContBonus);
+  loadJSON(`/static/MAPS/${mapName}/seaRoutes.json`, (data)=>{for(let sr of data){seaRoutes.push(sr);}});
+  loadJSON(`/static/MAPS/${mapName}/contBorders.json`, (data)=>{for(let border of data){contBorders.push(border);}});
+  loadJSON(`/static/MAPS/${mapName}/contBonusDisplay.json`, (data)=>{for(let display of data){contBonusBoxes.push(display);}});
 }
 
 function draw() {
@@ -79,8 +141,8 @@ function draw() {
     currWinWid = windowWidth;
     currWinHeight = windowHeight;
   }
+  // clear the background
   background(0, 150, 200);
-  
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;
@@ -94,62 +156,80 @@ function draw() {
     let dx = mouseX - previousMouseX;
     let dy = mouseY - previousMouseY;
     
-    offsetX = constrain(offsetX + dx, -1500, 500); // Adjust according to canvas size
+    offsetX = constrain(offsetX + dx, -1500, 1500); // Adjust according to canvas size
     offsetY = constrain(offsetY + dy, -1000, 1000); // Adjust according to canvas size
   }
   // Dragging
   translate(offsetX, offsetY);
   
   // Draw elements
+  // Draw territories
   tmp_id = 0;
-  for (let polygon of polygons){
+  for (let trty of territories){
     push();
-    if(isMouseInsidePolygon(mouseX, mouseY, polygon))
+    fill(trty.color)
+    // update hover_over
+    if(isMouseInsidePolygon(mouseX, mouseY, trty.outline))
     {
-      fill(255,0,0);
-     hover_over.pts = polygon;
-     hover_over.id = tmp_id;
+      fill(setShadowColor(trty.color));
+      hover_over.id = tmp_id;
+      hover_over.pts = trty.outline
     } 
-  beginShape();
-  for (let p of polygon) {
-    vertex(p.x, p.y);
-  }
-  endShape(CLOSE);
+    // Display territory outline
+    beginShape();
+    for (let p of trty.outline) {
+      vertex(p.x, p.y);
+    }
+    endShape(CLOSE);
     pop();
     tmp_id++;
-  }
 
-  for (let coord of srs){
-    push();
-    fill(0,255,0)
-    circle(coord.x, coord.y, 10);
-    pop();
-  }
+    // Display sea route coordinates
+    for (let src of trty.srcs){
+      push();
+      fill(0,200,100);
+      ellipse(src.x, src.y, 10, 10)
+      pop();
+    }
 
-  let nameIndex = 0
-  for (let coord of nameSpaces){
+    // Display name
     push();
-    text(territoryNames[nameIndex], coord.x, coord.y);
-    nameIndex++;
+    fill(0); 
+    textStyle(BOLD);
+    textFont("Helvetica");
+    text(trty.name, trty.ns.x, trty.ns.y);
     pop();
-  }
+    
+    // Display troop number
+    push();
+    fill(0); 
+    textStyle(BOLD);
+    textSize(15);
+    textFont("Helvetica");
+    text(trty.troops, trty.ts.x, trty.ts.y);
+    pop();
 
-  for (let coord of capitalSpaces){
-    push();
-    image(capitalImage, coord.x, coord.y, coord.dx, coord.dy);
-    pop();
-  }
+    // Display capital
+    if (trty.isCapital){
+      push();
+      drawStar(trty.cs.dx, trty.cs.dy, trty.cs.x, trty.cs.y, trty.color)
+      pop();
+    }
 
-  for (let coord of devSpaces){
-    push();
-    image(cityImage, coord.x, coord.y, coord.dx, coord.dy);
-    pop();
-  }
+    // Display dev
+    if (trty.devImg){
+      push();
+      image(cityImage, trty.ds.x, trty.ds.y, trty.ds.dx, trty.ds.dy)
+      pop();
+    }
 
-  for (let coord of insigSpaces){
-    push();
-    image(insigImage, coord.x, coord.y, coord.dx, coord.dy);
-    pop();
+    // Display insig
+    if (trty.insig){
+      push();
+      image(trty.insig, trty.is.x, trty.is.y, trty.is.dx, trty.is.dy);
+      pop();
+    }
+
   }
 
   for (let route of seaRoutes){
@@ -198,70 +278,18 @@ function draw() {
   
 }
 
+// TO BE UPDATED
 function keyPressed(){
   if (key === 'c'){
     scaleFactor = 1.0;
   }
 }
 
-function loadPolygonsData(data){
-    for (let p of data) {
-    polygons.push([...p]);
-  }
-}
-
-function loadSR(data){
-    for (let p of data) {
-    srs.push(p);
-  }
-}
-
-function loadNS(data){
-  for (let p of data) {
-    nameSpaces.push(p)
-  }
-}
-
-function loadCS(data){
-  for (let c of data){
-    capitalSpaces.push(c);
-  }
-}
-
-function loadDS(data){
-  for (let c of data){
-    devSpaces.push(c);
-  }
-}
-
-function loadIS(data){
-  for (let i of data){
-    insigSpaces.push(i);
-  }
-}
-
-function loadCP(data){
-    for (let p of data) {
-    cps.push(p);
-  }
-}
-
-function loadBorders(data){
-  for (let border of data){
-    contBorders.push(border);
-  }
-}
-
-function loadContBonus(data){
-  for (let display of data){
-    contBonusBoxes.push(display);
-  }
-}
-
-function loadSeaRoutes(data){
-  for (let sr of data){
-    seaRoutes.push(sr);
-  }
+// Shadowy color
+function setShadowColor(hexcode){
+  let c = color(hexcode)
+  c.setAlpha(100)
+  return c
 }
 
 // Function to check if a point is inside a polygon
@@ -294,6 +322,7 @@ function isMouseInsidePolygon(mouseX, mouseY, polygon) {
   return pointInPolygon(createVector(finalX, finalY), polygon);
 }
 
+// draw sea routes
 function drawDottedLine(x1, y1, x2, y2){
   push();
   stroke(0); 
@@ -305,5 +334,37 @@ function drawDottedLine(x1, y1, x2, y2){
     let y = map(i, 0, lineLength, y1, y2);
     point(x, y);
   }
+  pop();
+}
+
+// draw capitals
+function drawStar(dimX, dimY, x, y, scolor) {
+  let centerX = x + dimX / 2;
+  let centerY = y + dimY / 2;
+
+  let starSize = min(dimX, dimY) * 0.8; // Adjust the star size based on the smaller dimension
+  let outerRadius = starSize / 2;
+  let innerRadius = starSize / 4;
+  let numPoints = 5;
+
+  push();
+  fill(scolor);
+  translate(centerX, centerY);
+  rotate(-PI / 2); // Rotate the star to point upward
+
+  beginShape();
+  strokeWeight(3);
+  let angle = TWO_PI / numPoints;
+  for (let a = 0; a < TWO_PI; a += angle) {
+    let sx = cos(a) * outerRadius;
+    let sy = sin(a) * outerRadius;
+    vertex(sx, sy);
+
+    let sa = a + angle / 2;
+    let mx = cos(sa) * innerRadius;
+    let my = sin(sa) * innerRadius;
+    vertex(mx, my);
+  }
+  endShape(CLOSE);
   pop();
 }

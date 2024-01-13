@@ -1,5 +1,6 @@
-$(document).ready(function() {
+$(document).ready(async function() {
 
+    game_settings = await get_game_settings();
     // Load p5.js sketch
     loadScript(URL_FRONTEND + 'static/js/game_sketch.js', 'sketch');
 
@@ -14,11 +15,29 @@ $(document).ready(function() {
 
     document.head.appendChild(p5Script);
     document.head.appendChild(p5SoundScript);
-
-
 });
 
+let game_settings;
 
+async function get_game_settings() {
+    try {
+      const gameSettings = await new Promise((resolve) => {
+        // Emit the 'get_game_settings' event to request game settings
+        socket.emit('get_game_settings');
+        // Listen for the 'game_settings' event
+        socket.once('game_settings', (settings) => {
+          // Resolve the Promise with the received game settings
+          resolve(settings);
+        });
+      });
+      return gameSettings;
+    } catch (error) {
+      console.error('Error fetching game settings:', error);
+    }
+  }
+
+
+  // Mouse events
 function mouseWheel(event) {
     // Check if the mouse is within the canvas bounds
     if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
