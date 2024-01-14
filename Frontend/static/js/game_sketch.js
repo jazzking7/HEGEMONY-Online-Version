@@ -18,12 +18,10 @@ let insigImage;
 
 // tmp
 let colors = [
-  "#F26101",
-  "#CAF200",
-  "#7FACD6",
-  "#BAC94A",
-  "#96D7C6",
-  "#6C8CDF",];
+  "#CFCA4C",
+  "#5EB299",
+  "#745A33",
+  "#33539E",];
 
 // Components to be displayed
 let territories = [];
@@ -49,7 +47,7 @@ function setup() {
   console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
   cityImage = loadImage('/static/Assets/Dev/transhub.png');
-  insigImage = loadImage('/static/Assets/Insig/neutral.PNG');
+  insigImage = loadImage('/static/Assets/Insig/fort.PNG');
   loadMapComponents(game_settings.map)
 }
 
@@ -109,12 +107,14 @@ async function loadMapComponents(mapName){
       .then((res) => res.json())
       .then((data) => {for(let is of data){insigSpaces.push(is)}}).catch(e => console.error(e)); 
     for (let i = 0; i < tnames.length; i++){
+      let srcs = [];
+      for (let j = 0; j < sr_per_trty; j++){srcs.push(srs[sr_per_trty*i+j]);}
       territories.push(
         {
           "name": tnames[i],
           "neighbors": tneighbors[i], 
           "outline": polygons[i],
-          "srcs": [srs[sr_per_trty*i], srs[sr_per_trty*i+1]],
+          "srcs": srcs,
           "cps": cps[i],
           "ns": nameSpaces[i],
           "ts": troopSpaces[i],
