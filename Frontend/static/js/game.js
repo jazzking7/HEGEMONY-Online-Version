@@ -1,6 +1,19 @@
 $(document).ready(async function() {
 
+    // Load in gameStyle.css
+    var newLink = document.createElement('link');
+    newLink.rel = 'stylesheet';
+    newLink.href = URL_FRONTEND +"/static/css/gameStyle.css"; 
+    var head = document.head || document.getElementsByTagName('head')[0];
+    var initialLink = document.getElementById('initial_styling');
+    head.replaceChild(newLink, initialLink);
+
+    // Remove alert
+    document.getElementById('alert').parentNode.removeChild(document.getElementById('alert'))
+
+    // Get game settings
     game_settings = await get_game_settings();
+
     // Load p5.js sketch
     loadScript(URL_FRONTEND + 'static/js/game_sketch.js', 'sketch');
 
@@ -15,6 +28,12 @@ $(document).ready(async function() {
 
     document.head.appendChild(p5Script);
     document.head.appendChild(p5SoundScript);
+    
+    // Show continent border toggle
+    $('#btn_show_cont').click(function() {
+      showContBorders = !showContBorders;
+      document.getElementById('btn_show_cont').textContent = showContBorders ? 'Hide Borders' : "Show Continent Borders"
+  });
 });
 
 let game_settings;
@@ -85,7 +104,6 @@ function mouseWheel(event) {
   function mouseClicked() {
     // Check if you clicked on a polygon
     if(mouseX <= width && mouseY <= height){
-      console.log(hover_over.id);
       if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
         // socket.emit("clicked", {"id": hover_over.id})
         socket.emit("clicked", {"id": hover_over.id})

@@ -1,0 +1,115 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    display: flex;
+    /* align-items: center;
+    justify-content: center; */
+    overflow: hidden; 
+}
+
+#canvasContainer {
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+#overlay_sections {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2; 
+}
+
+#view_mode_btns {
+    position: absolute;
+    top: 1%;
+    left: 0;
+    padding: 0;
+    max-width: 30%;
+}
+
+
+#btn_show_cont{
+    margin: 0;
+}
+
+#player_info{
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    max-width: 15vw;
+    max-height: 40vh;
+}
+
+
+.stats-list {
+    overflow-y: auto;
+    max-height: 30vh;
+    position: sticky;
+    top: 0;
+    direction: rtl;
+}
+
+.game_btn{
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+#actions{
+    position: absolute;
+    bottom: 1%;
+    left: 0;
+    max-width: 15vw;
+    max-height: 30vh;
+}
+
+.card-head{
+    padding-left: 1vw;
+    padding-top: 1vh;
+}
+
+#event_announcement{
+    position: absolute;
+    top: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 40vw;
+    max-height: 15vh;
+}
+
+#tracker{
+    position: absolute;
+    top: 1%;
+    right: 0;
+    max-width: 20vw;
+    max-height: 40vh;
+}
+
+#control_panel{
+    position: absolute;
+    bottom: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 40vw;
+    max-height: 20vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#control_panel .card-head{
+    padding: 0;
+    margin-top: 1%;
+}

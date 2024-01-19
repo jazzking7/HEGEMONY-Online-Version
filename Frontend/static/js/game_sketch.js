@@ -18,10 +18,12 @@ let insigImage;
 
 // tmp
 let colors = [
-  "#CFCA4C",
-  "#5EB299",
-  "#745A33",
-  "#33539E",];
+  "#A20D1E",
+  "#0074D9",
+  "#00305A",
+  "#F06060",
+  "#F2EBBF",
+  "#F3B562",];
 
 // Components to be displayed
 let territories = [];
@@ -46,7 +48,7 @@ function setup() {
   canvas.parent('canvasContainer');
   console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
-  cityImage = loadImage('/static/Assets/Dev/transhub.png');
+  cityImage = loadImage('/static/Assets/Dev/city.png');
   insigImage = loadImage('/static/Assets/Insig/fort.PNG');
   loadMapComponents(game_settings.map)
 }
@@ -264,25 +266,7 @@ function draw() {
   // Offset dragging
   translate(-offsetX, -offsetY);
   pop();
-
   
-  push();
-  fill(220,0,50)
-  rect(width*0.05, height*0.05, 80, 50); //25,25
-  fill(0,0,0)
-  textStyle(BOLD);
-  text("\t\t\tSHOW\nCONTINENTS", width*0.05, height*0.05+23); //25,48
-  showContBorders = (mouseX < width*0.05+80 && mouseX > width*0.05 && mouseY < height*0.05+50 && mouseY > height*0.05);
-
-  pop();
-  
-}
-
-// TO BE UPDATED
-function keyPressed(){
-  if (key === 'c'){
-    scaleFactor = 1.0;
-  }
 }
 
 // Shadowy color
@@ -290,6 +274,13 @@ function setShadowColor(hexcode){
   let c = color(hexcode)
   c.setAlpha(100)
   return c
+}
+
+// TO BE UPDATED
+function keyPressed(){
+  if (key === 'c'){
+    scaleFactor = 1.0;
+  }
 }
 
 // Function to check if a point is inside a polygon
