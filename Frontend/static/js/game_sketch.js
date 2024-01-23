@@ -41,28 +41,25 @@ let currWinHeight;
 let showContBorders = false;
 
 function setup() {
-  // var canvas = createCanvas(1000, 800);
   var canvas = createCanvas(windowWidth, windowHeight);
   currWinWid = windowWidth;
   currWinHeight = windowHeight;
   canvas.parent('canvasContainer');
-  console.log("REACHED")
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
   cityImage = loadImage('/static/Assets/Dev/city.png');
   insigImage = loadImage('/static/Assets/Insig/fort.PNG');
-  loadMapComponents(game_settings.map)
+  loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors)
 }
 
-async function loadMapComponents(mapName){
+async function loadMapComponents(mapName, tnames, tneighbors){
 
   await fetch(`/static/MAPS/${mapName}/properties.json`)
   .then((res) => res.json())
   .then((data) => {mapProperties = data;}).catch(e => console.error(e));
-
+  let t_index = 0;
   for (let i = 1; i < mapProperties.numConts+1; i++){
-    let tnames = [];
-    let tneighbors = [];
     let sr_per_trty;
+    let numt;
     let polygons = [];
     let srs = [];
     let cps = [];
@@ -71,17 +68,10 @@ async function loadMapComponents(mapName){
     let capitalSpaces = [];
     let devSpaces = [];
     let insigSpaces = [];
-    // Names and properties
+    // properties.json
     await fetch(`/static/MAPS/${mapName}/C${i}/properties.json`)
     .then((res) => res.json())
-    .then((data) => {sr_per_trty = data.numSrp;}).catch(e => console.error(e));
-    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}tnames.txt`)
-      .then((res) => res.text())
-      .then((text) => {tnames = text.split(/\r?\n/).filter(n => n);}).catch((e) => console.error(e));
-    await fetch(`/static/MAPS/${mapName}/C${i}/c${i}nt.txt`)
-      .then((res) => res.text())
-      .then((text) => {tneighbors = text.split(/\r?\n/).map(line => line.split(',')).filter(names => names.length > 0 && names[0].length > 0);})
-      .catch((e) => console.error(e));
+    .then((data) => {sr_per_trty = data.numSrp; numt = data.numt}).catch(e => console.error(e));
     // Territory outlines, Center points, sea route coordinates
     await fetch(`/static/MAPS/${mapName}/C${i}/c${i}a.json`)
       .then((res) => res.json())
@@ -108,13 +98,13 @@ async function loadMapComponents(mapName){
     await fetch(`/static/MAPS/${mapName}/C${i}/displaySections/c${i}is.json`)
       .then((res) => res.json())
       .then((data) => {for(let is of data){insigSpaces.push(is)}}).catch(e => console.error(e)); 
-    for (let i = 0; i < tnames.length; i++){
+    for (let i = 0; i < numt; i++){
       let srcs = [];
       for (let j = 0; j < sr_per_trty; j++){srcs.push(srs[sr_per_trty*i+j]);}
       territories.push(
         {
-          "name": tnames[i],
-          "neighbors": tneighbors[i], 
+          "name": tnames[t_index],
+          "neighbors": tneighbors[t_index], 
           "outline": polygons[i],
           "srcs": srcs,
           "cps": cps[i],
@@ -130,6 +120,7 @@ async function loadMapComponents(mapName){
           "insig": insigImage
         }
       );
+      t_index += 1;
     }
   }
   loadJSON(`/static/MAPS/${mapName}/seaRoutes.json`, (data)=>{for(let sr of data){seaRoutes.push(sr);}});

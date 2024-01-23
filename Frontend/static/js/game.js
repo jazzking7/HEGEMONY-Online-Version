@@ -28,12 +28,12 @@ $(document).ready(async function() {
 
     document.head.appendChild(p5Script);
     document.head.appendChild(p5SoundScript);
-    
+
     // Show continent border toggle
     $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
       document.getElementById('btn_show_cont').textContent = showContBorders ? 'Hide Borders' : "Show Continent Borders"
-  });
+    });
 });
 
 let game_settings;
@@ -55,6 +55,11 @@ async function get_game_settings() {
     }
   }
 
+// Receive Mission
+socket.on('get_mission', function(data) {
+    document.getElementById('announcement').innerHTML = `<h1>` + data.msg + `</h1>`
+    socket.off('get_mission');
+});
 
   // Mouse events
 function mouseWheel(event) {

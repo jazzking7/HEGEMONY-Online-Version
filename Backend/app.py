@@ -2,6 +2,8 @@ from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
 import random
 from string import ascii_uppercase
+from game_map import *
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -133,11 +135,16 @@ def startGame(data):
     print(lobby)
     print(lobbies[lobby_id])
 
-    # BACKEND GAME START SEQUENCES
+    # TEMP | FOR TESTING ONLY
+    lobby['waitlist'] = []
+    lobby['map_name'] = 'MichaelMap1'
+    lobby['map'] = Map(lobby['map_name'])
+
     socketio.emit('game_started', room=lobby_id)
 
 ### Game functions ###
 
+## SET UP 
 @socketio.on('get_game_settings')
 def get_game_settings():
     sid = request.sid
@@ -147,12 +154,30 @@ def get_game_settings():
     if lobby_id is None:
         return
     lobby = lobbies[lobby_id]
+    lobby_map = lobby['map']
     # FILL IN MAP CHOSEN
-    socketio.emit('game_settings', {'map': 'MichaelMap1'}, room=sid)
+    socketio.emit('game_settings',
+     {'map': lobby['map_name'], 
+    'tnames': lobby_map.tnames, 
+    'tneighbors': lobby_map.tneighbors}, room=sid)
 
 @socketio.on('clicked')
 def handle_clicks(data):
     print(f'{request.sid} has clicked on {data.get("id")}')
+    return
+
+# temporary
+@socketio.on('initialize_game_components')
+def initiate_events():
+    lobby = lobbies[ players[request.sid]['lobby_id'] ]
+    if request.sid not in lobby['waitlist']:
+        lobby['waitlist'].append(request.sid)
+        print(request.sid, " ready to play")
+    if len(lobby['waitlist']) == len(lobby['players']):
+        print("Initiate color choosing")
+        for player in lobby['waitlist']:
+            continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
+            socketio.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
 
 
 if __name__ == '__main__':

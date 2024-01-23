@@ -1,9 +1,0 @@
-Chatham Rise,Caledonia,Vestland
-Tasman,Caledonia,Ghanzi
-Tasman,Chatham Rise,Canterbury Basin
-Caledonia,Otago,Norfolk Ridge
-Tuhoe,Norfolk Ridge,Canterbury Basin
-Otago,Norfolk Ridge,Bauska
-Sarmatia,Balotania
-Canterbury Basin,Otago,Tuhoe,Sarmatia
-Norfolk Ridge,Aerilon

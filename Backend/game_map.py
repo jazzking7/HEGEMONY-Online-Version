@@ -24,10 +24,8 @@ class Map:
 
     def __init__(self, mapName):
         
-        # temp attributs
         self.tnames = []
         self.tneighbors = []
-
         self.conts = {}
         self.territories = []
         self.mappath = f'MAPS/{mapName}'
@@ -64,8 +62,8 @@ class Map:
             territory = Territory(tname, tneighbors)
             self.territories.append(territory)
         
-        self.tnames = None
-        self.tneighbors = None
+        # self.tnames = None
+        # self.tneighbors = None
         self.num_nations = len(self.territories)
 
         # self.biohazard = []

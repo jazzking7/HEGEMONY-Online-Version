@@ -29,7 +29,7 @@ function loadPage(page_route) {
     });
 }
 
-function loadScript(script_src, id=null, async=false) {
+function loadScript(script_src, id=null, async=false, fun) {
     let script = document.createElement('script');
     script.src = script_src;
     if (id) script.id = id;
