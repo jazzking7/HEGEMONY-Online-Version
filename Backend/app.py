@@ -4,6 +4,7 @@ import random
 from string import ascii_uppercase
 from game_map import *
 import time
+import json
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -135,7 +136,7 @@ def startGame(data):
     print(lobby)
     print(lobbies[lobby_id])
 
-    # TEMP | FOR TESTING ONLY
+    # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
     lobby['map_name'] = 'MichaelMap1'
     lobby['map'] = Map(lobby['map_name'])
@@ -167,18 +168,39 @@ def handle_clicks(data):
     return
 
 # temporary
-@socketio.on('initialize_game_components')
+@socketio.on('initiate_event')
 def initiate_events():
     lobby = lobbies[ players[request.sid]['lobby_id'] ]
     if request.sid not in lobby['waitlist']:
         lobby['waitlist'].append(request.sid)
         print(request.sid, " ready to play")
     if len(lobby['waitlist']) == len(lobby['players']):
-        print("Initiate color choosing")
+        print("Mission Sent")
         for player in lobby['waitlist']:
             continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
             socketio.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
+        lobby['waitlist'] = []
 
+@socketio.on('start_color_distribution')
+def start_color_distribution():
+    lobby = lobbies[ players[request.sid]['lobby_id'] ]
+    if request.sid not in lobby['waitlist']:
+        lobby['waitlist'].append(request.sid)
+        print(request.sid, " ready to choose")
+    if len(lobby['waitlist']) == len(lobby['players']):
+        time.sleep(10)
+        with open('Setting_Options/colorOptions.json') as file:
+            color_options = json.load(file)
+        for player in lobby['waitlist']:
+            socketio.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
+        lobby['waitlist'] = []
+
+@socketio.on('send_color_choice')
+def update_color_choice(data):
+    color = data.get('choice')
+    print("HERE")
+    # MAKE SURE COLOR NOT CHOSEN
+    socketio.emit('color_picked', {'option': color}, room=players[request.sid]['lobby_id'])
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

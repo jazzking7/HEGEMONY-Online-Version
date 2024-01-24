@@ -5,7 +5,8 @@
             View Options
         </div>
         <div class="card-body">
-            <button id="btn_show_cont" class="btn btn-info">Show Continent Borders</button>
+            <h6>Show Continent Borders: </h6>
+            <button id="btn_show_cont" class="btn btn-info">On</button>
         </div>
     </div>
 
@@ -53,19 +54,16 @@
     </div>
 
     <div class="card" id="control_panel">
-        <div class="card-head">Deploy Troops</div>
-        <div class="card-body">
-            <button class="btn btn-success">Confirm</button>
-            <button class="btn btn-warning">Cancel</button>
+        <div class="card-head" id="control_mechanism"></div>
+        <div class="card-body" id="confirm_cancel">
+            <button class="btn btn-success" id="control_confirm">Confirm</button>
+            <button class="btn btn-warning" id="control_cancel">Cancel</button>
         </div>
     </div>
 
-    <!-- <div class="card" id="middle_display">
-        <div class="card-head">Deploy Troops</div>
-        <div class="card-body">
-            <button class="btn btn-success">Confirm</button>
-            <button class="btn btn-warning">Cancel</button>
-        </div>
-    </div> -->
+    <div class="card" id="middle_display">
+        <div class="card-head" id="middle_title"></div>
+        <div class="card-body" id="middle_content"></div>
+    </div>
 
 </div>

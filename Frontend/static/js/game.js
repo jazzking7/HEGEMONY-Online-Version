@@ -32,8 +32,10 @@ $(document).ready(async function() {
     // Show continent border toggle
     $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
-      document.getElementById('btn_show_cont').textContent = showContBorders ? 'Hide Borders' : "Show Continent Borders"
+      document.getElementById('btn_show_cont').textContent = showContBorders ? 'Off' : "On"
     });
+
+    socket.emit("initiate_event");
 });
 
 let game_settings;
@@ -59,7 +61,66 @@ async function get_game_settings() {
 socket.on('get_mission', function(data) {
     document.getElementById('announcement').innerHTML = `<h1>` + data.msg + `</h1>`
     socket.off('get_mission');
+    socket.emit('start_color_distribution')
 });
+
+// Start Color Choosing
+socket.on('choose_color', function(data){
+    document.getElementById('announcement').innerHTML = `<h2>` + data.msg + `</h2>`;
+    document.getElementById('middle_display').style.display = 'flex';
+    let colorBoard = document.getElementById('middle_content');
+    let disabled = false;
+    colorBoard.innerHTML = ''
+    for (let option of data.options){
+      let btn_c = document.createElement("button");
+      btn_c.className = 'btn';
+      btn_c.style.width = '2vw';
+      btn_c.style.height = '2vw';
+      btn_c.style.backgroundColor = option;
+      btn_c.style.border = 'none';
+      btn_c.style.margin = '1px';
+      btn_c.onclick = function(){
+        if (!disabled){
+          disabled = true;
+          btn_c.style.border = '2px solid';
+          btn_c.style.borderColor = 'red';
+          document.getElementById('control_panel').style.display = 'flex';
+          document.getElementById('control_confirm').onclick = function(){
+            socket.emit('send_color_choice', {'choice': btn_c.style.backgroundColor})
+            document.getElementById('control_panel').style.display = 'none';
+            document.getElementById('middle_display').style.display = 'none';
+            socket.off('color_picked');
+          }
+          document.getElementById('control_cancel').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            disabled = false;
+            btn_c.style.border = "none";
+          }
+        }
+      };
+      colorBoard.appendChild(btn_c);
+    }
+    socket.off('choose_color');
+});
+// Update color options
+socket.on('color_picked', function(data) {
+  let colorBoard = document.getElementById('middle_content');
+  let buttons = colorBoard.getElementsByTagName('button');
+  let targetButton = null;
+  for (let btn of buttons) {
+    if (btn.style.backgroundColor === data.option) {
+      targetButton = btn;
+      break; 
+    }
+  }
+  if (targetButton) {
+    targetButton.remove();
+  } else {
+    console.log("Button with color", targetColor, "not found.");
+  }
+});
+
+
 
   // Mouse events
 function mouseWheel(event) {
