@@ -18,12 +18,12 @@ let insigImage;
 
 // tmp
 let colors = [
-  "#729599",
-  "#3B8686",
-  "#CFF09E",
-  "#BAC94A",
-  "#96D7C6",
-  "#6C8CDF",];
+  "#812F33",
+  "#CFCA4C",
+  "#5EB299",
+  "#E6DFD9",
+  "#BFB3A8",
+  "#D8F2F0",];
 
 // Components to be displayed
 let territories = [];

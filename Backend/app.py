@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
 import random
 from string import ascii_uppercase
-from game_map import *
+from game_state_manager import *
 import time
 import json
 
@@ -123,6 +123,8 @@ def startGame(data):
     sid = request.sid
     lobby_id = players[sid]['lobby_id']
     lobby = lobbies[lobby_id]
+
+    # Safeguard
     if lobby['host'] != sid:
         socketio.emit('error', {'msg': "Only the host can start the game!"}, room=sid)
         return
@@ -134,7 +136,6 @@ def startGame(data):
     lobby['alliance'] = data.get('alliance')
     lobby['turn_time'] = int(data.get('turn_time'))
     print(lobby)
-    print(lobbies[lobby_id])
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
@@ -167,38 +168,10 @@ def handle_clicks(data):
     print(f'{request.sid} has clicked on {data.get("id")}')
     return
 
-# temporary
-@socketio.on('initiate_event')
-def initiate_events():
-    lobby = lobbies[ players[request.sid]['lobby_id'] ]
-    if request.sid not in lobby['waitlist']:
-        lobby['waitlist'].append(request.sid)
-        print(request.sid, " ready to play")
-    if len(lobby['waitlist']) == len(lobby['players']):
-        print("Mission Sent")
-        for player in lobby['waitlist']:
-            continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
-            socketio.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
-        lobby['waitlist'] = []
-
-@socketio.on('start_color_distribution')
-def start_color_distribution():
-    lobby = lobbies[ players[request.sid]['lobby_id'] ]
-    if request.sid not in lobby['waitlist']:
-        lobby['waitlist'].append(request.sid)
-        print(request.sid, " ready to choose")
-    if len(lobby['waitlist']) == len(lobby['players']):
-        time.sleep(10)
-        with open('Setting_Options/colorOptions.json') as file:
-            color_options = json.load(file)
-        for player in lobby['waitlist']:
-            socketio.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
-        lobby['waitlist'] = []
 
 @socketio.on('send_color_choice')
 def update_color_choice(data):
     color = data.get('choice')
-    print("HERE")
     # MAKE SURE COLOR NOT CHOSEN
     socketio.emit('color_picked', {'option': color}, room=players[request.sid]['lobby_id'])
 

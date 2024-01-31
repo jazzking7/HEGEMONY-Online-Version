@@ -32,10 +32,9 @@ $(document).ready(async function() {
     // Show continent border toggle
     $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
-      document.getElementById('btn_show_cont').textContent = showContBorders ? 'Off' : "On"
+      document.getElementById('btn_show_cont').textContent = showContBorders ? 'On' : "Off"
     });
 
-    socket.emit("initiate_event");
 });
 
 let game_settings;
