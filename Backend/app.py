@@ -181,9 +181,12 @@ def update_color_choice(data):
 @socketio.on('send_dist_choice')
 def update_dist_choice(data):
     dist = data.get('choice')
-    gsm = lobbies[players[request.sid]['lobby_id']]['gsm']
-    gsm.players[request.sid].territories = gsm.aval_choices[dist]
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
+    for trty in gsm.players[pid].territories:
+        gsm.server.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}})
     gsm.selected = True
 
 

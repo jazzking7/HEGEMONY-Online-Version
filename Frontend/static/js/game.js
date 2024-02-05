@@ -148,7 +148,6 @@ socket.on('choose_territorial_distribution', function(data){
   let dist_choices = document.getElementById('middle_content');
   dist_choices.innerHTML = ``;
   let disabled = false;
-  console.log(data)
   for (let trty_dist in data.options){
     let btn_dist = document.createElement("button");
       btn_dist.className = 'btn';
@@ -187,6 +186,17 @@ socket.on('clear_view', function(){
   document.getElementById('middle_display').style.display = 'none';
 });
 
+// update territorial display
+socket.on('update_trty_display', function(data){
+  for (trty_name in data){
+    // changed properties
+    let changes = data[trty_name];
+    // update property one by one
+    for (field in changes){
+      territories[trty_name][field] = changes[field];
+    }
+  }
+});
 
   // Mouse events
 function mouseWheel(event) {

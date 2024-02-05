@@ -17,7 +17,7 @@ let cityImage;
 let insigImage;
 
 // Components to be displayed
-let territories = [];
+let territories = {};
 let mapProperties;
 
 let seaRoutes = [];
@@ -92,9 +92,7 @@ async function loadMapComponents(mapName, tnames, tneighbors){
     for (let i = 0; i < numt; i++){
       let srcs = [];
       for (let j = 0; j < sr_per_trty; j++){srcs.push(srs[sr_per_trty*i+j]);}
-      territories.push(
-        {
-          "name": tnames[t_index],
+      territories[tnames[t_index]] = {
           "neighbors": tneighbors[t_index], 
           "outline": polygons[i],
           "srcs": srcs,
@@ -109,8 +107,7 @@ async function loadMapComponents(mapName, tnames, tneighbors){
           "isCapital": false,
           "devImg": null,
           "insig": null
-        }
-      );
+      };
       t_index += 1;
     }
   }
@@ -149,7 +146,8 @@ function draw() {
   // Draw elements
   // Draw territories
   tmp_id = 0;
-  for (let trty of territories){
+  for (let tname in territories){
+    let trty = territories[tname]
     push();
     fill(trty.color)
     // update hover_over
@@ -181,7 +179,7 @@ function draw() {
     fill(0); 
     textStyle(BOLD);
     textFont("Helvetica");
-    text(trty.name, trty.ns.x, trty.ns.y);
+    text(tname, trty.ns.x, trty.ns.y);
     pop();
     
     // Display troop number

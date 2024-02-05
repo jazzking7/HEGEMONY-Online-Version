@@ -87,7 +87,7 @@ class setup_event_scheduler:
         gs.aval_choices = color_options
         for player in gs.players:
             gs.server.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
-        time.sleep(1)
+        time.sleep(10)
         # handle timeout
         for player in gs.players.values():
             if player.color is None:
@@ -118,6 +118,11 @@ class setup_event_scheduler:
             tmp = random.choice(trty_list)
             gs.aval_choices[choices[curr_i]].append(tmp)
             trty_list.remove(tmp)
+            curr_i+=1
+        # UPDATE TRTY VIEW
+        for dist in gs.aval_choices:
+            for trty in gs.aval_choices[dist]:
+                gs.server.emit('update_trty_display', {trty:{'color': dist}}) 
         # NOTIF EVENT ONE BY ONE
         for player in gs.players:
             gs.selected = False
@@ -127,17 +132,16 @@ class setup_event_scheduler:
                 else:
                     gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
-            time.sleep(20)
+            time.sleep(15)
             # handle timeout
             if not gs.selected:
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
                 gs.players[player].territories = random_dist
                 del gs.aval_choices[random_key]
+                for trty in random_dist:
+                    gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}) 
                 gs.server.emit('clear_view', room=player)
                 print("NOT CHOSEN")
-        # test
-        for player in gs.players:
-            print(gs.players[player].territories)
     
     def start_capital_settlement(self,gs):
         return
