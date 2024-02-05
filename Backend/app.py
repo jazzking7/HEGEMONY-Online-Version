@@ -1,10 +1,7 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
-import random
 from string import ascii_uppercase
 from game_state_manager import *
-import time
-import json
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -12,6 +9,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Contains all lobbies
 players = {}
 lobbies = {}
+SES = setup_event_scheduler()
 
 def generate_unique_code(length):
     while True:
@@ -135,14 +133,17 @@ def startGame(data):
     # Setup lobby settings ## TO BE UPDATED
     lobby['alliance'] = data.get('alliance')
     lobby['turn_time'] = int(data.get('turn_time'))
+    lobby['setup_mode'] = "all_manuel"
     print(lobby)
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
     lobby['map_name'] = 'MichaelMap1'
-    lobby['map'] = Map(lobby['map_name'])
+    player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
+    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio)
 
     socketio.emit('game_started', room=lobby_id)
+    lobby['gsm'].run_game_events()
 
 ### Game functions ###
 
@@ -156,24 +157,40 @@ def get_game_settings():
     if lobby_id is None:
         return
     lobby = lobbies[lobby_id]
-    lobby_map = lobby['map']
+    lobby_map = lobby['gsm'].map
     # FILL IN MAP CHOSEN
     socketio.emit('game_settings',
      {'map': lobby['map_name'], 
     'tnames': lobby_map.tnames, 
     'tneighbors': lobby_map.tneighbors}, room=sid)
+    lobby_map.tneighbors = []
+
+@socketio.on('send_color_choice')
+def update_color_choice(data):
+    color = data.get('choice')
+    gsm = lobbies[players[request.sid]['lobby_id']]['gsm']
+    if color not in gsm.made_choices:
+        gsm.made_choices.append(color)
+        gsm.aval_choices.remove(color)
+        socketio.emit('color_picked', {'option': color}, room=players[request.sid]['lobby_id'])
+        socketio.emit('clear_view', room=request.sid)
+        gsm.players[request.sid].color = color
+    else:
+        socketio.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': gsm.aval_choices}, room=request.sid)
+
+@socketio.on('send_dist_choice')
+def update_dist_choice(data):
+    dist = data.get('choice')
+    gsm = lobbies[players[request.sid]['lobby_id']]['gsm']
+    gsm.players[request.sid].territories = gsm.aval_choices[dist]
+    del gsm.aval_choices[dist]
+    gsm.selected = True
+
 
 @socketio.on('clicked')
 def handle_clicks(data):
     print(f'{request.sid} has clicked on {data.get("id")}')
     return
-
-
-@socketio.on('send_color_choice')
-def update_color_choice(data):
-    color = data.get('choice')
-    # MAKE SURE COLOR NOT CHOSEN
-    socketio.emit('color_picked', {'option': color}, room=players[request.sid]['lobby_id'])
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

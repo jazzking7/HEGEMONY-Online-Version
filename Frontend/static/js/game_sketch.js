@@ -16,15 +16,6 @@ let capitalImage;
 let cityImage;
 let insigImage;
 
-// tmp
-let colors = [
-  "#812F33",
-  "#CFCA4C",
-  "#5EB299",
-  "#E6DFD9",
-  "#BFB3A8",
-  "#D8F2F0",];
-
 // Components to be displayed
 let territories = [];
 let mapProperties;
@@ -113,11 +104,11 @@ async function loadMapComponents(mapName, tnames, tneighbors){
           "cs": capitalSpaces[i],
           "ds": devSpaces[i],
           "is": insigSpaces[i],
-          "troops": 1000,
-          "color": random(colors),
-          "isCapital": true,
-          "devImg": cityImage,
-          "insig": insigImage
+          "troops": '',
+          "color": "white",
+          "isCapital": false,
+          "devImg": null,
+          "insig": null
         }
       );
       t_index += 1;

@@ -56,11 +56,10 @@ async function get_game_settings() {
     }
   }
 
-// Receive Mission
+// Receive Mission + Display info on Mission Tracker
 socket.on('get_mission', function(data) {
     document.getElementById('announcement').innerHTML = `<h1>` + data.msg + `</h1>`
     socket.off('get_mission');
-    socket.emit('start_color_distribution')
 });
 
 // Start Color Choosing
@@ -85,10 +84,8 @@ socket.on('choose_color', function(data){
           btn_c.style.borderColor = 'red';
           document.getElementById('control_panel').style.display = 'flex';
           document.getElementById('control_confirm').onclick = function(){
-            socket.emit('send_color_choice', {'choice': btn_c.style.backgroundColor})
             document.getElementById('control_panel').style.display = 'none';
-            document.getElementById('middle_display').style.display = 'none';
-            socket.off('color_picked');
+            socket.emit('send_color_choice', {'choice': rgbToHex(btn_c.style.backgroundColor)})
           }
           document.getElementById('control_cancel').onclick = function(){
             document.getElementById('control_panel').style.display = 'none';
@@ -99,15 +96,15 @@ socket.on('choose_color', function(data){
       };
       colorBoard.appendChild(btn_c);
     }
-    socket.off('choose_color');
 });
 // Update color options
 socket.on('color_picked', function(data) {
   let colorBoard = document.getElementById('middle_content');
   let buttons = colorBoard.getElementsByTagName('button');
   let targetButton = null;
+  let targetColor = hexToRgb(data.option)
   for (let btn of buttons) {
-    if (btn.style.backgroundColor === data.option) {
+    if (btn.style.backgroundColor === targetColor) {
       targetButton = btn;
       break; 
     }
@@ -118,7 +115,77 @@ socket.on('color_picked', function(data) {
     console.log("Button with color", targetColor, "not found.");
   }
 });
+function rgbToHex(rgb) {
+  // Extract RGB values from the computed color style
+  var rgbValues = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 
+  // Convert the RGB values to hex
+  var hexColor = "#" + 
+      ("0" + parseInt(rgbValues[1], 10).toString(16)).slice(-2) +
+      ("0" + parseInt(rgbValues[2], 10).toString(16)).slice(-2) +
+      ("0" + parseInt(rgbValues[3], 10).toString(16)).slice(-2);
+  return hexColor.toUpperCase();
+}
+function hexToRgb(hex) {
+  // Remove the hash (#) if it exists
+  hex = hex.replace(/^#/, '');
+  // Parse the hex value into separate RGB components
+  var bigint = parseInt(hex, 16);
+  var r = (bigint >> 16) & 255;
+  var g = (bigint >> 8) & 255;
+  var b = bigint & 255;
+  // Return the RGB values in the format "rgb(x, x, x)"
+  return "rgb(" + r + ", " + g + ", " + b + ")";
+}
+
+// announcements
+socket.on('set_up_announcement', function(data){
+  document.getElementById('announcement').innerHTML = `<h2>` + data.msg + `</h2>`;
+});
+
+socket.on('choose_territorial_distribution', function(data){
+  document.getElementById('middle_display').style.display = 'flex';
+  let dist_choices = document.getElementById('middle_content');
+  dist_choices.innerHTML = ``;
+  let disabled = false;
+  console.log(data)
+  for (let trty_dist in data.options){
+    let btn_dist = document.createElement("button");
+      btn_dist.className = 'btn';
+      btn_dist.style.width = '2vw';
+      btn_dist.style.height = '2vw';
+      btn_dist.style.backgroundColor = trty_dist;
+      btn_dist.style.border = 'none';
+      btn_dist.style.margin = '1px';
+      btn_dist.onclick = function(){
+        if (!disabled){
+          disabled = true;
+          btn_dist.style.border = '2px solid';
+          btn_dist.style.borderColor = 'red';
+          document.getElementById('control_panel').style.display = 'flex';
+          document.getElementById('control_confirm').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
+            document.getElementById('middle_display').style.display = 'none';
+          }
+          document.getElementById('control_cancel').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            disabled = false;
+            btn_dist.style.border = "none";
+          }
+        }
+      };
+      dist_choices.appendChild(btn_dist);
+  }
+});
+
+// Clear current selection window
+socket.on('clear_view', function(){
+  socket.off('color_picked');
+  socket.off('choose_color');
+  document.getElementById('control_panel').style.display = 'none';
+  document.getElementById('middle_display').style.display = 'none';
+});
 
 
   // Mouse events
