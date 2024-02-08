@@ -9,7 +9,7 @@ let previousMouseY;
 
 // Speed up clicks
 let tmp_id;
-let hover_over = {'id': 0, 'pts': {}};
+let hover_over = {'id': 0, 'pts': {}, 'name': null};
 
 // images
 let capitalImage;
@@ -30,6 +30,9 @@ let currWinHeight;
 
 // Toggles
 let showContBorders = false;
+
+// Highlight
+let toHightlight = [];
 
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -155,8 +158,12 @@ function draw() {
     {
       fill(setShadowColor(trty.color));
       hover_over.id = tmp_id;
-      hover_over.pts = trty.outline
+      hover_over.pts = trty.outline;
+      hover_over.name = tname;
     } 
+    if (toHightlight.includes(tname)){
+      strokeWeight(3);
+    }
     // Display territory outline
     beginShape();
     for (let p of trty.outline) {

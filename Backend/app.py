@@ -140,7 +140,7 @@ def startGame(data):
     lobby['waitlist'] = []
     lobby['map_name'] = 'MichaelMap1'
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
-    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio)
+    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
 
     socketio.emit('game_started', room=lobby_id)
     lobby['gsm'].run_game_events()
@@ -186,14 +186,38 @@ def update_dist_choice(data):
     gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
     for trty in gsm.players[pid].territories:
-        gsm.server.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}})
+        gsm.server.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
     gsm.selected = True
 
+@socketio.on('send_capital_choice')
+def update_player_capital(data):
+    choice = data.get('choice')
+    tid = data.get('tid')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in gsm.players[pid].territories:
+        if choice == trty:
+            gsm.players[pid].capital = choice
+            gsm.map.territories[tid].isCapital = True
+            gsm.server.emit('update_trty_display', {trty: {'isCapital': True}}, room=gsm.lobby)
+            gsm.server.emit('capital_result', {'resp': True}, room=pid)
+            return
+    gsm.server.emit('capital_result', {'resp': False}, room=pid)
 
-@socketio.on('clicked')
-def handle_clicks(data):
-    print(f'{request.sid} has clicked on {data.get("id")}')
-    return
+@socketio.on('send_city_choices')
+def update_player_city(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for c in choices:
+        if c not in gsm.players[pid].territories:
+            gsm.server.emit('city_result', {'resp': False}, room=pid)
+            return
+    for trty in choices:
+        gsm.map.get_trty(trty).isCity = True
+        gsm.server.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+    gsm.server.emit('city_result', {'resp': True}, room=pid)
+
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

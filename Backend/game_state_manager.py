@@ -122,7 +122,7 @@ class setup_event_scheduler:
         # UPDATE TRTY VIEW
         for dist in gs.aval_choices:
             for trty in gs.aval_choices[dist]:
-                gs.server.emit('update_trty_display', {trty:{'color': dist}}) 
+                gs.server.emit('update_trty_display', {trty:{'color': dist}}, room=gs.lobby) 
         # NOTIF EVENT ONE BY ONE
         for player in gs.players:
             gs.selected = False
@@ -132,32 +132,57 @@ class setup_event_scheduler:
                 else:
                     gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
-            time.sleep(15)
+            time.sleep(5)
             # handle timeout
             if not gs.selected:
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
                 gs.players[player].territories = random_dist
                 del gs.aval_choices[random_key]
                 for trty in random_dist:
-                    gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}) 
+                    gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby) 
                 gs.server.emit('clear_view', room=player)
                 print("NOT CHOSEN")
+        gs.aval_choices = []
     
-    def start_capital_settlement(self,gs):
-        return
+    def start_capital_settlement(self, gs):
+        gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
+        gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
+        time.sleep(3)
+        # handle not choosing
+        for player in gs.players.values():
+            if player.capital == None:
+                player.capital = random.choice(player.territories)
+                gs.map.get_trty(player.capital).isCapital = True
+                gs.server.emit('update_trty_display', {player.capital:{'isCapital': True}}, room=gs.lobby)
+                gs.server.emit('capital_result', {'resp': True}, room=gs.lobby)
+        gs.signal_view_clear()
     
     def start_city_settlement(self,gs):
-        return
+        gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
+        gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
+        time.sleep(15)
+        for player in gs.players.values():
+            if gs.map.count_cities(player.territories) == 0:
+                cities = random.sample(player.territories, k=2)
+                for c in cities:
+                    gs.map.get_trty(c).isCity = True
+                    gs.server.emit('update_trty_display', {c:{'hasDev': 'city'}}, room=gs.lobby)
+                    gs.server.emit('city_result', {'resp': True}, room=gs.lobby)
+        gs.signal_view_clear()
     
     def start_initial_deployment(self,gs):
+        gs.server.emit('set_up_announcement', {'msg': "Deploy your troops!"}, room=gs.lobby)
+        time.sleep(3)
         return
     
     def start_skill_selection(self,gs):
+        gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
+        time.sleep(3)
         return
 
 class Game_State_Manager:
 
-    def __init__(self, mapName, player_list, setup_events, server):
+    def __init__(self, mapName, player_list, setup_events, server, lobby):
 
         # Number of players and players are related
         self.players = {}
@@ -189,6 +214,7 @@ class Game_State_Manager:
 
         # server
         self.server = server
+        self.lobby = lobby
 
         # EVENT SCHEDULERS
         self.round = 0

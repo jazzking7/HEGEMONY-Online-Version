@@ -22,6 +22,18 @@ class Territory:
 
 class Map:
 
+    def get_trty(self, tname):
+        for trty in self.territories:
+            if trty.name == tname:
+                return trty
+    
+    def count_cities(self, trtys):
+        count = 0
+        for trty in self.territories:
+            if trty.name in trtys and trty.isCity:
+                count += 1
+        return count
+
     def __init__(self, mapName):
         
         self.tnames = []

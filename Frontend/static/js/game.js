@@ -8,9 +8,6 @@ $(document).ready(async function() {
     var initialLink = document.getElementById('initial_styling');
     head.replaceChild(newLink, initialLink);
 
-    // Remove alert
-    document.getElementById('alert').parentNode.removeChild(document.getElementById('alert'))
-
     // Get game settings
     game_settings = await get_game_settings();
 
@@ -37,6 +34,7 @@ $(document).ready(async function() {
 
 });
 
+let currEvent = null;
 let game_settings;
 
 async function get_game_settings() {
@@ -178,6 +176,28 @@ socket.on('choose_territorial_distribution', function(data){
   }
 });
 
+socket.on('change_click_event', function(data){
+  currEvent = data.event;
+});
+
+socket.on('capital_result', function(data){
+  if (data.resp){
+    currEvent = null;
+    toHightlight = [];
+  } else {
+    popup("NOT YOUR TERRITORY!", 1000);
+  }
+});
+
+socket.on('city_result', function(data){
+  if (data.resp){
+    currEvent = null;
+    toHightlight = [];
+  } else {
+    popup("NOT YOUR TERRITORY!", 1000);
+  }
+});
+
 // Clear current selection window
 socket.on('clear_view', function(){
   socket.off('color_picked');
@@ -193,7 +213,17 @@ socket.on('update_trty_display', function(data){
     let changes = data[trty_name];
     // update property one by one
     for (field in changes){
-      territories[trty_name][field] = changes[field];
+      // Dev property
+      if (field == 'hasDev'){
+        if (changes[field] == 'city'){
+          territories[trty_name].devImg = cityImage;
+        } else {
+          territories[trty_name].devImg = null;
+        }
+      // Other properties
+      } else {
+        territories[trty_name][field] = changes[field];
+      }
     }
   }
 });
@@ -213,7 +243,7 @@ function mouseWheel(event) {
       }
   
       // Limit the scale factor to prevent zooming too far in or out
-      scaleFactor = constrain(scaleFactor, 0.5, 3); // Adjust the range as needed
+      scaleFactor = constrain(scaleFactor, 0.3, 3); // Adjust the range as needed
     }
   }
   
@@ -247,8 +277,43 @@ function mouseWheel(event) {
     // Check if you clicked on a polygon
     if(mouseX <= width && mouseY <= height){
       if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
-        // socket.emit("clicked", {"id": hover_over.id})
-        socket.emit("clicked", {"id": hover_over.id})
+        let tname = hover_over.name;
+        let tid = hover_over.id;
+        if (currEvent == "settle_capital"){
+          toHightlight = []
+          toHightlight.push(tname)
+          document.getElementById('control_panel').style.display = 'none';
+          document.getElementById('control_panel').style.display = 'flex';
+          document.getElementById('control_confirm').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
+            toHightlight = [];
+          }
+          document.getElementById('control_cancel').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            toHightlight = [];
+          }
+        } 
+        else if (currEvent == "settle_cities"){
+          if (toHightlight.length == 2){
+            toHightlight.splice(0, 1);
+          }
+          if (!toHightlight.includes(tname)){
+            toHightlight.push(tname);
+          }
+          if (toHightlight.length == 2){
+              document.getElementById('control_panel').style.display = 'none';
+              document.getElementById('control_panel').style.display = 'flex';
+              document.getElementById('control_confirm').onclick = function(){
+              document.getElementById('control_panel').style.display = 'none';
+              socket.emit('send_city_choices', {'choice': toHightlight});
+              toHightlight = [];
+            }
+            document.getElementById('control_cancel').onclick = function(){
+              document.getElementById('control_panel').style.display = 'none';
+            }
+          }
+        }
       }
     }
   }
