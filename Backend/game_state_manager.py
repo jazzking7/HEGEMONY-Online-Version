@@ -18,7 +18,6 @@ class Player:
         # agenda
         self.mission = None
         # skill
-        self.hasSkill = False
         self.skill = None
         # ownership
         self.territories = []
@@ -44,6 +43,8 @@ class Player:
         self.puppet = False
         self.master = None
         self.vassals = []
+        # deployment
+        self.deployable_amt = 0
         # economy
         self.cumulative_gdp = 0
 
@@ -132,7 +133,7 @@ class setup_event_scheduler:
                 else:
                     gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
-            time.sleep(5)
+            time.sleep(10)
             # handle timeout
             if not gs.selected:
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
@@ -147,7 +148,7 @@ class setup_event_scheduler:
     def start_capital_settlement(self, gs):
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
-        time.sleep(3)
+        time.sleep(15)
         # handle not choosing
         for player in gs.players.values():
             if player.capital == None:
@@ -171,14 +172,40 @@ class setup_event_scheduler:
         gs.signal_view_clear()
     
     def start_initial_deployment(self,gs):
-        gs.server.emit('set_up_announcement', {'msg': "Deploy your troops!"}, room=gs.lobby)
-        time.sleep(3)
-        return
+        gs.shuffle_players()
+        gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=gs.lobby)
+        curr = 0
+        for player in gs.players:
+            amount = len(gs.players[player].territories) + 5
+            if (curr > len(gs.players)//2):
+                amount += 3
+            gs.players[player].deployable_amt = amount 
+            gs.server.emit('troop_deployment', {'amount': amount}, room=player)
+        time.sleep(20)
+        gs.signal_view_clear()
+        gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
+        gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
+        time.sleep(2)
+        for player in gs.players:
+            p =  gs.players[player]
+            if p.deployable_amt > 0:
+                while (p.deployable_amt != 0):
+                    trty = random.choice(p.territories)
+                    t = gs.map.get_trty(trty)
+                    t.troops += 1
+                    p.deployable_amt -= 1
+                    gs.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=gs.lobby)
     
     def start_skill_selection(self,gs):
         gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
-        time.sleep(3)
-        return
+        for player in gs.players:
+            options = random.sample(gs.skill_options, k=5)
+            gs.server.emit('choose_skill', {'options': options}, room=player)
+        time.sleep(15)
+        gs.signal_view_clear()
+        for player in gs.players:
+            if gs.players[player].skill == None:
+                gs.players[player].skill = random.choice(gs.skill_options)
 
 class Game_State_Manager:
 
@@ -211,6 +238,21 @@ class Game_State_Manager:
 
         # color options
         self.color_options = []
+        # skill options
+        self.skill_options = [
+            "Sturdy_As_Steel",
+            "Usurper",
+            "Air_Superiority",
+            "Divine_Punishment",
+            "Industrial_Revolution",
+            "Zealous_Expansion",
+            "Mass_Mobilization",
+            "Handler_of_Wheel_of_Fortune",
+            "Laplace_Demon",
+            "Necromancer",
+            "Ares_Blessing",
+            "Dictator"
+        ]
 
         # server
         self.server = server

@@ -218,6 +218,30 @@ def update_player_city(data):
         gsm.server.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
     gsm.server.emit('city_result', {'resp': True}, room=pid)
 
+@socketio.on('send_troop_update')
+def update_troop_info(data):
+    choice = data.get('choice')
+    amount = int(data.get('amount'))
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if choice not in gsm.players[pid].territories:
+        gsm.server.emit('troop_result', {'resp': False}, room=pid)
+        return
+    t = gsm.map.get_trty(choice)
+    t.troops += amount
+    gsm.players[pid].deployable_amt -= amount
+    gsm.server.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    if gsm.players[pid].deployable_amt > 0:
+        gsm.server.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
+    else:
+        gsm.server.emit('troop_result', {'resp': True}, room=pid)
+        gsm.server.emit('set_up_announcement', {'msg': "Completed, waiting for others...."}, room=pid)
+
+@socketio.on('send_skill_choice')
+def update_skill_choice(data):
+    skill = data.get('choice')
+    lobbies[players[request.sid]['lobby_id']]['gsm'].players[request.sid].skill = skill
+    return
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

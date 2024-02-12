@@ -32,9 +32,23 @@ $(document).ready(async function() {
       document.getElementById('btn_show_cont').textContent = showContBorders ? 'On' : "Off"
     });
 
+    // Click propagation prevention
+    let overlay = document.getElementById('overlay_sections');
+    let cards = overlay.querySelectorAll('.card');
+    for (let card of cards){
+      card.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent click event from reaching the background
+      });
+    
+      card.addEventListener('mousemove', function(event) {
+        event.stopPropagation(); // Prevent mousemove event from reaching the background
+      });
+    }
+
 });
 
 let currEvent = null;
+let deployable = 0;
 let game_settings;
 
 async function get_game_settings() {
@@ -176,6 +190,45 @@ socket.on('choose_territorial_distribution', function(data){
   }
 });
 
+socket.on("troop_deployment", function(data){
+  deployable = data.amount;
+  document.getElementById('announcement').innerHTML = `<h2>Deploy your troops! </h2>`
+  document.getElementById('announcement').innerHTML += `<h2>` + String(deployable) + ' deployable.' + `</h2>`;
+});
+
+socket.on('choose_skill', function(data){
+  document.getElementById('middle_display').style.display = 'flex';
+  let skill_options = document.getElementById('middle_content');
+  skill_options.innerHTML = '';
+  let disabled = false;
+  for (let option of data.options){
+    let btn_skill = document.createElement("button");
+    btn_skill.className = 'btn btn-info';
+    btn_skill.textContent = option;
+    btn_skill.style.border = 'none';
+    btn_skill.style.margin = '1px';
+    btn_skill.onclick = function(){
+      if(!disabled){
+        disabled = true;
+        btn_skill.style.border = '2px solid';
+        btn_skill.style.borderColor = 'red';
+        document.getElementById('control_panel').style.display = 'flex';
+        document.getElementById('control_confirm').onclick = function(){
+          document.getElementById('control_panel').style.display = 'none';
+          socket.emit('send_skill_choice', {'choice': btn_skill.textContent})
+          document.getElementById('middle_display').style.display = 'none';
+        }
+        document.getElementById('control_cancel').onclick = function(){
+          document.getElementById('control_panel').style.display = 'none';
+          disabled = false;
+          btn_skill.style.border = "none";
+        }
+      }
+    }
+    skill_options.appendChild(btn_skill);
+  }
+});
+
 socket.on('change_click_event', function(data){
   currEvent = data.event;
 });
@@ -197,6 +250,15 @@ socket.on('city_result', function(data){
     popup("NOT YOUR TERRITORY!", 1000);
   }
 });
+
+socket.on('troop_result', function(data){
+  if (!data.resp){
+    popup("NOT YOUR TERRITORY!", 1000);
+  } else {
+    toHightlight = [];
+    document.getElementById('control_mechanism').innerHTML = '';
+  }
+})
 
 // Clear current selection window
 socket.on('clear_view', function(){
@@ -231,7 +293,7 @@ socket.on('update_trty_display', function(data){
   // Mouse events
 function mouseWheel(event) {
     // Check if the mouse is within the canvas bounds
-    if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+    if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height && !isMouseOverOverlay()) {
       event.preventDefault(); 
       // Adjust the scale factor based on the mouse scroll direction
       if (event.delta > 0) {
@@ -247,6 +309,18 @@ function mouseWheel(event) {
     }
   }
   
+  function isMouseOverOverlay() {
+    let overlay = document.getElementById('overlay_sections');
+    let cards = overlay.querySelectorAll('.card');
+    for (var card of cards){
+      var overlayRect = card.getBoundingClientRect();
+      if (mouseX >= overlayRect.left && mouseX <= overlayRect.right && mouseY >= overlayRect.top && mouseY <= overlayRect.bottom){
+        return true;
+      }
+    }
+    return false;
+  }
+
   function mousePressed() {
     if(mouseX <= width && mouseY <= height){
       isDragging = true;
@@ -275,7 +349,7 @@ function mouseWheel(event) {
   
   function mouseClicked() {
     // Check if you clicked on a polygon
-    if(mouseX <= width && mouseY <= height){
+    if(mouseX <= width && mouseY <= height && !isMouseOverOverlay()){
       if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
         let tname = hover_over.name;
         let tid = hover_over.id;
@@ -306,12 +380,42 @@ function mouseWheel(event) {
               document.getElementById('control_panel').style.display = 'flex';
               document.getElementById('control_confirm').onclick = function(){
               document.getElementById('control_panel').style.display = 'none';
-              socket.emit('send_city_choices', {'choice': toHightlight});
+              socket.emit('send_city_choices', {'choice': toHightlight, 'amount': 0});
               toHightlight = [];
             }
             document.getElementById('control_cancel').onclick = function(){
               document.getElementById('control_panel').style.display = 'none';
+              toHightlight = [];
             }
+          }
+        }
+        else if (currEvent == "troop_deployment"){
+          if (toHightlight.length){
+            toHightlight = [];
+          }
+          toHightlight.push(tname);
+          document.getElementById('control_panel').style.display = 'none';
+          document.getElementById('control_panel').style.display = 'flex';
+          let troopValue = document.createElement("p");
+          let troopInput = document.createElement("input");
+          troopInput.setAttribute("type", "range");
+          troopInput.setAttribute("min", 1);
+          troopInput.setAttribute("max", deployable);
+          troopInput.setAttribute("value", 1);
+          troopInput.setAttribute("step", 1);
+          troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+          let c_m = document.getElementById('control_mechanism');
+          c_m.innerHTML = "";
+          c_m.appendChild(troopInput);
+          c_m.appendChild(troopValue);
+          document.getElementById('control_confirm').onclick = function(){
+          document.getElementById('control_panel').style.display = 'none';
+          socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
+          toHightlight = [];
+          }
+          document.getElementById('control_cancel').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            toHightlight = [];
           }
         }
       }
