@@ -34,6 +34,20 @@ class Map:
                 count += 1
         return count
 
+    def get_continental_bonus(self, trtys):
+        bonus = 0
+        for cont in self.conts:
+            if self.own_continent(trtys, self.conts[cont]['trtys']):
+                bonus += self.conts[cont]['bonus']
+        return bonus
+
+    def own_continent(self, t_list, cont_list):
+        amt = 0
+        for t in t_list:
+            if t in cont_list:
+                amt += 1
+        return amt == len(cont_list)
+
     def __init__(self, mapName):
         
         self.tnames = []

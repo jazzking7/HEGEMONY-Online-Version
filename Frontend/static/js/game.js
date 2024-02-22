@@ -49,6 +49,7 @@ $(document).ready(async function() {
 
 let currEvent = null;
 let deployable = 0;
+let player_territories = [];
 let game_settings;
 
 async function get_game_settings() {
@@ -67,6 +68,10 @@ async function get_game_settings() {
       console.error('Error fetching game settings:', error);
     }
   }
+
+socket.on('update_player_list', function(data){
+  player_territories = data.list;
+});
 
 // Receive Mission + Display info on Mission Tracker
 socket.on('get_mission', function(data) {
@@ -192,8 +197,9 @@ socket.on('choose_territorial_distribution', function(data){
 
 socket.on("troop_deployment", function(data){
   deployable = data.amount;
-  document.getElementById('announcement').innerHTML = `<h2>Deploy your troops! </h2>`
-  document.getElementById('announcement').innerHTML += `<h2>` + String(deployable) + ' deployable.' + `</h2>`;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Deploy your troops! </h2>`
+  announ.innerHTML += `<h2>` + String(data.amount) + ' deployable.' + `</h2>`;
 });
 
 socket.on('choose_skill', function(data){
@@ -257,6 +263,8 @@ socket.on('troop_result', function(data){
   } else {
     toHightlight = [];
     document.getElementById('control_mechanism').innerHTML = '';
+    deployable = 0;
+    document.getElementById('announcement').innerHTML = `<h2>Completed, waiting for others...`;
   }
 })
 
@@ -290,7 +298,7 @@ socket.on('update_trty_display', function(data){
   }
 });
 
-  // Mouse events
+// Mouse events
 function mouseWheel(event) {
     // Check if the mouse is within the canvas bounds
     if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height && !isMouseOverOverlay()) {
@@ -354,33 +362,15 @@ function mouseWheel(event) {
         let tname = hover_over.name;
         let tid = hover_over.id;
         if (currEvent == "settle_capital"){
-          toHightlight = []
-          toHightlight.push(tname)
+          toHightlight = [];
           document.getElementById('control_panel').style.display = 'none';
-          document.getElementById('control_panel').style.display = 'flex';
-          document.getElementById('control_confirm').onclick = function(){
-            document.getElementById('control_panel').style.display = 'none';
-            socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
-            toHightlight = [];
-          }
-          document.getElementById('control_cancel').onclick = function(){
-            document.getElementById('control_panel').style.display = 'none';
-            toHightlight = [];
-          }
-        } 
-        else if (currEvent == "settle_cities"){
-          if (toHightlight.length == 2){
-            toHightlight.splice(0, 1);
-          }
-          if (!toHightlight.includes(tname)){
+          if (player_territories.includes(tname)){
             toHightlight.push(tname);
-          }
-          if (toHightlight.length == 2){
+            document.getElementById('control_panel').style.display = 'none';
+            document.getElementById('control_panel').style.display = 'flex';
+            document.getElementById('control_confirm').onclick = function(){
               document.getElementById('control_panel').style.display = 'none';
-              document.getElementById('control_panel').style.display = 'flex';
-              document.getElementById('control_confirm').onclick = function(){
-              document.getElementById('control_panel').style.display = 'none';
-              socket.emit('send_city_choices', {'choice': toHightlight, 'amount': 0});
+              socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
               toHightlight = [];
             }
             document.getElementById('control_cancel').onclick = function(){
@@ -388,36 +378,114 @@ function mouseWheel(event) {
               toHightlight = [];
             }
           }
+        } 
+        else if (currEvent == "settle_cities"){
+          if(player_territories.includes(tname)){
+            if (toHightlight.length == 2){
+              toHightlight.splice(0, 1);
+            }
+            if (!toHightlight.includes(tname)){
+              toHightlight.push(tname);
+            }
+            if (toHightlight.length == 2){
+                document.getElementById('control_panel').style.display = 'none';
+                document.getElementById('control_panel').style.display = 'flex';
+                document.getElementById('control_confirm').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                socket.emit('send_city_choices', {'choice': toHightlight});
+                toHightlight = [];
+              }
+              document.getElementById('control_cancel').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                toHightlight = [];
+              }
+            }
+          }
         }
         else if (currEvent == "troop_deployment"){
-          if (toHightlight.length){
-            toHightlight = [];
-          }
-          toHightlight.push(tname);
-          document.getElementById('control_panel').style.display = 'none';
-          document.getElementById('control_panel').style.display = 'flex';
-          let troopValue = document.createElement("p");
-          let troopInput = document.createElement("input");
-          troopInput.setAttribute("type", "range");
-          troopInput.setAttribute("min", 1);
-          troopInput.setAttribute("max", deployable);
-          troopInput.setAttribute("value", 1);
-          troopInput.setAttribute("step", 1);
-          troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-          let c_m = document.getElementById('control_mechanism');
-          c_m.innerHTML = "";
-          c_m.appendChild(troopInput);
-          c_m.appendChild(troopValue);
-          document.getElementById('control_confirm').onclick = function(){
-          document.getElementById('control_panel').style.display = 'none';
-          socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
           toHightlight = [];
-          }
-          document.getElementById('control_cancel').onclick = function(){
+          document.getElementById('control_panel').style.display = 'none';
+          if (player_territories.includes(tname)){
+            toHightlight.push(tname);
             document.getElementById('control_panel').style.display = 'none';
+            document.getElementById('control_panel').style.display = 'flex';
+            let troopValue = document.createElement("p");
+            let troopInput = document.createElement("input");
+            troopInput.setAttribute("type", "range");
+            troopInput.setAttribute("min", 1);
+            troopInput.setAttribute("max", deployable);
+            troopInput.setAttribute("value", 1);
+            troopInput.setAttribute("step", 1);
+            troopInput.style.display = "inline-block";
+            troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+            let c_m = document.getElementById('control_mechanism');
+            c_m.innerHTML = "";
+            c_m.appendChild(troopInput);
+            c_m.appendChild(troopValue);
+            document.getElementById('control_confirm').onclick = function(){
+            document.getElementById('control_panel').style.display = 'none';
+            socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
             toHightlight = [];
+            }
+            document.getElementById('control_cancel').onclick = function(){
+              document.getElementById('control_panel').style.display = 'none';
+              toHightlight = [];
+            }
           }
         }
+        else if (currEvent == "conquest"){
+          
+          if (player_territories.includes(tname)){
+            document.getElementById('control_panel').style.display = 'none';
+            clickables = [];
+            if (toHightlight.length){
+              toHightlight = [];
+            }
+            if (territories[tname].troops-1 == 0){
+              popup("NOT ENOUGH TROOPS FOR BATTLE!", 1000);
+              return
+            }
+            toHightlight.push(tname);
+            clickables = territories[tname].neighbors;
+          } else if (clickables.includes(tname)){
+            if (toHightlight.length != 2){
+              toHightlight.push(tname);
+            }
+            if (toHightlight.length == 2){
+              toHightlight[1] = tname;
+              document.getElementById('control_panel').style.display = 'none';
+              document.getElementById('control_panel').style.display = 'flex';
+
+              let troopValue = document.createElement("p");
+              let troopInput = document.createElement("input");
+              troopInput.setAttribute("type", "range");
+              troopInput.setAttribute("min", 1);
+              troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+              troopInput.setAttribute("value", 1);
+              troopInput.setAttribute("step", 1);
+              troopInput.style.display = "inline-block";
+              troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+              let c_m = document.getElementById('control_mechanism');
+              c_m.innerHTML = "";
+              c_m.appendChild(troopInput);
+              c_m.appendChild(troopValue);
+
+              document.getElementById('control_confirm').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
+                toHightlight = [];
+                clickables = [];
+              }
+              document.getElementById('control_cancel').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                toHightlight = [];
+                clickables = [];
+              }
+           }
+          }
+
+        }
+
       }
     }
   }

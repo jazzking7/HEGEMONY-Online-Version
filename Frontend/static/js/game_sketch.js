@@ -33,6 +33,9 @@ let showContBorders = false;
 
 // Highlight
 let toHightlight = [];
+let clickables = [];
+let ani_offset = 0;
+let ani_direction = 1;
 
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -150,7 +153,7 @@ function draw() {
   // Draw territories
   tmp_id = 0;
   for (let tname in territories){
-    let trty = territories[tname]
+    let trty = territories[tname];
     push();
     fill(trty.color)
     // update hover_over
@@ -219,6 +222,11 @@ function draw() {
       pop();
     }
 
+    // clickable animation
+    if (clickables.includes(tname)){
+      drawEquiTriangle(trty.cps.x, trty.cps.y+ani_offset);
+    }
+
   }
 
   for (let route of seaRoutes){
@@ -253,7 +261,10 @@ function draw() {
   // Offset dragging
   translate(-offsetX, -offsetY);
   pop();
-  
+  ani_offset += ani_direction;
+  if (ani_offset == 30 || ani_offset == 0){
+    ani_direction *= -1;
+  }
 }
 
 // Shadowy color
@@ -344,5 +355,24 @@ function drawStar(dimX, dimY, x, y, scolor) {
     vertex(mx, my);
   }
   endShape(CLOSE);
+  pop();
+}
+
+// 20 side length equilateral triangle
+function drawEquiTriangle(x, y) {
+
+  let x1 = x - 10;
+  let y1 = y - 17.3205; // Invert the y-coordinate
+
+  let x2 = x + 10;
+  let y2 = y - 17.3205; // Invert the y-coordinate
+
+  let x3 = x;
+  let y3 = y; 
+  
+  push();
+  fill(255, 0, 0); // Sets the fill color (in this case, a shade of blue)
+  strokeWeight(2)
+  triangle(x1, y1, x2, y2, x3, y3);
   pop();
 }

@@ -143,7 +143,8 @@ def startGame(data):
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
 
     socketio.emit('game_started', room=lobby_id)
-    lobby['gsm'].run_game_events()
+    lobby['gsm'].run_setup_events()
+    lobby['gsm'].run_turn_scheduler()
 
 ### Game functions ###
 
@@ -163,7 +164,6 @@ def get_game_settings():
      {'map': lobby['map_name'], 
     'tnames': lobby_map.tnames, 
     'tneighbors': lobby_map.tneighbors}, room=sid)
-    lobby_map.tneighbors = []
 
 @socketio.on('send_color_choice')
 def update_color_choice(data):
@@ -185,6 +185,7 @@ def update_dist_choice(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
+    gsm.server.emit('update_player_list', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
         gsm.server.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
     gsm.selected = True
@@ -235,7 +236,6 @@ def update_troop_info(data):
         gsm.server.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
     else:
         gsm.server.emit('troop_result', {'resp': True}, room=pid)
-        gsm.server.emit('set_up_announcement', {'msg': "Completed, waiting for others...."}, room=pid)
 
 @socketio.on('send_skill_choice')
 def update_skill_choice(data):
