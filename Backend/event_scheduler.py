@@ -45,29 +45,39 @@ class turn_loop_scheduler:
     def conquer(self, gs, curr_player):
         gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=gs.lobby)
         gs.server.emit("change_click_event", {'event': 'conquest'}, room=curr_player)
+        gs.server.emit("conquest", room=curr_player)
         return
     
     def rearrange(self, gs, curr_player):
-        gs.server.emit("rearrangement", {}, room=curr_player)
+        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=gs.lobby)
+        gs.server.emit("rearrangement", room=curr_player)
         return
 
     def execute_turn(self, gs, player):
         while not self.terminated:
+
+            atk_player = gs.players[player]
+
             self.set_curr_stat(gs, self.events[0])
             self.reinforcement(gs, player)
             self.stage1 = False
             while not self.stage1:
-                self.stage1 = gs.players[player].deployable_amt == 0
+                self.stage1 = atk_player.deployable_amt == 0
+
             self.set_curr_stat(gs, self.events[1])
+            # Prevent Immediate Stats growth
+            atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
             self.conquer(gs, player)
             self.stage2 = False
             while not self.stage2:
                 time.sleep(1)
+            
             self.set_curr_stat(gs, self.events[2])
             self.rearrange(gs, player)
             self.stage3 = False
             while not self.stage3:
                 time.sleep(1)
+
             return
         return
 
@@ -84,7 +94,7 @@ class turn_loop_scheduler:
             if self.current_player == len(gs.pids):
                 self.current_player = 0
                 self.round += 1
-            return
+            curr_player = gs.pids[self.current_player]
             
 class setup_event_scheduler:
     def __init__(self, ):

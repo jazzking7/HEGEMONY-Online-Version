@@ -243,5 +243,46 @@ def update_skill_choice(data):
     lobbies[players[request.sid]['lobby_id']]['gsm'].players[request.sid].skill = skill
     return
 
+@socketio.on('send_battle_data')
+def handle_battle(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.handle_battle(data)
+    return
+
+@socketio.on("get_reachable_trty")
+def get_reachable_trty(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    reachable_trty = gsm.map.get_reachable_trty(data['choice'], gsm.players[pid].territories)
+    gsm.server.emit('update_clickables', {'trtys': reachable_trty}, room=pid)
+
+@socketio.on("terminate_conquer_stage")
+def terminate_conquer_stage():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.turn_loop_scheduler.stage2 = True
+
+@socketio.on("terminate_rearrangement_stage")
+def terminate_rearrangement_stage():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.turn_loop_scheduler.stage3 = True
+
+@socketio.on('send_rearrange_data')
+def handle_rearrange_data(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    choices = data['choice']
+    amount = int(data['amount'])
+    t1 = gsm.map.get_trty(choices[0])
+    t2 = gsm.map.get_trty(choices[1])
+    t1.troops -= amount
+    t2.troops += amount
+    socketio.emit('update_trty_display', {
+        choices[0]: {'troops': t1.troops},
+        choices[1]: {'troops': t2.troops}
+    } , room=gsm.lobby)
+
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

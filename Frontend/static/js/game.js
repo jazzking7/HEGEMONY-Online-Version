@@ -51,6 +51,7 @@ let currEvent = null;
 let deployable = 0;
 let player_territories = [];
 let game_settings;
+let next_stage_btn;
 
 async function get_game_settings() {
     try {
@@ -200,6 +201,37 @@ socket.on("troop_deployment", function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Deploy your troops! </h2>`
   announ.innerHTML += `<h2>` + String(data.amount) + ' deployable.' + `</h2>`;
+});
+
+socket.on('conquest', function(){
+  next_stage_btn = document.getElementById('proceed_next_stage');
+  next_stage_btn.style.display = 'flex';
+  next_stage_btn.innerHTML = `<h3>Finished Conquering</h3>`;
+  next_stage_btn.onclick = () => {
+    next_stage_btn.style.display = 'none'; 
+    socket.emit("terminate_conquer_stage");
+    currEvent = null;
+    toHightlight = [];
+    clickables = [];
+  };
+});
+
+socket.on('update_clickables', function(data){
+  clickables = data.trtys;
+})
+
+socket.on('rearrangement', function(){
+  currEvent = 'rearrange';
+  next_stage_btn = document.getElementById('proceed_next_stage');
+  next_stage_btn.style.display = 'flex';
+  next_stage_btn.innerHTML = `<h3>Finished Rearranging</h3>`;
+  next_stage_btn.onclick = () => {
+    next_stage_btn.style.display = 'none'; 
+    socket.emit("terminate_rearrangement_stage");
+    currEvent = null;
+    toHightlight = [];
+    clickables = [];
+  };
 });
 
 socket.on('choose_skill', function(data){
@@ -434,9 +466,9 @@ function mouseWheel(event) {
           }
         }
         else if (currEvent == "conquest"){
-          
           if (player_territories.includes(tname)){
             document.getElementById('control_panel').style.display = 'none';
+            next_stage_btn.style.display = 'flex';
             clickables = [];
             if (toHightlight.length){
               toHightlight = [];
@@ -455,6 +487,7 @@ function mouseWheel(event) {
               toHightlight[1] = tname;
               document.getElementById('control_panel').style.display = 'none';
               document.getElementById('control_panel').style.display = 'flex';
+              next_stage_btn.style.display = 'none';
 
               let troopValue = document.createElement("p");
               let troopInput = document.createElement("input");
@@ -475,14 +508,75 @@ function mouseWheel(event) {
                 socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
                 toHightlight = [];
                 clickables = [];
+                next_stage_btn.style.display = 'flex';
               }
               document.getElementById('control_cancel').onclick = function(){
                 document.getElementById('control_panel').style.display = 'none';
                 toHightlight = [];
                 clickables = [];
+                next_stage_btn.style.display = 'flex';
               }
            }
           }
+
+        }
+
+        else if(currEvent == "rearrange"){
+
+          if (clickables.includes(tname) && tname != toHightlight[0]){
+            if (toHightlight.length != 2){
+              toHightlight.push(tname);
+            }
+            if (toHightlight.length == 2){
+              toHightlight[1] = tname;
+              document.getElementById('control_panel').style.display = 'none';
+              document.getElementById('control_panel').style.display = 'flex';
+              next_stage_btn.style.display = 'none';
+
+              let troopValue = document.createElement("p");
+              let troopInput = document.createElement("input");
+              troopInput.setAttribute("type", "range");
+              troopInput.setAttribute("min", 1);
+              troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+              troopInput.setAttribute("value", 1);
+              troopInput.setAttribute("step", 1);
+              troopInput.style.display = "inline-block";
+              troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+              let c_m = document.getElementById('control_mechanism');
+              c_m.innerHTML = "";
+              c_m.appendChild(troopInput);
+              c_m.appendChild(troopValue);
+
+              document.getElementById('control_confirm').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                socket.emit('send_rearrange_data', {'choice': toHightlight, 'amount': troopInput.value});
+                toHightlight = [];
+                clickables = [];
+                next_stage_btn.style.display = 'flex';
+              }
+              document.getElementById('control_cancel').onclick = function(){
+                document.getElementById('control_panel').style.display = 'none';
+                toHightlight = [];
+                clickables = [];
+                next_stage_btn.style.display = 'flex';
+              }
+           }
+          }
+
+          else if (player_territories.includes(tname)){
+            document.getElementById('control_panel').style.display = 'none';
+            next_stage_btn.style.display = 'flex';
+            clickables = [];
+            if (territories[tname].troops == 1){
+              popup("NOT ENOUGH TROOPS TO TRANSFER!", 1000);
+              return;
+            }
+            if (toHightlight.length){
+              toHightlight = [];
+            }
+            toHightlight.push(tname);
+            socket.emit("get_reachable_trty", {'choice': tname})
+          }  
 
         }
 

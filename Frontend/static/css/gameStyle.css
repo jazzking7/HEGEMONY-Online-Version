@@ -128,12 +128,6 @@ html, body {
     margin-top: 1%;
 }
 
-/* #confirm_cancel{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
-
 #middle_display{
     display: none;
     position: absolute;
@@ -153,4 +147,14 @@ html, body {
 
 #middle_content{
     text-align: center;
+}
+
+#proceed_next_stage {
+    display: none;
+    position: absolute;
+    bottom: 1%;
+    left: 70%;
+    transform: translateX(-50%);
+    width: 10vw;
+    height: 10vh;
 }

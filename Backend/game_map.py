@@ -22,6 +22,20 @@ class Territory:
 
 class Map:
 
+    def recursive_get_trty(self, curr, owned, curr_list):
+        t = self.get_trty(curr)
+        for n in t.neighbors:
+            if n not in curr_list and n in owned:
+                curr_list.append(n)
+                self.recursive_get_trty(n, owned, curr_list)
+        return curr_list 
+
+    def get_reachable_trty(self, start, owned):
+        t_list = self.recursive_get_trty(start, owned, [])        
+        if len(t_list):
+            t_list.remove(start)
+        return t_list
+
     def get_trty(self, tname):
         for trty in self.territories:
             if trty.name == tname:
@@ -97,4 +111,3 @@ class Map:
         # self.sea_routes = []
         # self.sea_side_territories = []
         # self.pre_existed_sea_routes = []
-    

@@ -20,6 +20,7 @@ class Player:
         self.territories = []
         self.capital = None
         # battle stats
+        self.temp_stats = None
         self.industrial = 6
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
@@ -140,4 +141,125 @@ class Game_State_Manager:
         if t_score < 9:
             return bonus + 3
         return bonus + t_score//3
+
+    def get_player_industrial_level(self, player):
+        lvl = 0
+        c_amt = self.map.count_cities(player.territories)
+        if c_amt == 3:
+            lvl += 1
+        elif c_amt > 3:
+            lvl += 1 + (c_amt-3)//2
+        for trty in self.map.territories:
+            if trty.name in player.territories and trty.isMegacity:
+                lvl += 1
+        return lvl
+
+    def get_player_infra_level(self, player):
+        lvl = 0
+        for trty in self.map.territories:
+            if trty in player.territories and trty.isTransportcenter:
+                lvl += 1
+        lvl += player.infrastructure_upgrade
+        return lvl
+
+    def get_player_battle_stats(self, player):
+
+        # get industrial level
+        stats = []
+        stats.append(self.get_player_industrial_level(player)+6)
+        stats.append(self.get_player_infra_level(player)+3)
+        return stats
+
+    def handle_battle(self, data):
+        # Load territories involved
+        t1, t2 = data['choice']
+        
+        # Identify opponents
+        atk_p, def_p, a_pid, d_pid = None, None, None, None
+
+        # TEMP TO BE ADJUSTED WHEN IN ALLIANCE
+        for player in self.players:
+            if t1 in self.players[player].territories:
+                atk_p = self.players[player]
+                a_pid = player
+            if t2 in self.players[player].territories:
+                def_p = self.players[player]
+                d_pid = player       
+
+        # Identify territories
+        trty_atk = self.map.get_trty(t1)
+        trty_def = self.map.get_trty(t2)
+
+        # Compute participating forces
+        atk_amt = int(data['amount'])
+        def_amt = trty_def.troops
+
+        # Compute player battle stats
+        atk_stats = atk_p.temp_stats
+        def_stats = self.get_player_battle_stats(def_p)
+
+        # Simulate battle and get result
+        result = self.simulate_attack(atk_amt, def_amt, atk_stats, def_stats)
+
+        # Remove troops from attacking territory
+        trty_atk.troops -= atk_amt
+        self.server.emit('update_trty_display', {t1:{'troops': trty_atk.troops}}, room=self.lobby)
+        
+        # attacker wins
+        if result[0] > 0:
+
+            trty_def.troops = result[0]
+            self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
+
+            atk_p.territories.append(t2)
+            self.server.emit('update_player_list', {'list': atk_p.territories}, room=a_pid)
+            self.server.emit('update_trty_display', {t2:{'color': atk_p.color}}, room=self.lobby)
+            def_p.territories.remove(t2)
+            self.server.emit('update_player_list', {'list': def_p.territories}, room=d_pid)
+
+        # defender wins
+        else:
+
+            trty_def.troops = result[1]
+            self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
+
+        
+
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
+        
+        # Troop amount
+        a_troops = atk_amt
+        d_troops = def_amt
+
+        # Max stats
+        a_maxv, a_maxt = atk_stats[0], atk_stats[1]
+        d_maxv, d_maxt = def_stats[0], def_stats[1] - 1
+
+        # Adjust stats
+        a_maxt = a_troops if a_troops < a_maxt else a_maxt
+        d_maxt = d_troops if d_troops < d_maxt else d_maxt
+
+        print(a_troops, d_troops)
+
+        # Starts simulation
+        while(a_troops > 0 and d_troops > 0):
+
+            a_rolls = sorted([random.randint(1, a_maxv) for _ in range(a_maxt)], reverse=True)
+            d_rolls = sorted([random.randint(1, d_maxv) for _ in range(d_maxt)], reverse=True)
+
+            max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
+
+            for i in range(max_dmg):
+                if a_rolls[i] > d_rolls[i]:
+                    d_troops -= 1
+                else:
+                    a_troops -= 1
+            
+            a_maxt = a_troops if a_troops < a_maxt else a_maxt
+            d_maxt = d_troops if d_troops < d_maxt else d_maxt
+
+            print(a_rolls, d_rolls)
+            print(a_troops, d_troops)
+
+        return [a_troops, d_troops]
 
