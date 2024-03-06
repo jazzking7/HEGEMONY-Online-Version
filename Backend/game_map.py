@@ -23,7 +23,7 @@ class Territory:
 class Map:
 
     def recursive_get_trty(self, curr, owned, curr_list):
-        t = self.get_trty(curr)
+        t = self.territories[curr]
         for n in t.neighbors:
             if n not in curr_list and n in owned:
                 curr_list.append(n)
@@ -36,15 +36,10 @@ class Map:
             t_list.remove(start)
         return t_list
 
-    def get_trty(self, tname):
-        for trty in self.territories:
-            if trty.name == tname:
-                return trty
-    
     def count_cities(self, trtys):
         count = 0
-        for trty in self.territories:
-            if trty.name in trtys and trty.isCity:
+        for trty in trtys:
+            if self.territories[trty].isCity:
                 count += 1
         return count
 
@@ -97,13 +92,26 @@ class Map:
             # add continent
             self.conts[contp[0]] = {'bonus': int(contp[1]), 'trtys': tnames}
         
+        tid = 0
+        t_convert = {}
+        for tname in self.tnames:
+            t_convert[tname] = tid
+            tid += 1
+        # convert neighbors to index
+        for n in self.tneighbors:
+            for i in range(len(n)):
+                n[i] = t_convert[n[i]]
+        # convert continent to index
+        for c in self.conts:
+            cur = self.conts[c]['trtys']
+            for i in range(len(cur)):
+                cur[i] = t_convert[cur[i]]
+
         # Create territory object for each name + list of neighbors
         for tname, tneighbors in zip(self.tnames, self.tneighbors):
             territory = Territory(tname, tneighbors)
             self.territories.append(territory)
-        
-        # self.tnames = None
-        # self.tneighbors = None
+            
         self.num_nations = len(self.territories)
 
         # self.biohazard = []
@@ -111,3 +119,4 @@ class Map:
         # self.sea_routes = []
         # self.sea_side_territories = []
         # self.pre_existed_sea_routes = []
+

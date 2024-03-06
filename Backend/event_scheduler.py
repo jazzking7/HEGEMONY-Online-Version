@@ -87,7 +87,9 @@ class turn_loop_scheduler:
             self.curr_thread = threading.Thread(target=self.execute_turn, args=(gs, curr_player))
             self.terminated = False
             self.curr_thread.start()
+
             time.sleep(30)
+
             self.terminated = True
             self.curr_thread.join()
             self.current_player += 1
@@ -131,10 +133,13 @@ class setup_event_scheduler:
         gs.aval_choices = color_options
         for player in gs.players:
             gs.server.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
+        
         time.sleep(1)
+
         # handle timeout
         for player in gs.players.values():
             if player.color is None:
+                print("Did not choose a color!")
                 player.color = random.choice(gs.aval_choices)
                 gs.aval_choices.remove(player.color)
         gs.signal_view_clear()
@@ -149,7 +154,7 @@ class setup_event_scheduler:
         gs.shuffle_players()
         # RANDOM TRTY DISTRIBUTION
         avg_num_trty = math.floor(len(gs.map.tnames)/len(gs.players))
-        trty_list = gs.map.tnames[:]
+        trty_list = [i for i in range(len(gs.map.tnames))]
         for choice in choices:
             curr_dist = []
             while(len(curr_dist) < avg_num_trty):
@@ -176,9 +181,12 @@ class setup_event_scheduler:
                 else:
                     gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
+            
             time.sleep(1)
+            
             # handle timeout
             if not gs.selected:
+                print("Did not choose a distribution!")
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
                 gs.players[player].territories = random_dist
                 gs.server.emit('update_player_list', {'list': gs.players[player].territories}, room=player)
@@ -186,18 +194,20 @@ class setup_event_scheduler:
                 for trty in random_dist:
                     gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby) 
                 gs.server.emit('clear_view', room=player)
-                print("NOT CHOSEN")
         gs.aval_choices = []
     
     def start_capital_settlement(self, gs):
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
+
         time.sleep(1)
+
         # handle not choosing
         for player in gs.players.values():
             if player.capital == None:
+                print("Did not choose a capital!")
                 player.capital = random.choice(player.territories)
-                gs.map.get_trty(player.capital).isCapital = True
+                gs.map.territories[player.capital].isCapital = True
                 gs.server.emit('update_trty_display', {player.capital:{'isCapital': True}}, room=gs.lobby)
                 gs.server.emit('capital_result', {'resp': True}, room=gs.lobby)
         gs.signal_view_clear()
@@ -205,12 +215,15 @@ class setup_event_scheduler:
     def start_city_settlement(self,gs):
         gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
+
         time.sleep(1)
+
         for player in gs.players.values():
             if gs.map.count_cities(player.territories) == 0:
+                print("Did not choose cities!")
                 cities = random.sample(player.territories, k=2)
                 for c in cities:
-                    gs.map.get_trty(c).isCity = True
+                    gs.map.territories[c].isCity = True
                     gs.server.emit('update_trty_display', {c:{'hasDev': 'city'}}, room=gs.lobby)
                     gs.server.emit('city_result', {'resp': True}, room=gs.lobby)
         gs.signal_view_clear()
@@ -221,11 +234,14 @@ class setup_event_scheduler:
         curr = 0
         for player in gs.players:
             amount = len(gs.players[player].territories) + 5
-            if (curr > len(gs.players)//2):
+            if (curr >= len(gs.players)//2):
                 amount += 3
+            curr += 1
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
-        time.sleep(1)
+
+        time.sleep(50)
+
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
         gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
@@ -233,9 +249,10 @@ class setup_event_scheduler:
         for player in gs.players:
             p =  gs.players[player]
             if p.deployable_amt > 0:
+                print("Did not finish deployment!")
                 while (p.deployable_amt != 0):
                     trty = random.choice(p.territories)
-                    t = gs.map.get_trty(trty)
+                    t = gs.map.territories[trty]
                     t.troops += 1
                     p.deployable_amt -= 1
                     gs.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=gs.lobby)
@@ -245,7 +262,9 @@ class setup_event_scheduler:
         for player in gs.players:
             options = random.sample(gs.skill_options, k=5)
             gs.server.emit('choose_skill', {'options': options}, room=player)
-        time.sleep(1)
+
+        time.sleep(10)
+
         gs.signal_view_clear()
         for player in gs.players:
             if gs.players[player].skill == None:

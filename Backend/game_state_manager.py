@@ -127,7 +127,7 @@ class Game_State_Manager:
         t_score = 0
         p = self.players[player]
         for trty in p.territories:
-            t = self.map.get_trty(trty)
+            t = self.map.territories[trty]
             if t.isCapital:
                 bonus += 1
             if t.isCity:
@@ -187,8 +187,8 @@ class Game_State_Manager:
                 d_pid = player       
 
         # Identify territories
-        trty_atk = self.map.get_trty(t1)
-        trty_def = self.map.get_trty(t2)
+        trty_atk = self.map.territories[t1]
+        trty_def = self.map.territories[t2]
 
         # Compute participating forces
         atk_amt = int(data['amount'])

@@ -192,17 +192,15 @@ def update_dist_choice(data):
 
 @socketio.on('send_capital_choice')
 def update_player_capital(data):
-    choice = data.get('choice')
     tid = data.get('tid')
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    for trty in gsm.players[pid].territories:
-        if choice == trty:
-            gsm.players[pid].capital = choice
-            gsm.map.territories[tid].isCapital = True
-            gsm.server.emit('update_trty_display', {trty: {'isCapital': True}}, room=gsm.lobby)
-            gsm.server.emit('capital_result', {'resp': True}, room=pid)
-            return
+    if tid in gsm.players[pid].territories:
+        gsm.players[pid].capital = gsm.map.territories[tid].name # territory name instead of id
+        gsm.map.territories[tid].isCapital = True
+        gsm.server.emit('update_trty_display', {tid: {'isCapital': True}}, room=gsm.lobby)
+        gsm.server.emit('capital_result', {'resp': True}, room=pid)
+        return
     gsm.server.emit('capital_result', {'resp': False}, room=pid)
 
 @socketio.on('send_city_choices')
@@ -215,7 +213,7 @@ def update_player_city(data):
             gsm.server.emit('city_result', {'resp': False}, room=pid)
             return
     for trty in choices:
-        gsm.map.get_trty(trty).isCity = True
+        gsm.map.territories[trty].isCity = True
         gsm.server.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
     gsm.server.emit('city_result', {'resp': True}, room=pid)
 
@@ -228,7 +226,7 @@ def update_troop_info(data):
     if choice not in gsm.players[pid].territories:
         gsm.server.emit('troop_result', {'resp': False}, room=pid)
         return
-    t = gsm.map.get_trty(choice)
+    t = gsm.map.territories[choice]
     t.troops += amount
     gsm.players[pid].deployable_amt -= amount
     gsm.server.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
@@ -275,8 +273,8 @@ def handle_rearrange_data(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     choices = data['choice']
     amount = int(data['amount'])
-    t1 = gsm.map.get_trty(choices[0])
-    t2 = gsm.map.get_trty(choices[1])
+    t1 = gsm.map.territories[choices[0]]
+    t2 = gsm.map.territories[choices[1]]
     t1.troops -= amount
     t2.troops += amount
     socketio.emit('update_trty_display', {

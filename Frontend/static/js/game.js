@@ -56,11 +56,8 @@ let next_stage_btn;
 async function get_game_settings() {
     try {
       const gameSettings = await new Promise((resolve) => {
-        // Emit the 'get_game_settings' event to request game settings
         socket.emit('get_game_settings');
-        // Listen for the 'game_settings' event
         socket.once('game_settings', (settings) => {
-          // Resolve the Promise with the received game settings
           resolve(settings);
         });
       });
@@ -297,6 +294,7 @@ socket.on('troop_result', function(data){
     document.getElementById('control_mechanism').innerHTML = '';
     deployable = 0;
     document.getElementById('announcement').innerHTML = `<h2>Completed, waiting for others...`;
+    currEvent = null;
   }
 })
 
@@ -310,21 +308,21 @@ socket.on('clear_view', function(){
 
 // update territorial display
 socket.on('update_trty_display', function(data){
-  for (trty_name in data){
+  for (tid in data){
     // changed properties
-    let changes = data[trty_name];
+    let changes = data[tid];
     // update property one by one
     for (field in changes){
       // Dev property
       if (field == 'hasDev'){
         if (changes[field] == 'city'){
-          territories[trty_name].devImg = cityImage;
+          territories[tid].devImg = cityImage;
         } else {
-          territories[trty_name].devImg = null;
+          territories[tid].devImg = null;
         }
       // Other properties
       } else {
-        territories[trty_name][field] = changes[field];
+        territories[tid][field] = changes[field];
       }
     }
   }
@@ -388,16 +386,17 @@ function mouseWheel(event) {
   }
   
   function mouseClicked() {
+    console.log(territories)
+    console.log(clickables)
     // Check if you clicked on a polygon
     if(mouseX <= width && mouseY <= height && !isMouseOverOverlay()){
       if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
-        let tname = hover_over.name;
         let tid = hover_over.id;
         if (currEvent == "settle_capital"){
           toHightlight = [];
           document.getElementById('control_panel').style.display = 'none';
-          if (player_territories.includes(tname)){
-            toHightlight.push(tname);
+          if (player_territories.includes(tid)){
+            toHightlight.push(tid);
             document.getElementById('control_panel').style.display = 'none';
             document.getElementById('control_panel').style.display = 'flex';
             document.getElementById('control_confirm').onclick = function(){
@@ -412,12 +411,12 @@ function mouseWheel(event) {
           }
         } 
         else if (currEvent == "settle_cities"){
-          if(player_territories.includes(tname)){
+          if(player_territories.includes(tid)){
             if (toHightlight.length == 2){
               toHightlight.splice(0, 1);
             }
-            if (!toHightlight.includes(tname)){
-              toHightlight.push(tname);
+            if (!toHightlight.includes(tid)){
+              toHightlight.push(tid);
             }
             if (toHightlight.length == 2){
                 document.getElementById('control_panel').style.display = 'none';
@@ -437,8 +436,8 @@ function mouseWheel(event) {
         else if (currEvent == "troop_deployment"){
           toHightlight = [];
           document.getElementById('control_panel').style.display = 'none';
-          if (player_territories.includes(tname)){
-            toHightlight.push(tname);
+          if (player_territories.includes(tid)){
+            toHightlight.push(tid);
             document.getElementById('control_panel').style.display = 'none';
             document.getElementById('control_panel').style.display = 'flex';
             let troopValue = document.createElement("p");
@@ -466,25 +465,25 @@ function mouseWheel(event) {
           }
         }
         else if (currEvent == "conquest"){
-          if (player_territories.includes(tname)){
+          if (player_territories.includes(tid)){
             document.getElementById('control_panel').style.display = 'none';
             next_stage_btn.style.display = 'flex';
             clickables = [];
             if (toHightlight.length){
               toHightlight = [];
             }
-            if (territories[tname].troops-1 == 0){
+            if (territories[tid].troops == 1){
               popup("NOT ENOUGH TROOPS FOR BATTLE!", 1000);
               return
             }
-            toHightlight.push(tname);
-            clickables = territories[tname].neighbors;
-          } else if (clickables.includes(tname)){
+            toHightlight.push(tid);
+            clickables = territories[tid].neighbors;
+          } else if (clickables.includes(tid)){
             if (toHightlight.length != 2){
-              toHightlight.push(tname);
+              toHightlight.push(tid);
             }
             if (toHightlight.length == 2){
-              toHightlight[1] = tname;
+              toHightlight[1] = tid;
               document.getElementById('control_panel').style.display = 'none';
               document.getElementById('control_panel').style.display = 'flex';
               next_stage_btn.style.display = 'none';
@@ -523,12 +522,12 @@ function mouseWheel(event) {
 
         else if(currEvent == "rearrange"){
 
-          if (clickables.includes(tname) && tname != toHightlight[0]){
+          if (clickables.includes(tid) && tid != toHightlight[0]){
             if (toHightlight.length != 2){
-              toHightlight.push(tname);
+              toHightlight.push(tid);
             }
             if (toHightlight.length == 2){
-              toHightlight[1] = tname;
+              toHightlight[1] = tid;
               document.getElementById('control_panel').style.display = 'none';
               document.getElementById('control_panel').style.display = 'flex';
               next_stage_btn.style.display = 'none';
@@ -563,19 +562,19 @@ function mouseWheel(event) {
            }
           }
 
-          else if (player_territories.includes(tname)){
+          else if (player_territories.includes(tid)){
             document.getElementById('control_panel').style.display = 'none';
             next_stage_btn.style.display = 'flex';
             clickables = [];
-            if (territories[tname].troops == 1){
+            if (territories[tid].troops == 1){
               popup("NOT ENOUGH TROOPS TO TRANSFER!", 1000);
               return;
             }
             if (toHightlight.length){
               toHightlight = [];
             }
-            toHightlight.push(tname);
-            socket.emit("get_reachable_trty", {'choice': tname})
+            toHightlight.push(tid);
+            socket.emit("get_reachable_trty", {'choice': tid})
           }  
 
         }
