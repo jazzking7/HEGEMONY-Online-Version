@@ -1,5 +1,0 @@
-Canberra: 100 100
-Sydney: 200 200
-Mongolia: 300 400
-Hawaii: 300 500
-Ural: 1000 200

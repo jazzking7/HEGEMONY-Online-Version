@@ -185,9 +185,9 @@ def update_dist_choice(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
-    gsm.server.emit('update_player_list', {'list': gsm.players[pid].territories}, room=pid)
+    socketio.emit('update_player_list', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
-        gsm.server.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
+        socketio.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
     gsm.selected = True
 
 @socketio.on('send_capital_choice')
@@ -198,10 +198,10 @@ def update_player_capital(data):
     if tid in gsm.players[pid].territories:
         gsm.players[pid].capital = gsm.map.territories[tid].name # territory name instead of id
         gsm.map.territories[tid].isCapital = True
-        gsm.server.emit('update_trty_display', {tid: {'isCapital': True}}, room=gsm.lobby)
-        gsm.server.emit('capital_result', {'resp': True}, room=pid)
+        socketio.emit('update_trty_display', {tid: {'isCapital': True}}, room=gsm.lobby)
+        socketio.emit('settle_result', {'resp': True}, room=pid)
         return
-    gsm.server.emit('capital_result', {'resp': False}, room=pid)
+    socketio.emit('settle_result', {'resp': False}, room=pid)
 
 @socketio.on('send_city_choices')
 def update_player_city(data):
@@ -210,12 +210,12 @@ def update_player_city(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     for c in choices:
         if c not in gsm.players[pid].territories:
-            gsm.server.emit('city_result', {'resp': False}, room=pid)
+            socketio.emit('settle_result', {'resp': False}, room=pid)
             return
     for trty in choices:
         gsm.map.territories[trty].isCity = True
-        gsm.server.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
-    gsm.server.emit('city_result', {'resp': True}, room=pid)
+        socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+    socketio.emit('settle_result', {'resp': True}, room=pid)
 
 @socketio.on('send_troop_update')
 def update_troop_info(data):
@@ -224,16 +224,16 @@ def update_troop_info(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if choice not in gsm.players[pid].territories:
-        gsm.server.emit('troop_result', {'resp': False}, room=pid)
+        socketio.emit('troop_result', {'resp': False}, room=pid)
         return
     t = gsm.map.territories[choice]
     t.troops += amount
     gsm.players[pid].deployable_amt -= amount
-    gsm.server.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     if gsm.players[pid].deployable_amt > 0:
-        gsm.server.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
+        socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
     else:
-        gsm.server.emit('troop_result', {'resp': True}, room=pid)
+        socketio.emit('troop_result', {'resp': True}, room=pid)
 
 @socketio.on('send_skill_choice')
 def update_skill_choice(data):
@@ -253,7 +253,7 @@ def get_reachable_trty(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     reachable_trty = gsm.map.get_reachable_trty(data['choice'], gsm.players[pid].territories)
-    gsm.server.emit('update_clickables', {'trtys': reachable_trty}, room=pid)
+    socketio.emit('update_clickables', {'trtys': reachable_trty}, room=pid)
 
 @socketio.on("terminate_conquer_stage")
 def terminate_conquer_stage():

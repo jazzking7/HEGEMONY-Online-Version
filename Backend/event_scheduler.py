@@ -50,6 +50,7 @@ class turn_loop_scheduler:
     
     def rearrange(self, gs, curr_player):
         gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=gs.lobby)
+        gs.server.emit("change_click_event", {'event': 'rearrange'}, room=curr_player)
         gs.server.emit("rearrangement", room=curr_player)
         return
 
@@ -200,7 +201,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        time.sleep(1)
+        time.sleep(30)
 
         # handle not choosing
         for player in gs.players.values():
@@ -216,7 +217,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
-        time.sleep(1)
+        time.sleep(50)
 
         for player in gs.players.values():
             if gs.map.count_cities(player.territories) == 0:
@@ -240,7 +241,7 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        time.sleep(50)
+        time.sleep(60)
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
@@ -263,7 +264,7 @@ class setup_event_scheduler:
             options = random.sample(gs.skill_options, k=5)
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        time.sleep(10)
+        time.sleep(1)
 
         gs.signal_view_clear()
         for player in gs.players:
