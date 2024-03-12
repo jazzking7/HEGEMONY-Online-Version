@@ -1,50 +1,52 @@
 $(document).ready(async function() {
+  // Load in gameStyle.css
+  var newLink = $('<link>', {
+      rel: 'stylesheet',
+      href: URL_FRONTEND + "/static/css/gameStyle.css"
+  });
+  $('#initial_styling').replaceWith(newLink);
 
-    // Load in gameStyle.css
-    var newLink = document.createElement('link');
-    newLink.rel = 'stylesheet';
-    newLink.href = URL_FRONTEND +"/static/css/gameStyle.css"; 
-    var head = document.head || document.getElementsByTagName('head')[0];
-    var initialLink = document.getElementById('initial_styling');
-    head.replaceChild(newLink, initialLink);
+  // Get game settings
+  game_settings = await get_game_settings();
 
-    // Get game settings
-    game_settings = await get_game_settings();
+  // Load p5.js libraries
+  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
+    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
+  });
 
-    // Load p5.js sketch
-    loadScript(URL_FRONTEND + 'static/js/game_sketch.js', 'sketch');
+  // Load p5.js sketch
+  $.getScript(URL_FRONTEND + 'static/js/game_sketch.js');
 
-    // Load p5.js libraries
-    let p5Script = document.createElement('script');
-    p5Script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js';
-    p5Script.async = false;
+  // Load progress bar
+  $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
+      function(){
+        timeoutBar = new ProgressBar.Line('#timeout-bar', {
+          strokeWidth: 0.5,
+          easing: 'linear',
+          duration: 1000,
+          color: '#ED6A5A', 
+          trailColor: 'rgba(244, 244, 244, 0)', 
+          trailWidth: 0.5,
+          text: {
+            style: {
+            }
+          },
+          step: (state, timeoutBar) => {
+          }
+        });
+      }
+  );
 
-    let p5SoundScript = document.createElement('script');
-    p5SoundScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js';
-    p5SoundScript.async = false;
-
-    document.head.appendChild(p5Script);
-    document.head.appendChild(p5SoundScript);
-
-    // Show continent border toggle
-    $('#btn_show_cont').click(function() {
+  // Show continent border toggle
+  $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
-      document.getElementById('btn_show_cont').textContent = showContBorders ? 'On' : "Off"
-    });
+      $(this).text(showContBorders ? 'On' : 'Off');
+  });
 
-    // Click propagation prevention
-    let overlay = document.getElementById('overlay_sections');
-    let cards = overlay.querySelectorAll('.card');
-    for (let card of cards){
-      card.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent click event from reaching the background
-      });
-    
-      card.addEventListener('mousemove', function(event) {
-        event.stopPropagation(); // Prevent mousemove event from reaching the background
-      });
-    }
-
+  // Click propagation prevention
+  $('#overlay_sections .card').on('click mousemove', function(event) {
+      event.stopPropagation(); // Prevent click and mousemove events from reaching the background
+  });
 });
 
 let currEvent = null;
@@ -52,6 +54,25 @@ let deployable = 0;
 let player_territories = [];
 let game_settings;
 let next_stage_btn;
+
+let timeoutBar;
+let current_interval = null;
+
+// Function to start the timeout countdown
+function startTimeout(totalSeconds) {
+  var progress = 1;
+  timeoutBar.set(progress);
+  progress -= 1 / totalSeconds; 
+  timeoutBar.animate(progress);
+  current_interval = setInterval(function() {
+    progress -= 1 / totalSeconds; 
+    timeoutBar.animate(progress); // Animate the progress bar
+    if (progress <= 0) {
+      clearInterval(current_interval);
+      timeoutBar.set(0);
+    }
+  }, 1000); // Update the progress bar every second
+}
 
 async function get_game_settings() {
     try {
@@ -68,6 +89,15 @@ async function get_game_settings() {
   }
 
 //========================= Update Game State ============================
+
+// start/interrupt timeout bar
+socket.on('start_timeout', function(data){
+  startTimeout(data.secs);
+});
+
+socket.on('stop_timeout', function(){
+  clearInterval(current_interval);
+})
 
 // update player info
 socket.on('update_player_list', function(data){
@@ -113,6 +143,8 @@ socket.on('change_click_event', function(data){
     currEvent = conquest;
   } else if (data.event == 'rearrange') {
     currEvent = rearrange;
+  } else {
+    currEvent = null;
   }
 });
 
@@ -120,6 +152,9 @@ socket.on('change_click_event', function(data){
 socket.on('clear_view', function(){
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('middle_display').style.display = 'none';
+  document.getElementById('proceed_next_stage').style.display = 'none';
+  toHightlight = [];
+  clickables = [];
 });
 
 // announcements

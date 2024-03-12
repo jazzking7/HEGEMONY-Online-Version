@@ -65,6 +65,9 @@ class Game_State_Manager:
         self.turn = 0
         self.stage = 0
 
+        # turn victory (for special authority acquisition)
+        self.turn_victory = False
+
         # max number of allies allowed in an alliance
         self.max_allies = 2
         
@@ -142,6 +145,21 @@ class Game_State_Manager:
             return bonus + 3
         return bonus + t_score//3
 
+    def clear_deployables(self, player):
+        p =  self.players[player]
+        if p.deployable_amt > 0:
+            while (p.deployable_amt != 0):
+                trty = random.choice(p.territories)
+                t = self.map.territories[trty]
+                t.troops += 1
+                p.deployable_amt -= 1
+                self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
+
+    def set_time_out(self, num_secs):
+        self.server.emit('start_timeout',{'secs': num_secs}, room=self.lobby)
+        time.sleep(num_secs)
+        self.server.emit('stop_timeout', room=self.lobby)
+
     def get_player_industrial_level(self, player):
         lvl = 0
         c_amt = self.map.count_cities(player.territories)
@@ -216,6 +234,9 @@ class Game_State_Manager:
             self.server.emit('update_trty_display', {t2:{'color': atk_p.color}}, room=self.lobby)
             def_p.territories.remove(t2)
             self.server.emit('update_player_list', {'list': def_p.territories}, room=d_pid)
+
+            # update turn victory
+            atk_p.turn_victory = True
 
         # defender wins
         else:

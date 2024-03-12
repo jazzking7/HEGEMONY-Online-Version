@@ -158,3 +158,11 @@ html, body {
     width: 10vw;
     height: 10vh;
 }
+
+#timeout-bar {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    width: 100vw;
+    height: 0.5vh;
+}

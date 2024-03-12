@@ -259,13 +259,13 @@ def get_reachable_trty(data):
 def terminate_conquer_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.turn_loop_scheduler.stage2 = True
+    gsm.turn_loop_scheduler.stage_completed = True
 
 @socketio.on("terminate_rearrangement_stage")
 def terminate_rearrangement_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.turn_loop_scheduler.stage3 = True
+    gsm.turn_loop_scheduler.stage_completed = True
 
 @socketio.on('send_rearrange_data')
 def handle_rearrange_data(data):

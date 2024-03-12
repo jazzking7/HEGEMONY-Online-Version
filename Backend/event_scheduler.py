@@ -20,23 +20,42 @@ class turn_loop_scheduler:
             Event("conquer", self.conquer),
             Event("rearrangement", self.rearrange)
         ]
+        # loop interrupted
         self.interrupt = False
+        # current turn terminated
         self.terminated = False
-        self.stage1 = False
-        self.stage2 = False
-        self.stage3 = False
+        # stage gate
+        self.stage_completed = False
+        # current round
         self.round = 0
+        # thread for turn execution
         self.curr_thread = None
+        # thread for timer
+        self.timer = None
+        # current event
         self.current_event = None
         self.current_player = 0
+        # stack of events in case of interruption
         self.event_stack = []
 
     def set_curr_stat(self, gs, event):
         gs.current_event = event
         return
 
+    def activate_timer(self, num_secs):
+        sec = 0
+        while not self.terminated and sec < num_secs:
+            time.sleep(1)
+            sec += 1
+            print(sec)
+        self.stage_completed = True
+        self.terminated = True
+        return
+
     def reinforcement(self, gs, curr_p):
-        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=gs.lobby)
+        for player in gs.pids:
+            if player != curr_p:
+                gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
         gs.players[curr_p].deployable_amt = gs.get_deployable_amt(curr_p) 
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
@@ -55,44 +74,65 @@ class turn_loop_scheduler:
         return
 
     def execute_turn(self, gs, player):
-        while not self.terminated:
 
-            atk_player = gs.players[player]
+        atk_player = gs.players[player]
+        atk_player.turn_victory = False
 
-            self.set_curr_stat(gs, self.events[0])
-            self.reinforcement(gs, player)
-            self.stage1 = False
-            while not self.stage1:
-                self.stage1 = atk_player.deployable_amt == 0
-
-            self.set_curr_stat(gs, self.events[1])
-            # Prevent Immediate Stats growth
-            atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
-            self.conquer(gs, player)
-            self.stage2 = False
-            while not self.stage2:
-                time.sleep(1)
-            
-            self.set_curr_stat(gs, self.events[2])
-            self.rearrange(gs, player)
-            self.stage3 = False
-            while not self.stage3:
-                time.sleep(1)
-
+        self.set_curr_stat(gs, self.events[0])
+        self.reinforcement(gs, player)
+        self.stage_completed = False
+        done = False
+        while not self.stage_completed and not done:
+            done = atk_player.deployable_amt == 0
+        if self.terminated:
             return
+
+        self.set_curr_stat(gs, self.events[1])
+        # Prevent Immediate Stats growth
+        atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
+        self.conquer(gs, player)
+        self.stage_completed = False
+        while not self.stage_completed:
+            time.sleep(1)
+        if self.terminated:
+            return
+        
+        self.set_curr_stat(gs, self.events[2])
+        self.rearrange(gs, player)
+        self.stage_completed = False
+        while not self.stage_completed:
+            time.sleep(1)
+        if self.terminated:
+            return
+        # stop timer
+        self.terminated = True
         return
+    
+    def handle_end_turn(self, gs, player):
+        # notify frontend to change event and clear controls
+        gs.server.emit("change_click_event", {'event': None}, room=player)
+        gs.server.emit("clear_view", room=player)
+        # clear deployables
+        gs.clear_deployables(player)
+        # assign stars if applicable
+        p = gs.players[player]
+        if p.turn_victory:
+            p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
+        print(p.stars)
 
     def run_turn_loop(self, gs):
         curr_player = gs.pids[self.current_player]
         while not self.interrupt:
             self.curr_thread = threading.Thread(target=self.execute_turn, args=(gs, curr_player))
+            self.timer = threading.Thread(target=self.activate_timer, args=(30,))
             self.terminated = False
             self.curr_thread.start()
-
-            time.sleep(30)
-
-            self.terminated = True
+            gs.server.emit('start_timeout',{'secs': 30}, room=gs.lobby)
+            self.timer.start()
+            self.timer.join()
             self.curr_thread.join()
+            gs.server.emit('stop_timeout', room=gs.lobby)
+            self.handle_end_turn(gs, curr_player)
             self.current_player += 1
             if self.current_player == len(gs.pids):
                 self.current_player = 0
@@ -124,7 +164,8 @@ class setup_event_scheduler:
         for player in gs.players:
             continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
             gs.server.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
-        time.sleep(1)
+            
+        gs.set_time_out(5)
 
     # FCFS
     def start_color_distribution(self, gs):
@@ -135,7 +176,7 @@ class setup_event_scheduler:
         for player in gs.players:
             gs.server.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
         
-        time.sleep(1)
+        gs.set_time_out(5)
 
         # handle timeout
         for player in gs.players.values():
@@ -183,7 +224,7 @@ class setup_event_scheduler:
                     gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
-            time.sleep(1)
+            gs.set_time_out(5)
             
             # handle timeout
             if not gs.selected:
@@ -201,7 +242,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        time.sleep(30)
+        gs.set_time_out(5)
 
         # handle not choosing
         for player in gs.players.values():
@@ -217,7 +258,8 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
-        time.sleep(50)
+        gs.set_time_out(5)
+
 
         for player in gs.players.values():
             if gs.map.count_cities(player.territories) == 0:
@@ -241,22 +283,14 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        time.sleep(60)
+        gs.set_time_out(5)
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
         gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
         time.sleep(2)
         for player in gs.players:
-            p =  gs.players[player]
-            if p.deployable_amt > 0:
-                print("Did not finish deployment!")
-                while (p.deployable_amt != 0):
-                    trty = random.choice(p.territories)
-                    t = gs.map.territories[trty]
-                    t.troops += 1
-                    p.deployable_amt -= 1
-                    gs.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=gs.lobby)
+            gs.clear_deployables(player)
     
     def start_skill_selection(self,gs):
         gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
@@ -264,7 +298,7 @@ class setup_event_scheduler:
             options = random.sample(gs.skill_options, k=5)
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        time.sleep(1)
+        gs.set_time_out(5)
 
         gs.signal_view_clear()
         for player in gs.players:
