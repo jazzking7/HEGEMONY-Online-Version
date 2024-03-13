@@ -45,9 +45,9 @@ class turn_loop_scheduler:
         self.set_curr_state(ms, self.events[0])
         self.reinforcement(gs, player)
         ms.stage_completed = False
-        done = False
-        while not ms.stage_completed and not done:
-            done = atk_player.deployable_amt == 0
+        ms.selected = 0
+        while not ms.stage_completed and not ms.selected:
+            time.sleep(1)
         if ms.terminated:
             return
 
@@ -79,6 +79,7 @@ class turn_loop_scheduler:
         # clear deployables
         gs.clear_deployables(player)
         # assign stars if applicable
+        # CM
         p = gs.players[player]
         if p.turn_victory:
             p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
@@ -106,9 +107,12 @@ class turn_loop_scheduler:
         while not ms.interrupt:
             if gs.players[curr_player].alive:
                 self.execute_turn(gs, ms, curr_player)
+            if ms.interrupt:
+                return
             ms.current_player += 1
             if ms.current_player == len(gs.pids):
                 ms.current_player = 0
                 ms.round += 1
+                # CM
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

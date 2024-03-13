@@ -5,6 +5,7 @@
 from game_map import *
 from general_event_scheduler import *
 from elimination_tracker import *
+from end_game_tracker import *
 
 class Player:
 
@@ -76,9 +77,6 @@ class Game_State_Manager:
         self.aval_choices = []
         self.made_choices = []
 
-        # Elimination Tracker
-        self.et = Elimination_tracker()
-
         # color options
         self.color_options = []
         # skill options
@@ -104,10 +102,16 @@ class Game_State_Manager:
         # EVENT SCHEDULER
         self.GES = General_Event_Scheduler(self, setup_events)
 
+        # Elimination Tracker
+        self.et = Elimination_tracker()
+        # End game tracker
+        self.egt = End_game_tracker()
+
     def shuffle_players(self, ):
         random.shuffle(self.pids)
         shuffled_dict = {key: self.players[key] for key in self.pids}
         self.players = shuffled_dict
+        # CM
         for player in self.players:
             self.server.emit('update_player_info', room=player)
 
@@ -138,6 +142,7 @@ class Game_State_Manager:
     def clear_deployables(self, player):
         p =  self.players[player]
         if p.deployable_amt > 0:
+            # CM
             while (p.deployable_amt != 0):
                 trty = random.choice(p.territories)
                 t = self.map.territories[trty]
@@ -210,8 +215,8 @@ class Game_State_Manager:
         
         # Battle results
         # attacker wins
+        # CM
         if result[0] > 0:
-
             trty_def.troops = result[0]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
 
@@ -229,8 +234,9 @@ class Game_State_Manager:
 
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
-        
+
         self.et.determine_elimination(def_p)
+        self.egt.determine_end_game(self)
         
 
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):

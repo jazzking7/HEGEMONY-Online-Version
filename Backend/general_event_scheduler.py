@@ -38,7 +38,7 @@ class General_Event_Scheduler:
 
     def activate_timer(self, num_secs):
         sec = 0
-        while not self.terminated and sec < num_secs:
+        while not self.terminated and sec < num_secs and not self.interrupt:
             time.sleep(1)
             sec += 1
         self.stage_completed = True
@@ -56,3 +56,6 @@ class General_Event_Scheduler:
     def execute_game_events(self,):
         self.run_setup_events()
         self.run_turn_scheduler()
+
+    def halt_events(self,):
+        self.interrupt = True

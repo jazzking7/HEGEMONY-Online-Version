@@ -31,6 +31,7 @@ class setup_event_scheduler:
     
     # TO BE UPDATED
     def distribute_missions(self, gs, ms):
+        # CM
         for player in gs.players:
             continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
             gs.server.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
@@ -50,6 +51,7 @@ class setup_event_scheduler:
 
         # handle timeout
         for player in gs.players.values():
+            # CM
             if player.color is None:
                 print("Did not choose a color!")
                 player.color = random.choice(gs.aval_choices)
@@ -99,6 +101,7 @@ class setup_event_scheduler:
             
             # handle timeout
             if not ms.selected:
+                # CM
                 print("Did not choose a distribution!")
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
                 gs.players[player].territories = random_dist
@@ -117,6 +120,7 @@ class setup_event_scheduler:
 
         # handle not choosing
         for player in gs.players.values():
+            # CM
             if player.capital == None:
                 print("Did not choose a capital!")
                 player.capital = random.choice(player.territories)
@@ -133,6 +137,7 @@ class setup_event_scheduler:
 
 
         for player in gs.players.values():
+            # CM
             if gs.map.count_cities(player.territories) == 0:
                 print("Did not choose cities!")
                 cities = random.sample(player.territories, k=2)
@@ -154,7 +159,7 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        ms.selection_time_out(1, len(gs.players))
+        ms.selection_time_out(20, len(gs.players))
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
@@ -173,5 +178,6 @@ class setup_event_scheduler:
 
         gs.signal_view_clear()
         for player in gs.players:
+            # CM
             if gs.players[player].skill == None:
                 gs.players[player].skill = random.choice(gs.skill_options)
