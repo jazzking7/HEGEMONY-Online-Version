@@ -73,7 +73,7 @@ class turn_loop_scheduler:
         gs.server.emit("rearrangement", room=curr_player)
         return
 
-    def execute_turn(self, gs, player):
+    def execute_turn_events(self, gs, player):
 
         atk_player = gs.players[player]
         atk_player.turn_victory = False
@@ -120,19 +120,28 @@ class turn_loop_scheduler:
             p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
         print(p.stars)
 
+    def execute_turn(self, gs, curr_player):
+
+        self.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, curr_player))
+        self.timer = threading.Thread(target=self.activate_timer, args=(30,))
+
+        self.terminated = False
+        self.curr_thread.start()
+
+        gs.server.emit('start_timeout',{'secs': 30}, room=gs.lobby)
+        self.timer.start()
+        self.timer.join()
+        gs.server.emit('stop_timeout', room=gs.lobby)
+        
+        self.curr_thread.join()
+
+        self.handle_end_turn(gs, curr_player)
+
     def run_turn_loop(self, gs):
         curr_player = gs.pids[self.current_player]
         while not self.interrupt:
-            self.curr_thread = threading.Thread(target=self.execute_turn, args=(gs, curr_player))
-            self.timer = threading.Thread(target=self.activate_timer, args=(30,))
-            self.terminated = False
-            self.curr_thread.start()
-            gs.server.emit('start_timeout',{'secs': 30}, room=gs.lobby)
-            self.timer.start()
-            self.timer.join()
-            self.curr_thread.join()
-            gs.server.emit('stop_timeout', room=gs.lobby)
-            self.handle_end_turn(gs, curr_player)
+            if gs.players[curr_player].alive:
+                self.execute_turn(gs, curr_player)
             self.current_player += 1
             if self.current_player == len(gs.pids):
                 self.current_player = 0

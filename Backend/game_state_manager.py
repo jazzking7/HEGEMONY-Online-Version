@@ -4,6 +4,7 @@
 # World Status Display
 from game_map import *
 from event_scheduler import *
+from elimination_tracker import *
 
 class Player:
 
@@ -79,6 +80,9 @@ class Game_State_Manager:
         self.aval_choices = []
         self.made_choices = []
         self.selected = True
+
+        # Elimination Tracker
+        self.et = Elimination_tracker()
 
         # color options
         self.color_options = []
@@ -223,6 +227,7 @@ class Game_State_Manager:
         trty_atk.troops -= atk_amt
         self.server.emit('update_trty_display', {t1:{'troops': trty_atk.troops}}, room=self.lobby)
         
+        # Battle results
         # attacker wins
         if result[0] > 0:
 
@@ -243,7 +248,8 @@ class Game_State_Manager:
 
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
-
+        
+        self.et.determine_elimination(def_p)
         
 
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
