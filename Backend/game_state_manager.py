@@ -3,7 +3,7 @@
 # Game Object
 # World Status Display
 from game_map import *
-from event_scheduler import *
+from general_event_scheduler import *
 from elimination_tracker import *
 
 class Player:
@@ -72,14 +72,9 @@ class Game_State_Manager:
         # max number of allies allowed in an alliance
         self.max_allies = 2
         
-        # loop elements update on async
-        self.curr_reinforcer = None
-        self.curr_conqueror = None
-        
         # SELECTION TRACKER
         self.aval_choices = []
         self.made_choices = []
-        self.selected = True
 
         # Elimination Tracker
         self.et = Elimination_tracker()
@@ -106,17 +101,8 @@ class Game_State_Manager:
         self.server = server
         self.lobby = lobby
 
-        # EVENT SCHEDULERS
-        self.setup_scheduler = setup_events
-        self.turn_loop_scheduler = turn_loop_scheduler()
-    
-    def run_setup_events(self,):
-        time.sleep(3)
-        for event in self.setup_scheduler:
-            event.executable(self)
-    
-    def run_turn_scheduler(self,):
-        self.turn_loop_scheduler.run_turn_loop(self)
+        # EVENT SCHEDULER
+        self.GES = General_Event_Scheduler(self, setup_events)
 
     def shuffle_players(self, ):
         random.shuffle(self.pids)
@@ -158,11 +144,6 @@ class Game_State_Manager:
                 t.troops += 1
                 p.deployable_amt -= 1
                 self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
-
-    def set_time_out(self, num_secs):
-        self.server.emit('start_timeout',{'secs': num_secs}, room=self.lobby)
-        time.sleep(num_secs)
-        self.server.emit('stop_timeout', room=self.lobby)
 
     def get_player_industrial_level(self, player):
         lvl = 0

@@ -143,8 +143,7 @@ def startGame(data):
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
 
     socketio.emit('game_started', room=lobby_id)
-    lobby['gsm'].run_setup_events()
-    lobby['gsm'].run_turn_scheduler()
+    lobby['gsm'].GES.execute_game_events()
 
 ### Game functions ###
 
@@ -175,6 +174,7 @@ def update_color_choice(data):
         socketio.emit('color_picked', {'option': color}, room=players[request.sid]['lobby_id'])
         socketio.emit('clear_view', room=request.sid)
         gsm.players[request.sid].color = color
+        gsm.GES.selected += 1
     else:
         socketio.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': gsm.aval_choices}, room=request.sid)
 
@@ -188,7 +188,7 @@ def update_dist_choice(data):
     socketio.emit('update_player_list', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
         socketio.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
-    gsm.selected = True
+    gsm.GES.selected += 1
 
 @socketio.on('send_capital_choice')
 def update_player_capital(data):
@@ -200,6 +200,7 @@ def update_player_capital(data):
         gsm.map.territories[tid].isCapital = True
         socketio.emit('update_trty_display', {tid: {'isCapital': True}}, room=gsm.lobby)
         socketio.emit('settle_result', {'resp': True}, room=pid)
+        gsm.GES.selected += 1
         return
     socketio.emit('settle_result', {'resp': False}, room=pid)
 
@@ -215,6 +216,7 @@ def update_player_city(data):
     for trty in choices:
         gsm.map.territories[trty].isCity = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+    gsm.GES.selected += 1
     socketio.emit('settle_result', {'resp': True}, room=pid)
 
 @socketio.on('send_troop_update')
@@ -238,7 +240,9 @@ def update_troop_info(data):
 @socketio.on('send_skill_choice')
 def update_skill_choice(data):
     skill = data.get('choice')
-    lobbies[players[request.sid]['lobby_id']]['gsm'].players[request.sid].skill = skill
+    gsm = lobbies[players[request.sid]['lobby_id']]['gsm']
+    gsm.players[request.sid].skill = skill
+    gsm.GES.selected += 1
     return
 
 @socketio.on('send_battle_data')
@@ -259,13 +263,13 @@ def get_reachable_trty(data):
 def terminate_conquer_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.turn_loop_scheduler.stage_completed = True
+    gsm.GES.stage_completed = True
 
 @socketio.on("terminate_rearrangement_stage")
 def terminate_rearrangement_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.turn_loop_scheduler.stage_completed = True
+    gsm.GES.stage_completed = True
 
 @socketio.on('send_rearrange_data')
 def handle_rearrange_data(data):
