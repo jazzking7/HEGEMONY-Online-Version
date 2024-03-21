@@ -107,13 +107,35 @@ class Game_State_Manager:
         # End game tracker
         self.egt = End_game_tracker()
 
+    def get_total_troops_of_player(self, player):
+        player = self.players[player]
+        total = 0
+        for t in player.territories:
+            total += self.map.territories[t].troops
+        return total
+
+    def send_player_list(self, ):
+        data = {}
+        for pid in self.pids:
+            data[self.players[pid].name] = {
+                'troops': self.get_total_troops_of_player(pid),
+                'trtys': len(self.players[pid].territories),
+                'color': self.players[pid].color
+            }
+        self.server.emit('get_players_stats', data, room=self.lobby)
+    
+    def update_player_stats(self, pid):
+        data = {
+            'name': self.players[pid].name,
+            'troops': self.get_total_troops_of_player(pid),
+            'trtys': len(self.players[pid].territories)
+        }
+        self.server.emit('update_players_stats', data, room=self.lobby)
+
     def shuffle_players(self, ):
         random.shuffle(self.pids)
         shuffled_dict = {key: self.players[key] for key in self.pids}
         self.players = shuffled_dict
-        # CM
-        for player in self.players:
-            self.server.emit('update_player_info', room=player)
 
     def signal_view_clear(self,):
         for player in self.players:
@@ -149,6 +171,7 @@ class Game_State_Manager:
                 t.troops += 1
                 p.deployable_amt -= 1
                 self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
+            self.update_player_stats(player)
 
     def get_player_industrial_level(self, player):
         lvl = 0
@@ -221,10 +244,10 @@ class Game_State_Manager:
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
 
             atk_p.territories.append(t2)
-            self.server.emit('update_player_list', {'list': atk_p.territories}, room=a_pid)
+            self.server.emit('update_player_territories', {'list': atk_p.territories}, room=a_pid)
             self.server.emit('update_trty_display', {t2:{'color': atk_p.color}}, room=self.lobby)
             def_p.territories.remove(t2)
-            self.server.emit('update_player_list', {'list': def_p.territories}, room=d_pid)
+            self.server.emit('update_player_territories', {'list': def_p.territories}, room=d_pid)
 
             # update turn victory
             atk_p.turn_victory = True
@@ -234,6 +257,10 @@ class Game_State_Manager:
 
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
+
+        # update player stats list
+        self.update_player_stats(a_pid)
+        self.update_player_stats(d_pid)
 
         self.et.determine_elimination(def_p)
         self.egt.determine_end_game(self)

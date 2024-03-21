@@ -45,9 +45,9 @@ class turn_loop_scheduler:
         self.set_curr_state(ms, self.events[0])
         self.reinforcement(gs, player)
         ms.stage_completed = False
-        ms.selected = 0
-        while not ms.stage_completed and not ms.selected:
-            time.sleep(1)
+        done = False
+        while not ms.stage_completed and not done:
+            done = atk_player.deployable_amt == 0
         if ms.terminated:
             return
 
@@ -88,12 +88,12 @@ class turn_loop_scheduler:
     def execute_turn(self, gs, ms, curr_player):
 
         ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
-        ms.timer = threading.Thread(target=ms.activate_timer, args=(30,))
+        ms.timer = threading.Thread(target=ms.activate_timer, args=(60,))
 
         ms.terminated = False
         ms.curr_thread.start()
 
-        gs.server.emit('start_timeout',{'secs': 30}, room=gs.lobby)
+        gs.server.emit('start_timeout',{'secs': 60}, room=gs.lobby)
         ms.timer.start()
         ms.timer.join()
         gs.server.emit('stop_timeout', room=gs.lobby)

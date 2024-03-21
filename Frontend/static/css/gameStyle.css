@@ -154,10 +154,12 @@ html, body {
     display: none;
     position: absolute;
     bottom: 1%;
-    left: 70%;
+    right: 10%;
     transform: translateX(-50%);
     width: 10vw;
     height: 10vh;
+    justify-content: center;
+    align-items: center;
 }
 
 #timeout-bar {
@@ -166,4 +168,8 @@ html, body {
     left: 0%;
     width: 100vw;
     height: 0.5vh;
+}
+
+.text {
+    font-size: 1.2vw;
 }

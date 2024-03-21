@@ -105,7 +105,7 @@ class setup_event_scheduler:
                 print("Did not choose a distribution!")
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
                 gs.players[player].territories = random_dist
-                gs.server.emit('update_player_list', {'list': gs.players[player].territories}, room=player)
+                gs.server.emit('update_player_territories', {'list': gs.players[player].territories}, room=player)
                 del gs.aval_choices[random_key]
                 for trty in random_dist:
                     gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby) 
@@ -159,7 +159,7 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        ms.selection_time_out(20, len(gs.players))
+        ms.selection_time_out(1, len(gs.players))
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
@@ -181,3 +181,5 @@ class setup_event_scheduler:
             # CM
             if gs.players[player].skill == None:
                 gs.players[player].skill = random.choice(gs.skill_options)
+        
+        gs.send_player_list()

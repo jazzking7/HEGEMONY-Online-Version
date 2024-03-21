@@ -99,8 +99,48 @@ socket.on('stop_timeout', function(){
   clearInterval(current_interval);
 })
 
-// update player info
-socket.on('update_player_list', function(data){
+socket.on('get_players_stats', function(data){
+  p_list = document.getElementById('stats-list');
+  for (let p in data){
+    p_info = data[p];
+    pBtn = document.createElement('button');
+    pBtn.setAttribute('id', p);
+    pBtn.classList.add('btn', 'game_btn');
+    pBtn.style.color = "black";
+    pBtn.style.backgroundColor = p_info.color;
+    pBtn.innerHTML = `
+      <div style="text-align: left;" display: flex; flex-wrap: wrap;">
+        ${p}<br>
+        <div style="flex: 1 1 auto;">
+          ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+        </div>
+        <div style="flex: 1 1 auto;">
+          ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+        </div>
+      </div>
+    `;
+    p_list.appendChild(pBtn);
+  }
+})
+
+socket.on('update_players_stats', function(data){
+  btn = document.getElementById(data.name);
+  btn.innerHTML = `
+    <div style="text-align: left;" display: flex; flex-wrap: wrap;">
+      ${data.name}<br>
+      <div style="flex: 1 1 auto;">
+        ${data.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+      </div>
+      <div style="flex: 1 1 auto;">
+        ${data.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+      </div>
+    </div>
+  `;
+  return;
+})
+
+// update player territory list
+socket.on('update_player_territories', function(data){
   player_territories = data.list;
 });
 
@@ -374,7 +414,7 @@ socket.on("troop_deployment", function(data){
 socket.on('conquest', function(){
   next_stage_btn = document.getElementById('proceed_next_stage');
   next_stage_btn.style.display = 'flex';
-  next_stage_btn.innerHTML = `<h3>Finished Conquering</h3>`;
+  document.querySelector('#proceed_next_stage .text').textContent = 'Finished Conquest';
   next_stage_btn.onclick = () => {
     next_stage_btn.style.display = 'none'; 
     socket.emit("terminate_conquer_stage");
@@ -387,7 +427,7 @@ socket.on('conquest', function(){
 socket.on('rearrangement', function(){
   next_stage_btn = document.getElementById('proceed_next_stage');
   next_stage_btn.style.display = 'flex';
-  next_stage_btn.innerHTML = `<h3>Finished Rearranging</h3>`;
+  document.querySelector('#proceed_next_stage .text').textContent = 'Finished Rearranging';
   next_stage_btn.onclick = () => {
     next_stage_btn.style.display = 'none'; 
     socket.emit("terminate_rearrangement_stage");

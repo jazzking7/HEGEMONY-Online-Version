@@ -80,6 +80,14 @@ def joinLobby(data):
         socketio.emit('error', {'msg': "Invalid lobby code!"}, room=sid)
         return
     
+    # Get lobby
+    lobby = lobbies[lobby_code]
+
+    # Update username if username is already taken
+    for pid in lobby['players']:
+        if players[pid]['username'] == username:
+            username += "_"
+    
     # Add player
     players[sid] = {
         'username': username,
@@ -87,7 +95,6 @@ def joinLobby(data):
     }
 
     # Add player to lobby
-    lobby = lobbies[lobby_code]
     lobby['players'].append(sid)
     join_room(lobby_code)
 
@@ -187,7 +194,7 @@ def update_dist_choice(data):
     gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
     # CM
-    socketio.emit('update_player_list', {'list': gsm.players[pid].territories}, room=pid)
+    socketio.emit('update_player_territories', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
         socketio.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
     gsm.GES.selected += 1
@@ -237,12 +244,13 @@ def update_troop_info(data):
     gsm.players[pid].deployable_amt -= amount
     # CM
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    gsm.update_player_stats(pid)
     if gsm.players[pid].deployable_amt > 0:
         socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
     else:
         if gsm.GES.current_event == None:
             socketio.emit('troop_result', {'resp': True}, room=pid)
-        gsm.GES.selected += 1
+            gsm.GES.selected += 1
 
 @socketio.on('send_skill_choice')
 def update_skill_choice(data):
