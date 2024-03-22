@@ -1,3 +1,12 @@
+let currEvent = null;
+let deployable = 0;
+let player_territories = [];
+let game_settings;
+let next_stage_btn;
+
+let timeoutBar;
+let current_interval = null;
+
 $(document).ready(async function() {
   // Load in gameStyle.css
   var newLink = $('<link>', {
@@ -47,16 +56,12 @@ $(document).ready(async function() {
   $('#overlay_sections .card').on('click mousemove', function(event) {
       event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
+
+  $('#overlay_sections .circular-button').on('click mousemove', function(event) {
+    event.stopPropagation(); // Prevent click and mousemove events from reaching the background
+  });
+
 });
-
-let currEvent = null;
-let deployable = 0;
-let player_territories = [];
-let game_settings;
-let next_stage_btn;
-
-let timeoutBar;
-let current_interval = null;
 
 // Function to start the timeout countdown
 function startTimeout(totalSeconds) {
@@ -100,44 +105,45 @@ socket.on('stop_timeout', function(){
 })
 
 socket.on('get_players_stats', function(data){
-  p_list = document.getElementById('stats-list');
-  for (let p in data){
-    p_info = data[p];
-    pBtn = document.createElement('button');
-    pBtn.setAttribute('id', p);
-    pBtn.classList.add('btn', 'game_btn');
-    pBtn.style.color = "black";
-    pBtn.style.backgroundColor = p_info.color;
-    pBtn.innerHTML = `
-      <div style="text-align: left;" display: flex; flex-wrap: wrap;">
-        ${p}<br>
-        <div style="flex: 1 1 auto;">
-          ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+  var pList = $('#stats-list');
+  $.each(data, function(p, p_info) {
+    var pBtn = $('<button></button>')
+      .attr('id', p)
+      .addClass('btn game_btn')
+      .css({
+        'color': 'black',
+        'background-color': p_info.color
+      })
+      .html(`
+        <div style="text-align: left;">
+          ${p}<br>
+          <div style="display: inline-block;">
+            ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+          </div>
+          <div style="display: inline-block;">
+            ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+          </div>
         </div>
-        <div style="flex: 1 1 auto;">
-          ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
-        </div>
-      </div>
-    `;
-    p_list.appendChild(pBtn);
-  }
-})
+      `);
+    pList.append(pBtn);
+  });
+});
 
 socket.on('update_players_stats', function(data){
-  btn = document.getElementById(data.name);
-  btn.innerHTML = `
-    <div style="text-align: left;" display: flex; flex-wrap: wrap;">
+  let btn = $('#' + data.name);
+  btn.html(`
+    <div style="text-align: left;">
       ${data.name}<br>
-      <div style="flex: 1 1 auto;">
+      <div style="display: inline-block;">
         ${data.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
       </div>
-      <div style="flex: 1 1 auto;">
+      <div style="display: inline-block;">
         ${data.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
       </div>
     </div>
-  `;
-  return;
-})
+  `);
+});
+
 
 // update player territory list
 socket.on('update_player_territories', function(data){
@@ -190,33 +196,31 @@ socket.on('change_click_event', function(data){
 
 // Clear current selection window
 socket.on('clear_view', function(){
-  document.getElementById('control_panel').style.display = 'none';
-  document.getElementById('middle_display').style.display = 'none';
-  document.getElementById('proceed_next_stage').style.display = 'none';
+  $('#control_panel, #middle_display, #proceed_next_stage').hide();
   toHightlight = [];
   clickables = [];
 });
 
 // announcements
 socket.on('set_up_announcement', function(data){
-  document.getElementById('announcement').innerHTML = `<h2>` + data.msg + `</h2>`;
+  $('#announcement').html('<h3>' + data.msg + '</h3>');
 });
 
 //===================================================================================
 
 // Receive Mission + Display info on Mission Tracker
 socket.on('get_mission', function(data) {
-    document.getElementById('announcement').innerHTML = `<h1>` + data.msg + `</h1>`
-    socket.off('get_mission');
+  $('#announcement').html('<h1>' + data.msg + '</h1>');
+  socket.off('get_mission');
 });
 
 // Start Color Choosing
 socket.on('choose_color', function(data){
-    document.getElementById('announcement').innerHTML = `<h2>` + data.msg + `</h2>`;
-    document.getElementById('middle_display').style.display = 'flex';
-    let colorBoard = document.getElementById('middle_content');
+    $('#announcement').html('<h2>' + data.msg + '</h2>');
+    $('#middle_display').css('display', 'flex');
+    let colorBoard = $('#middle_content');
     let disabled = false;
-    colorBoard.innerHTML = ''
+    colorBoard.empty();
     for (let option of data.options){
       let btn_c = document.createElement("button");
       btn_c.className = 'btn';
@@ -242,7 +246,7 @@ socket.on('choose_color', function(data){
           }
         }
       };
-      colorBoard.appendChild(btn_c);
+      colorBoard.append(btn_c);
     }
 });
 // Update color options
@@ -594,6 +598,104 @@ function rearrange(tid){
 
 //===============================================================================
 
+//=========================== Control Buttons ===================================
+btn_diplomatic = document.getElementById('btn-diplomatic');
+btn_diplomatic.onclick = function () {
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = "<h4>Diplomatic Menu</h4>";
+  midDis = document.getElementById('middle_content')
+  midDis.innerHTML = `
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div style="display: inline-block;">
+  <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; ">
+    FORM ALLIANCE
+  </button>
+  </div>
+  <div style="display: inline-block;">
+  <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
+    REQUEST SUMMIT
+  </button>
+  </div>
+  </div>
+  `
+}
+
+async function get_sep_auth(){
+  let amt = await new Promise((resolve) => {
+    socket.emit('get_sep_auth');
+    socket.once('receive_sep_auth', (data) => {resolve(data);});
+  });
+  return amt.amt;
+}
+
+btn_sep_auth = document.getElementById('btn-sep-auth');
+btn_sep_auth.onclick = function () {
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = "";
+  get_sep_auth().then(sep_auth => {
+    document.getElementById('middle_title').innerHTML = `
+    <div style="padding: 1px;">
+    <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
+    </div>`
+  });
+  midDis = document.getElementById('middle_content')
+  midDis.innerHTML = `
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div style="display: inline-block;">
+  <button class="btn" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
+    UPGRADE INFRASTRUCTURE
+  </button>
+  </div>
+  <div style="display: inline-block;">
+  <button class="btn" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
+    BUILD CITIES
+  </button>
+  </div>
+  <div style="display: inline-block;">
+  <button class="btn" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
+    MOBILIZATION
+  </button>
+  </div>
+  </div>
+  `
+}
+
+btn_skill = document.getElementById('btn-skill');
+btn_skill.onclick = function () {
+  return;
+}
+
+async function get_reserves_amt(){
+  let amt = await new Promise((resolve) => {
+    socket.emit('get_reserves_amt');
+    socket.once('receive_reserves_amt', (data) => {resolve(data);});
+  });
+  return amt.amt;
+}
+
+btn_reserves = document.getElementById("btn-reserve");
+btn_reserves.onclick = function () {
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = "";
+  get_reserves_amt().then(ramt => {
+    document.getElementById('middle_title').innerHTML = `
+    <div style="padding: 1px;">
+    <h5>TROOPS AVAILABLE: ${ramt}</h5>
+    </div>`
+  });
+  midDis = document.getElementById('middle_content')
+  midDis.innerHTML = `
+  <div>
+  <button class="btn" style="background-color: #BB6B6B; color:#FFFFFF;">
+    DEPLOY RESERVES
+  </button>
+  </div>
+  `;
+}
+
+
+
+//===============================================================================
 
 //============================ Mouse events =====================================
 function mouseWheel(event) {

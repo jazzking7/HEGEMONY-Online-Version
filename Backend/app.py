@@ -303,5 +303,17 @@ def handle_rearrange_data(data):
         choices[1]: {'troops': t2.troops}
     } , room=gsm.lobby)
 
+@socketio.on('get_sep_auth')
+def send_sep_auth():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    socketio.emit('receive_sep_auth', {'amt': gsm.players[pid].stars}, room=pid)
+
+@socketio.on('get_reserves_amt')
+def send_reserves_amt():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    socketio.emit('receive_reserves_amt', {'amt': gsm.players[pid].reserves}, room=pid)
+
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)
