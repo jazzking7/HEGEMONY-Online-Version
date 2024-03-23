@@ -16,6 +16,51 @@ class turn_loop_scheduler:
         ms.current_event = event
         return
 
+    def resume_loop(self, ms, gs, pid):
+        curr_event = ms.current_event
+        c = 0
+        for i, event in enumerate(self.events):
+            if event == curr_event:
+                c = i
+                break
+        atk_player = gs.players[pid]
+        for event in self.events[c:]:
+            if event.name == 'reinforcement':
+                self.set_curr_state(ms, self.events[0])
+                self.reinforcement(gs, pid)
+                ms.stage_completed = False
+                done = False
+                while not ms.stage_completed and not done and not ms.innerInterrupt:
+                    done = atk_player.deployable_amt == 0
+                if ms.terminated or ms.innerInterrupt:
+                    return
+
+            if event.name == 'conquer':
+                # prevent immediate growth
+                if not ms.stats_set:
+                    atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
+                    ms.stats_set = True
+                self.set_curr_state(ms, self.events[1])
+                self.conquer(gs, pid)
+
+                ms.stage_completed = False
+                while not ms.stage_completed and not ms.innerInterrupt:
+                    time.sleep(1)
+                if ms.terminated or ms.innerInterrupt:
+                    return
+            if event.name == 'rearrangement':
+                self.set_curr_state(ms, self.events[2])
+                self.rearrange(gs, pid)
+
+                ms.stage_completed = False
+                while not ms.stage_completed and not ms.innerInterrupt:
+                    time.sleep(1)
+                if ms.terminated or ms.innerInterrupt:
+                    return
+        # stop timer
+        ms.terminated = True
+        return
+
     def reinforcement(self, gs, curr_p):
         for player in gs.pids:
             if player != curr_p:
@@ -41,33 +86,39 @@ class turn_loop_scheduler:
 
         atk_player = gs.players[player]
         atk_player.turn_victory = False
+        ms.stats_set = False
 
         self.set_curr_state(ms, self.events[0])
         self.reinforcement(gs, player)
+
         ms.stage_completed = False
         done = False
-        while not ms.stage_completed and not done:
+        while not ms.stage_completed and not done and not ms.innerInterrupt:
             done = atk_player.deployable_amt == 0
-        if ms.terminated:
+        if ms.terminated or ms.innerInterrupt:
             return
 
-        self.set_curr_state(ms, self.events[1])
-        # Prevent Immediate Stats growth
+        # prevent immediate growth
         atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
+        ms.stats_set = True
+        self.set_curr_state(ms, self.events[1])
         self.conquer(gs, player)
+
         ms.stage_completed = False
-        while not ms.stage_completed:
+        while not ms.stage_completed and not ms.innerInterrupt:
             time.sleep(1)
-        if ms.terminated:
+        if ms.terminated or ms.innerInterrupt:
             return
         
         self.set_curr_state(ms, self.events[2])
         self.rearrange(gs, player)
+
         ms.stage_completed = False
-        while not ms.stage_completed:
+        while not ms.stage_completed and not ms.innerInterrupt:
             time.sleep(1)
-        if ms.terminated:
+        if ms.terminated or ms.innerInterrupt:
             return
+        
         # stop timer
         ms.terminated = True
         return

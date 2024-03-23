@@ -1,5 +1,6 @@
 let currEvent = null;
 let deployable = 0;
+let reserves = 0;
 let player_territories = [];
 let game_settings;
 let next_stage_btn;
@@ -8,6 +9,10 @@ let timeoutBar;
 let current_interval = null;
 
 $(document).ready(async function() {
+  
+  // Hide control buttons
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+
   // Load in gameStyle.css
   var newLink = $('<link>', {
       rel: 'stylesheet',
@@ -189,6 +194,8 @@ socket.on('change_click_event', function(data){
     currEvent = conquest;
   } else if (data.event == 'rearrange') {
     currEvent = rearrange;
+  } else if (data.event == 'reserve_deployment') {
+    currEvent = deploy_reserves;
   } else {
     currEvent = null;
   }
@@ -204,6 +211,10 @@ socket.on('clear_view', function(){
 // announcements
 socket.on('set_up_announcement', function(data){
   $('#announcement').html('<h3>' + data.msg + '</h3>');
+});
+
+socket.on('signal_show_btns', function(){
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
 });
 
 //===================================================================================
@@ -596,11 +607,61 @@ function rearrange(tid){
   }  
 }
 
-//===============================================================================
+//==============================Inner Async======================================
+
+socket.on('async_terminate', function(){
+    $("#proceed_next_stage").show();
+    $("#proceed_next_stage .text").text('DONE');
+    $("#proceed_next_stage").off('click').on('click', function(){
+      socket.emit('signal_async_end');
+      $("#proceed_next_stage").hide(); 
+      currEvent = null;
+      toHightlight = [];
+      clickables = [];
+    });
+});
+
+socket.on("reserve_deployment", function(data){
+  reserves = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Deploying reserves, ${data.amount} troops available</h2>`
+});
+
+function deploy_reserves(tid){
+  toHightlight = [];
+  document.getElementById('control_panel').style.display = 'none';
+  if (player_territories.includes(tid)){
+    toHightlight.push(tid);
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    let troopValue = document.createElement("p");
+    let troopInput = document.createElement("input");
+    troopInput.setAttribute("type", "range");
+    troopInput.setAttribute("min", 1);
+    troopInput.setAttribute("max", reserves);
+    troopInput.setAttribute("value", 1);
+    troopInput.setAttribute("step", 1);
+    troopInput.style.display = "inline-block";
+    troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+    let c_m = document.getElementById('control_mechanism');
+    c_m.innerHTML = "";
+    c_m.appendChild(troopInput);
+    c_m.appendChild(troopValue);
+    document.getElementById('control_confirm').onclick = function(){
+    document.getElementById('control_panel').style.display = 'none';
+    socket.emit('send_reserves_deployed', {'choice': toHightlight[0], 'amount': troopInput.value});
+    toHightlight = [];
+    }
+    document.getElementById('control_cancel').onclick = function(){
+      document.getElementById('control_panel').style.display = 'none';
+      toHightlight = [];
+    }
+  }
+}
 
 //=========================== Control Buttons ===================================
-btn_diplomatic = document.getElementById('btn-diplomatic');
-btn_diplomatic.onclick = function () {
+btn_diplomatic = $('#btn-diplomatic');
+btn_diplomatic.off('click').click(function () {
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = "<h4>Diplomatic Menu</h4>";
   midDis = document.getElementById('middle_content')
@@ -617,8 +678,8 @@ btn_diplomatic.onclick = function () {
   </button>
   </div>
   </div>
-  `
-}
+  `;
+});
 
 async function get_sep_auth(){
   let amt = await new Promise((resolve) => {
@@ -631,33 +692,61 @@ async function get_sep_auth(){
 btn_sep_auth = document.getElementById('btn-sep-auth');
 btn_sep_auth.onclick = function () {
   document.getElementById('middle_display').style.display = 'flex';
+  // set up title
   document.getElementById('middle_title').innerHTML = "";
   get_sep_auth().then(sep_auth => {
+    
     document.getElementById('middle_title').innerHTML = `
     <div style="padding: 1px;">
     <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
-    </div>`
+    </div>`;
+
+    midDis = document.getElementById('middle_content')
+    midDis.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: inline-block;">
+    <button class="btn" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
+      UPGRADE INFRASTRUCTURE
+    </button>
+    </div>
+    <div style="display: inline-block;">
+    <button class="btn" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
+      BUILD CITIES
+    </button>
+    </div>
+    <div style="display: inline-block;">
+    <button class="btn" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
+      MOBILIZATION
+    </button>
+    </div>
+    </div>
+    `;
+
+    // Functionalities to be added
+    $("#btn-mob").off('click').on('click', function(){
+      if (sep_auth < 2){
+        popup('MINIMUM 2 STARS TO CONVERT TROOPS!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      let max = sep_auth > 15 ? 15 : sep_auth;
+      $("#middle_content").html(
+        `<p>Select amount to convert:</p>
+         <input type="range" id="amtSlider" min="2" max=${max} step="1" value="2">
+         <p id="samt"></p>
+         <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          socket.emit('convert_reserves', {'amt': $("#amtSlider").val()});
+          //Shutting off
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
   });
-  midDis = document.getElementById('middle_content')
-  midDis.innerHTML = `
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-  <div style="display: inline-block;">
-  <button class="btn" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
-    UPGRADE INFRASTRUCTURE
-  </button>
-  </div>
-  <div style="display: inline-block;">
-  <button class="btn" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
-    BUILD CITIES
-  </button>
-  </div>
-  <div style="display: inline-block;">
-  <button class="btn" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
-    MOBILIZATION
-  </button>
-  </div>
-  </div>
-  `
 }
 
 btn_skill = document.getElementById('btn-skill');
@@ -681,16 +770,28 @@ btn_reserves.onclick = function () {
     document.getElementById('middle_title').innerHTML = `
     <div style="padding: 1px;">
     <h5>TROOPS AVAILABLE: ${ramt}</h5>
-    </div>`
+    </div>`;
+
+    midDis = document.getElementById('middle_content')
+    midDis.innerHTML = `
+    <div>
+    <button class="btn" id="btn_DR" style="background-color: #BB6B6B; color:#FFFFFF;">
+      DEPLOY RESERVES
+    </button>
+    </div>
+    `;
+
+    $('#btn_DR').off('click').on('click', function(){
+      socket.emit('send_async_event', {'name': "R_D"});
+      $('#middle_display').hide()
+      $('#middle_title, #middle_content').empty();
+    });
+    
+
   });
-  midDis = document.getElementById('middle_content')
-  midDis.innerHTML = `
-  <div>
-  <button class="btn" style="background-color: #BB6B6B; color:#FFFFFF;">
-    DEPLOY RESERVES
-  </button>
-  </div>
-  `;
+
+
+
 }
 
 

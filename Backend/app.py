@@ -315,5 +315,40 @@ def send_reserves_amt():
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     socketio.emit('receive_reserves_amt', {'amt': gsm.players[pid].reserves}, room=pid)
 
+@socketio.on("convert_reserves")
+def convert_reserves(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.convert_reserves(int(data['amt']), pid)
+
+@socketio.on('send_reserves_deployed')
+def handle_reserves_deployment(data):
+    choice = data['choice']
+    amount = int(data['amount'])
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    t = gsm.map.territories[choice]
+    t.troops += amount
+    gsm.players[pid].reserves -= amount
+    # CM
+    socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    gsm.update_player_stats(pid)
+    if gsm.players[pid].reserves > 0:
+        socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
+
+@socketio.on('send_async_event')
+def handle_async_event(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.GES.handle_async_event(data, pid)
+    return
+
+@socketio.on('signal_async_end')
+def handle_async_end():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.GES.innerInterrupt = False
+    return
+
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)

@@ -9,7 +9,7 @@ class General_Event_Scheduler:
 
         # set up selection controller
         self.selected = 0
-        # loop interrupted
+        # whole game interrupted
         self.interrupt = False
         # current turn terminated
         self.terminated = False
@@ -26,6 +26,9 @@ class General_Event_Scheduler:
         self.current_player = 0
         # stack of events in case of interruption
         self.event_stack = []
+        # inner async
+        self.stats_set = False
+        self.innerInterrupt = False
 
     def selection_time_out(self, num_secs, count):
         self.selected = 0
@@ -59,3 +62,51 @@ class General_Event_Scheduler:
 
     def halt_events(self,):
         self.interrupt = True
+
+    # Inner async
+    def handle_async_event(self, data, pid):
+        
+        n = data['name']
+        self.innerInterrupt = True
+  
+        if n == 'F_A':
+            self.curr_thread = threading.Thread(target=self.form_alliance, args=(data, pid))
+        elif n == 'R_S':
+            self.curr_thread = threading.Thread(target=self.request_summit, args=(data, pid))
+        elif n == 'R_D':
+            self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(data, pid))
+        elif n == 'U_I':
+            self.curr_thread = threading.Thread(target=self.upgrade_infrastructure, args=(data, pid))
+        elif n == 'B_C':
+            self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
+        
+        self.curr_thread.start()
+        self.curr_thread.join()
+        self.innerInterrupt = False
+        # resume loop event if not terminated
+        if not self.terminated:
+            self.TLS.resume_loop(self, self.gs, pid)
+
+    def form_alliance(self, data, pid):
+        return
+    
+    def request_summit(self, data, pid):
+        return
+
+    def reserve_deployment(self, data, pid):
+
+        self.gs.server.emit('async_terminate', room=pid)
+        self.gs.server.emit('change_click_event', {'event': "reserve_deployment"}, room=pid)
+        self.gs.server.emit('reserve_deployment', {'amount': self.gs.players[pid].reserves}, room=pid)
+        done = False
+        while not done and self.innerInterrupt and not self.terminated:
+            done = self.gs.players[pid].reserves == 0
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+
+    def upgrade_infrastructure(self, data, pid):
+        return
+
+    def build_cities(self, data):
+        return

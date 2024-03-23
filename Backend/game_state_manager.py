@@ -27,7 +27,7 @@ class Player:
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
         # hidden resources
-        self.stars = 0
+        self.stars = 5
         self.reserves = 0
         # alliance
         self.hasAllies = False
@@ -106,6 +106,39 @@ class Game_State_Manager:
         self.et = Elimination_tracker()
         # End game tracker
         self.egt = End_game_tracker()
+
+    def convert_reserves(self, amt, player):
+        extra = 0
+        if amt == 2:
+            extra = 3
+        elif amt == 3:
+            extra = 4
+        elif amt == 4:
+            extra = 7
+        elif amt == 5:
+            extra = 10
+        elif amt == 6:
+            extra = 13
+        elif amt == 7:
+            extra = 17
+        elif amt == 8:
+            extra = 21
+        elif amt == 9:
+            extra = 25
+        elif amt == 10:
+            extra = 30
+        elif amt == 11:
+            extra = 34
+        elif amt == 12:
+            extra = 39
+        elif amt == 13:
+            extra = 46
+        elif amt == 14:
+            extra = 53
+        elif amt == 15:
+            extra = 60
+        self.players[player].reserves += extra
+        self.players[player].stars -= amt
 
     def get_total_troops_of_player(self, player):
         player = self.players[player]
