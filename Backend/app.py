@@ -352,6 +352,7 @@ def handle_reserves_deployment(data):
     if gsm.players[pid].reserves > 0:
         socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
 
+
 @socketio.on('send_async_event')
 def handle_async_event(data):
     pid = request.sid
@@ -364,6 +365,7 @@ def handle_async_end():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.GES.innerInterrupt = False
+    print(f"{gsm.players[pid].name} has signal to end async action.")
     return
 
 if __name__ == '__main__':

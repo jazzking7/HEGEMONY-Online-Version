@@ -66,7 +66,8 @@ class turn_loop_scheduler:
             if player != curr_p:
                 gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
-        gs.players[curr_p].deployable_amt = gs.get_deployable_amt(curr_p) 
+        if gs.players[curr_p].deployable_amt == 0:
+            gs.players[curr_p].deployable_amt = gs.get_deployable_amt(curr_p) 
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
 
@@ -127,6 +128,8 @@ class turn_loop_scheduler:
         # notify frontend to change event and clear controls
         gs.server.emit("change_click_event", {'event': None}, room=player)
         gs.server.emit("clear_view", room=player)
+        gs.server.emit('signal_hide_btns', room=player)
+        print(f"{gs.players[player].name}'s turn ends, buttons have been hidden.")
         # clear deployables
         gs.clear_deployables(player)
         # assign stars if applicable
@@ -144,7 +147,10 @@ class turn_loop_scheduler:
         ms.terminated = False
         ms.curr_thread.start()
 
-        gs.server.emit('start_timeout',{'secs': 60}, room=gs.lobby)
+        gs.server.emit('start_timeout', {'secs': 60}, room=gs.lobby)
+        print(f"{gs.players[curr_player].name}'s turn starts, buttons have been shown.")
+        gs.server.emit('signal_show_btns', room=curr_player)
+        
         ms.timer.start()
         ms.timer.join()
         gs.server.emit('stop_timeout', room=gs.lobby)

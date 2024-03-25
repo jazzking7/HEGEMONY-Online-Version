@@ -183,4 +183,3 @@ class setup_event_scheduler:
                 gs.players[player].skill = random.choice(gs.skill_options)
         
         gs.send_player_list()
-        gs.server.emit("signal_show_btns", room=gs.lobby)

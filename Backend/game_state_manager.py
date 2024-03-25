@@ -27,7 +27,7 @@ class Player:
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
         # hidden resources
-        self.stars = 0
+        self.stars = 9
         self.reserves = 0
         self.s_city_amt = 0
         # alliance
@@ -184,7 +184,7 @@ class Game_State_Manager:
             if t.isCapital:
                 bonus += 1
             if t.isCity:
-                t_score += 2
+                t_score += 1
             if t.isMegacity:
                 bonus += 1
             if t.isTransportcenter:

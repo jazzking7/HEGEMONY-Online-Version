@@ -82,9 +82,12 @@ class General_Event_Scheduler:
         
         self.curr_thread.start()
         self.curr_thread.join()
+        print(f"{self.gs.players[pid].name}'s async action thread completed.")
         self.innerInterrupt = False
         # resume loop event if not terminated
         if not self.terminated:
+            self.gs.server.emit('signal_show_btns', room=pid)
+            print(f"{self.gs.players[pid].name}'s async action completed.")
             self.TLS.resume_loop(self, self.gs, pid)
 
     def form_alliance(self, data, pid):
@@ -98,9 +101,11 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate', room=pid)
         self.gs.server.emit('change_click_event', {'event': "reserve_deployment"}, room=pid)
         self.gs.server.emit('reserve_deployment', {'amount': self.gs.players[pid].reserves}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
         done = False
         while not done and self.innerInterrupt and not self.terminated:
             done = self.gs.players[pid].reserves == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
 
@@ -112,9 +117,11 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate', room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_cities"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
         self.gs.players[pid].s_city_amt = data['amt']
         done = False
         while not done and self.innerInterrupt and not self.terminated:
             done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)

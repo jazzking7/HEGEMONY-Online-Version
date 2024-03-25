@@ -4,7 +4,6 @@ let reserves = 0;
 let city_amt = 0;
 let player_territories = [];
 let game_settings;
-let next_stage_btn;
 
 let timeoutBar;
 let current_interval = null;
@@ -217,8 +216,20 @@ socket.on('set_up_announcement', function(data){
 });
 
 socket.on('signal_show_btns', function(){
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
+  show_async_btns();
 });
+
+socket.on('signal_hide_btns', function(){
+  hide_async_btns();
+});
+
+function hide_async_btns(){
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+}
+
+function show_async_btns(){
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
+}
 
 //===================================================================================
 
@@ -430,29 +441,27 @@ socket.on("troop_deployment", function(data){
 });
 
 socket.on('conquest', function(){
-  next_stage_btn = document.getElementById('proceed_next_stage');
-  next_stage_btn.style.display = 'flex';
-  document.querySelector('#proceed_next_stage .text').textContent = 'Finished Conquest';
-  next_stage_btn.onclick = () => {
-    next_stage_btn.style.display = 'none'; 
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Finished Conquest');
+  $('#proceed_next_stage').off('click').on('click', () => {
+    $('#proceed_next_stage').hide();
     socket.emit("terminate_conquer_stage");
     currEvent = null;
     toHightlight = [];
     clickables = [];
-  };
+  });
 });
 
 socket.on('rearrangement', function(){
-  next_stage_btn = document.getElementById('proceed_next_stage');
-  next_stage_btn.style.display = 'flex';
-  document.querySelector('#proceed_next_stage .text').textContent = 'Finished Rearranging';
-  next_stage_btn.onclick = () => {
-    next_stage_btn.style.display = 'none'; 
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Finished Rearrangement');
+  $('#proceed_next_stage').off('click').on('click', () => {
+    $('#proceed_next_stage').hide();
     socket.emit("terminate_rearrangement_stage");
     currEvent = null;
     toHightlight = [];
     clickables = [];
-  };
+  });
 });
 
 function troop_deployment(tid){
@@ -502,7 +511,7 @@ socket.on('troop_result', function(data){
 function conquest(tid){
   if (player_territories.includes(tid)){
     document.getElementById('control_panel').style.display = 'none';
-    next_stage_btn.style.display = 'flex';
+    $('#proceed_next_stage').show();
     clickables = [];
     if (toHightlight.length){
       toHightlight = [];
@@ -521,7 +530,7 @@ function conquest(tid){
       toHightlight[1] = tid;
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
-      next_stage_btn.style.display = 'none';
+      $('#proceed_next_stage').hide();
 
       let troopValue = document.createElement("p");
       let troopInput = document.createElement("input");
@@ -542,13 +551,13 @@ function conquest(tid){
         socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
         clickables = [];
-        next_stage_btn.style.display = 'flex';
+        $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
         clickables = [];
-        next_stage_btn.style.display = 'flex';
+        $('#proceed_next_stage').show();
       });
    }
   }
@@ -563,7 +572,7 @@ function rearrange(tid){
       toHightlight[1] = tid;
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
-      next_stage_btn.style.display = 'none';
+      $('#proceed_next_stage').hide();
 
       let troopValue = document.createElement("p");
       let troopInput = document.createElement("input");
@@ -584,19 +593,19 @@ function rearrange(tid){
         socket.emit('send_rearrange_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
         clickables = [];
-        next_stage_btn.style.display = 'flex';
+        $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
         clickables = [];
-        next_stage_btn.style.display = 'flex';
+        $('#proceed_next_stage').show();
       });
    }
   }
   else if (player_territories.includes(tid)){
     document.getElementById('control_panel').style.display = 'none';
-    next_stage_btn.style.display = 'flex';
+    $('#proceed_next_stage').show();
     clickables = [];
     if (territories[tid].troops == 1){
       popup("NOT ENOUGH TROOPS TO TRANSFER!", 1000);
@@ -774,6 +783,7 @@ btn_sep_auth.onclick = function () {
           `);
           $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
           $("#convertBtn").on('click', function(){
+            hide_async_btns();
             socket.emit('send_async_event', {'name': "B_C", 'amt': $("#amtSlider").val()});
             $('#middle_display').hide()
             $('#middle_title, #middle_content').empty();
@@ -818,6 +828,7 @@ btn_reserves.onclick = function () {
     `;
 
     $('#btn_DR').off('click').on('click', function(){
+      hide_async_btns();
       socket.emit('send_async_event', {'name': "R_D"});
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty();
