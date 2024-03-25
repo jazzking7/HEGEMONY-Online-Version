@@ -230,6 +230,22 @@ def update_player_city(data):
     gsm.GES.selected += 1
     socketio.emit('settle_result', {'resp': True}, room=pid)
 
+@socketio.on('settle_cities')
+def settle_new_cities(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isCity:
+            socketio.emit('update_settle_status', {'msg':'EXISTING CITY AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isCity = True
+        socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*3
+
 @socketio.on('send_troop_update')
 def update_troop_info(data):
     choice = data.get('choice')

@@ -134,7 +134,7 @@ class turn_loop_scheduler:
         p = gs.players[player]
         if p.turn_victory:
             p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
-        print(p.stars)
+        print(f'{gs.players[player].name} special authority amount: {p.stars}')
 
     def execute_turn(self, gs, ms, curr_player):
 

@@ -1,6 +1,7 @@
 let currEvent = null;
 let deployable = 0;
 let reserves = 0;
+let city_amt = 0;
 let player_territories = [];
 let game_settings;
 let next_stage_btn;
@@ -196,7 +197,9 @@ socket.on('change_click_event', function(data){
     currEvent = rearrange;
   } else if (data.event == 'reserve_deployment') {
     currEvent = deploy_reserves;
-  } else {
+  } else if (data.event == 'build_cities') {
+    currEvent = build_cities;
+  }  else {
     currEvent = null;
   }
 });
@@ -246,15 +249,15 @@ socket.on('choose_color', function(data){
           btn_c.style.border = '2px solid';
           btn_c.style.borderColor = 'red';
           document.getElementById('control_panel').style.display = 'flex';
-          document.getElementById('control_confirm').onclick = function(){
+          $('#control_confirm').off('click').on('click', function(){
             document.getElementById('control_panel').style.display = 'none';
             socket.emit('send_color_choice', {'choice': rgbToHex(btn_c.style.backgroundColor)})
-          }
-          document.getElementById('control_cancel').onclick = function(){
+          });
+          $('#control_cancel').off('click').on('click', function(){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_c.style.border = "none";
-          }
+          });
         }
       };
       colorBoard.append(btn_c);
@@ -315,16 +318,16 @@ socket.on('choose_territorial_distribution', function(data){
           btn_dist.style.border = '2px solid';
           btn_dist.style.borderColor = 'red';
           document.getElementById('control_panel').style.display = 'flex';
-          document.getElementById('control_confirm').onclick = function(){
+          $('#control_confirm').off('click').on('click', function(){
             document.getElementById('control_panel').style.display = 'none';
             socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
             document.getElementById('middle_display').style.display = 'none';
-          }
-          document.getElementById('control_cancel').onclick = function(){
+          });
+          $('#control_cancel').off('click').on('click' , function(){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_dist.style.border = "none";
-          }
+          });
         }
       };
       dist_choices.appendChild(btn_dist);
@@ -338,15 +341,15 @@ function settle_capital(tid){
     toHightlight.push(tid);
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
-    document.getElementById('control_confirm').onclick = function(){
+    $('#control_confirm').off('click').on('click', function(){
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
       toHightlight = [];
-    }
-    document.getElementById('control_cancel').onclick = function(){
+    });
+    $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHightlight = [];
-    }
+    });
   }
 }
 
@@ -361,15 +364,15 @@ function settle_cities(tid){
     if (toHightlight.length == 2){
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
-        document.getElementById('control_confirm').onclick = function(){
+        $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_city_choices', {'choice': toHightlight});
         toHightlight = [];
-      }
-      document.getElementById('control_cancel').onclick = function(){
+        });
+        $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
-      }
+        });
     }
   }
 }
@@ -401,16 +404,16 @@ socket.on('choose_skill', function(data){
         btn_skill.style.border = '2px solid';
         btn_skill.style.borderColor = 'red';
         document.getElementById('control_panel').style.display = 'flex';
-        document.getElementById('control_confirm').onclick = function(){
+        $('#control_confirm').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
           socket.emit('send_skill_choice', {'choice': btn_skill.textContent})
           document.getElementById('middle_display').style.display = 'none';
-        }
-        document.getElementById('control_cancel').onclick = function(){
+        });
+        $('#control_cancel').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
           disabled = false;
           btn_skill.style.border = "none";
-        }
+        });
       }
     }
     skill_options.appendChild(btn_skill);
@@ -472,15 +475,15 @@ function troop_deployment(tid){
     c_m.innerHTML = "";
     c_m.appendChild(troopInput);
     c_m.appendChild(troopValue);
-    document.getElementById('control_confirm').onclick = function(){
+    $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
     socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
     toHightlight = [];
-    }
-    document.getElementById('control_cancel').onclick = function(){
+    });
+    $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHightlight = [];
-    }
+    });
   }
 }
 
@@ -534,19 +537,19 @@ function conquest(tid){
       c_m.appendChild(troopInput);
       c_m.appendChild(troopValue);
 
-      document.getElementById('control_confirm').onclick = function(){
+      $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
         clickables = [];
         next_stage_btn.style.display = 'flex';
-      }
-      document.getElementById('control_cancel').onclick = function(){
+      });
+      $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
         clickables = [];
         next_stage_btn.style.display = 'flex';
-      }
+      });
    }
   }
 }
@@ -576,19 +579,19 @@ function rearrange(tid){
       c_m.appendChild(troopInput);
       c_m.appendChild(troopValue);
 
-      document.getElementById('control_confirm').onclick = function(){
+      $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_rearrange_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
         clickables = [];
         next_stage_btn.style.display = 'flex';
-      }
-      document.getElementById('control_cancel').onclick = function(){
+      });
+      $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
         clickables = [];
         next_stage_btn.style.display = 'flex';
-      }
+      });
    }
   }
   else if (player_territories.includes(tid)){
@@ -624,8 +627,18 @@ socket.on('async_terminate', function(){
 socket.on("reserve_deployment", function(data){
   reserves = data.amount;
   announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Deploying reserves, ${data.amount} troops available</h2>`
+  announ.innerHTML = `<h2>Deploying reserves, ${data.amount} troops available</h2>`;
 });
+
+socket.on('build_cities', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
+})
+
+socket.on('update_settle_status', function(data){
+  popup(data.msg, 3000);
+})
 
 function deploy_reserves(tid){
   toHightlight = [];
@@ -647,15 +660,15 @@ function deploy_reserves(tid){
     c_m.innerHTML = "";
     c_m.appendChild(troopInput);
     c_m.appendChild(troopValue);
-    document.getElementById('control_confirm').onclick = function(){
+    $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
     socket.emit('send_reserves_deployed', {'choice': toHightlight[0], 'amount': troopInput.value});
     toHightlight = [];
-    }
-    document.getElementById('control_cancel').onclick = function(){
+    });
+    $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHightlight = [];
-    }
+    });
   }
 }
 
@@ -746,6 +759,29 @@ btn_sep_auth.onclick = function () {
         });
     });
 
+    $("#btn-bc").off('click').on('click', function() {
+        if (sep_auth < 3)  {
+          popup('MINIMUM 3 STARS TO BUILD CITIES!', 2000);
+          $("#middle_display").hide()
+          $("#middle_title, #middle_content").empty();
+          return;
+        }
+        $("#middle_content").html(
+          `<p>Select amount to convert:</p>
+           <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
+           <p id="samt"></p>
+           <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
+          `);
+          $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+          $("#convertBtn").on('click', function(){
+            socket.emit('send_async_event', {'name': "B_C", 'amt': $("#amtSlider").val()});
+            $('#middle_display').hide()
+            $('#middle_title, #middle_content').empty();
+          });
+    });
+
+
+  // population
   });
 }
 
@@ -786,15 +822,36 @@ btn_reserves.onclick = function () {
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty();
     });
-    
 
   });
 
-
-
 }
 
-
+// dependency on "city_amt"
+function build_cities(tid){
+  if(player_territories.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
 
 //===============================================================================
 

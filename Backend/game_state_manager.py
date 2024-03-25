@@ -27,8 +27,9 @@ class Player:
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
         # hidden resources
-        self.stars = 5
+        self.stars = 0
         self.reserves = 0
+        self.s_city_amt = 0
         # alliance
         self.hasAllies = False
         self.allies = []
@@ -263,6 +264,7 @@ class Game_State_Manager:
         def_stats = self.get_player_battle_stats(def_p)
 
         # Simulate battle and get result
+        print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
         result = self.simulate_attack(atk_amt, def_amt, atk_stats, def_stats)
 
         # Remove troops from attacking territory
