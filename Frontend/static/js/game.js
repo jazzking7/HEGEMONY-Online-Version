@@ -695,12 +695,90 @@ btn_diplomatic.off('click').click(function () {
   </button>
   </div>
   <div style="display: inline-block;">
-  <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
+  <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
     REQUEST SUMMIT
   </button>
   </div>
   </div>
   `;
+
+  $('#btn-summit').off('click').on('click', function(){
+    socket.emit('request_summit')
+    $('#middle_display').hide()
+    $('#middle_title, #middle_content').empty();
+  });
+
+});
+
+socket.on('summit_voting', function(data){
+  $("#announcement").html(`<h3>${data.msg}<h3>`)
+  $("#middle_display").show();
+  let middis = $('#middle_content');
+  middis.html(`
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <div style="display: flex; justify-content: space-between;"> 
+
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin:3px; align-self: flex-start;">
+          <button id='btn_yes' class='btn btn-success' style='width:8vw; height:8vw;'>Accept</button>
+          <div>
+          <h5>Yes</h5>
+          <ul id='voted_yes' style='list-style: none; padding: 0; margin: 0;'> </ul>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin:3px; align-self: flex-start;">
+          <button id='btn_no' class='btn btn-danger' style='width:8vw; height:8vw;'>Reject</button>
+          <div>
+          <h5>No</h5>
+          <ul id='voted_no' style='list-style: none; padding: 0; margin: 0;'> </ul>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin:3px; align-self: flex-start;">
+          <button id='btn_abs' class='btn btn-warning' style='width:8vw; height:8vw;'>Abstain</button>
+          <div>
+          <h5>Whatever</h5>
+          <ul id='voted_abs' style='list-style: none; padding: 0; margin: 0;'> </ul>
+        </div>
+
+      </div>
+
+    </div>
+  `);
+  $("#btn_yes").off('click').on('click', function(){
+    $('#btn_yes, #btn_no, #btn_abs').hide();
+    socket.emit("send_summit_choice", {'choice': 'y'});
+  });
+  $("#btn_no").off('click').on('click', function(){
+    $('#btn_yes, #btn_no, #btn_abs').hide();
+    socket.emit("send_summit_choice", {'choice': 'n'});
+  });
+  $("#btn_abs").off('click').on('click', function(){
+    $('#btn_yes, #btn_no, #btn_abs').hide();
+    socket.emit("send_summit_choice", {'choice': 'a'});
+  });
+})
+
+socket.on('summit_result', function(data){
+  popup(data.msg, 3000);
+  $("#middle_display").hide();
+  $('#middle_title, #middle_content').empty();
+});
+
+socket.on('s_voting_fb', function(data){
+  if (data.opt == 'y'){
+    $('#voted_yes').append(`<li>${data.name}</li>`);
+  } else if (data.opt == 'n'){
+    $('#voted_no').append(`<li>${data.name}</li>`);
+  } else {
+    $('#voted_abs').append(`<li>${data.name}</li>`);
+  }
+});
+
+socket.on('activate_summit', function(){
+  $("#middle_display").hide();
+  $('#middle_title, #middle_content').empty();
+  $('#announcement').html(`<h3>Summit in progress...</h3>`)
 });
 
 async function get_sep_auth(){
@@ -788,6 +866,28 @@ btn_sep_auth.onclick = function () {
             $('#middle_display').hide()
             $('#middle_title, #middle_content').empty();
           });
+    });
+
+    $("#btn-ui").off('click').on('click', function(){
+      if (sep_auth < 4){
+        popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select amount to convert:</p>
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
+         <p id="samt"></p>
+         <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          socket.emit('upgrade_infrastructure', {'amt': $("#amtSlider").val()});
+          //Shutting off
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
     });
 
 

@@ -29,6 +29,9 @@ class General_Event_Scheduler:
         # inner async
         self.stats_set = False
         self.innerInterrupt = False
+        # inter turn summit
+        self.summit_requested = False
+        self.summit_voter = {'y': 0, 'n': 0}
 
     def selection_time_out(self, num_secs, count):
         self.selected = 0
@@ -68,15 +71,9 @@ class General_Event_Scheduler:
         
         n = data['name']
         self.innerInterrupt = True
-  
-        if n == 'F_A':
-            self.curr_thread = threading.Thread(target=self.form_alliance, args=(data, pid))
-        elif n == 'R_S':
-            self.curr_thread = threading.Thread(target=self.request_summit, args=(data, pid))
-        elif n == 'R_D':
+
+        if n == 'R_D':
             self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(data, pid))
-        elif n == 'U_I':
-            self.curr_thread = threading.Thread(target=self.upgrade_infrastructure, args=(data, pid))
         elif n == 'B_C':
             self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
         
@@ -89,12 +86,6 @@ class General_Event_Scheduler:
             self.gs.server.emit('signal_show_btns', room=pid)
             print(f"{self.gs.players[pid].name}'s async action completed.")
             self.TLS.resume_loop(self, self.gs, pid)
-
-    def form_alliance(self, data, pid):
-        return
-    
-    def request_summit(self, data, pid):
-        return
 
     def reserve_deployment(self, data, pid):
 
@@ -109,10 +100,6 @@ class General_Event_Scheduler:
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
 
-
-    def upgrade_infrastructure(self, data, pid):
-        return
-
     def build_cities(self, data, pid):
         self.gs.server.emit('async_terminate', room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
@@ -125,3 +112,19 @@ class General_Event_Scheduler:
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
+
+    def activate_summit(self,):
+        self.gs.server.emit('activate_summit', room=self.gs.lobby)
+        self.selection_time_out(15, len(self.gs.players))
+
+    def launch_summit_procedures(self, player):
+        pid = self.gs.pids[player]
+        self.summit_voter = {'y': 0, 'n': 0}
+        self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=self.gs.lobby)
+        self.selection_time_out(15, len(self.gs.players))
+        if self.summit_voter['y'] > self.summit_voter['n']:
+            self.gs.players[pid].num_summit -= 1
+            self.activate_summit()
+        else:
+            self.gs.server.emit('summit_result', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
+        self.summit_requested = False

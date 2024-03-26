@@ -166,6 +166,11 @@ class turn_loop_scheduler:
                 self.execute_turn(gs, ms, curr_player)
             if ms.interrupt:
                 return
+
+            # inter_turn_summit
+            if not ms.interrupt and ms.summit_requested:
+                ms.launch_summit_procedures(ms.current_player)
+             
             ms.current_player += 1
             if ms.current_player == len(gs.pids):
                 ms.current_player = 0

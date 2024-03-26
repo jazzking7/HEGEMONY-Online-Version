@@ -48,6 +48,8 @@ class Player:
         self.deployable_amt = 0
         # economy
         self.cumulative_gdp = 0
+        # summit
+        self.num_summit = 2
 
 class Game_State_Manager:
 
@@ -174,6 +176,10 @@ class Game_State_Manager:
     def signal_view_clear(self,):
         for player in self.players:
             self.server.emit('clear_view', room=player)
+
+    def upgrade_infrastructure(self, amt, player):
+        self.players[player].infrastructure_upgrade += amt
+        self.players[player].stars -= amt*4
 
     def get_deployable_amt(self, player):
         bonus = 0

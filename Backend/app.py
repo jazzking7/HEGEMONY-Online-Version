@@ -337,6 +337,12 @@ def convert_reserves(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.convert_reserves(int(data['amt']), pid)
 
+@socketio.on('upgrade_infrastructure')
+def upgrade_infrastructure(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.upgrade_infrastructure(int(data['amt']), pid)
+
 @socketio.on('send_reserves_deployed')
 def handle_reserves_deployment(data):
     choice = data['choice']
@@ -352,6 +358,26 @@ def handle_reserves_deployment(data):
     if gsm.players[pid].reserves > 0:
         socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
 
+@socketio.on('request_summit')
+def handle_summit_request():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].num_summit > 0:
+        gsm.GES.summit_requested = True
+    else:
+        socketio.emit('summit_result', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
+
+@socketio.on('send_summit_choice')
+def handle_summit_choice(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    opt = data['choice']
+    if opt == 'y':
+        gsm.GES.summit_voter['y'] += 1
+    elif opt == 'n':
+        gsm.GES.summit_voter['n'] += 1
+    socketio.emit('s_voting_fb', {'opt': opt, 'name': gsm.players[pid].name}, room=gsm.lobby)
+    gsm.GES.selected += 1
 
 @socketio.on('send_async_event')
 def handle_async_event(data):
@@ -367,6 +393,7 @@ def handle_async_end():
     gsm.GES.innerInterrupt = False
     print(f"{gsm.players[pid].name} has signal to end async action.")
     return
+
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)
