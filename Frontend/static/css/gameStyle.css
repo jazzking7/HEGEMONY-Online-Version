@@ -203,3 +203,11 @@ html, body {
     background-color: #2A729B;
     left: 24%;
 }
+
+#global_status {
+    display: none;
+    background-color: #94a3b8;
+    position: absolute; 
+    right: 0;
+    top: 50%;
+}

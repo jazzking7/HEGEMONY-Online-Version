@@ -149,6 +149,13 @@ socket.on('update_players_stats', function(data){
   `);
 });
 
+socket.on('update_global_status', function(data){
+    $('#global_status').show();
+    $('#LAO').text(data.LAO);
+    $('#MTO').text(data.MTO);
+    $('#TIP').text(data.TIP);
+    $('#SUP').text(data.SUP);
+});
 
 // update player territory list
 socket.on('update_player_territories', function(data){

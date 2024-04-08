@@ -131,6 +131,9 @@ class Game_State_Manager:
         self.LAO = LAO
     
     def update_LAO(self, p):
+        if len(self.pids) == 1:
+            self.LAO = p
+            return
         if self.LAO == None:
             self.get_LAO()
         else:
@@ -152,6 +155,9 @@ class Game_State_Manager:
         self.MTO = MTO
     
     def update_MTO(self, p):
+        if len(self.pids) == 1:
+            self.MTO = p
+            return
         if self.MTO == None:
             self.get_MTO()
         else:
@@ -174,6 +180,9 @@ class Game_State_Manager:
         self.HIP = HIP
 
     def update_HIP(self, p):
+        if len(self.pids) == 1:
+            self.HIP = p
+            return
         if self.HIP == None:
             self.get_HIP()
         else:
@@ -198,6 +207,9 @@ class Game_State_Manager:
         self.TIP = TIP
     
     def update_TIP(self, p):
+        if len(self.pids) == 1:
+            self.TIP = p
+            return
         if self.TIP == None:
             self.get_TIP()
         else:
@@ -215,6 +227,13 @@ class Game_State_Manager:
             if l.count(p) >= 3:
                 self.SUP = p
                 return
+
+    def update_global_status(self, ):
+        self.server.emit('update_global_status',
+        {'LAO': self.players[self.LAO].name if self.LAO != None else "Yet to exist",
+        'MTO': self.players[self.MTO].name if self.MTO != None else "Yet to exist",
+        'TIP': self.players[self.TIP].name if self.TIP != None else "Yet to exist",
+        'SUP': self.players[self.SUP].name if self.SUP != None else "Yet to exist",}, room=self.lobby)
 
     def convert_reserves(self, amt, player):
         extra = 0
@@ -289,6 +308,7 @@ class Game_State_Manager:
         self.players[player].stars -= amt*4
         self.update_HIP(player)
         self.get_SUP()
+        self.update_global_status()
 
     def get_deployable_amt(self, player):
         bonus = 0
@@ -323,6 +343,7 @@ class Game_State_Manager:
                 self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
             self.update_LAO(player)
             self.get_SUP()
+            self.update_global_status()
             self.update_player_stats(player)
 
     def get_player_industrial_level(self, player):
@@ -437,6 +458,7 @@ class Game_State_Manager:
             self.update_HIP(d_pid)
 
         self.get_SUP()
+        self.update_global_status()
 
         self.et.determine_elimination(atk_p, def_p)
         self.egt.determine_end_game(self)

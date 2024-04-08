@@ -249,6 +249,8 @@ def settle_new_cities(data):
 
     gsm.update_TIP(pid)
     gsm.get_SUP()
+    gsm.update_global_status()
+
     gsm.players[pid].s_city_amt = 0
     gsm.players[pid].stars -= len(choices)*3
 
@@ -269,6 +271,7 @@ def update_troop_info(data):
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
     gsm.get_SUP()
+    gsm.update_global_status()
     gsm.update_player_stats(pid)
     if gsm.players[pid].deployable_amt > 0:
         socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
@@ -366,6 +369,7 @@ def handle_reserves_deployment(data):
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
     gsm.get_SUP()
+    gsm.update_global_status()
     gsm.update_player_stats(pid)
     if gsm.players[pid].reserves > 0:
         socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)

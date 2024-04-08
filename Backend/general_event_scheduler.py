@@ -67,6 +67,7 @@ class General_Event_Scheduler:
         self.gs.get_HIP()
         self.gs.get_TIP()
         self.gs.get_SUP()
+        self.gs.update_global_status()
         self.run_turn_scheduler()
 
     def halt_events(self,):
