@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
+from mission_distributor import *
 from game_state_manager import *
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 players = {}
 lobbies = {}
 SES = setup_event_scheduler()
+MDIS = Mission_Distributor()
 
 def generate_unique_code(length):
     while True:
@@ -148,6 +150,7 @@ def startGame(data):
     lobby['map_name'] = 'MichaelMap1'
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
+    lobby['gsm'].MSs = MDIS.get_mission_set(len(lobby['gsm'].pids))
 
     socketio.emit('game_started', room=lobby_id)
     lobby['gsm'].GES.execute_game_events()
@@ -243,6 +246,9 @@ def settle_new_cities(data):
     for trty in choices:
         gsm.map.territories[trty].isCity = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+
+    gsm.update_TIP(pid)
+    gsm.get_SUP()
     gsm.players[pid].s_city_amt = 0
     gsm.players[pid].stars -= len(choices)*3
 
@@ -257,9 +263,12 @@ def update_troop_info(data):
         return
     t = gsm.map.territories[choice]
     t.troops += amount
+    gsm.players[pid].total_troops += amount
     gsm.players[pid].deployable_amt -= amount
     # CM
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    gsm.update_LAO(pid)
+    gsm.get_SUP()
     gsm.update_player_stats(pid)
     if gsm.players[pid].deployable_amt > 0:
         socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
@@ -351,9 +360,12 @@ def handle_reserves_deployment(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     t = gsm.map.territories[choice]
     t.troops += amount
+    gsm.players[pid].total_troops += amount
     gsm.players[pid].reserves -= amount
     # CM
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+    gsm.update_LAO(pid)
+    gsm.get_SUP()
     gsm.update_player_stats(pid)
     if gsm.players[pid].reserves > 0:
         socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)

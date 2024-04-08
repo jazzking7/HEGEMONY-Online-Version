@@ -138,6 +138,7 @@ class turn_loop_scheduler:
         if p.turn_victory:
             p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
         print(f'{gs.players[player].name} special authority amount: {p.stars}')
+        print(f'{gs.players[player].name} reserve amount: {p.reserves}')
 
     def execute_turn(self, gs, ms, curr_player):
 
@@ -162,6 +163,7 @@ class turn_loop_scheduler:
     def run_turn_loop(self, gs, ms):
         curr_player = gs.pids[ms.current_player]
         while not ms.interrupt:
+            # checking if player is alive
             if gs.players[curr_player].alive:
                 self.execute_turn(gs, ms, curr_player)
             if ms.interrupt:

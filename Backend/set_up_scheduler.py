@@ -181,5 +181,3 @@ class setup_event_scheduler:
             # CM
             if gs.players[player].skill == None:
                 gs.players[player].skill = random.choice(gs.skill_options)
-        
-        gs.send_player_list()

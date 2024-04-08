@@ -6,6 +6,7 @@ from game_map import *
 from general_event_scheduler import *
 from elimination_tracker import *
 from end_game_tracker import *
+from mission_trackers import *
 
 class Player:
 
@@ -50,6 +51,8 @@ class Player:
         self.cumulative_gdp = 0
         # summit
         self.num_summit = 2
+        # status monitoringg
+        self.total_troops = 0
 
 class Game_State_Manager:
 
@@ -65,10 +68,6 @@ class Game_State_Manager:
         # Map
         self.map = Map(mapName)
         self.total_troops = len(self.map.territories)
-
-        # turn counter
-        self.turn = 0
-        self.stage = 0
 
         # turn victory (for special authority acquisition)
         self.turn_victory = False
@@ -105,10 +104,117 @@ class Game_State_Manager:
         # EVENT SCHEDULER
         self.GES = General_Event_Scheduler(self, setup_events)
 
+        # Mission
+        self.MSs = None
+
         # Elimination Tracker
         self.et = Elimination_tracker()
         # End game tracker
         self.egt = End_game_tracker()
+
+        # Global status
+        self.LAO = None
+        self.MTO = None
+        self.HIP = None
+        self.TIP = None
+        self.SUP = None
+
+    def get_LAO(self,):
+        LAO = self.pids[0]
+        h_score = self.players[LAO].total_troops
+        for p in self.players:
+            if self.players[p].total_troops > h_score:
+                h_score = self.players[p].total_troops
+                LAO = p
+            elif self.players[p].total_troops == h_score:
+                LAO = None
+        self.LAO = LAO
+    
+    def update_LAO(self, p):
+        if self.LAO == None:
+            self.get_LAO()
+        else:
+            if self.LAO != p:
+                if self.players[p].total_troops > self.players[self.LAO].total_troops:
+                    self.LAO = p
+                elif self.players[p].total_troops == self.players[self.LAO].total_troops:
+                    self.LAO = None
+    
+    def get_MTO(self,):
+        MTO = self.pids[0]
+        h_score = len(self.players[MTO].territories)
+        for p in self.players:
+            if len(self.players[p].territories) > h_score:
+                h_score = len(self.players[p].territories)
+                MTO = p
+            elif len(self.players[p].territories) == h_score:
+                MTO = None
+        self.MTO = MTO
+    
+    def update_MTO(self, p):
+        if self.MTO == None:
+            self.get_MTO()
+        else:
+            if self.MTO != p:
+                if len(self.players[p].territories)  > len(self.players[self.MTO].territories):
+                    self.MTO = p
+                elif len(self.players[p].territories) == len(self.players[self.MTO].territories):
+                    self.MTO = None
+
+    def get_HIP(self, ):
+        HIP = self.pids[0]
+        h_score = self.get_player_infra_level(self.players[HIP])
+        for p in self.players:
+            curri = self.get_player_infra_level(self.players[p])
+            if curri > h_score:
+                h_score = curri
+                HIP = p
+            elif curri == h_score:
+                HIP = None
+        self.HIP = HIP
+
+    def update_HIP(self, p):
+        if self.HIP == None:
+            self.get_HIP()
+        else:
+            if self.HIP != p:
+                pi = self.get_player_infra_level(self.players[p])
+                hi = self.get_player_infra_level(self.players[self.HIP])
+                if pi  > hi:
+                    self.HIP = p
+                elif pi == hi:
+                    self.HIP = None
+
+    def get_TIP(self, ):
+        TIP = self.pids[0]
+        h_score = self.get_player_industrial_level(self.players[TIP])
+        for p in self.players:
+            curri = self.get_player_industrial_level(self.players[p])
+            if curri > h_score:
+                h_score = curri
+                TIP = p
+            elif curri == h_score:
+                TIP = None
+        self.TIP = TIP
+    
+    def update_TIP(self, p):
+        if self.TIP == None:
+            self.get_TIP()
+        else:
+            if self.TIP != p:
+                pi = self.get_player_industrial_level(self.players[p])
+                hi = self.get_player_industrial_level(self.players[self.TIP])
+                if pi > hi:
+                    self.TIP = p
+                elif pi == hi:
+                    self.TIP = None
+    
+    def get_SUP(self,):
+        l = [self.LAO, self.MTO, self.HIP, self.TIP]
+        for p in l:
+            if l.count(p) >= 3:
+                self.SUP = p
+                return
 
     def convert_reserves(self, amt, player):
         extra = 0
@@ -148,6 +254,7 @@ class Game_State_Manager:
         total = 0
         for t in player.territories:
             total += self.map.territories[t].troops
+        player.total_troops = total
         return total
 
     def send_player_list(self, ):
@@ -163,7 +270,7 @@ class Game_State_Manager:
     def update_player_stats(self, pid):
         data = {
             'name': self.players[pid].name,
-            'troops': self.get_total_troops_of_player(pid),
+            'troops': self.players[pid].total_troops,
             'trtys': len(self.players[pid].territories)
         }
         self.server.emit('update_players_stats', data, room=self.lobby)
@@ -180,6 +287,8 @@ class Game_State_Manager:
     def upgrade_infrastructure(self, amt, player):
         self.players[player].infrastructure_upgrade += amt
         self.players[player].stars -= amt*4
+        self.update_HIP(player)
+        self.get_SUP()
 
     def get_deployable_amt(self, player):
         bonus = 0
@@ -209,8 +318,11 @@ class Game_State_Manager:
                 trty = random.choice(p.territories)
                 t = self.map.territories[trty]
                 t.troops += 1
+                p.total_troops += 1
                 p.deployable_amt -= 1
                 self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
+            self.update_LAO(player)
+            self.get_SUP()
             self.update_player_stats(player)
 
     def get_player_industrial_level(self, player):
@@ -220,15 +332,15 @@ class Game_State_Manager:
             lvl += 1
         elif c_amt > 3:
             lvl += 1 + (c_amt-3)//2
-        for trty in self.map.territories:
-            if trty.name in player.territories and trty.isMegacity:
+        for trty in player.territories:
+            if self.map.territories[trty].isMegacity:
                 lvl += 1
         return lvl
 
     def get_player_infra_level(self, player):
         lvl = 0
-        for trty in self.map.territories:
-            if trty in player.territories and trty.isTransportcenter:
+        for trty in player.territories:
+            if self.map.territories[trty].isTransportcenter:
                 lvl += 1
         lvl += player.infrastructure_upgrade
         return lvl
@@ -277,16 +389,20 @@ class Game_State_Manager:
         trty_atk.troops -= atk_amt
         self.server.emit('update_trty_display', {t1:{'troops': trty_atk.troops}}, room=self.lobby)
         
+        # Possible future concern: multiplier causing both sides going below 0
         # Battle results
         # attacker wins
         # CM
         if result[0] > 0:
+
+            # Territory troop change
             trty_def.troops = result[0]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
-
+            # Attacker gain territory
             atk_p.territories.append(t2)
             self.server.emit('update_player_territories', {'list': atk_p.territories}, room=a_pid)
             self.server.emit('update_trty_display', {t2:{'color': atk_p.color}}, room=self.lobby)
+            # Defender lost territory
             def_p.territories.remove(t2)
             self.server.emit('update_player_territories', {'list': def_p.territories}, room=d_pid)
 
@@ -298,12 +414,31 @@ class Game_State_Manager:
 
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
+        
+        atk_p.total_troops -= (atk_amt-result[0])
+        def_p.total_troops -= (def_amt-result[1])
 
         # update player stats list
         self.update_player_stats(a_pid)
         self.update_player_stats(d_pid)
 
-        self.et.determine_elimination(def_p)
+        self.update_LAO(a_pid)
+        self.update_LAO(d_pid)
+
+        self.update_MTO(a_pid)
+        self.update_MTO(d_pid)
+
+        if trty_def.isCity or trty_def.isMegacity:
+            self.update_TIP(a_pid)
+            self.update_TIP(d_pid)
+
+        if trty_def.isTransportcenter:
+            self.update_HIP(a_pid)
+            self.update_HIP(d_pid)
+
+        self.get_SUP()
+
+        self.et.determine_elimination(atk_p, def_p)
         self.egt.determine_end_game(self)
         
 
