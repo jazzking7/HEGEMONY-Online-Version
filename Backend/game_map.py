@@ -51,11 +51,7 @@ class Map:
         return bonus
 
     def own_continent(self, t_list, cont_list):
-        amt = 0
-        for t in t_list:
-            if t in cont_list:
-                amt += 1
-        return amt == len(cont_list)
+        return set(cont_list).issubset(set(t_list))
 
     def __init__(self, mapName):
         
@@ -119,4 +115,3 @@ class Map:
         # self.sea_routes = []
         # self.sea_side_territories = []
         # self.pre_existed_sea_routes = []
-

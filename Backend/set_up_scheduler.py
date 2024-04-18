@@ -32,10 +32,14 @@ class setup_event_scheduler:
     # TO BE UPDATED
     def distribute_missions(self, gs, ms):
         # CM
-        for player in gs.players:
-            continents = ['Pannotia', 'Zealandia', 'Baltica', 'Rodinia', 'Kenorland', 'Kalahari']
-            gs.server.emit('get_mission', {'msg': f'Mission: capture {random.choice(continents)}'}, room=player)
-
+        miss_set = gs.Mdist.get_mission_set(len(gs.pids))
+        for index, player in enumerate(gs.pids):
+            miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
+            miss_set[index].set_up_tracker_view()
+            gs.server.emit('get_mission', {'msg': f'Mission: Survive'}, room=player)
+        gs.Mdist.set_up_mission_trackers(gs, miss_set)
+        print(gs.MTrackers)
+        print(miss_set)
         ms.selection_time_out(1, len(gs.players))
 
     # FCFS

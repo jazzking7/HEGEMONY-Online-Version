@@ -61,6 +61,7 @@ class General_Event_Scheduler:
 
     def execute_game_events(self,):
         self.run_setup_events()
+
         self.gs.send_player_list()
         self.gs.get_LAO()
         self.gs.get_MTO()
@@ -68,6 +69,11 @@ class General_Event_Scheduler:
         self.gs.get_TIP()
         self.gs.get_SUP()
         self.gs.update_global_status()
+
+        for mk in self.gs.MTrackers:
+            if mk != 'round':
+                self.gs.MTrackers[mk].event.set()
+
         self.run_turn_scheduler()
 
     def halt_events(self,):

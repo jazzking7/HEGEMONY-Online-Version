@@ -1,5 +1,50 @@
 from missions import *
 import random
+import threading
+
+class Mission_Tracker(threading.Thread):
+    
+    def __init__(self, gs):
+        super().__init__()
+        self.observers = []
+        self.gs = gs
+        self.event = threading.Event()
+        self.daemon = True
+
+    def add_observer(self, player):
+        self.observers.append(player)
+
+    def remove_observer(self, player):
+        self.observers.remove(player)
+
+    def check_conditions(self,):
+        raise NotImplementedError("Subclasses must implement check_conditions method")
+    
+    def run(self, ):
+        while not self.gs.GES.interrupt:
+            self.event.wait()
+            
+            self.check_conditions()
+
+            self.event.clear()
+
+class Round_Based_Incrementor(Mission_Tracker):
+
+    def __init__(self, gs):
+        super().__init__(gs)
+    
+    def check_conditions(self,):
+        for obs in self.observers:
+            obs.check_round_condition()
+
+class Event_Based_Tracker(Mission_Tracker):
+
+    def __init__(self, gs):
+        super().__init__(gs)
+    
+    def check_conditions(self, ):
+        for obs in self.observers:
+            obs.check_conditions()
 
 class Mission_Distributor:
 
@@ -20,11 +65,18 @@ class Mission_Distributor:
         ]
 
     def validate_mission_set(self, miss_set):
+        c = 0
         for m in miss_set:
             if m in self.self_wins:
-                return True
+                c += 1
+                if m == 'Loy':
+                    c += 1
             if m in self.dup_con and miss_set.count(m) > 1:
                 return True
+        if 'Pac' in miss_set and c >= math.floor(len(miss_set)/2):
+            return False
+        if c > 0:
+            return True
         for nc in self.nat_con:
             if all(m in nc for m in miss_set):
                 return True
@@ -48,5 +100,56 @@ class Mission_Distributor:
                 if self.validate_mission_set(miss_set):
                     return miss_set
                 miss_set = []
-    
-    
+
+    def initiate_mission(self, gs, player, name):
+        if name == 'Pac':
+            return Pacifist(player, gs)
+        elif name == 'War':
+            return Warmonger(player, gs)
+        elif name == 'Loy':
+            return Loyalist(player, gs)
+        elif name == 'Bon':
+            return Bounty_Hunter(player, gs)
+        elif name == 'Uni':
+            return Unifier(player, gs)
+        elif name == 'Pol':
+            return Polarizer(player, gs)
+        elif name == 'Fan':
+            return Fanatic(player, gs)
+        elif name == 'Ind':
+            return Industrialist(player, gs)
+        elif name == 'Exp':
+            return Expansionist(player, gs)
+        elif name == 'Pop':
+            return Populist(player, gs)
+        elif name == 'Dom':
+            return Dominator(player, gs)
+        elif name == 'Gua':
+            return Guardian(player, gs)
+
+    def set_up_mission_trackers(self, gs, miss_set):
+        for m in miss_set:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter']:
+                if 'death' not in gs.MTrackers:
+                    gs.MTrackers['death'] = Event_Based_Tracker(gs)
+                gs.MTrackers['death'].add_observer(m)
+            if m.type == 'r_based':
+                if 'round' not in gs.MTrackers:
+                    gs.MTrackers['round'] = Round_Based_Incrementor(gs)
+                gs.MTrackers['round'].add_observer(m)
+            if m.name in ['Unifier', 'Polarizer', 'Fanatic', 'Industrialist', 'Expansionist', 'Guardian', 'Dominator']:
+                if 'trty' not in gs.MTrackers:
+                    gs.MTrackers['trty'] = Event_Based_Tracker(gs)
+                gs.MTrackers['trty'].add_observer(m)
+            if m.name in ['Industrialist', 'Dominator']:
+                if 'indus' not in gs.MTrackers:
+                    gs.MTrackers['indus'] = Event_Based_Tracker(gs)
+                gs.MTrackers['indus'].add_observer(m)
+            if m.name in ['Populist', 'Dominator']:
+                if 'popu' not in gs.MTrackers:
+                    gs.MTrackers['popu'] = Event_Based_Tracker(gs)
+                gs.MTrackers['popu'].add_observer(m)
+        
+        # start running the trackers
+        for t in gs.MTrackers:
+            gs.MTrackers[t].start()

@@ -6,7 +6,6 @@ from game_map import *
 from general_event_scheduler import *
 from elimination_tracker import *
 from end_game_tracker import *
-from mission_trackers import *
 
 class Player:
 
@@ -15,8 +14,6 @@ class Player:
         self.name = name
         # status
         self.alive = True
-        # agenda
-        self.mission = None
         # skill
         self.skill = None
         # ownership
@@ -61,10 +58,12 @@ class Game_State_Manager:
         # Number of players and players are related
         self.players = {}
         self.pids = []
+        self.oriPlayers = []
         for player in player_list:
             self.pids.append(player['sid'])
+            self.oriPlayers.append(player['sid'])
             self.players[player['sid']] = Player(player['name'], self)
-
+        
         # Map
         self.map = Map(mapName)
         self.total_troops = len(self.map.territories)
@@ -105,7 +104,8 @@ class Game_State_Manager:
         self.GES = General_Event_Scheduler(self, setup_events)
 
         # Mission
-        self.MSs = None
+        self.Mdist = None
+        self.MTrackers = {}
 
         # Elimination Tracker
         self.et = Elimination_tracker()
@@ -119,9 +119,18 @@ class Game_State_Manager:
         self.TIP = None
         self.SUP = None
 
+        # monitoring
+        self.perm_elims = []
+        self.miss_elims = []
+        self.kill_logs = {}
+
+    def signal_MTrackers(self, event_name):
+        if event_name in self.MTrackers:
+            self.MTrackers[event_name].event.set()
+
     def get_LAO(self,):
-        LAO = self.pids[0]
-        h_score = self.players[LAO].total_troops
+        LAO = None
+        h_score = -100
         for p in self.players:
             if self.players[p].total_troops > h_score:
                 h_score = self.players[p].total_troops
@@ -131,9 +140,6 @@ class Game_State_Manager:
         self.LAO = LAO
     
     def update_LAO(self, p):
-        if len(self.pids) == 1:
-            self.LAO = p
-            return
         if self.LAO == None:
             self.get_LAO()
         else:
@@ -144,8 +150,8 @@ class Game_State_Manager:
                     self.LAO = None
     
     def get_MTO(self,):
-        MTO = self.pids[0]
-        h_score = len(self.players[MTO].territories)
+        MTO = None
+        h_score = -100
         for p in self.players:
             if len(self.players[p].territories) > h_score:
                 h_score = len(self.players[p].territories)
@@ -155,9 +161,6 @@ class Game_State_Manager:
         self.MTO = MTO
     
     def update_MTO(self, p):
-        if len(self.pids) == 1:
-            self.MTO = p
-            return
         if self.MTO == None:
             self.get_MTO()
         else:
@@ -168,35 +171,36 @@ class Game_State_Manager:
                     self.MTO = None
 
     def get_HIP(self, ):
-        HIP = self.pids[0]
-        h_score = self.get_player_infra_level(self.players[HIP])
+        HIP = None
+        h_score = -100
         for p in self.players:
-            curri = self.get_player_infra_level(self.players[p])
-            if curri > h_score:
-                h_score = curri
-                HIP = p
-            elif curri == h_score:
-                HIP = None
+            if self.players[p].alive:
+                curri = self.get_player_infra_level(self.players[p])
+                if curri > h_score:
+                    h_score = curri
+                    HIP = p
+                elif curri == h_score:
+                    HIP = None
         self.HIP = HIP
 
     def update_HIP(self, p):
-        if len(self.pids) == 1:
-            self.HIP = p
-            return
         if self.HIP == None:
             self.get_HIP()
         else:
             if self.HIP != p:
-                pi = self.get_player_infra_level(self.players[p])
-                hi = self.get_player_infra_level(self.players[self.HIP])
-                if pi  > hi:
-                    self.HIP = p
-                elif pi == hi:
-                    self.HIP = None
+                if self.players[self.HIP].alive and self.players[p].alive:
+                    pi = self.get_player_infra_level(self.players[p])
+                    hi = self.get_player_infra_level(self.players[self.HIP])
+                    if pi  > hi:
+                        self.HIP = p
+                    elif pi == hi:
+                        self.HIP = None
+                else:
+                    self.get_HIP()
 
     def get_TIP(self, ):
-        TIP = self.pids[0]
-        h_score = self.get_player_industrial_level(self.players[TIP])
+        TIP = None
+        h_score = -100
         for p in self.players:
             curri = self.get_player_industrial_level(self.players[p])
             if curri > h_score:
@@ -207,9 +211,6 @@ class Game_State_Manager:
         self.TIP = TIP
     
     def update_TIP(self, p):
-        if len(self.pids) == 1:
-            self.TIP = p
-            return
         if self.TIP == None:
             self.get_TIP()
         else:
@@ -227,6 +228,7 @@ class Game_State_Manager:
             if l.count(p) >= 3:
                 self.SUP = p
                 return
+        self.SUP = None
 
     def update_global_status(self, ):
         self.server.emit('update_global_status',
@@ -304,11 +306,13 @@ class Game_State_Manager:
             self.server.emit('clear_view', room=player)
 
     def upgrade_infrastructure(self, amt, player):
+        # CM
         self.players[player].infrastructure_upgrade += amt
         self.players[player].stars -= amt*4
         self.update_HIP(player)
         self.get_SUP()
         self.update_global_status()
+        self.signal_MTrackers('popu')
 
     def get_deployable_amt(self, player):
         bonus = 0
@@ -345,6 +349,7 @@ class Game_State_Manager:
             self.get_SUP()
             self.update_global_status()
             self.update_player_stats(player)
+            self.signal_MTrackers('popu')
 
     def get_player_industrial_level(self, player):
         lvl = 0
@@ -460,7 +465,12 @@ class Game_State_Manager:
         self.get_SUP()
         self.update_global_status()
 
-        self.et.determine_elimination(atk_p, def_p)
+        # mission
+        self.signal_MTrackers('indus')
+        self.signal_MTrackers('popu')
+        self.signal_MTrackers('trty')
+
+        self.et.determine_elimination(self, a_pid, d_pid)
         self.egt.determine_end_game(self)
         
 

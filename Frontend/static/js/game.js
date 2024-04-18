@@ -8,6 +8,9 @@ let game_settings;
 let timeoutBar;
 let current_interval = null;
 
+let misProgBar;
+let lossProg;
+
 $(document).ready(async function() {
   
   // Hide control buttons
@@ -245,6 +248,89 @@ socket.on('get_mission', function(data) {
   $('#announcement').html('<h1>' + data.msg + '</h1>');
   socket.off('get_mission');
 });
+
+socket.on('initiate_tracker', function(data){
+  $('#mission_title').text(data.title);
+  if (data.targets){
+    $('#misTargets').show();
+    for (target in data.targets) {
+      var tarid = target.replace(/ /g, "_");
+      $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
+      $(`#target_${target}`).css({
+        'display': 'inline-block',
+        'padding': '2px',
+        'margin': '2px',
+        'border-radius': '3px'
+      });
+      if (data.targets[target] == 's') {
+        $(`#target_${tarid}`).css('background-color', '#50C878');
+      } else {
+        $(`#target_${tarid}`).css('background-color', '#E34234');
+      }
+    }
+  } 
+  if (data.misProgBar) {
+    $('#misProgBar').show();
+    misProgBar = new ProgressBar.Line('#misProgBar', {
+      strokeWidth: 4,
+      easing: 'easeInOut',
+      duration: 1000,
+      color: '#50C878',
+      trailColor: '#eee',
+      trailWidth: 4,
+      svgStyle: {width: '100%', height: '100%'},
+    });
+    misProgBar.animate(data.misProgBar[0]/data.misProgBar[1]);
+  }
+  if (data.misProgDesp) {
+    $('#misProgDesp').show();
+    $('#misProgDesp').text(data.misProgDesp);
+  }
+  if (data.lossProg) {
+    $('#lossProg').show();
+    lossProg = new ProgressBar.Line('#lossProg', {
+      strokeWidth: 4,
+      easing: 'easeInOut',
+      duration: 1000,
+      color: '#880000',
+      trailColor: '#eee',
+      trailWidth: 4,
+      svgStyle: {width: '100%', height: '100%'},
+    });
+    lossProg.animate(data.lossProg[0]/data.lossProg[1]);
+  }
+  if (data.lossDesp) {
+    $('#lossDesp').show();
+    $('#lossDesp').text(data.lossDesp);
+  }
+})
+
+socket.on('update_tracker', function(data){
+  if (data.targets){
+    for (target in data.targets) {
+      var tarid = target.replace(/ /g, "_");
+      if (data.targets[target] == 's') {
+        $(`#target_${tarid}`).css('background-color', '#50C878');
+      } else {
+        $(`#target_${tarid}`).css('background-color', '#E34234');
+      }
+    }
+  } 
+  if (data.misProgBar) {
+    misProgBar.animate(data.misProgBar[0]/data.misProgBar[1]);
+  }
+  if (data.misProgDesp) {
+    $('#misProgDesp').text(data.misProgDesp);
+  }
+  if (data.lossProg) {
+    lossProg.animate(data.lossProg[0]/data.lossProg[1]);
+  }
+  if (data.lossDesp) {
+    $('#lossDesp').text(data.lossDesp);
+  }
+});
+
+//===================================================================================
 
 // Start Color Choosing
 socket.on('choose_color', function(data){

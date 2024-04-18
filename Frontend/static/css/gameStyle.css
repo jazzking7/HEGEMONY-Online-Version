@@ -91,12 +91,45 @@ html, body {
     text-align: center;
 }
 
+
 #tracker{
     position: absolute;
     top: 1%;
     right: 0;
     max-width: 20vw;
     max-height: 40vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.winning_condition {
+    display: flex;
+    flex-direction: column;
+}
+
+.losing_condition {
+    display: flex;
+    flex-direction: column;
+}
+
+#misTargets {
+    display: None;
+}
+
+#misProgBar {
+    display: None;
+}
+
+#misProgDesp {
+    display: None;
+}
+
+#lossProg {
+    display: None;
+}
+
+#lossDesp {
+    display: None;
 }
 
 #control_panel{
