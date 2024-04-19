@@ -38,6 +38,7 @@ class setup_event_scheduler:
             miss_set[index].set_up_tracker_view()
             gs.server.emit('get_mission', {'msg': f'Mission: Survive'}, room=player)
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
+        gs.Mset = miss_set
         print(gs.MTrackers)
         print(miss_set)
         ms.selection_time_out(1, len(gs.players))

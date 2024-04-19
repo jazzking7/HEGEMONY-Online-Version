@@ -32,6 +32,8 @@ class General_Event_Scheduler:
         # inter turn summit
         self.summit_requested = False
         self.summit_voter = {'y': 0, 'n': 0}
+        # locking mechanism
+        self.lock = threading.Lock()
 
     def selection_time_out(self, num_secs, count):
         self.selected = 0
@@ -76,8 +78,15 @@ class General_Event_Scheduler:
 
         self.run_turn_scheduler()
 
+    # end game
     def halt_events(self,):
-        self.interrupt = True
+        self.lock.acquire()
+        if not self.interrupt:
+            self.interrupt = True
+            self.gs.signal_view_clear()
+            time.sleep(1)
+            self.gs.game_over()
+        self.lock.release()
 
     # Inner async
     def handle_async_event(self, data, pid):

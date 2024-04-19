@@ -241,6 +241,22 @@ function show_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
 }
 
+socket.on('GAME_OVER', function(data){
+  $('#announcement').show();
+  $('#announcement').html('<h1>GAME OVER<h1>');
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_title').html('<h1>WINNERS:</h1>');
+  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;" ></div>`);
+  for (winner of data.winners) {
+    var wname; var mission;
+    for (w in winner) {
+      wname = w;
+      mission = winner[w];
+    }
+    $('#winners').append(`<div><h3>${wname} => ${mission}</h3></div>`)
+  }
+});
+
 //===================================================================================
 
 // Receive Mission + Display info on Mission Tracker
@@ -256,7 +272,7 @@ socket.on('initiate_tracker', function(data){
     for (target in data.targets) {
       var tarid = target.replace(/ /g, "_");
       $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
-      $(`#target_${target}`).css({
+      $(`#target_${tarid}`).css({
         'display': 'inline-block',
         'padding': '2px',
         'margin': '2px',

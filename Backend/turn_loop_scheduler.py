@@ -124,21 +124,22 @@ class turn_loop_scheduler:
         ms.terminated = True
         return
     
-    def handle_end_turn(self, gs, player):
-        # notify frontend to change event and clear controls
-        gs.server.emit("change_click_event", {'event': None}, room=player)
-        gs.server.emit("clear_view", room=player)
-        gs.server.emit('signal_hide_btns', room=player)
-        print(f"{gs.players[player].name}'s turn ends, buttons have been hidden.")
-        # clear deployables
-        gs.clear_deployables(player)
-        # assign stars if applicable
-        # CM
-        p = gs.players[player]
-        if p.turn_victory:
-            p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
-        print(f'{gs.players[player].name} special authority amount: {p.stars}')
-        print(f'{gs.players[player].name} reserve amount: {p.reserves}')
+    def handle_end_turn(self, ms, gs, player):
+        if not ms.interrupt:
+            # notify frontend to change event and clear controls
+            gs.server.emit("change_click_event", {'event': None}, room=player)
+            gs.server.emit("clear_view", room=player)
+            gs.server.emit('signal_hide_btns', room=player)
+            print(f"{gs.players[player].name}'s turn ends, buttons have been hidden.")
+            # clear deployables
+            gs.clear_deployables(player)
+            # assign stars if applicable
+            # CM
+            p = gs.players[player]
+            if p.turn_victory:
+                p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
+            print(f'{gs.players[player].name} special authority amount: {p.stars}')
+            print(f'{gs.players[player].name} reserve amount: {p.reserves}')
 
     def execute_turn(self, gs, ms, curr_player):
 
@@ -158,7 +159,7 @@ class turn_loop_scheduler:
 
         ms.curr_thread.join()
 
-        self.handle_end_turn(gs, curr_player)
+        self.handle_end_turn(ms, gs, curr_player)
 
     def run_turn_loop(self, gs, ms):
         curr_player = gs.pids[ms.current_player]

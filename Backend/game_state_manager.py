@@ -105,6 +105,7 @@ class Game_State_Manager:
 
         # Mission
         self.Mdist = None
+        self.Mset = None
         self.MTrackers = {}
 
         # Elimination Tracker
@@ -127,6 +128,14 @@ class Game_State_Manager:
     def signal_MTrackers(self, event_name):
         if event_name in self.MTrackers:
             self.MTrackers[event_name].event.set()
+
+    def game_over(self, ):
+        winners = self.Mdist.determine_winners(self)
+        winners = [{self.players[w].name: winners[w]} for w in winners]
+        print(winners)
+        self.server.emit('GAME_OVER', {
+            'winners': winners,
+        }, room=self.lobby)
 
     def get_LAO(self,):
         LAO = None

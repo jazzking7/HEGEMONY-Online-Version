@@ -64,6 +64,9 @@ class Mission_Distributor:
             'Exp', 'Pop', 'Dom', 'Gua'
         ]
 
+        self.first_tier = ['Bounty_Hunter', 'Decapitator']
+        self.second_tier = ['Loyalist', 'Guardian']
+
     def validate_mission_set(self, miss_set):
         c = 0
         for m in miss_set:
@@ -153,3 +156,39 @@ class Mission_Distributor:
         # start running the trackers
         for t in gs.MTrackers:
             gs.MTrackers[t].start()
+    
+    def determine_winners(self, gs):
+        c = []
+        for p in gs.players:
+            if gs.players[p].alive:
+                c.append(p)
+        if len(c) == 1:
+            return {c[0]: "Lone Survivor"}
+        f = {}
+        s = {}
+        t = {}
+        l = None
+        miss_set = gs.Mset
+        for m in miss_set:
+            if m.end_game_checking():
+                if m.name in self.first_tier:
+                    f[m.player] = m.name
+                elif m.name in self.second_tier:
+                    s[m.player] = m.name
+                    if m.name == 'Loyalist':
+                        l = m
+                else:
+                    t[m.player] = m.name
+
+        if l is not None:
+            if l.target_player in t:
+                s[l.target_player] = t[l.target_player]
+            elif l.target_player in f:
+                f[l.player] = s[l.player]
+    
+        if len(f) > 0:
+            return f
+        elif len(s) > 0:
+            return s
+        else:
+            return t

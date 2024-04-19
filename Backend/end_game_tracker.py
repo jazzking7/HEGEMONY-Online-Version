@@ -16,6 +16,5 @@ class End_game_tracker:
             for p in gs.pids:
                 if gs.players[p].alive:
                     vp = gs.players[p] 
-            gs.GES.halt_events()
             gs.signal_view_clear()
-            gs.server.emit('set_up_announcement', {'msg': f"GAME OVER\n{vp.name}'s victory!"})
+            gs.GES.halt_events()

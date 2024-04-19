@@ -12,16 +12,15 @@ class Mission:
         raise NotImplementedError("Subclasses must implement check_conditions method")
 
     def signal_mission_success(self,):
-        gs.GES.halt_events()
-        gs.signal_view_clear()
-        gs.server.emit('set_up_announcement', {'msg': f"GAME OVER\n{vp.name}'s victory!"})
+        self.gs.signal_view_clear()
+        self.gs.GES.halt_events()
         return
 
     def set_up_tracker_view(self, ):
         raise NotImplementedError("Subclasses must implement set_up method")
 
     def end_game_checking(self, ):
-        raise NotImplementedError("Subclasses must implement set_up method")
+        raise NotImplementedError("Subclasses must implement end_game_checking method")
 
     def update_tracker_view(self, updates):
         self.gs.server.emit('update_tracker', updates, room=self.player)
@@ -43,6 +42,8 @@ class Pacifist(Mission):
         self.goal_round = 10
 
     def check_conditions(self,):
+        if not self.gs.players[self.player].alive:
+            return
         dc = len(self.gs.perm_elims)
         if dc > self.death_count:
             self.round = -1
@@ -63,6 +64,8 @@ class Pacifist(Mission):
             self.signal_mission_failure()
     
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         self.round += 1
         self.update_tracker_view({
             'misProgBar': [0, self.goal_round],
@@ -81,6 +84,9 @@ class Pacifist(Mission):
             'lossDesp': f'{self.death_count}/{self.max_death_count} deaths until mission failure'
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.round == self.goal_round and self.gs.players[self.player].alive
+
 class Warmonger(Mission):
     def __init__(self, player, gs):
         super().__init__("Warmonger", player, gs)
@@ -91,6 +97,8 @@ class Warmonger(Mission):
         self.death_count = 0
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         dc = len(self.gs.perm_elims)
         if dc > self.death_count:
             self.peace = -1
@@ -107,6 +115,8 @@ class Warmonger(Mission):
             self.signal_mission_success()
 
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         self.peace += 1
         self.update_tracker_view({
             'lossProg': [self.peace, self.max_peace],
@@ -129,6 +139,9 @@ class Warmonger(Mission):
             'lossDesp': f'{self.peace}/{self.max_peace} consecutives round of peace until mission failure'
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.death_count == self.goal_count and self.gs.players[self.player].alive
+
 class Loyalist(Mission):
     def __init__(self, player, gs):
         super().__init__("Loyalist", player, gs)
@@ -138,7 +151,16 @@ class Loyalist(Mission):
             if self.target_player == player:
                 self.target_player = None
 
+    def exactly_two_players_left(self, ):
+        s = []
+        for p in self.gs.players:
+            if self.gs.players[p].alive:
+                s.append(p)
+        return len(s) == 2 and self.player in s and self.target_player in s
+
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if not self.gs.players[self.target_player].alive:
             self.update_tracker_view({
             'targets': {self.gs.players[self.target_player].name: 'f'},
@@ -146,6 +168,8 @@ class Loyalist(Mission):
             })
             self.signal_mission_failure()
         # verify how many players still alive
+        if self.exactly_two_players_left():
+            self.signal_mission_success()
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -153,6 +177,9 @@ class Loyalist(Mission):
             'targets': {self.gs.players[self.target_player].name: 's'},
             'misProgDesp': 'Target still alive, mission continue'
         }, room=self.player)
+
+    def end_game_checking(self, ):
+        return self.gs.players[self.target_player].alive and self.gs.players[self.player].alive
         
 class Bounty_Hunter(Mission):
     def __init__(self, player, gs):
@@ -172,6 +199,8 @@ class Bounty_Hunter(Mission):
                 self.target_players = None
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         # check if target players are dead
         c = 0
         for target in self.target_players:
@@ -189,7 +218,9 @@ class Bounty_Hunter(Mission):
                 self.update_tracker_view({'targets': {self.gs.players[target].name: 'f'}})
         if c == len(self.target_players):
             # signal end
+            self.update_tracker_view({'misProgDesp': 'bounty not yet fulfilled'})
             self.signal_mission_success()
+
 
     def set_up_tracker_view(self, ):
         targets = {}
@@ -200,7 +231,20 @@ class Bounty_Hunter(Mission):
             'targets': targets,
             'misProgDesp': 'bounty not yet fulfilled'
         }, room=self.player)
-        
+
+    def end_game_checking(self, ):
+        c = 0
+        for target in self.target_players:
+            if target in self.gs.kill_logs:
+                if self.gs.kill_logs[target] not in [self.player, 'MF']:
+                    return False
+                else:
+                    c += 1
+            else:
+                return False
+        if c == len(self.target_players):
+            return True and self.gs.players[self.player].alive
+
 class Unifier(Mission):
     def __init__(self, player, gs):
         super().__init__("Unifier", player, gs)
@@ -220,6 +264,8 @@ class Unifier(Mission):
         return self.gs.map.own_continent(self.gs.players[self.player].territories, self.gs.map.conts[self.target_continent]['trtys'])
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if not self.own_target_cont():
             self.round = -1
             self.update_tracker_view({
@@ -228,9 +274,11 @@ class Unifier(Mission):
             'misProgDesp': f'Successfully controlled {self.target_continent} for {0}/{self.target_round} consecutive rounds'
             })
         else:
-            self.update_tracker_view({'targets': {self.target_continent: 'f'}})
+            self.update_tracker_view({'targets': {self.target_continent: 's'}})
     
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.own_target_cont():
             self.round += 1
             self.update_tracker_view({
@@ -249,6 +297,9 @@ class Unifier(Mission):
             'misProgBar': [self.round, self.target_round],
             'misProgDesp': f'Successfully controlled {self.target_continent} for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
+    
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
 
 class Polarizer(Mission):
     def __init__(self, player, gs):
@@ -265,12 +316,16 @@ class Polarizer(Mission):
         return True
 
     def check_conditions(self, ):
-        if not self.no_unification(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        if not self.no_unification():
             self.round = -1
             self.update_tracker_view({'misProgBar': [0, self.target_round],
             'misProgDesp': f'{0}/{self.target_round} consecutive rounds without continental unification'})
     
     def check_round_condition(self,):
+        if not self.gs.players[self.player].alive:
+            return
         if self.no_unification():
             self.round += 1
             self.update_tracker_view({'misProgBar': [self.round, self.target_round],
@@ -286,6 +341,9 @@ class Polarizer(Mission):
             'misProgBar': [self.round, self.target_round],
             'misProgDesp': f'{self.round}/{self.target_round} consecutive rounds without continental unification',
         }, room=self.player)
+
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
 
 class Fanatic(Mission):
     def __init__(self, player, gs):
@@ -308,6 +366,8 @@ class Fanatic(Mission):
         return self.gs.map.own_continent(p_list, self.targets)
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         # verify if player owns the targets
         if not self.own_all_targets():
             self.round = -1
@@ -315,6 +375,8 @@ class Fanatic(Mission):
             'misProgDesp': f'Controlled target territories for {0}/{self.target_round} consecutive rounds',})
     
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.own_all_targets():
             self.round += 1
             self.update_tracker_view({'misProgBar': [self.round, self.target_round],
@@ -334,6 +396,9 @@ class Fanatic(Mission):
             'misProgDesp': f'Controlled target territories for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
+
 class Industrialist(Mission):
     def __init__(self, player, gs):
         super().__init__("Industrialist", player, gs)
@@ -342,6 +407,8 @@ class Industrialist(Mission):
         self.target_round = 5
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.TIP != self.player:
             self.round = -1
             self.update_tracker_view({
@@ -350,6 +417,8 @@ class Industrialist(Mission):
             })
     
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.TIP == self.player:
             self.round += 1
             self.update_tracker_view({
@@ -367,6 +436,9 @@ class Industrialist(Mission):
             'misProgDesp': f'Being the most industrailized player for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
+
 class Expansionist(Mission):
     def __init__(self, player, gs):
         super().__init__("Expansionist", player, gs)
@@ -375,6 +447,8 @@ class Expansionist(Mission):
         self.target_round = 5
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.MTO != self.player:
             self.round = -1
             self.update_tracker_view({
@@ -383,6 +457,8 @@ class Expansionist(Mission):
             })
 
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.MTO == self.player:
             self.round += 1
             self.update_tracker_view({
@@ -400,6 +476,9 @@ class Expansionist(Mission):
             'misProgDesp': f'Controlled the most territories for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
+
 class Populist(Mission):
     def __init__(self, player, gs):
         super().__init__("Populist", player, gs)
@@ -408,6 +487,8 @@ class Populist(Mission):
         self.target_round = 5
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         # verify if player holds LAO title
         if self.gs.LAO != self.player:
             self.round = -1
@@ -415,6 +496,8 @@ class Populist(Mission):
             'misProgDesp': f'Holding the largest army for {0}/{self.target_round} consecutive rounds',})
 
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.LAO == self.player:
             self.round += 1
             self.update_tracker_view({'misProgBar': [self.round, self.target_round],
@@ -429,6 +512,9 @@ class Populist(Mission):
             'misProgBar': [self.round, self.target_round],
             'misProgDesp': f'Holding the largest army for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
+
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
         
 class Dominator(Mission):
     def __init__(self, player, gs):
@@ -438,6 +524,8 @@ class Dominator(Mission):
         self.target_round = 3
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         # verify if player holds SUP title
         if self.gs.SUP != self.player:
             self.round = -1
@@ -445,6 +533,8 @@ class Dominator(Mission):
             'misProgDesp': f'Exercising supremacy for {0}/{self.target_round} consecutive rounds',})
 
     def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if self.gs.SUP == self.player:
             self.round += 1
             self.update_tracker_view({'misProgBar': [self.round, self.target_round],
@@ -460,6 +550,9 @@ class Dominator(Mission):
             'misProgDesp': f'Exercising supremacy for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
 
+    def end_game_checking(self, ):
+        return self.round == self.target_round and self.gs.players[self.player].alive
+
 class Guardian(Mission):
     def __init__(self, player, gs):
         super().__init__("Guardian", player, gs)
@@ -472,6 +565,8 @@ class Guardian(Mission):
         return False
 
     def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
         if not self.own_capital():
             # signal death
             self.update_tracker_view({'target': {self.gs.players[self.player].capital: 'f'},
@@ -484,3 +579,6 @@ class Guardian(Mission):
             'target': {self.gs.players[self.player].capital: 's'},
             'misProgDesp': f'Capital remains unconquered, mission still in progress',
         }, room=self.player)
+
+    def end_game_checking(self, ):
+        return self.gs.players[self.player].alive
