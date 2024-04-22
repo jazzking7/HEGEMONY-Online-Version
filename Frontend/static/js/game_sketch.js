@@ -272,13 +272,6 @@ function setShadowColor(hexcode){
   return c
 }
 
-// TO BE UPDATED
-function keyPressed(){
-  if (key === 'c'){
-    scaleFactor = 1.0;
-  }
-}
-
 // Function to check if a point is inside a polygon
 function pointInPolygon(P, vertices) {
   let x = P.x, y = P.y;

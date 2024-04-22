@@ -111,7 +111,7 @@ class Game_State_Manager:
         # Elimination Tracker
         self.et = Elimination_tracker()
         # End game tracker
-        self.egt = End_game_tracker()
+        self.egt = None
 
         # Global status
         self.LAO = None
@@ -128,6 +128,8 @@ class Game_State_Manager:
     def signal_MTrackers(self, event_name):
         if event_name in self.MTrackers:
             self.MTrackers[event_name].event.set()
+            return True
+        return False
 
     def game_over(self, ):
         winners = self.Mdist.determine_winners(self)

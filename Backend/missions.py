@@ -12,7 +12,6 @@ class Mission:
         raise NotImplementedError("Subclasses must implement check_conditions method")
 
     def signal_mission_success(self,):
-        self.gs.signal_view_clear()
         self.gs.GES.halt_events()
         return
 
@@ -29,7 +28,9 @@ class Mission:
         self.gs.players[self.player].alive = False
         self.gs.miss_elims.append(self.player)
         self.gs.kill_logs[self.player] = 'MF'
-        self.gs.signal_MTrackers('death')
+        # prevent infinity loop
+        if not self.gs.signal_MTrackers('death'):
+            self.gs.egt.determine_end_game(self.gs)
 
 class Pacifist(Mission):
 
@@ -68,7 +69,7 @@ class Pacifist(Mission):
             return
         self.round += 1
         self.update_tracker_view({
-            'misProgBar': [0, self.goal_round],
+            'misProgBar': [self.round, self.goal_round],
             'misProgDesp': f'{self.round}/{self.goal_round} consecutive rounds of peace maintained',
             })
         if self.round == self.goal_round:
@@ -99,7 +100,7 @@ class Warmonger(Mission):
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
-        dc = len(self.gs.perm_elims)
+        dc = len(self.gs.perm_elims) + len(self.gs.miss_elims)
         if dc > self.death_count:
             self.peace = -1
             self.death_count = dc
@@ -218,7 +219,7 @@ class Bounty_Hunter(Mission):
                 self.update_tracker_view({'targets': {self.gs.players[target].name: 'f'}})
         if c == len(self.target_players):
             # signal end
-            self.update_tracker_view({'misProgDesp': 'bounty not yet fulfilled'})
+            self.update_tracker_view({'misProgDesp': 'bounty fulfilled'})
             self.signal_mission_success()
 
 

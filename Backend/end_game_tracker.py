@@ -12,9 +12,4 @@ class End_game_tracker:
                 if count == 2:
                     break
         if count < 2:
-            vp = None
-            for p in gs.pids:
-                if gs.players[p].alive:
-                    vp = gs.players[p] 
-            gs.signal_view_clear()
             gs.GES.halt_events()

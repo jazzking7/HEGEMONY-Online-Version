@@ -1142,3 +1142,10 @@ function mouseWheel(event) {
       }
     }
   }
+
+  // TO BE UPDATED
+function keyPressed(){
+  if (key === 'c'){
+    scaleFactor = 1.0;
+  }
+}

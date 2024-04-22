@@ -1,0 +1,1 @@
+web: bash -c 'cd Frontend && gunicorn app:app'

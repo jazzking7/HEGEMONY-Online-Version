@@ -128,9 +128,10 @@ class setup_event_scheduler:
             # CM
             if player.capital == None:
                 print("Did not choose a capital!")
-                player.capital = random.choice(player.territories)
-                gs.map.territories[player.capital].isCapital = True
-                gs.server.emit('update_trty_display', {player.capital:{'isCapital': True}}, room=gs.lobby)
+                capital = random.choice(player.territories)
+                gs.map.territories[capital].isCapital = True
+                player.capital = gs.map.territories[capital].name
+                gs.server.emit('update_trty_display', {capital:{'isCapital': True}}, room=gs.lobby)
                 gs.server.emit('capital_result', {'resp': True}, room=gs.lobby)
         gs.signal_view_clear()
     

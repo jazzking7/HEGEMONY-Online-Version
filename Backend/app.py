@@ -12,6 +12,7 @@ players = {}
 lobbies = {}
 SES = setup_event_scheduler()
 MDIS = Mission_Distributor()
+EGT = End_game_tracker()
 
 def generate_unique_code(length):
     while True:
@@ -151,6 +152,7 @@ def startGame(data):
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
+    lobby['gsm'].egt = EGT
 
     socketio.emit('game_started', room=lobby_id)
     lobby['gsm'].GES.execute_game_events()
