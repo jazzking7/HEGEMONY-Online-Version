@@ -84,7 +84,7 @@ class General_Event_Scheduler:
         if not self.interrupt:
             self.interrupt = True
             self.gs.signal_view_clear()
-            time.sleep(2)
+            time.sleep(2)   # TODO: find a better way to do this
             self.gs.game_over()
         self.lock.release()
 
