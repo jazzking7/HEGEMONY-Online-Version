@@ -25,7 +25,7 @@ class Player:
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
         # hidden resources
-        self.stars = 9
+        self.stars = 0
         self.reserves = 0
         self.s_city_amt = 0
         # alliance

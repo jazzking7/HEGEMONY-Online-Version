@@ -35,6 +35,9 @@ class General_Event_Scheduler:
         # locking mechanism
         self.lock = threading.Lock()
 
+        # Main thread
+        self.main_flow = threading.Thread(target=self.execute_game_events)
+
     def selection_time_out(self, num_secs, count):
         self.selected = 0
         self.gs.server.emit('start_timeout',{'secs': num_secs}, room=self.gs.lobby)
@@ -95,7 +98,7 @@ class General_Event_Scheduler:
         self.innerInterrupt = True
 
         if n == 'R_D':
-            self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(data, pid))
+            self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
         elif n == 'B_C':
             self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
         
@@ -109,7 +112,7 @@ class General_Event_Scheduler:
             print(f"{self.gs.players[pid].name}'s async action completed.")
             self.TLS.resume_loop(self, self.gs, pid)
 
-    def reserve_deployment(self, data, pid):
+    def reserve_deployment(self, pid):
 
         self.gs.server.emit('async_terminate', room=pid)
         self.gs.server.emit('change_click_event', {'event': "reserve_deployment"}, room=pid)

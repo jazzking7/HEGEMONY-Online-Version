@@ -28,9 +28,8 @@ class Mission:
         self.gs.players[self.player].alive = False
         self.gs.miss_elims.append(self.player)
         self.gs.kill_logs[self.player] = 'MF'
-        # prevent infinity loop
-        if not self.gs.signal_MTrackers('death'):
-            self.gs.egt.determine_end_game(self.gs)
+        self.gs.signal_MTrackers('death')
+        self.gs.egt.determine_end_game(self.gs)
 
 class Pacifist(Mission):
 

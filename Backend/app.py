@@ -155,7 +155,10 @@ def startGame(data):
     lobby['gsm'].egt = EGT
 
     socketio.emit('game_started', room=lobby_id)
-    lobby['gsm'].GES.execute_game_events()
+
+    # MAIN ENTRY POINT
+    lobby['gsm'].GES.main_flow.start()
+    print("GAME LAUNCHED")
 
 ### Game functions ###
 
@@ -416,7 +419,6 @@ def handle_async_end():
     gsm.GES.innerInterrupt = False
     print(f"{gsm.players[pid].name} has signal to end async action.")
     return
-
 
 if __name__ == '__main__':
     socketio.run(app, host='127.0.0.1', port=8081, debug=True)
