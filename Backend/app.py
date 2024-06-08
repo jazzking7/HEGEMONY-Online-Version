@@ -1,8 +1,8 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
-from mission_distributor import *
-from game_state_manager import *
+from Backend.mission_distributor import *
+from Backend.game_state_manager import *
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
