@@ -45,7 +45,7 @@ function unloadScript(script_id) {
 
 // Initiate socket connection
 // const URL_BACKEND = 'http://127.0.0.1:8081';
-const URL_BACKEND = 'https://plankton-app-5cjv2.ondigitalocean.app:8081/'
+const URL_BACKEND = 'https://king-prawn-app-gdi9k.ondigitalocean.app:8081/'
 var socket = io.connect(URL_BACKEND);
 
 // Main logic
