@@ -59,6 +59,7 @@ class General_Event_Scheduler:
     def run_setup_events(self,):
         time.sleep(3)
         for event in self.SES:
+            print("Event Executed", event)
             event.executable(self.gs, self)
     
     def run_turn_scheduler(self,):
