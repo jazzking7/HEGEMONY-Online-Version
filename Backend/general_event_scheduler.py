@@ -65,6 +65,7 @@ class General_Event_Scheduler:
         self.TLS.run_turn_loop(self.gs, self)
 
     def execute_game_events(self,):
+        print("Flow Started")
         self.run_setup_events()
 
         self.gs.send_player_list()
