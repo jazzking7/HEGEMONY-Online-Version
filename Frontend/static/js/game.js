@@ -261,6 +261,7 @@ socket.on('GAME_OVER', function(data){
 
 // Receive Mission + Display info on Mission Tracker
 socket.on('get_mission', function(data) {
+  console.log("get_mission")
   $('#announcement').html('<h1>' + data.msg + '</h1>');
   socket.off('get_mission');
 });
@@ -543,6 +544,7 @@ socket.on('choose_skill', function(data){
 
 //============================ Turn based events ================================
 socket.on("troop_deployment", function(data){
+  console.log("HERE")
   deployable = data.amount;
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Deploy your troops! </h2>`
