@@ -15,7 +15,7 @@ function popup(msg, duration) {
 // Load page
 // const URL_FRONTEND = 'http://127.0.0.1:8080/';
 // const URL_FRONTEND = 'https://plankton-app-5cjv2.ondigitalocean.app/';
-const URL_FRONTEND = 'http://3.99.177.92:8080';
+const URL_FRONTEND = 'http://3.99.177.92:8080/';
 var main;
 
 function loadPage(page_route) {
@@ -47,7 +47,7 @@ function unloadScript(script_id) {
 // Initiate socket connection
 // const URL_BACKEND = 'http://127.0.0.1:8081';
 // const URL_BACKEND = 'https://stingray-app-cr93a.ondigitalocean.app/'
-const URL_BACKEND = 'http://3.99.177.92:8081';
+const URL_BACKEND = 'http://3.99.177.92:8081/';
 var socket = io.connect(URL_BACKEND);
 
 // Main logic
