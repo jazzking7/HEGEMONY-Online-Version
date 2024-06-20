@@ -1,9 +1,22 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, make_response
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hasdasdasdawg"
 
+def no_cache(view):
+    """Decorator to add no-cache headers to a response."""
+    def no_cache_decorator(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+    no_cache_decorator.__name__ = view.__name__
+    return no_cache_decorator
+
 @app.route("/")
+@no_cache
 def main():
     return render_template('main.html')
 
