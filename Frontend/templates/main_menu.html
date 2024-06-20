@@ -1,4 +1,4 @@
-<!-- Game Title -->
+<!-- 
 <div class="text-center" style="margin: 10vh 0">
     <h1>Hegemony</h1>
 </div>
@@ -6,7 +6,7 @@
 <div class="container" style="margin: 0 15vw">
 <div class="row">
 
-    <!-- Play Game -->
+
     <div class="col">
     <div class="card text-center">
         <h4 class="card-header">Play Game</h4>
@@ -24,8 +24,7 @@
     </div>
     </div>
 
-    <!-- Credits -->
-    <!-- <div class="col">
+     <div class="col">
      <div class="card text-center">
         <h4 class="card-header">Credits</h4>
         <div class="card-body">
@@ -34,18 +33,37 @@
             <p>Long Buk Lao — Beta Tester</p>
         </div>
      </div>
-    </div> -->
+    </div> 
 
 </div>
+</div> -->
+
+
+<!-- Game Title -->
+<div class="text-center mt-10">
+    <h1 class="text-4xl font-bold">Hegemony</h1>
 </div>
 
-<!-- Settings -->
-<!--
-<div class="card text-center" style="70vw">
-    <h4 class="card-header">Settings</h4>
-    <div class="card-body">
-        Add settings here<br/>
-        Expecting to split into two columns
+<div class="container mx-auto mt-0 md:mx-24 lg:mx-40 xl:mx-64">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Play Game -->
+        <div class="col">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h4 class="text-xl font-bold mb-4">Play Game</h4>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-2 bg-gray-200 rounded-l-md">Nickname</span>
+                        <input id="nickname" class="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring focus:border-blue-300" type="text" placeholder="Enter a nickname..." />
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input id="joinLobbyCode" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring focus:border-blue-300" type="text" placeholder="Lobby ID" />
+                        <button id="btn_joinLobby" class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Join Lobby</button>
+                    </div>
+                    <button id="btn_createLobby" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Create Lobby</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
--->
