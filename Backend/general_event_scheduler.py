@@ -57,7 +57,7 @@ class General_Event_Scheduler:
         return
 
     def run_setup_events(self,):
-        time.sleep(5)
+        time.sleep(6)
         self.gs.server.emit('set_up_announcement', {'msg': "Loading resources..."}, room=self.gs.lobby)
         time.sleep(2)
         for event in self.SES:
