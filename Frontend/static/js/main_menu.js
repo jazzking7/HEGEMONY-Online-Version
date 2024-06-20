@@ -1,5 +1,5 @@
 $(document).ready(function() {
-
+    function setupEventListeners() {
     $('#btn_createLobby').click(function() {
         let username = $('#nickname').val();
         if (username.trim() === '') {
@@ -23,6 +23,11 @@ $(document).ready(function() {
         }
         socket.emit('join_lobby', {'username': username, 'lobby_code': lobby_code});
     });
+
+    console.log("Function triggered");
+    }
+
+    setupEventListeners();
 
     socket.on('lobby_created', function() {
         console.log('lobby_created');
