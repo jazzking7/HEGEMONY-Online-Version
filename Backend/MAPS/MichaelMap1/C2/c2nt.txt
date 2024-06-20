@@ -1,4 +1,4 @@
-Chatham Rise,Caledonia,Vestland,Byzantinum
+Chatham Rise,Caledonia,Nordinburgh,Byzantinum
 Tasman,Caledonia,Ghanzi
 Tasman,Chatham Rise,Canterbury Basin
 Caledonia,Otago,Norfolk Ridge

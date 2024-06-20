@@ -52,5 +52,14 @@
     "cx": 1840,
     "cy": 70,
     "message": "BALTICA\n+3 TROOPS"
+  },
+  {
+    "x": 580,
+    "y": 1100,
+    "dx": 120,
+    "dy": 60,
+    "cx": 640,
+    "cy": 1130,
+    "message": "YUDINAVIA\n+4 TROOPS"
   }
 ]

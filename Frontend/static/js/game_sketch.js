@@ -130,7 +130,7 @@ function draw() {
     currWinHeight = windowHeight;
   }
   // clear the background
-  background(0, 150, 200);
+  background(8, 145, 212);
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;

@@ -2,5 +2,5 @@ Pannonia,Kavango
 Kervia,Banat
 Banat,Dardani,Tasman
 Byzantinum,Sirmium,Banat
-Dardani,Banat,Vestland
+Dardani,Banat,Vestland,Bavaria
 Pannonia,Byzantinum,Dardani,Sirmium

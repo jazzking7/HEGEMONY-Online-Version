@@ -1,5 +1,5 @@
 Valmiera,Misalonia
-Darlana,Ruscany
+Darlana,Ruscany,Pomerania
 Aerilon,Ruscany
 Karnataka,Balotania,Hessia,Misalonia
 Misalonia,Hessia
