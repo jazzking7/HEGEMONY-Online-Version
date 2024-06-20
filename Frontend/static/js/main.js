@@ -46,8 +46,10 @@ var main;
 
 function loadPage(page_route) {
     return new Promise((resolve, reject) => {
+        // cache-busting -> use unique time stamp to force new request
+        const url = `${URL_FRONTEND + page_route}?_=${new Date().getTime()}`;
         $.ajax({
-            url: URL_FRONTEND + page_route,
+            url: url,
             type: 'GET',
             success: function(response) {
                 main.innerHTML = response;
@@ -63,7 +65,8 @@ function loadPage(page_route) {
 function loadScript(script_src, id = null, async = false) {
     return new Promise((resolve, reject) => {
         let script = document.createElement('script');
-        script.src = script_src;
+        // cache-busting -> use unique time stamp to force new request
+        script.src = `${script_src}?_=${new Date().getTime()}`;
         if (id) script.id = id;
         script.async = async;
         script.onload = () => resolve();
