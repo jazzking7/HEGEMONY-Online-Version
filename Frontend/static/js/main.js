@@ -18,30 +18,70 @@ function popup(msg, duration) {
 const URL_FRONTEND = 'http://3.99.177.92:8080/';
 var main;
 
+// function loadPage(page_route) {
+//     $.ajax({
+//         url: URL_FRONTEND + page_route,
+//         type: 'GET',
+//         success: function(response) {
+//             main.innerHTML = response;
+//         },
+//         error: function(error) {
+//             throw error;
+//         }
+//     });
+// }
+
+// function loadScript(script_src, id=null, async=false) {
+//     let script = document.createElement('script');
+//     script.src = script_src;
+//     if (id) script.id = id;
+//     script.async = async;
+//     document.head.appendChild(script);
+// }
+
+// function unloadScript(script_id) {
+//     let script = document.getElementById(script_id);
+//     if (script) script.remove();
+// }
+
 function loadPage(page_route) {
-    $.ajax({
-        url: URL_FRONTEND + page_route,
-        type: 'GET',
-        success: function(response) {
-            main.innerHTML = response;
-        },
-        error: function(error) {
-            throw error;
-        }
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: URL_FRONTEND + page_route,
+            type: 'GET',
+            success: function(response) {
+                main.innerHTML = response;
+                resolve();
+            },
+            error: function(error) {
+                reject(error);
+            }
+        });
     });
 }
 
-function loadScript(script_src, id=null, async=false) {
-    let script = document.createElement('script');
-    script.src = script_src;
-    if (id) script.id = id;
-    script.async = async;
-    document.head.appendChild(script);
+function loadScript(script_src, id = null, async = false) {
+    return new Promise((resolve, reject) => {
+        let script = document.createElement('script');
+        script.src = script_src;
+        if (id) script.id = id;
+        script.async = async;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Script load error for ${script_src}`));
+        document.head.appendChild(script);
+    });
 }
 
 function unloadScript(script_id) {
-    let script = document.getElementById(script_id);
-    if (script) script.remove();
+    return new Promise((resolve, reject) => {
+        let script = document.getElementById(script_id);
+        if (script) {
+            script.remove();
+            resolve();
+        } else {
+            reject(new Error(`Script with id ${script_id} not found`));
+        }
+    });
 }
 
 // Initiate socket connection
@@ -55,9 +95,22 @@ $(document).ready(function() {
 
     main = document.getElementById('main');
 
-    // main_menu page
-    loadPage('main_menu');
-    loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+    // // main_menu page
+    // loadPage('main_menu');
+    // loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+
+    // Load main_menu page and script
+    Promise.all([
+        loadPage('main_menu'),
+        loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script')
+    ])
+    .then(() => {
+        console.log('Both page and script are fully loaded');
+        // Proceed with further logic here
+    })
+    .catch((error) => {
+        console.error('Error loading page or script:', error);
+    });
 
     // Error handling
     const ERROR_POPUP_DURATION = 1000;
