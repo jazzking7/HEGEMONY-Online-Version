@@ -103,10 +103,12 @@ $(document).ready(function() {
     // loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
 
     // Load main_menu page and script
-    Promise.all([
-        loadPage('main_menu'),
-        loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script')
-    ])
+    loadPage('main_menu')
+        .then(() => {
+            console.log('Main menu page loaded successfully');
+            // After loadPage completes, load the main_menu.js script
+            return loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+        })
     .then(() => {
         console.log('Both page and script are fully loaded');
         // Proceed with further logic here
