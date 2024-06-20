@@ -1,9 +1,12 @@
 $(document).ready(function() {
     function setupEventListeners() {
     $('#btn_createLobby').click(function() {
-        let username = $('#nickname').val();
-        if (username.trim() === '') {
+        let username = $('#nickname').val().trim();
+        if (username === '') {
             popup("Must enter a name!", 1000);
+            return;
+        } else if (username.length > 20) {
+            popup("Name longer than 20 characters!", 1000);
             return;
         }
         console.log('create_lobby');
@@ -12,9 +15,12 @@ $(document).ready(function() {
     
     $('#btn_joinLobby').click(function() {
         let lobby_code = $("#joinLobbyCode").val();
-        let username = $('#nickname').val();
-        if (username.trim() === '') {
+        let username = $('#nickname').val().trim();
+        if (username === '') {
             popup("Must enter a name!", 1000);
+            return;
+        } else if (username.length > 20) {
+            popup("Name longer than 20 characters!", 1000);
             return;
         }
         if (lobby_code.trim() === ''){
