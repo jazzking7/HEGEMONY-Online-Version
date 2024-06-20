@@ -23,8 +23,6 @@ $(document).ready(function() {
         }
         socket.emit('join_lobby', {'username': username, 'lobby_code': lobby_code});
     });
-
-    console.log("Function triggered");
     }
 
     setupEventListeners();
