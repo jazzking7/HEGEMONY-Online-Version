@@ -29,26 +29,39 @@ $(document).ready(function() {
 
     socket.on('lobby_created', function() {
         console.log('lobby_created');
-        try {
-            loadPage('lobby');
-        } catch (error) {
-            return;
-        }
-        unloadScript('page_script');
-        loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
-        socket.off('lobby_created');
+        loadPage('lobby')
+        .then(() => {
+            return unloadScript('page_script');
+        })
+        .then(() => {
+            return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+        })
+        .then(() => {
+            socket.off('lobby_created');
+            console.log('lobby.js script loaded successfully');
+        })
+        .catch((error) => {
+            console.error('Error loading page or script:', error);
+        });
     });
 
     socket.on('lobby_joined', function() {
         console.log('lobby_joined');
-        try {
-            loadPage('lobby');
-        } catch (error) {
-            return;
-        }
-        unloadScript('page_script');
-        loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
-        socket.off('lobby_joined');
+        loadPage('lobby')
+        .then(() => {
+            return unloadScript('page_script');
+        })
+        .then(() => {
+            return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+        })
+        .then(() => {
+            socket.off('lobby_joined');
+            console.log('lobby.js script loaded successfully');
+            // Additional logic after loading lobby.js if needed
+        })
+        .catch((error) => {
+            console.error('Error loading page or script:', error);
+        });
     });
 
 });
