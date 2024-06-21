@@ -149,7 +149,7 @@ class turn_loop_scheduler:
         ms.terminated = False
         ms.curr_thread.start()
 
-        gs.server.emit('start_timeout', {'secs': 60}, room=gs.lobby)
+        gs.server.emit('start_timeout', {'secs': 90}, room=gs.lobby)
         print(f"{gs.players[curr_player].name}'s turn starts, buttons have been shown.")
         gs.server.emit('signal_show_btns', room=curr_player)
         
