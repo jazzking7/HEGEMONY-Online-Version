@@ -36,8 +36,7 @@ class setup_event_scheduler:
         for index, player in enumerate(gs.pids):
             miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
             miss_set[index].set_up_tracker_view()
-            print("REACHED")
-            gs.server.emit('get_mission', {'msg': f'Mission: Survive'}, room=player)
+            gs.server.emit('get_mission', {'msg': f'Your agenda: {miss_set[index].name}'}, room=player)
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
         gs.Mset = miss_set
         print(gs.MTrackers)

@@ -413,7 +413,7 @@ class Industrialist(Mission):
             self.round = -1
             self.update_tracker_view({
             'misProgBar': [0, self.target_round],
-            'misProgDesp': f'Being the most industrailized player for {0}/{self.target_round} consecutive rounds',
+            'misProgDesp': f'Being the most industrialized player for {0}/{self.target_round} consecutive rounds',
             })
     
     def check_round_condition(self, ):
@@ -423,7 +423,7 @@ class Industrialist(Mission):
             self.round += 1
             self.update_tracker_view({
             'misProgBar': [self.round, self.target_round],
-            'misProgDesp': f'Being the most industrailized player for {self.round}/{self.target_round} consecutive rounds',
+            'misProgDesp': f'Being the most industrialized player for {self.round}/{self.target_round} consecutive rounds',
             })
             if self.round == self.target_round:
                 # signal end
@@ -433,7 +433,7 @@ class Industrialist(Mission):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
             'misProgBar': [self.round, self.target_round],
-            'misProgDesp': f'Being the most industrailized player for {self.round}/{self.target_round} consecutive rounds',
+            'misProgDesp': f'Being the most industrialized player for {self.round}/{self.target_round} consecutive rounds',
         }, room=self.player)
 
     def end_game_checking(self, ):

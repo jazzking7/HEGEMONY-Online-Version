@@ -800,16 +800,21 @@ btn_diplomatic.off('click').click(function () {
   midDis = document.getElementById('middle_content')
   midDis.innerHTML = `
   <div style="display: flex; justify-content: space-between; align-items: center;">
-  <div style="display: inline-block;">
-  <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; ">
-    FORM ALLIANCE
-  </button>
-  </div>
-  <div style="display: inline-block;">
-  <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
-    REQUEST SUMMIT
-  </button>
-  </div>
+    <div style="display: inline-block;">
+      <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; ">
+        FORM ALLIANCE
+      </button>
+    </div>
+    <div style="display: inline-block;">
+      <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; margin-left:1px;">
+        REQUEST SUMMIT
+      </button>
+    </div>
+    <div style="display: inline-block;">
+      <button class="btn" id='btn-globalpeace' style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
+        GLOBAL CEASEFIRE
+      </button>
+    </div>
   </div>
   `;
 

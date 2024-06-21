@@ -1,0 +1,76 @@
+[
+  {
+    "x": 15,
+    "y": 837,
+    "dx": 120,
+    "dy": 60,
+    "cx": 75,
+    "cy": 867,
+    "message": "PANNOTIA\n+5 TROOPS"
+  },
+  {
+    "x": 690,
+    "y": 17,
+    "dx": 120,
+    "dy": 60,
+    "cx": 750,
+    "cy": 47,
+    "message": "ZEALANDIA\n+8 TROOPS"
+  },
+  {
+    "x": 1720,
+    "y": 953,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1780,
+    "cy": 983,
+    "message": "RODINIA\n+6 TROOPS"
+  },
+  {
+    "x": 876,
+    "y": 490,
+    "dx": 120,
+    "dy": 60,
+    "cx": 936,
+    "cy": 520,
+    "message": "KENORLAND\n+10 TROOPS"
+  },
+  {
+    "x": 45,
+    "y": 181,
+    "dx": 120,
+    "dy": 60,
+    "cx": 105,
+    "cy": 211,
+    "message": "KALAHARI\n+3 TROOPS"
+  },
+  {
+    "x": 1780,
+    "y": 40,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1840,
+    "cy": 70,
+    "message": "BALTICA\n+3 TROOPS"
+  }
+  ,
+  {
+    "x": 580,
+    "y": 1100,
+    "dx": 120,
+    "dy": 60,
+    "cx": 640,
+    "cy": 1130,
+    "message": "YUDINAVIA\n+4 TROOPS"
+  }
+  ,
+  {
+    "x": 2050,
+    "y": 673,
+    "dx": 120,
+    "dy": 60,
+    "cx": 2110,
+    "cy": 703,
+    "message": "Iskanbul\n+4 TROOPS"
+  }
+]

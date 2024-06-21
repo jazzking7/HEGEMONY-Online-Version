@@ -9,7 +9,7 @@ $(document).ready(function() {
         $("#turn_time").prop("disabled", false);
 
         // Display start game button
-        $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem;">Start Game</button></div>');
+        $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
 
         // Connect start_game button
         $('#start_game').click(function() {

@@ -1,0 +1,6 @@
+Babylonia,Kushgar
+Irana,Kushgar,Valmiera,Ashkan
+Irana,Babylonia,Ashkan,Karabola
+Babylonia,Kushgar,Karabola,Mushafa
+Ashkan,Karabola,Gauteng
+Ashkan,Kushgar,Mushafa

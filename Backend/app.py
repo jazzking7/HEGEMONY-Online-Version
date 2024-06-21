@@ -148,7 +148,7 @@ def startGame(data):
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
-    lobby['map_name'] = 'MichaelMap1'
+    lobby['map_name'] = '8CMAP'
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
@@ -421,5 +421,5 @@ def handle_async_end():
     return
 
 if __name__ == '__main__':
-    # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
-    socketio.run(app, host='0.0.0.0', port=8081, debug=True)
+    socketio.run(app, host='127.0.0.1', port=8081, debug=True)
+    # socketio.run(app, host='0.0.0.0', port=8081, debug=True)
