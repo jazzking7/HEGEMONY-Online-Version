@@ -34,6 +34,11 @@ let showContBorders = false;
 // Highlight
 let toHightlight = [];
 let clickables = [];
+
+// Other player action
+let otherHighlight = [];
+let otherclickables = [];
+
 let ani_offset = 0;
 let ani_direction = 1;
 
@@ -166,6 +171,9 @@ function draw() {
     if (toHightlight.includes(tmp_id)){
       strokeWeight(3);
     }
+    if (otherHighlight.includes(tmp_id)){
+      strokeWeight(3);
+    }
     // Display territory outline
     beginShape();
     for (let p of trty.outline) {
@@ -222,6 +230,9 @@ function draw() {
 
     // clickable animation
     if (clickables.includes(tmp_id)){
+      drawEquiTriangle(trty.cps.x, trty.cps.y+ani_offset);
+    }
+    if (otherclickables.includes(tmp_id)){
       drawEquiTriangle(trty.cps.x, trty.cps.y+ani_offset);
     }
     tmp_id++;

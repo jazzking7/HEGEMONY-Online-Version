@@ -39,7 +39,7 @@ class Pacifist(Mission):
         self.round = 0
         self.type = 'r_based'
         self.max_death_count = math.floor(len(gs.pids)/2)
-        self.goal_round = 10
+        self.goal_round = 7
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -49,17 +49,17 @@ class Pacifist(Mission):
             self.round = -1
             self.death_count = dc
             self.update_tracker_view({
-            'misProgBar': [0, self.goal_round],
-            'misProgDesp': f'{0}/{self.goal_round} consecutive rounds of peace maintained',
-            'lossProg': [self.death_count, self.max_death_count],
-            'lossDesp': f'{self.death_count}/{self.max_death_count} deaths until mission failure'
+                'misProgBar': [0, self.goal_round],
+                'misProgDesp': f'{0}/{self.goal_round} consecutive rounds of peace maintained',
+                'lossProg': [self.death_count, self.max_death_count],
+                'lossDesp': f'{self.death_count}/{self.max_death_count} deaths until mission failure'
             })
         if self.death_count == self.max_death_count:
             self.update_tracker_view({
-            'misProgBar': [0, self.goal_round],
-            'misProgDesp': f'{0}/{self.goal_round} consecutive rounds of peace maintained',
-            'lossProg': [self.death_count, self.max_death_count],
-            'lossDesp': f'Eliminated due to mission failure'
+                'misProgBar': [0, self.goal_round],
+                'misProgDesp': f'{0}/{self.goal_round} consecutive rounds of peace maintained',
+                'lossProg': [self.death_count, self.max_death_count],
+                'lossDesp': f'Eliminated due to mission failure'
             })
             self.signal_mission_failure()
     
@@ -90,10 +90,10 @@ class Pacifist(Mission):
 class Warmonger(Mission):
     def __init__(self, player, gs):
         super().__init__("Warmonger", player, gs)
-        self.goal_count = len(self.gs.pids)//2+1
+        self.goal_count = len(self.gs.pids)//2 if len(self.gs.pids) >= 2 else 2
         self.peace = 0
         self.type = 'r_based'
-        self.max_peace = 7
+        self.max_peace = 8
         self.death_count = 0
 
     def check_conditions(self, ):
@@ -105,10 +105,10 @@ class Warmonger(Mission):
             self.death_count = dc
             # Signal update
             self.update_tracker_view({
-            'misProgBar': [self.death_count, self.goal_count],
-            'misProgDesp': f'{self.death_count}/{self.goal_count} deaths until mission success',
-            'lossProg': [0, self.max_peace],
-            'lossDesp': f'{0}/{self.max_peace} consecutives round of peace until mission failure'
+                'misProgBar': [self.death_count, self.goal_count],
+                'misProgDesp': f'{self.death_count}/{self.goal_count} deaths until mission success',
+                'lossProg': [0, self.max_peace],
+                'lossDesp': f'{0}/{self.max_peace} consecutives round of peace until mission failure'
             })
         if self.death_count == self.goal_count:
             # signal end
@@ -221,7 +221,6 @@ class Bounty_Hunter(Mission):
             self.update_tracker_view({'misProgDesp': 'bounty fulfilled'})
             self.signal_mission_success()
 
-
     def set_up_tracker_view(self, ):
         targets = {}
         for t in self.target_players:
@@ -252,11 +251,11 @@ class Unifier(Mission):
         self.target_round = 0
         l = len(gs.map.conts[self.target_continent]['trtys'])
         if l <= 5:
-            self.target_round = 7
-        elif l <= 10:
             self.target_round = 5
-        else:
+        elif l <= 10:
             self.target_round = 3
+        else:
+            self.target_round = 2
         self.round = 0
         self.type = 'r_based'
     
@@ -334,7 +333,6 @@ class Polarizer(Mission):
             # signal end
             self.signal_mission_success()
         
-
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
@@ -352,7 +350,7 @@ class Fanatic(Mission):
         self.round = 0
         m = len(gs.map.territories)
         self.targets = random.sample([i for i in range(m)], 7)
-        self.target_round = 5
+        self.target_round = 4
     
     def own_all_targets(self, ):
         p_list = self.gs.players[self.player].territories
@@ -404,7 +402,7 @@ class Industrialist(Mission):
         super().__init__("Industrialist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -444,7 +442,7 @@ class Expansionist(Mission):
         super().__init__("Expansionist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -484,7 +482,7 @@ class Populist(Mission):
         super().__init__("Populist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -521,7 +519,7 @@ class Dominator(Mission):
         super().__init__("Dominator", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 3
+        self.target_round = 2
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:

@@ -9,7 +9,7 @@ class General_Event_Scheduler:
 
         # set up selection controller
         self.selected = 0
-        # whole game interrupted
+        # WHOLE GAME INTERRUPT
         self.interrupt = False
         # current turn terminated
         self.terminated = False
@@ -91,11 +91,12 @@ class General_Event_Scheduler:
         if not self.interrupt:
             self.interrupt = True
             self.gs.signal_view_clear()
+            # PAUSE TO GIVE TIME TO COMPUTE END RESULT
             time.sleep(2)
             self.gs.game_over()
         self.lock.release()
 
-    # Inner async
+    # INNER ASYNC EVENTS FROM HERE FORWARD
     def handle_async_event(self, data, pid):
         
         n = data['name']
@@ -118,7 +119,7 @@ class General_Event_Scheduler:
 
     def reserve_deployment(self, pid):
 
-        self.gs.server.emit('async_terminate', room=pid)
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('change_click_event', {'event': "reserve_deployment"}, room=pid)
         self.gs.server.emit('reserve_deployment', {'amount': self.gs.players[pid].reserves}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -130,7 +131,7 @@ class General_Event_Scheduler:
         self.gs.server.emit("clear_view", room=pid)
 
     def build_cities(self, data, pid):
-        self.gs.server.emit('async_terminate', room=pid)
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_cities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -144,16 +145,16 @@ class General_Event_Scheduler:
 
     def activate_summit(self,):
         self.gs.server.emit('activate_summit', room=self.gs.lobby)
-        self.selection_time_out(15, len(self.gs.players))
+        self.selection_time_out(60, len(self.gs.players))
 
     def launch_summit_procedures(self, player):
         pid = self.gs.pids[player]
         self.summit_voter = {'y': 0, 'n': 0}
         self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=self.gs.lobby)
-        self.selection_time_out(15, len(self.gs.players))
+        self.selection_time_out(20, len(self.gs.players))
         if self.summit_voter['y'] > self.summit_voter['n']:
             self.gs.players[pid].num_summit -= 1
             self.activate_summit()
         else:
-            self.gs.server.emit('summit_result', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
+            self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
         self.summit_requested = False

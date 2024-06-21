@@ -39,9 +39,7 @@ class setup_event_scheduler:
             gs.server.emit('get_mission', {'msg': f'Your agenda: {miss_set[index].name}'}, room=player)
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
         gs.Mset = miss_set
-        print(gs.MTrackers)
-        print(miss_set)
-        ms.selection_time_out(30, len(gs.players))
+        ms.selection_time_out(20, len(gs.players))
 
     # FCFS
     def start_color_distribution(self, gs, ms):

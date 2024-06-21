@@ -1,13 +1,22 @@
+// Current game event -> click event
 let currEvent = null;
+// Deployable troops
 let deployable = 0;
+// Deployable reserves
 let reserves = 0;
+// Number of cities to be settled for ASYNC EVENT
 let city_amt = 0;
+// Territories controlled by player
 let player_territories = [];
+// Game settings
 let game_settings;
 
+// Timeout bar
 let timeoutBar;
+// Interval of countdown
 let current_interval = null;
 
+// Progression bars for mission
 let misProgBar;
 let lossProg;
 
@@ -71,7 +80,7 @@ $(document).ready(async function() {
 
 });
 
-// Function to start the timeout countdown
+// Function to start the timeout countdown animation
 function startTimeout(totalSeconds) {
   var progress = 1;
   timeoutBar.set(progress);
@@ -87,6 +96,7 @@ function startTimeout(totalSeconds) {
   }, 1000); // Update the progress bar every second
 }
 
+// Function to load game settings
 async function get_game_settings() {
     try {
       const gameSettings = await new Promise((resolve) => {
@@ -103,15 +113,17 @@ async function get_game_settings() {
 
 //========================= Update Game State ============================
 
-// start/interrupt timeout bar
+// Start timer animation
 socket.on('start_timeout', function(data){
   startTimeout(data.secs);
 });
 
+// Stop timer animation
 socket.on('stop_timeout', function(){
   clearInterval(current_interval);
 })
 
+// Player stats list initiate
 socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
   $.each(data, function(p, p_info) {
@@ -137,6 +149,7 @@ socket.on('get_players_stats', function(data){
   });
 });
 
+// Player stats list update
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
   btn.html(`
@@ -152,6 +165,7 @@ socket.on('update_players_stats', function(data){
   `);
 });
 
+// Update overview status
 socket.on('update_global_status', function(data){
     $('#global_status').show();
     $('#LAO').text(data.LAO);
@@ -165,21 +179,30 @@ socket.on('update_player_territories', function(data){
   player_territories = data.list;
 });
 
-// update territorial display
+// UPDATE TERRITORIAL DISPLAY
+// FORMAT: 
+// { 
+//  tid1: { property1: new_value, property2: new_value ...  }, 
+//  tid2: { property1: new_value, property2: new_value ...  }, 
+//  ......
+// }
+// property name must matches the property name used in game_sketch.js for display territory
+// hasDev is used for loading different images for development
 socket.on('update_trty_display', function(data){
+  // Go through each territory (tid)
   for (tid in data){
-    // changed properties
+    // Get the changed property list of the territory (tid)
     let changes = data[tid];
-    // update property one by one
+    // Update the property one by one
     for (field in changes){
-      // Dev property
+      // Dev property -> CITY | MEGACITY | TRANSPORT HUB
       if (field == 'hasDev'){
         if (changes[field] == 'city'){
           territories[tid].devImg = cityImage;
         } else {
           territories[tid].devImg = null;
         }
-      // Other properties
+      // Other properties -> Standard property
       } else {
         territories[tid][field] = changes[field];
       }
@@ -187,12 +210,7 @@ socket.on('update_trty_display', function(data){
   }
 });
 
-// update clickables
-socket.on('update_clickables', function(data){
-  clickables = data.trtys;
-})
-
-// changing click events
+// CHANGING CLICK EVENTS
 socket.on('change_click_event', function(data){
   if (data.event == 'settle_capital'){
     currEvent = settle_capital;
@@ -208,44 +226,39 @@ socket.on('change_click_event', function(data){
     currEvent = deploy_reserves;
   } else if (data.event == 'build_cities') {
     currEvent = build_cities;
-  }  else {
+  } else {
     currEvent = null;
   }
 });
 
-// Clear current selection window
+// CLEAR SELECTION WINDOWS
 socket.on('clear_view', function(){
   $('#control_panel, #middle_display, #proceed_next_stage').hide();
   toHightlight = [];
   clickables = [];
 });
 
-// announcements
+// set announcements
 socket.on('set_up_announcement', function(data){
   $('#announcement').html('<h3>' + data.msg + '</h3>');
 });
 
+// show buttons
 socket.on('signal_show_btns', function(){
-  show_async_btns();
-});
-
-socket.on('signal_hide_btns', function(){
-  hide_async_btns();
-});
-
-function hide_async_btns(){
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
-}
-
-function show_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
-}
+});
 
+// hide buttons
+socket.on('signal_hide_btns', function(){
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+});
+
+// game over announcement
 socket.on('GAME_OVER', function(data){
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
   $('#middle_display, #middle_title, #middle_content').show();
-  $('#middle_title').html('<h1>WINNERS:</h1>');
+  $('#middle_title').html('<h1>FINAL VICTORS</h1>');
   $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;" ></div>`);
   for (winner of data.winners) {
     var wname; var mission;
@@ -257,7 +270,7 @@ socket.on('GAME_OVER', function(data){
   }
 });
 
-//===================================================================================
+//===============================Mission Related Display=============================================
 
 // Receive Mission + Display info on Mission Tracker
 socket.on('get_mission', function(data) {
@@ -266,6 +279,7 @@ socket.on('get_mission', function(data) {
   socket.off('get_mission');
 });
 
+// Initiate mission tracker
 socket.on('initiate_tracker', function(data){
   $('#mission_title').text(data.title);
   if (data.targets){
@@ -322,6 +336,7 @@ socket.on('initiate_tracker', function(data){
   }
 })
 
+// Update mission tracker
 socket.on('update_tracker', function(data){
   if (data.targets){
     for (target in data.targets) {
@@ -347,7 +362,9 @@ socket.on('update_tracker', function(data){
   }
 });
 
-//===================================================================================
+//======================================================================================================
+
+//=====================================SET UP EVENTS====================================================
 
 // Start Color Choosing
 socket.on('choose_color', function(data){
@@ -419,7 +436,7 @@ function hexToRgb(hex) {
   return "rgb(" + r + ", " + g + ", " + b + ")";
 }
 
-// Starting territorial distribution
+// Choose territorial distribution
 socket.on('choose_territorial_distribution', function(data){
   document.getElementById('middle_display').style.display = 'flex';
   let dist_choices = document.getElementById('middle_content');
@@ -455,6 +472,7 @@ socket.on('choose_territorial_distribution', function(data){
   }
 });
 
+// Set capital
 function settle_capital(tid){
   toHightlight = [];
   document.getElementById('control_panel').style.display = 'none';
@@ -474,6 +492,7 @@ function settle_capital(tid){
   }
 }
 
+// Set cities
 function settle_cities(tid){
   if(player_territories.includes(tid)){
     if (toHightlight.length == 2){
@@ -498,6 +517,7 @@ function settle_cities(tid){
   }
 }
 
+// Set feedback for capital and city setting events
 socket.on('settle_result', function(data){
   if (data.resp){
     currEvent = null;
@@ -541,16 +561,24 @@ socket.on('choose_skill', function(data){
   }
 });
 
+//======================================================================================================
 
-//============================ Turn based events ================================
+//============================ TURN BASED EVENTS =======================================================
+
+// Play notification to signal start of turn
+socket.on("signal_turn_start", function(){
+  document.getElementById('turn_notification').play();
+});
+
+// Display and update how many troops are deployable. Used both in initial deployment and turn-based troop deployment
 socket.on("troop_deployment", function(data){
-  console.log("HERE")
   deployable = data.amount;
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Deploy your troops! </h2>`
   announ.innerHTML += `<h2>` + String(data.amount) + ' deployable.' + `</h2>`;
 });
 
+// Show the button that ends the conquest stage
 socket.on('conquest', function(){
   $('#proceed_next_stage').show();
   $('#proceed_next_stage .text').text('Finished Conquest');
@@ -563,6 +591,7 @@ socket.on('conquest', function(){
   });
 });
 
+// Show the button that ends the rearrangement stage
 socket.on('rearrangement', function(){
   $('#proceed_next_stage').show();
   $('#proceed_next_stage .text').text('Finished Rearrangement');
@@ -575,6 +604,7 @@ socket.on('rearrangement', function(){
   });
 });
 
+// Click function that handles troop deployment (for initial and turn-based troop deployment)
 function troop_deployment(tid){
   toHightlight = [];
   document.getElementById('control_panel').style.display = 'none';
@@ -583,6 +613,7 @@ function troop_deployment(tid){
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     let troopValue = document.createElement("p");
+    troopValue.textContent = 1;
     let troopInput = document.createElement("input");
     troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
@@ -607,6 +638,7 @@ function troop_deployment(tid){
   }
 }
 
+// Used in initial deployment to show waiting message when done
 socket.on('troop_result', function(data){
   if (!data.resp){
     popup("NOT YOUR TERRITORY!", 1000);
@@ -619,6 +651,7 @@ socket.on('troop_result', function(data){
   }
 })
 
+// Click function that handles conquest
 function conquest(tid){
   if (player_territories.includes(tid)){
     document.getElementById('control_panel').style.display = 'none';
@@ -674,6 +707,12 @@ function conquest(tid){
   }
 }
 
+// Update clickables to include the reachable territories for rearrangement
+socket.on('update_clickables', function(data){
+  clickables = data.trtys;
+})
+
+// Click function that handles rearrangement
 function rearrange(tid){
   if (clickables.includes(tid) && tid != toHightlight[0]){
     if (toHightlight.length != 2){
@@ -686,6 +725,7 @@ function rearrange(tid){
       $('#proceed_next_stage').hide();
 
       let troopValue = document.createElement("p");
+      troopValue.textContent = 1;
       let troopInput = document.createElement("input");
       troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
@@ -730,9 +770,10 @@ function rearrange(tid){
   }  
 }
 
-//==============================Inner Async======================================
+//==============================INNER ASYNC======================================
 
-socket.on('async_terminate', function(){
+// Set the button that can trigger a stop to the async event
+socket.on('async_terminate_button_setup', function(){
     $("#proceed_next_stage").show();
     $("#proceed_next_stage .text").text('DONE');
     $("#proceed_next_stage").off('click').on('click', function(){
@@ -744,22 +785,26 @@ socket.on('async_terminate', function(){
     });
 });
 
+// Set and display the reserve amount for reserve deployment event
 socket.on("reserve_deployment", function(data){
   reserves = data.amount;
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Deploying reserves, ${data.amount} troops available</h2>`;
 });
 
+// Set and display the city amount for city settlement event
 socket.on('build_cities', function(data){
   city_amt = data.amount;
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
 })
 
+// Warning during city settlement
 socket.on('update_settle_status', function(data){
   popup(data.msg, 3000);
 })
 
+// Click function for reserve deployment
 function deploy_reserves(tid){
   toHightlight = [];
   document.getElementById('control_panel').style.display = 'none';
@@ -768,6 +813,7 @@ function deploy_reserves(tid){
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     let troopValue = document.createElement("p");
+    troopValue.textContent = 1;
     let troopInput = document.createElement("input");
     troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
@@ -792,32 +838,68 @@ function deploy_reserves(tid){
   }
 }
 
-//=========================== Control Buttons ===================================
+// Click function to handle async city settlement
+function build_cities(tid){
+  if(player_territories.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+//=========================== CONTROL BUTTONS ===================================
+
+// DIPLOMATIC ACTIONS
+// Add display + Functionalities to diplomatic button
 btn_diplomatic = $('#btn-diplomatic');
 btn_diplomatic.off('click').click(function () {
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = "<h4>Diplomatic Menu</h4>";
   midDis = document.getElementById('middle_content')
+
+  // Alliance   Summit   Global Ceasefire
   midDis.innerHTML = `
   <div style="display: flex; justify-content: space-between; align-items: center;">
+
     <div style="display: inline-block;">
       <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; ">
         FORM ALLIANCE
       </button>
     </div>
+
     <div style="display: inline-block;">
       <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; margin-left:1px;">
         REQUEST SUMMIT
       </button>
     </div>
+
     <div style="display: inline-block;">
       <button class="btn" id='btn-globalpeace' style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
         GLOBAL CEASEFIRE
       </button>
     </div>
+
   </div>
   `;
 
+  // Summit button functionality
   $('#btn-summit').off('click').on('click', function(){
     socket.emit('request_summit')
     $('#middle_display').hide()
@@ -826,10 +908,12 @@ btn_diplomatic.off('click').click(function () {
 
 });
 
+// VOTING EVENT FOR SUMMIT
 socket.on('summit_voting', function(data){
   $("#announcement").html(`<h3>${data.msg}<h3>`)
   $("#middle_display").show();
   let middis = $('#middle_content');
+  // Voting menu with options + ul showing who voted what
   middis.html(`
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
       <div style="display: flex; justify-content: space-between;"> 
@@ -858,29 +942,33 @@ socket.on('summit_voting', function(data){
         </div>
 
       </div>
-
     </div>
   `);
+  // For yes in summit
   $("#btn_yes").off('click').on('click', function(){
     $('#btn_yes, #btn_no, #btn_abs').hide();
     socket.emit("send_summit_choice", {'choice': 'y'});
   });
+  // For no in summit
   $("#btn_no").off('click').on('click', function(){
     $('#btn_yes, #btn_no, #btn_abs').hide();
     socket.emit("send_summit_choice", {'choice': 'n'});
   });
+  // For whatever in summit
   $("#btn_abs").off('click').on('click', function(){
     $('#btn_yes, #btn_no, #btn_abs').hide();
     socket.emit("send_summit_choice", {'choice': 'a'});
   });
-})
+});
 
-socket.on('summit_result', function(data){
+// Summit Failed + Display the reason
+socket.on('summit_failed', function(data){
   popup(data.msg, 3000);
   $("#middle_display").hide();
   $('#middle_title, #middle_content').empty();
 });
 
+// Update summit voting result
 socket.on('s_voting_fb', function(data){
   if (data.opt == 'y'){
     $('#voted_yes').append(`<li>${data.name}</li>`);
@@ -891,12 +979,14 @@ socket.on('s_voting_fb', function(data){
   }
 });
 
+// Summit is activated, display announcement
 socket.on('activate_summit', function(){
   $("#middle_display").hide();
   $('#middle_title, #middle_content').empty();
   $('#announcement').html(`<h3>Summit in progress...</h3>`)
 });
 
+// Function to get player's authority
 async function get_sep_auth(){
   let amt = await new Promise((resolve) => {
     socket.emit('get_sep_auth');
@@ -905,40 +995,49 @@ async function get_sep_auth(){
   return amt.amt;
 }
 
+// SPECIAL AUTHORITY
+// Add display + Functionalities to special authority button
 btn_sep_auth = document.getElementById('btn-sep-auth');
 btn_sep_auth.onclick = function () {
   document.getElementById('middle_display').style.display = 'flex';
-  // set up title
+  // clear title
   document.getElementById('middle_title').innerHTML = "";
+  // Grab the special authority amt of the user
   get_sep_auth().then(sep_auth => {
     
+    // Show the title
     document.getElementById('middle_title').innerHTML = `
     <div style="padding: 1px;">
     <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
     </div>`;
 
+    // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div style="display: inline-block;">
-    <button class="btn" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
-      UPGRADE INFRASTRUCTURE
-    </button>
-    </div>
-    <div style="display: inline-block;">
-    <button class="btn" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
-      BUILD CITIES
-    </button>
-    </div>
-    <div style="display: inline-block;">
-    <button class="btn" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
-      MOBILIZATION
-    </button>
-    </div>
+
+      <div style="display: inline-block;">
+        <button class="btn" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
+          UPGRADE INFRASTRUCTURE
+        </button>
+      </div>
+
+      <div style="display: inline-block;">
+        <button class="btn" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
+          BUILD CITIES
+        </button>
+      </div>
+
+      <div style="display: inline-block;">
+        <button class="btn" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
+          MOBILIZATION
+        </button>
+      </div>
+
     </div>
     `;
 
-    // Functionalities to be added
+    // MOBILIZATION
     $("#btn-mob").off('click').on('click', function(){
       if (sep_auth < 2){
         popup('MINIMUM 2 STARS TO CONVERT TROOPS!', 2000);
@@ -950,7 +1049,7 @@ btn_sep_auth.onclick = function () {
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
          <input type="range" id="amtSlider" min="2" max=${max} step="1" value="2">
-         <p id="samt"></p>
+         <p id="samt">2</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);
         $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
@@ -962,6 +1061,7 @@ btn_sep_auth.onclick = function () {
         });
     });
 
+    // BUILD NEW CITY
     $("#btn-bc").off('click').on('click', function() {
         if (sep_auth < 3)  {
           popup('MINIMUM 3 STARS TO BUILD CITIES!', 2000);
@@ -972,7 +1072,7 @@ btn_sep_auth.onclick = function () {
         $("#middle_content").html(
           `<p>Select amount to convert:</p>
            <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
-           <p id="samt"></p>
+           <p id="samt">1</p>
            <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
           `);
           $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
@@ -984,6 +1084,7 @@ btn_sep_auth.onclick = function () {
           });
     });
 
+    // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
       if (sep_auth < 4){
         popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
@@ -994,7 +1095,7 @@ btn_sep_auth.onclick = function () {
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
-         <p id="samt"></p>
+         <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);
         $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
@@ -1007,15 +1108,17 @@ btn_sep_auth.onclick = function () {
     });
 
 
-  // population
   });
 }
 
+// SKILL USAGE
+// Add display + Functionalities according to user's skill
 btn_skill = document.getElementById('btn-skill');
 btn_skill.onclick = function () {
   return;
 }
 
+// Function to grab the reserve amt for the user
 async function get_reserves_amt(){
   let amt = await new Promise((resolve) => {
     socket.emit('get_reserves_amt');
@@ -1024,22 +1127,23 @@ async function get_reserves_amt(){
   return amt.amt;
 }
 
+// RESERVE DEPLOYMENT
 btn_reserves = document.getElementById("btn-reserve");
 btn_reserves.onclick = function () {
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = "";
   get_reserves_amt().then(ramt => {
     document.getElementById('middle_title').innerHTML = `
-    <div style="padding: 1px;">
-    <h5>TROOPS AVAILABLE: ${ramt}</h5>
+    <div style="padding: 2px;">
+      <h5>TROOPS AVAILABLE: ${ramt}</h5>
     </div>`;
 
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
     <div>
-    <button class="btn" id="btn_DR" style="background-color: #BB6B6B; color:#FFFFFF;">
-      DEPLOY RESERVES
-    </button>
+      <button class="btn" id="btn_DR" style="background-color: #BB6B6B; color:#FFFFFF;">
+        DEPLOY RESERVES
+      </button>
     </div>
     `;
 
@@ -1051,40 +1155,13 @@ btn_reserves.onclick = function () {
     });
 
   });
-
 }
 
-// dependency on "city_amt"
-function build_cities(tid){
-  if(player_territories.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
-    }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
-    }
-    if (toHightlight.length == city_amt){
-        $('#control_mechanism').empty();
-        $('#control_panel').hide();
-        $('#control_panel').show();
-        $('#control_confirm').off('click').on('click', function(){
-          $('#control_panel').hide();
-          socket.emit('settle_cities', {'choice': toHightlight});
-          toHightlight = [];
-        });
-        $('#control_cancel').off('click').on('click', function(){
-          $('#control_panel').hide();
-          toHightlight = [];
-        });
-    }
-  }
-}
+//========================================================================================================
 
-//===============================================================================
-
-//============================ Mouse events =====================================
+//============================================= Mouse events =============================================
 function mouseWheel(event) {
-    // Check if the mouse is within the canvas bounds
+    // Check if the mouse is in the game map layer
     if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height && !isMouseOverOverlay()) {
       event.preventDefault(); 
       // Adjust the scale factor based on the mouse scroll direction
@@ -1095,60 +1172,64 @@ function mouseWheel(event) {
         // Zoom in (increase scale factor)
         scaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
       }
-  
       // Limit the scale factor to prevent zooming too far in or out
       scaleFactor = constrain(scaleFactor, 0.3, 3); // Adjust the range as needed
     }
   }
   
-  function isMouseOverOverlay() {
-    let overlay = document.getElementById('overlay_sections');
-    let cards = overlay.querySelectorAll('.card');
-    for (var card of cards){
-      var overlayRect = card.getBoundingClientRect();
-      if (mouseX >= overlayRect.left && mouseX <= overlayRect.right && mouseY >= overlayRect.top && mouseY <= overlayRect.bottom){
-        return true;
-      }
+// Check if the mouse is in the overlay regions
+function isMouseOverOverlay() {
+  let overlay = document.getElementById('overlay_sections');
+  let cards = overlay.querySelectorAll('.card');
+  for (var card of cards){
+    var overlayRect = card.getBoundingClientRect();
+    if (mouseX >= overlayRect.left && mouseX <= overlayRect.right && mouseY >= overlayRect.top && mouseY <= overlayRect.bottom){
+      return true;
     }
-    return false;
   }
+  return false;
+}
 
-  function mousePressed() {
-    if(mouseX <= width && mouseY <= height){
-      isDragging = true;
-      previousMouseX = mouseX;
-      previousMouseY = mouseY;
+// Initiate dragging
+function mousePressed() {
+  if(mouseX <= width && mouseY <= height){
+    isDragging = true;
+    previousMouseX = mouseX;
+    previousMouseY = mouseY;
+  }
+}
+
+// Stop dragging
+function mouseReleased() {
+  isDragging = false;
+}
+
+// Dragging
+function mouseDragged() {
+  if (isDragging) {
+    let dx = mouseX - previousMouseX;
+    let dy = mouseY - previousMouseY;
+
+    offsetX += dx;
+    offsetY += dy;
+
+    previousMouseX = mouseX;
+    previousMouseY = mouseY;
+
+  }
+}
+
+// CLICK FUNCTION ON TERRITORY
+function mouseClicked() {
+  if(mouseX <= width && mouseY <= height && !isMouseOverOverlay()){
+    if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
+      let tid = hover_over.id;
+      if (currEvent){
+        currEvent(tid);
+      } 
     }
   }
-  
-  function mouseReleased() {
-    isDragging = false;
-  }
-  
-  function mouseDragged() {
-    if (isDragging) {
-      let dx = mouseX - previousMouseX;
-      let dy = mouseY - previousMouseY;
-  
-      offsetX += dx;
-      offsetY += dy;
-  
-      previousMouseX = mouseX;
-      previousMouseY = mouseY;
-  
-    }
-  }
-  
-  function mouseClicked() {
-    if(mouseX <= width && mouseY <= height && !isMouseOverOverlay()){
-      if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
-        let tid = hover_over.id;
-        if (currEvent){
-          currEvent(tid);
-        } 
-      }
-    }
-  }
+}
 
   // TO BE UPDATED
 function keyPressed(){

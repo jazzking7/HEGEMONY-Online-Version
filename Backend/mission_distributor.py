@@ -2,6 +2,8 @@ from missions import *
 import random
 import threading
 
+# GAME CAN ONLY BE ENDED BY DEATH OR ROUND TRACKERS
+# Abstract Mission Tracker | DAEMON MODE CHECKING
 class Mission_Tracker(threading.Thread):
     
     def __init__(self, gs):
@@ -22,12 +24,15 @@ class Mission_Tracker(threading.Thread):
     
     def run(self, ):
         while not self.gs.GES.interrupt:
+
+            # CHECK IS ONLY DONE WHEN self.event.set()
             self.event.wait()
             
             self.check_conditions()
 
             self.event.clear()
 
+# Only check condition at end of each round     Round
 class Round_Based_Incrementor(Mission_Tracker):
 
     def __init__(self, gs):
@@ -37,6 +42,7 @@ class Round_Based_Incrementor(Mission_Tracker):
         for obs in self.observers:
             obs.check_round_condition()
 
+# Check condition at specific point     Death | Trty | Indus | Popu
 class Event_Based_Tracker(Mission_Tracker):
 
     def __init__(self, gs):
@@ -89,14 +95,19 @@ class Mission_Distributor:
         miss_set = []
         done = False
         cl, cg = 0, 0
+        print(math.floor(num_p/2))
         while not done:
             choice = random.choice(self.missions)
-            if choice == 'Loy' and not cl:
+            if choice == 'Loy' and not cl and num_p > 3:
                 miss_set.append(choice)
                 cl += 1
+            elif choice == 'Loy' and cl:
+                continue
             elif choice == 'Gua' and not cg:
                 miss_set.append(choice)
                 cg += 1
+            elif choice == 'Gua' and cg:
+                continue
             else:
                 miss_set.append(choice)
             if len(miss_set) == num_p:
@@ -192,3 +203,4 @@ class Mission_Distributor:
             return s
         else:
             return t
+        

@@ -285,6 +285,7 @@ def update_troop_info(data):
         socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
     else:
         if gsm.GES.current_event == None:
+            # show only for initial deployment
             socketio.emit('troop_result', {'resp': True}, room=pid)
             gsm.GES.selected += 1
 
@@ -391,7 +392,7 @@ def handle_summit_request():
     if gsm.players[pid].num_summit > 0:
         gsm.GES.summit_requested = True
     else:
-        socketio.emit('summit_result', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
+        socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
 
 @socketio.on('send_summit_choice')
 def handle_summit_choice(data):
@@ -421,5 +422,5 @@ def handle_async_end():
     return
 
 if __name__ == '__main__':
-    # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
-    socketio.run(app, host='0.0.0.0', port=8081, debug=True)
+    socketio.run(app, host='127.0.0.1', port=8081, debug=True)
+    # socketio.run(app, host='0.0.0.0', port=8081, debug=True)

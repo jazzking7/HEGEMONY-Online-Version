@@ -106,6 +106,7 @@ class Game_State_Manager:
         # Mission
         self.Mdist = None
         self.Mset = None
+        # Mission Trackers that gets triggered at specific call points. See mission_distributor.py for definition
         self.MTrackers = {}
 
         # Elimination Tracker
@@ -120,11 +121,14 @@ class Game_State_Manager:
         self.TIP = None
         self.SUP = None
 
-        # monitoring
+        # Died due to kill
         self.perm_elims = []
+        # Died due to mission failure
         self.miss_elims = []
+        # victim -> killer/mission failure
         self.kill_logs = {}
 
+    # Signal the specific mission tracker to check condition
     def signal_MTrackers(self, event_name):
         if event_name in self.MTrackers:
             self.MTrackers[event_name].event.set()
@@ -349,13 +353,17 @@ class Game_State_Manager:
         p =  self.players[player]
         if p.deployable_amt > 0:
             # CM
+            updated_trty = []
             while (p.deployable_amt != 0):
                 trty = random.choice(p.territories)
                 t = self.map.territories[trty]
                 t.troops += 1
                 p.total_troops += 1
                 p.deployable_amt -= 1
-                self.server.emit('update_trty_display', {trty:{'troops': t.troops}}, room=self.lobby)
+                if trty not in updated_trty:
+                    updated_trty.append(trty)
+            updated_tids = {tid: self.map.territories[tid].troops for tid in updated_trty}
+            self.server.emit('update_trty_display', updated_tids, room=self.lobby)
             self.update_LAO(player)
             self.get_SUP()
             self.update_global_status()
