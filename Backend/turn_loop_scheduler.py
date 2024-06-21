@@ -144,7 +144,7 @@ class turn_loop_scheduler:
     def execute_turn(self, gs, ms, curr_player):
 
         ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
-        ms.timer = threading.Thread(target=ms.activate_timer, args=(60,))
+        ms.timer = threading.Thread(target=ms.activate_timer, args=(90,))
 
         ms.terminated = False
         ms.curr_thread.start()
