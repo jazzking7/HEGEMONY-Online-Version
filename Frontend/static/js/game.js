@@ -123,7 +123,32 @@ socket.on('stop_timeout', function(){
   clearInterval(current_interval);
 })
 
-// Player stats list initiate
+// // Player stats list initiate
+// socket.on('get_players_stats', function(data){
+//   var pList = $('#stats-list');
+//   $.each(data, function(p, p_info) {
+//     var pBtn = $('<button></button>')
+//       .attr('id', p)
+//       .addClass('btn game_btn')
+//       .css({
+//         'color': 'black',
+//         'background-color': p_info.color
+//       })
+//       .html(`
+//         <div style="text-align: left;">
+//           ${p}<br>
+//           <div style="display: inline-block;">
+//             ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+//           </div>
+//           <div style="display: inline-block;">
+//             ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+//           </div>
+//         </div>
+//       `);
+//     pList.append(pBtn);
+//   });
+// });
+
 socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
   $.each(data, function(p, p_info) {
@@ -132,15 +157,20 @@ socket.on('get_players_stats', function(data){
       .addClass('btn game_btn')
       .css({
         'color': 'black',
-        'background-color': p_info.color
+        'background-color': p_info.color,
+        'width': '10vh',
+        'max-width': '10vh',
+        'overflow': 'hidden',
+        'text-overflow': 'ellipsis',
+        'white-space': 'nowrap'
       })
       .html(`
-        <div style="text-align: left;">
+        <div style="text-align: left; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           ${p}<br>
-          <div style="display: inline-block;">
+          <div style="display: inline-block; width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
           </div>
-          <div style="display: inline-block;">
+          <div style="display: inline-block; width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
           </div>
         </div>
