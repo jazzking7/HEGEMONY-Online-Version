@@ -5,7 +5,7 @@ $(document).ready(function() {
         if (username === '') {
             popup("Must enter a name!", 1000);
             return;
-        } else if (username.length > 15) {
+        } else if (username.length > 12) {
             popup("Name longer than 15 characters!", 1000);
             return;
         }
@@ -19,7 +19,7 @@ $(document).ready(function() {
         if (username === '') {
             popup("Must enter a name!", 1000);
             return;
-        } else if (username.length > 15) {
+        } else if (username.length > 12) {
             popup("Name longer than 15 characters!", 1000);
             return;
         }
