@@ -6,7 +6,7 @@ $(document).ready(function() {
             popup("Must enter a name!", 1000);
             return;
         } else if (username.length > 12) {
-            popup("Name longer than 15 characters!", 1000);
+            popup("Name longer than 12 characters!", 1000);
             return;
         }
         console.log('create_lobby');
@@ -20,7 +20,7 @@ $(document).ready(function() {
             popup("Must enter a name!", 1000);
             return;
         } else if (username.length > 12) {
-            popup("Name longer than 15 characters!", 1000);
+            popup("Name longer than 12 characters!", 1000);
             return;
         }
         if (lobby_code.trim() === ''){

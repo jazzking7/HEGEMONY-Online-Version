@@ -15,13 +15,11 @@ class Elimination_tracker:
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars
             print(f"{victim.name} has been eliminated by {attacker.name}")
-            # victim not eliminated due to mission failure
-            if d_pid not in gs.miss_elims:
-                # victim is one of original players
-                if d_pid in gs.oriPlayers:
-                    gs.perm_elims.append(d_pid)
-                # update kill logs
-                gs.kill_logs[d_pid] = a_pid
+            # victim is one of original players
+            if d_pid in gs.oriPlayers:
+                gs.perm_elims.append(d_pid)
+            # update kill logs
+            gs.death_logs[d_pid] = a_pid
             # check death dependent mission
             gs.signal_MTrackers('death')
 

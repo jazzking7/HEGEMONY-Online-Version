@@ -316,6 +316,7 @@ socket.on('get_mission', function(data) {
 // Initiate mission tracker
 socket.on('initiate_tracker', function(data){
   $('#mission_title').text(data.title);
+  // Display target, s for green, f for red
   if (data.targets){
     $('#misTargets').show();
     for (target in data.targets) {
@@ -1120,15 +1121,15 @@ btn_sep_auth.onclick = function () {
 
     // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
-      if (sep_auth < 4){
-        popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
-         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
          <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);

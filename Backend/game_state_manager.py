@@ -55,9 +55,11 @@ class Game_State_Manager:
 
     def __init__(self, mapName, player_list, setup_events, server, lobby):
 
-        # Number of players and players are related
+        # Player dict => key: player_id (socket connection id)  value: player object
         self.players = {}
+        # All communicatable ids
         self.pids = []
+        # Original players -> not created using skills
         self.oriPlayers = []
         for player in player_list:
             self.pids.append(player['sid'])
@@ -121,12 +123,10 @@ class Game_State_Manager:
         self.TIP = None
         self.SUP = None
 
-        # Died due to kill
+        # Died player
         self.perm_elims = []
-        # Died due to mission failure
-        self.miss_elims = []
         # victim -> killer/mission failure
-        self.kill_logs = {}
+        self.death_logs = {}
 
     # Signal the specific mission tracker to check condition
     def signal_MTrackers(self, event_name):
@@ -257,7 +257,7 @@ class Game_State_Manager:
         if amt == 2:
             extra = 3
         elif amt == 3:
-            extra = 4
+            extra = 5
         elif amt == 4:
             extra = 7
         elif amt == 5:
@@ -265,21 +265,21 @@ class Game_State_Manager:
         elif amt == 6:
             extra = 13
         elif amt == 7:
-            extra = 17
+            extra = 16
         elif amt == 8:
-            extra = 21
+            extra = 19
         elif amt == 9:
-            extra = 25
+            extra = 23
         elif amt == 10:
-            extra = 30
+            extra = 28
         elif amt == 11:
-            extra = 34
+            extra = 33
         elif amt == 12:
-            extra = 39
+            extra = 38
         elif amt == 13:
-            extra = 46
+            extra = 44
         elif amt == 14:
-            extra = 53
+            extra = 52
         elif amt == 15:
             extra = 60
         self.players[player].reserves += extra
@@ -323,7 +323,7 @@ class Game_State_Manager:
     def upgrade_infrastructure(self, amt, player):
         # CM
         self.players[player].infrastructure_upgrade += amt
-        self.players[player].stars -= amt*4
+        self.players[player].stars -= amt*5
         self.update_HIP(player)
         self.get_SUP()
         self.update_global_status()
@@ -402,7 +402,11 @@ class Game_State_Manager:
         # Load territories involved
         t1, t2 = data['choice']
         
-        # Identify opponents
+        # Identify opponents: 
+        # atk_p -> player object of attacker
+        # def_p -> player object of defender
+        # a_pid -> socket id of attacker
+        # d_pid -> socket id of defender
         atk_p, def_p, a_pid, d_pid = None, None, None, None
 
         # TEMP TO BE ADJUSTED WHEN IN ALLIANCE

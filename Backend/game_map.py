@@ -90,14 +90,15 @@ class Map:
         
         tid = 0
         t_convert = {}
+        # get tid of each territory
         for tname in self.tnames:
             t_convert[tname] = tid
             tid += 1
-        # convert neighbors to index
+        # convert neighbors list from name to indexes
         for n in self.tneighbors:
             for i in range(len(n)):
                 n[i] = t_convert[n[i]]
-        # convert continent to index
+        # convert continent trty list from name to indexes
         for c in self.conts:
             cur = self.conts[c]['trtys']
             for i in range(len(cur)):

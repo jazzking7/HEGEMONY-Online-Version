@@ -63,23 +63,23 @@ class Mission_Distributor:
             ['Dom', 'Exp', 'Pop'],
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Gua', 'Bon']
+        self.self_wins = ['Loy', 'Gua', 'Bon', 'Dec', 'War']
         self.missions = [
             'Pac', 'War', 'Loy', 'Bon',
             'Uni', 'Pol', 'Fan', 'Ind',
-            'Exp', 'Pop', 'Dom', 'Gua'
+            'Exp', 'Pop', 'Dom', 'Gua',
+            'Dec'
         ]
 
-        self.first_tier = ['Bounty_Hunter', 'Decapitator']
-        self.second_tier = ['Loyalist', 'Guardian']
+        self.first_tier = ['Decapitator', 'Bounty_Hunter']
+        self.second_tier = ['Guardian', 'Loyalist']
+
 
     def validate_mission_set(self, miss_set):
         c = 0
         for m in miss_set:
             if m in self.self_wins:
                 c += 1
-                if m == 'Loy':
-                    c += 1
             if m in self.dup_con and miss_set.count(m) > 1:
                 return True
         if 'Pac' in miss_set and c >= math.floor(len(miss_set)/2):
@@ -151,7 +151,7 @@ class Mission_Distributor:
                 if 'round' not in gs.MTrackers:
                     gs.MTrackers['round'] = Round_Based_Incrementor(gs)
                 gs.MTrackers['round'].add_observer(m)
-            if m.name in ['Unifier', 'Polarizer', 'Fanatic', 'Industrialist', 'Expansionist', 'Guardian', 'Dominator']:
+            if m.name in ['Unifier', 'Polarizer', 'Fanatic', 'Industrialist', 'Expansionist', 'Guardian', 'Dominator', 'Decapitator']:
                 if 'trty' not in gs.MTrackers:
                     gs.MTrackers['trty'] = Event_Based_Tracker(gs)
                 gs.MTrackers['trty'].add_observer(m)
@@ -169,6 +169,8 @@ class Mission_Distributor:
             gs.MTrackers[t].start()
     
     def determine_winners(self, gs):
+
+        # Redefine this
         c = []
         for p in gs.players:
             if gs.players[p].alive:

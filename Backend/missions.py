@@ -26,8 +26,8 @@ class Mission:
 
     def signal_mission_failure(self, ):
         self.gs.players[self.player].alive = False
-        self.gs.miss_elims.append(self.player)
-        self.gs.kill_logs[self.player] = 'MF'
+        self.gs.perm_elims.append(self.player)
+        self.gs.death_logs[self.player] = 'MF'
         self.gs.signal_MTrackers('death')
         self.gs.egt.determine_end_game(self.gs)
 
@@ -39,7 +39,7 @@ class Pacifist(Mission):
         self.round = 0
         self.type = 'r_based'
         self.max_death_count = math.floor(len(gs.pids)/2)
-        self.goal_round = 7
+        self.goal_round = 8
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -93,13 +93,13 @@ class Warmonger(Mission):
         self.goal_count = len(self.gs.pids)//2 if len(self.gs.pids) >= 2 else 2
         self.peace = 0
         self.type = 'r_based'
-        self.max_peace = 8
+        self.max_peace = 9
         self.death_count = 0
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
-        dc = len(self.gs.perm_elims) + len(self.gs.miss_elims)
+        dc = len(self.gs.perm_elims)
         if dc > self.death_count:
             self.peace = -1
             self.death_count = dc
@@ -204,16 +204,9 @@ class Bounty_Hunter(Mission):
         # check if target players are dead
         c = 0
         for target in self.target_players:
-            if target in self.gs.kill_logs:
-                # someone else killed the target
-                if self.gs.kill_logs[target] not in [self.player, 'MF']:
-                    # signal death
-                    self.update_tracker_view({'misProgDesp': 'bounty failed, someone else killed the player'})
-                    self.signal_mission_failure()
-                    return
-                else:
-                    self.update_tracker_view({'targets': {self.gs.players[target].name: 's'}})
-                    c += 1
+            if target in self.gs.perm_elims:
+                self.update_tracker_view({'targets': {self.gs.players[target].name: 's'}})
+                c += 1
             else:
                 self.update_tracker_view({'targets': {self.gs.players[target].name: 'f'}})
         if c == len(self.target_players):
@@ -232,17 +225,14 @@ class Bounty_Hunter(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
-        c = 0
+        if not self.gs.players[self.player].alive:
+            return False
         for target in self.target_players:
-            if target in self.gs.kill_logs:
-                if self.gs.kill_logs[target] not in [self.player, 'MF']:
-                    return False
-                else:
-                    c += 1
+            if target in self.gs.perm_elims:
+                    continue
             else:
                 return False
-        if c == len(self.target_players):
-            return True and self.gs.players[self.player].alive
+        return True
 
 class Unifier(Mission):
     def __init__(self, player, gs):
@@ -305,7 +295,7 @@ class Polarizer(Mission):
         super().__init__("Polarizer", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 3
 
     def no_unification(self,):
         for cont in self.gs.map.conts:
@@ -349,7 +339,7 @@ class Fanatic(Mission):
         self.type = 'r_based'
         self.round = 0
         m = len(gs.map.territories)
-        self.targets = random.sample([i for i in range(m)], 7)
+        self.targets = random.sample([i for i in range(m)], 5)
         self.target_round = 4
     
     def own_all_targets(self, ):
@@ -402,7 +392,7 @@ class Industrialist(Mission):
         super().__init__("Industrialist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 4
+        self.target_round = 3
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -442,7 +432,7 @@ class Expansionist(Mission):
         super().__init__("Expansionist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 4
+        self.target_round = 3
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -580,3 +570,56 @@ class Guardian(Mission):
 
     def end_game_checking(self, ):
         return self.gs.players[self.player].alive
+    
+class Decapitator(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Decapitator", player, gs)
+        self.target_players = None
+        numt = 0
+        nump = len(gs.pids)
+        numt = nump//2
+        while self.target_players is None:
+            self.target_players = random.sample(gs.pids, numt)
+            if player in self.target_players:
+                self.target_players = None
+
+    # get the capital id based on the player's capital name
+    def get_capital_id(self, c_name):
+        for tid in range(self.gs.map.num_nations):
+            if self.gs.map.territories[tid].name == c_name:
+                return tid
+
+    def check_conditions(self, ):
+        c = 0
+        for target in self.target_players:
+            # check if capital tid is in player's control
+            capital_id = self.get_capital_id(self.gs.players[target].capital)
+            if capital_id in self.gs.players[self.player].territories:
+                self.update_tracker_view({'targets': {self.gs.players[target].name: 's'}})
+                c += 1
+            else:
+                self.update_tracker_view({'targets': {self.gs.players[target].name: 'f'}})
+        if c == len(self.target_players):
+            # signal end
+            self.update_tracker_view({'misProgDesp': 'All capital captured'})
+            self.signal_mission_success()
+
+    def set_up_tracker_view(self, ):
+        targets = {}
+        for t in self.target_players:
+            targets[self.gs.players[t].name] = 'f'
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'targets': targets,
+            'misProgDesp': 'Yet to capture all their capitals.'
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        for target in self.target_players:
+            # check if capital tid is in player's control
+            capital_id = self.get_capital_id(self.gs.players[target].capital)
+            if capital_id not in self.gs.players[self.player].territories:
+                return False
+        return True
