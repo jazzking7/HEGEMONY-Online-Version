@@ -25,11 +25,12 @@ class Mission:
         self.gs.server.emit('update_tracker', updates, room=self.player)
 
     def signal_mission_failure(self, ):
-        self.gs.players[self.player].alive = False
-        self.gs.perm_elims.append(self.player)
-        self.gs.death_logs[self.player] = 'MF'
-        self.gs.signal_MTrackers('death')
-        self.gs.egt.determine_end_game(self.gs)
+        if self.gs.players[self.player].alive:
+            self.gs.players[self.player].alive = False
+            self.gs.perm_elims.append(self.player)
+            self.gs.death_logs[self.player] = 'MF'
+            self.gs.signal_MTrackers('death')
+            self.gs.egt.determine_end_game(self.gs)
 
 class Pacifist(Mission):
 
@@ -90,7 +91,7 @@ class Pacifist(Mission):
 class Warmonger(Mission):
     def __init__(self, player, gs):
         super().__init__("Warmonger", player, gs)
-        self.goal_count = len(self.gs.pids)//2 if len(self.gs.pids) >= 2 else 2
+        self.goal_count = len(self.gs.pids)//3
         self.peace = 0
         self.type = 'r_based'
         self.max_peace = 9
@@ -99,7 +100,13 @@ class Warmonger(Mission):
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
-        dc = len(self.gs.perm_elims)
+
+        # count personal kill        
+        dc = 0
+        for d in self.gs.death_logs:
+            if self.player == self.gs.death_logs[d]:
+                dc += 1
+
         if dc > self.death_count:
             self.peace = -1
             self.death_count = dc
@@ -140,16 +147,29 @@ class Warmonger(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
+
+        # count personal kill        
+        dc = 0
+        for d in self.gs.death_logs:
+            if self.player == self.gs.death_logs[d]:
+                dc += 1
+        self.death_count = dc
+
         return self.death_count == self.goal_count and self.gs.players[self.player].alive
 
 class Loyalist(Mission):
     def __init__(self, player, gs):
         super().__init__("Loyalist", player, gs)
         self.target_player = None
-        while self.target_player is None:
-            self.target_player = random.choice(gs.pids)
-            if self.target_player == player:
-                self.target_player = None
+
+    def set_partner(self, ):
+        for m in self.gs.Mset:
+            if m.name == "Loyalist":
+                if m.target_player == None:
+                    if m.player != self.player:
+                        self.target_player = m.player
+                        m.target_player = self.player
+                        return
 
     def exactly_two_players_left(self, ):
         s = []
@@ -164,9 +184,19 @@ class Loyalist(Mission):
         if not self.gs.players[self.target_player].alive:
             self.update_tracker_view({
             'targets': {self.gs.players[self.target_player].name: 'f'},
-            'misProgDesp': 'Target did not survive until game ends, mission failed'
+            'misProgDesp': 'Partner did not survive, mission failed'
             })
             self.signal_mission_failure()
+
+            # Signal Partner about mission failure
+            for miss in self.gs.Mset:
+                if miss.name == "Loyalist":
+                    if miss.player == self.target_player:
+                        miss.update_tracker_view({
+                        'targets': {miss.gs.players[miss.target_player].name: 'f'},
+                        'misProgDesp': 'Partner did not survive, mission failed'
+                        })
+                        miss.signal_mission_failure()
         # verify how many players still alive
         if self.exactly_two_players_left():
             self.signal_mission_success()
@@ -175,11 +205,11 @@ class Loyalist(Mission):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
             'targets': {self.gs.players[self.target_player].name: 's'},
-            'misProgDesp': 'Target still alive, mission continue'
+            'misProgDesp': 'Partner still alive, fight to be the last survivors!'
         }, room=self.player)
 
     def end_game_checking(self, ):
-        return self.gs.players[self.target_player].alive and self.gs.players[self.player].alive
+        return self.exactly_two_players_left()
         
 class Bounty_Hunter(Mission):
     def __init__(self, player, gs):
@@ -623,3 +653,83 @@ class Decapitator(Mission):
             if capital_id not in self.gs.players[self.player].territories:
                 return False
         return True
+    
+class Starchaser(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Starchaser", player, gs)
+        
+        self.type = 'r_based'
+        self.curr_target = None
+
+        m = len(gs.map.territories)
+        valid = False
+        while not valid:
+            t = random.randint(0, m-1)
+            if t not in self.gs.players[self.player].territories:
+                self.curr_target = t
+                break
+        
+        self.chase_completed = 0
+        self.target_chases = 7
+
+        self.round = 0
+        self.death_round = 5
+
+    def set_up_tracker_view(self, ):
+        targets = {}
+        targets[self.gs.map.territories[self.curr_target].name] = 'f'
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'targets': targets,
+            'misProgBar': [self.chase_completed, self.target_chases],
+            'misProgDesp': f'{self.chase_completed}/{self.target_chases} chases completed',
+            'lossDesp': f'{self.death_round} rounds left to complete current chase',
+            'lossProg': [0, self.death_round]
+        }, room=self.player)
+
+    def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        # verify if player owns the target
+        if self.curr_target in self.gs.players[self.player].territories:
+            self.round = -1
+            self.chase_completed += 1
+            self.update_tracker_view({'targets': {self.gs.map.territories[self.curr_target].name: 's'}})
+            self.update_tracker_view({'misProgBar': [self.chase_completed, self.target_chases],
+            'misProgDesp': f'{self.chase_completed}/{self.target_chases} chases completed',})
+            self.update_tracker_view({'lossProg': [0, self.death_round],
+                'lossDesp': f'{self.death_round} rounds left to complete current chase',})
+            
+            if len(self.gs.players[self.player].territories) == len(self.gs.map.territories):
+                self.signal_mission_success()
+                return
+
+            if self.chase_completed == self.target_chases:
+                self.signal_mission_success()
+                return
+            
+            # Set new target
+            valid = False
+            while not valid:
+                t = random.randint(0, len(self.gs.map.territories)-1)
+                if t not in self.gs.players[self.player].territories:
+                    self.curr_target = t
+                    targets = {}
+                    targets[self.gs.map.territories[t].name] = 'f'
+                    self.update_tracker_view({'targets': targets, 'new_target': True})
+                    valid = True
+    
+    def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        if self.curr_target not in self.gs.players[self.player].territories:
+            self.round += 1
+            self.update_tracker_view({'lossProg': [self.round, self.death_round],
+                'lossDesp': f'{self.death_round-self.round} rounds left to complete current chase',})
+        if self.round == self.death_round:
+            self.signal_mission_failure()
+    
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        return self.chase_completed == self.target_chases or len(self.gs.players.territories) == len(self.gs.map.territories)

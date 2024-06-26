@@ -6,4 +6,4 @@ Tuhoe,Norfolk Ridge,Canterbury Basin
 Otago,Norfolk Ridge,Bauska
 Sarmatia,Balotania
 Canterbury Basin,Otago,Tuhoe,Sarmatia
-Norfolk Ridge,Aerilon
+Norfolk Ridge,Aerilon,Nordinburgh

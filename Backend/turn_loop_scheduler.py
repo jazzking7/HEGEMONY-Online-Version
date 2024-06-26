@@ -181,5 +181,6 @@ class turn_loop_scheduler:
                 ms.round += 1
                 # CM
                 gs.signal_MTrackers('round')
+                gs.update_global_status()
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

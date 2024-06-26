@@ -150,8 +150,14 @@ class General_Event_Scheduler:
     def launch_summit_procedures(self, player):
         pid = self.gs.pids[player]
         self.summit_voter = {'y': 0, 'n': 0}
-        self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=self.gs.lobby)
-        self.selection_time_out(20, len(self.gs.players))
+
+        c = 0
+        for player in self.gs.players:
+            if self.gs.players[player].alive:
+                c += 1
+                self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=player)
+
+        self.selection_time_out(20, c)
         if self.summit_voter['y'] > self.summit_voter['n']:
             self.gs.players[pid].num_summit -= 1
             self.activate_summit()

@@ -29,16 +29,27 @@ class setup_event_scheduler:
                 event_list.append(event)
             return event_list
     
-    # TO BE UPDATED
+    # MISSION DISTRIBUTION
     def distribute_missions(self, gs, ms):
         # CM
         miss_set = gs.Mdist.get_mission_set(len(gs.pids))
         for index, player in enumerate(gs.pids):
             miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
-            miss_set[index].set_up_tracker_view()
-            gs.server.emit('get_mission', {'msg': f'Your agenda: {miss_set[index].name}'}, room=player)
+
+        # Set up mission trackers for all missions
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
-        gs.Mset = miss_set
+        gs.Mset = miss_set 
+
+        # Set up partner for loyalist
+        for m in gs.Mset:
+            if m.name == "Loyalist":
+                m.set_partner()
+
+        # Set up user view for mission
+        for mission in gs.Mset:
+            mission.set_up_tracker_view()
+            gs.server.emit('get_mission', {'msg': f'Your agenda: {mission.name}'}, room=player)
+
         ms.selection_time_out(20, len(gs.players))
 
     # FCFS

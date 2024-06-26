@@ -18,8 +18,9 @@ class Elimination_tracker:
             # victim is one of original players
             if d_pid in gs.oriPlayers:
                 gs.perm_elims.append(d_pid)
-            # update kill logs
-            gs.death_logs[d_pid] = a_pid
+            # update kill logs if player not dead by mission failure
+            if d_pid not in gs.death_logs:
+                gs.death_logs[d_pid] = a_pid
             # check death dependent mission
             gs.signal_MTrackers('death')
 

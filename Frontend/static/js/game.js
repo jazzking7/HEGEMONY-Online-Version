@@ -198,6 +198,7 @@ socket.on('update_players_stats', function(data){
 // Update overview status
 socket.on('update_global_status', function(data){
     $('#global_status').show();
+    $('#game_round').text(data.game_round);
     $('#LAO').text(data.LAO);
     $('#MTO').text(data.MTO);
     $('#TIP').text(data.TIP);
@@ -292,7 +293,7 @@ socket.on('GAME_OVER', function(data){
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
   $('#middle_display, #middle_title, #middle_content').show();
-  $('#middle_title').html('<h1>FINAL VICTORS</h1>');
+  $('#middle_title').html('<h1 style="padding-right: 5px">FINAL VICTORS</h1>');
   $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;" ></div>`);
   for (winner of data.winners) {
     var wname; var mission;
@@ -376,6 +377,16 @@ socket.on('update_tracker', function(data){
   if (data.targets){
     for (target in data.targets) {
       var tarid = target.replace(/ /g, "_");
+      // Add new targets if there is flah
+      if (data.new_target) {
+        $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
+        $(`#target_${tarid}`).css({
+          'display': 'inline-block',
+          'padding': '2px',
+          'margin': '2px',
+          'border-radius': '3px'
+        });
+      }
       if (data.targets[target] == 's') {
         $(`#target_${tarid}`).css('background-color', '#50C878');
       } else {
@@ -1121,15 +1132,15 @@ btn_sep_auth.onclick = function () {
 
     // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
-      if (sep_auth < 5){
-        popup('MINIMUM 5 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+      if (sep_auth < 4){
+        popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
-         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
          <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);

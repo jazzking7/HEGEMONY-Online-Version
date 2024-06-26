@@ -107,6 +107,7 @@ class Game_State_Manager:
 
         # Mission
         self.Mdist = None
+        # Mission sets
         self.Mset = None
         # Mission Trackers that gets triggered at specific call points. See mission_distributor.py for definition
         self.MTrackers = {}
@@ -138,7 +139,8 @@ class Game_State_Manager:
     def game_over(self, ):
         winners = self.Mdist.determine_winners(self)
         winners = [{self.players[w].name: winners[w]} for w in winners]
-        print(winners)
+        self.signal_view_clear()
+        time.sleep(1)
         self.server.emit('GAME_OVER', {
             'winners': winners,
         }, room=self.lobby)
@@ -247,7 +249,8 @@ class Game_State_Manager:
 
     def update_global_status(self, ):
         self.server.emit('update_global_status',
-        {'LAO': self.players[self.LAO].name if self.LAO != None else "Yet to exist",
+        {'game_round': self.GES.round,
+        'LAO': self.players[self.LAO].name if self.LAO != None else "Yet to exist",
         'MTO': self.players[self.MTO].name if self.MTO != None else "Yet to exist",
         'TIP': self.players[self.TIP].name if self.TIP != None else "Yet to exist",
         'SUP': self.players[self.SUP].name if self.SUP != None else "Yet to exist",}, room=self.lobby)
@@ -323,7 +326,7 @@ class Game_State_Manager:
     def upgrade_infrastructure(self, amt, player):
         # CM
         self.players[player].infrastructure_upgrade += amt
-        self.players[player].stars -= amt*5
+        self.players[player].stars -= amt*4
         self.update_HIP(player)
         self.get_SUP()
         self.update_global_status()
@@ -362,7 +365,8 @@ class Game_State_Manager:
                 p.deployable_amt -= 1
                 if trty not in updated_trty:
                     updated_trty.append(trty)
-            updated_tids = {tid: self.map.territories[tid].troops for tid in updated_trty}
+            updated_tids = {tid: {'troops': self.map.territories[tid].troops} for tid in updated_trty}
+            print(updated_tids)
             self.server.emit('update_trty_display', updated_tids, room=self.lobby)
             self.update_LAO(player)
             self.get_SUP()
