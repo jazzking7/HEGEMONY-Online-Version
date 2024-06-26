@@ -132,7 +132,8 @@ socket.on('get_players_stats', function(data){
       .addClass('btn game_btn')
       .css({
         'color': 'black',
-        'background-color': p_info.color
+        'background-color': p_info.color,
+        'width': '100%',
       })
       .html(`
         <div style="text-align: left;">
