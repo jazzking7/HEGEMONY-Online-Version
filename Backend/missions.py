@@ -732,4 +732,4 @@ class Starchaser(Mission):
     def end_game_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
-        return self.chase_completed == self.target_chases or len(self.gs.players.territories) == len(self.gs.map.territories)
+        return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)

@@ -55,11 +55,11 @@ html, body {
 
 #player_info{
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 0;
     transform: translateY(-50%);
     max-width: 15vw;
-    max-height: 40vh;
+    max-height: 30vh;
     border: 0;
     background-color: rgba(255, 255, 255, 0)
 }
@@ -67,7 +67,7 @@ html, body {
 
 .stats-list {
     overflow-y: auto;
-    max-height: 15vh;
+    max-height: 30vh;
     position: sticky;
     top: 0;
     direction: rtl;
@@ -96,8 +96,8 @@ html, body {
     position: absolute;
     top: 1%;
     right: 0;
-    max-width: 20vw;
-    max-height: 40vh;
+    max-width: 25vw;
+    max-height: 35vh;
     display: flex;
     flex-direction: column;
 }
@@ -239,8 +239,8 @@ html, body {
 
 #global_status {
     display: none;
-    background-color: #94a3b8;
+    background-color: #1E2328;
     position: absolute; 
     right: 0;
-    top: 50%;
+    top: 35%;
 }

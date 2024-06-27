@@ -129,7 +129,7 @@ socket.on('get_players_stats', function(data){
   $.each(data, function(p, p_info) {
     var pBtn = $('<button></button>')
       .attr('id', p)
-      .addClass('btn game_btn')
+      .addClass('btn game_btn mb-1')
       .css({
         'color': 'black',
         'background-color': p_info.color,
@@ -184,7 +184,7 @@ socket.on('get_players_stats', function(data){
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
   btn.html(`
-    <div style="text-align: left;">
+    <div style="text-align: left;" class="mb-1">
       ${data.name}<br>
       <div style="display: inline-block;">
         ${data.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
@@ -613,8 +613,34 @@ socket.on('choose_skill', function(data){
 //============================ TURN BASED EVENTS =======================================================
 
 // Play notification to signal start of turn
+
+// SoundFX
 socket.on("signal_turn_start", function(){
   document.getElementById('turn_notification').play();
+});
+
+// battle soundFX
+socket.on("battle_propagation", function(data){
+    if (data.battlesize) {
+      var battleSFX = [document.getElementById('bigbattle'), document.getElementById('railgun')];
+      var randomIndex = Math.floor(Math.random() * battleSFX.length);
+      battleSFX[randomIndex].play();
+    } else {
+      var battleSFX = [document.getElementById('smallbattle'), document.getElementById('smolbattle')];
+      var randomIndex = Math.floor(Math.random() * battleSFX.length);
+      battleSFX[randomIndex].play();
+    }
+});
+
+// casualty display
+socket.on('battle_casualties', function(data){
+
+  for (tdis in data) {
+    casualties.push(data[tdis]);
+  }
+
+  dis_cas = true;
+  cas_count = 30;
 });
 
 // Display and update how many troops are deployable. Used both in initial deployment and turn-based troop deployment
@@ -622,7 +648,7 @@ socket.on("troop_deployment", function(data){
   deployable = data.amount;
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Deploy your troops! </h2>`
-  announ.innerHTML += `<h2>` + String(data.amount) + ' deployable.' + `</h2>`;
+  announ.innerHTML += `<h2>` + String(data.amount) + ' deployable' + `</h2>`;
 });
 
 // Show the button that ends the conquest stage
@@ -918,7 +944,11 @@ function build_cities(tid){
 btn_diplomatic = $('#btn-diplomatic');
 btn_diplomatic.off('click').click(function () {
   document.getElementById('middle_display').style.display = 'flex';
-  document.getElementById('middle_title').innerHTML = "<h4>Diplomatic Menu</h4>";
+  document.getElementById('middle_title').innerHTML = `
+  <div class="flex items-center justify-between relative">
+    <h4 class="text-lg font-semibold text-white flex-grow text-center">DIPLOMATIC ACTIONS</h4>
+  </div>
+`;
   midDis = document.getElementById('middle_content')
 
   // Alliance   Summit   Global Ceasefire
@@ -944,7 +974,20 @@ btn_diplomatic.off('click').click(function () {
     </div>
 
   </div>
+
+  <div class="flex items-center justify-center mt-2">
+        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
+            X
+        </button>
+  </div>
   `;
+
+  // close window
+  $('#btn-action-cancel').off('click').on('click', function(){
+    $('#control_panel').hide()
+    $('#middle_display').hide()
+    $('#middle_title, #middle_content').empty()
+  });
 
   // Summit button functionality
   $('#btn-summit').off('click').on('click', function(){
@@ -1054,7 +1097,7 @@ btn_sep_auth.onclick = function () {
     
     // Show the title
     document.getElementById('middle_title').innerHTML = `
-    <div style="padding: 1px;">
+    <div style="padding: 5px;">
     <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
     </div>`;
 
@@ -1082,7 +1125,20 @@ btn_sep_auth.onclick = function () {
       </div>
 
     </div>
+
+    <div class="flex items-center justify-center mt-2">
+        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
+            X
+        </button>
+    </div>
     `;
+
+    // close window
+    $('#btn-action-cancel').off('click').on('click', function(){
+      $('#control_panel').hide()
+      $('#middle_display').hide()
+      $('#middle_title, #middle_content').empty()
+    });
 
     // MOBILIZATION
     $("#btn-mob").off('click').on('click', function(){
@@ -1182,7 +1238,7 @@ btn_reserves.onclick = function () {
   get_reserves_amt().then(ramt => {
     document.getElementById('middle_title').innerHTML = `
     <div style="padding: 2px;">
-      <h5>TROOPS AVAILABLE: ${ramt}</h5>
+      <h5 style="padding-left:1px;">TROOPS AVAILABLE: ${ramt}</h5>
     </div>`;
 
     midDis = document.getElementById('middle_content')
@@ -1192,8 +1248,23 @@ btn_reserves.onclick = function () {
         DEPLOY RESERVES
       </button>
     </div>
+
+    <div class="flex items-center justify-center mt-2">
+        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
+            X
+        </button>
+    </div>
     `;
 
+    // close window
+    $('#btn-action-cancel').off('click').on('click', function(){
+      $('#control_panel').hide()
+      $('#middle_display').hide()
+      $('#middle_title, #middle_content').empty()
+    });
+
+
+    // CHOSE AMOUNT TO DEPLOY
     $('#btn_DR').off('click').on('click', function(){
       hide_async_btns();
       socket.emit('send_async_event', {'name': "R_D"});

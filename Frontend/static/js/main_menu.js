@@ -1,14 +1,15 @@
 $(document).ready(function() {
 
-    function hasInvalidSelectorChars(name) {
-        // Define a regular expression for invalid characters
-        const invalidChars = /[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/;
-        // Test the name against the regular expression
-        return invalidChars.test(name);
-    }
-
     function setupEventListeners() {
-    $('#btn_createLobby').click(function() {
+
+        function hasInvalidSelectorChars(name) {
+            // Define a regular expression for invalid characters
+            const invalidChars = /[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~\s]/;
+            // Test the name against the regular expression
+            return invalidChars.test(name);
+        }    
+
+        $('#btn_createLobby').click(function() {
         let username = $('#nickname').val().trim();
         if (username === '') {
             popup("Must enter a name!", 1000);
@@ -33,6 +34,9 @@ $(document).ready(function() {
         } else if (username.length > 12) {
             popup("Name longer than 12 characters!", 1000);
             return;
+        } else if (hasInvalidSelectorChars(username)) {
+            popup("Name containing unrecognized special characters!", 2000);
+            return
         }
         if (lobby_code.trim() === ''){
             popup("Must enter a lobby ID!", 1000);

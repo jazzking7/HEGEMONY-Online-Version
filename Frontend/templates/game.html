@@ -1,6 +1,13 @@
 <div id="canvasContainer"></div>
 <div id="overlay_sections">
+
     <audio id="turn_notification" src="{{url_for('static', filename='Audio/wardrum.wav')}}"></audio>
+    <audio id="smallbattle" src="{{url_for('static', filename='Audio/smallbattle.wav')}}"></audio>
+    <audio id="bigbattle" src="{{url_for('static', filename='Audio/bigbattle.wav')}}"></audio>
+    <audio id="railgun" src="{{url_for('static', filename='Audio/railgun.wav')}}"></audio>
+    <audio id="smolbattle" src="{{url_for('static', filename='Audio/smolbattle.wav')}}"></audio>
+
+
     <div class="card" id="view_mode_btns">
         <div class="card-head">
             View Options
@@ -74,23 +81,22 @@
         <img src="/static/Assets/Logo/reserves.png">
     </button>
 
-    <div id="global_status" class="p-2 bg-gray-900 rounded-lg shadow-md">
+    <div id="global_status" class="p-2 antialiased rounded-lg shadow-md">
         <div class="flex justify-between items-center mb-2">
-            <h4 class="text-lg font-semibold">Round:</h4>
-            <h4 id="game_round" class="text-xl font-bold pl-3">0</h4>
+            <h4 class="text-lg font-semibold" style="color: #F5B301">Round</h4>
+            <h4 id="game_round" class="text-xl font-bold pl-5" style="color: #F5B301">0</h4>
         </div>
+        <h4 class="text-lg font-semibold" style="color: #F5B301">Largest Army</h4>
+        <h4 id="LAO" class="text-xl font-bold mb-2" style="color: #F5B301">--</h4>
 
-        <h4 class="text-lg font-semibold">Largest Army</h4>
-        <h4 id="LAO" class="text-xl font-bold mb-2"></h4>
+        <h4 class="text-lg font-semibold" style="color: #F5B301">Most Territory</h4>
+        <h4 id="MTO" class="text-xl font-bold mb-2" style="color: #F5B301">--</h4>
 
-        <h4 class="text-lg font-semibold">Most Territory</h4>
-        <h4 id="MTO" class="text-xl font-bold mb-2"></h4>
+        <h4 class="text-lg font-semibold" style="color: #F5B301">Most Industrialized</h4>
+        <h4 id="TIP" class="text-xl font-bold mb-2" style="color: #F5B301">--</h4>
 
-        <h4 class="text-lg font-semibold">Most Advanced</h4>
-        <h4 id="TIP" class="text-xl font-bold mb-2"></h4>
-
-        <h4 class="text-lg font-semibold">Superpower</h4>
-        <h4 id="SUP" class="text-xl font-bold mb-2"></h4>
+        <h4 class="text-lg font-semibold" style="color: #F5B301">Superpower</h4>
+        <h4 id="SUP" class="text-xl font-bold mb-2" style="color: #F5B301">--</h4>
     </div>
 
 </div>

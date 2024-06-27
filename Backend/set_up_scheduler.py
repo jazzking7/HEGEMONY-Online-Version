@@ -48,7 +48,7 @@ class setup_event_scheduler:
         # Set up user view for mission
         for mission in gs.Mset:
             mission.set_up_tracker_view()
-            gs.server.emit('get_mission', {'msg': f'Your agenda: {mission.name}'}, room=player)
+            gs.server.emit('get_mission', {'msg': f'Your agenda: {mission.name}'}, room=mission.player)
 
         ms.selection_time_out(20, len(gs.players))
 
@@ -111,7 +111,7 @@ class setup_event_scheduler:
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
 
-            ms.selection_time_out(30, 1)
+            ms.selection_time_out(20, 1)
             
             # handle timeout
             if not ms.selected:

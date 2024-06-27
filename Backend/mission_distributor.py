@@ -175,8 +175,12 @@ class Mission_Distributor:
         for p in gs.players:
             if gs.players[p].alive:
                 c.append(p)
+        # Solo Winner
         if len(c) == 1:
-            return {c[0]: "Lone Survivor"}
+            for mis in gs.Mset:
+                if mis.player == c[0]:
+                    return {c[0]: mis.name}
+        Pac = {}
         S_tier = {}
         A_tier = {}
         B_tier = {}
@@ -185,7 +189,10 @@ class Mission_Distributor:
         for m in miss_set:
             if m.end_game_checking():
                 if m.name in self.S_tier:
-                    S_tier[m.player] = m.name
+                    if m.name == 'Pacifist':
+                        Pac[m.player] = m.name
+                    else:
+                        S_tier[m.player] = m.name
                 elif m.name in self.A_tier:
                     A_tier[m.player] = m.name
                 elif m.name in self.B_tier:
@@ -194,7 +201,8 @@ class Mission_Distributor:
                     C_tier[m.player] = m.name
 
         # Return {} -> key: pid   value: name of mission
-
+        if len(Pac) > 0:
+            return Pac
         if len(S_tier) > 0:
             return S_tier
         elif len(A_tier) > 0:

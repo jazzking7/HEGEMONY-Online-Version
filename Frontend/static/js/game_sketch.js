@@ -42,6 +42,11 @@ let otherclickables = [];
 let ani_offset = 0;
 let ani_direction = 1;
 
+// battle casualties display
+let dis_cas = false;
+let cas_count = 60;
+let casualties = [];
+
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
   currWinWid = windowWidth;
@@ -202,7 +207,7 @@ function draw() {
     push();
     fill(0); 
     textStyle(BOLD);
-    textSize(15);
+    textSize(16);
     textFont("Helvetica");
     text(trty.troops, trty.ts.x, trty.ts.y);
     pop();
@@ -237,6 +242,25 @@ function draw() {
     }
     tmp_id++;
   }
+
+  // casualties display
+  if (casualties.length > 0){
+    for (cas of casualties) {
+      if (cas_count > 0) {
+        if (cas.number > 0) {
+          push();
+          stroke(255); // Dark red color
+          strokeWeight(1); 
+          fill(139, 0, 0);
+          textSize(35);
+          textStyle(BOLD);
+          text("-" + cas.number, territories[cas.tid].cps.x, territories[cas.tid].cps.y);
+          pop();
+        }
+      } 
+    }
+  }
+  
 
   for (let route of seaRoutes){
     drawDottedLine(route.x1, route.y1, route.x2, route.y2);
@@ -274,6 +298,16 @@ function draw() {
   if (ani_offset == 30 || ani_offset == 0){
     ani_direction *= -1;
   }
+
+  // casualty display counter
+  if (dis_cas) {
+    cas_count--;
+    if (cas_count == 0) {
+      dis_cas = false;
+      casualties = [];
+    }
+  }
+
 }
 
 // Shadowy color

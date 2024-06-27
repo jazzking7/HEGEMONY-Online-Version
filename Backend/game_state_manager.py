@@ -467,7 +467,18 @@ class Game_State_Manager:
 
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
-        
+
+        # Sound effect
+        big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25
+        self.server.emit('battle_propagation', {'battlesize': big_battle}, room=self.lobby)
+
+        # visual effect
+        self.server.emit('battle_casualties', {
+            f'{t1}': {'tid': t1, 'number': atk_amt-result[0]},
+            f'{t2}': {'tid': t2, 'number': def_amt-result[1]},
+        }, room=self.lobby)
+
+
         atk_p.total_troops -= (atk_amt-result[0])
         def_p.total_troops -= (def_amt-result[1])
 
