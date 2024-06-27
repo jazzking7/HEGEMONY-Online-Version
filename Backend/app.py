@@ -305,7 +305,7 @@ def update_troop_info(data):
     gsm.update_LAO(pid)
     gsm.get_SUP()
     gsm.update_global_status()
-    gsm.update_player_stats(pid)
+    gsm.update_player_stats()
     gsm.signal_MTrackers('popu')
 
     if gsm.players[pid].deployable_amt > 0:
@@ -406,7 +406,7 @@ def handle_reserves_deployment(data):
     gsm.update_LAO(pid)
     gsm.get_SUP()
     gsm.update_global_status()
-    gsm.update_player_stats(pid)
+    gsm.update_player_stats()
     gsm.signal_MTrackers('popu')
 
     if gsm.players[pid].reserves > 0:

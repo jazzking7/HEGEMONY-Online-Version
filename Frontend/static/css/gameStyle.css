@@ -58,7 +58,7 @@ html, body {
     top: 40%;
     left: 0;
     transform: translateY(-50%);
-    max-width: 15vw;
+    max-width: 16vw;
     max-height: 30vh;
     border: 0;
     background-color: rgba(255, 255, 255, 0)
@@ -68,6 +68,7 @@ html, body {
 .stats-list {
     overflow-y: auto;
     max-height: 30vh;
+    max-width: 15vw;
     position: sticky;
     top: 0;
     direction: rtl;

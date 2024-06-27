@@ -138,11 +138,15 @@ socket.on('get_players_stats', function(data){
       .html(`
         <div style="text-align: left;">
           ${p}<br>
-          <div style="display: inline-block;">
-            ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+          <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
+            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"> <span>${p_info.troops}</span>
           </div>
-          <div style="display: inline-block;">
-            ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+          <div style="display: inline-block; vertical-align: middle;">
+            <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">  <span>${p_info.trtys}</span>
+          </div>
+          <br>
+          <div style="display: inline-block; vertical-align: middle; direction: ltr;">
+            <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"> <span>${p_info.PPI}</span>
           </div>
         </div>
       `);
@@ -186,11 +190,15 @@ socket.on('update_players_stats', function(data){
   btn.html(`
     <div style="text-align: left;" class="mb-1">
       ${data.name}<br>
-      <div style="display: inline-block;">
-        ${data.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
+      <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
+          <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"><span>${data.troops}</span>
       </div>
-      <div style="display: inline-block;">
-        ${data.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
+      <div style="display: inline-block; vertical-align: middle;">
+         <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;"><span>${data.trtys}</span>
+      </div>
+      <br>
+      <div style="display: inline-block; vertical-align: middle; direction: ltr;">
+        <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"><span>${data.PPI}</span>
       </div>
     </div>
   `);

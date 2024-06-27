@@ -50,6 +50,8 @@ class Player:
         self.num_summit = 2
         # status monitoringg
         self.total_troops = 0
+        # Player Power Index
+        self.PPI = 0
 
 class Game_State_Manager:
 
@@ -128,6 +130,63 @@ class Game_State_Manager:
         self.perm_elims = []
         # victim -> killer/mission failure
         self.death_logs = {}
+
+    def compute_SD(self, metric, avg, alive):
+        total_div = 0
+        for p in self.players:
+            curr_p = self.players[p]
+            if curr_p.alive:
+                if metric == 'indus':
+                    total_div += (self.get_player_industrial_level(curr_p) - avg)**2
+                elif metric == 'infra':
+                    total_div += (curr_p.infrastructure_upgrade + curr_p.infrastructure - avg)**2
+                elif metric == 'trty':
+                    total_div += (self.get_deployable_amt(p) - avg)**2
+                elif metric == 'popu':
+                    total_div += (curr_p.total_troops - avg)**2
+        return (total_div/alive)**(1/2)
+
+    def logistic_function(self, z):
+        return 1 / (1 + math.exp(-z))
+
+    def compute_PPI(self, ):
+        total_trty = 0
+        total_popu = 0
+        total_inf = 0
+        total_ind = 0
+
+        p_alive = []
+        for p in self.players:
+            curr_p = self.players[p]
+            if curr_p.alive:
+                total_ind += self.get_player_industrial_level(curr_p)
+                total_inf += curr_p.infrastructure_upgrade + curr_p.infrastructure
+                total_popu += curr_p.total_troops
+                total_trty += self.get_deployable_amt(p)
+                p_alive.append(p)
+            else:
+                curr_p.PPI = 0
+
+        num_alive = len(p_alive) if len(p_alive) > 0 else 1
+        avg_ind = total_ind/num_alive
+        avg_inf = total_inf/num_alive
+        avg_popu = total_popu/num_alive
+        avg_trty = total_trty/num_alive
+
+        indsd = self.compute_SD('indus', avg_ind, num_alive)
+        infsd = self.compute_SD('infra', avg_inf, num_alive)
+        popusd = self.compute_SD('popu', avg_popu, num_alive)
+        trtysd = self.compute_SD('trty', avg_trty, num_alive)
+
+        indsd = 1 if indsd == 0 else indsd
+        infsd = 1 if infsd == 0 else infsd
+        popusd = 1 if popusd == 0 else popusd
+        trtysd = 1 if trtysd == 0 else trtysd
+
+        for p in p_alive:
+            curr_p = self.players[p]
+            z_score = 0.25*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.25*((self.get_player_industrial_level(curr_p)-avg_ind)/indsd) + 0.25*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.25*((curr_p.total_troops-avg_popu)/popusd)
+            curr_p.PPI = round(self.logistic_function(z_score) * 100, 3)
 
     # Signal the specific mission tracker to check condition
     def signal_MTrackers(self, event_name):
@@ -297,22 +356,27 @@ class Game_State_Manager:
         return total
 
     def send_player_list(self, ):
+        self.compute_PPI()
         data = {}
         for pid in self.pids:
             data[self.players[pid].name] = {
                 'troops': self.get_total_troops_of_player(pid),
                 'trtys': len(self.players[pid].territories),
-                'color': self.players[pid].color
+                'color': self.players[pid].color,
+                'PPI': self.players[pid].PPI
             }
         self.server.emit('get_players_stats', data, room=self.lobby)
     
-    def update_player_stats(self, pid):
-        data = {
-            'name': self.players[pid].name,
-            'troops': self.players[pid].total_troops,
-            'trtys': len(self.players[pid].territories)
-        }
-        self.server.emit('update_players_stats', data, room=self.lobby)
+    def update_player_stats(self, ):
+        self.compute_PPI()
+        for p in self.players:
+            data = {
+                'name': self.players[p].name,
+                'troops': self.players[p].total_troops,
+                'trtys': len(self.players[p].territories),
+                'PPI': self.players[p].PPI
+            }
+            self.server.emit('update_players_stats', data, room=self.lobby)
 
     def shuffle_players(self, ):
         random.shuffle(self.pids)
@@ -371,7 +435,7 @@ class Game_State_Manager:
             self.update_LAO(player)
             self.get_SUP()
             self.update_global_status()
-            self.update_player_stats(player)
+            self.update_player_stats()
             self.signal_MTrackers('popu')
 
     def get_player_industrial_level(self, player):
@@ -483,8 +547,7 @@ class Game_State_Manager:
         def_p.total_troops -= (def_amt-result[1])
 
         # update player stats list
-        self.update_player_stats(a_pid)
-        self.update_player_stats(d_pid)
+        self.update_player_stats()
 
         self.update_LAO(a_pid)
         self.update_LAO(d_pid)
