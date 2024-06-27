@@ -448,6 +448,30 @@ def handle_async_end():
     print(f"{gsm.players[pid].name} has signal to end async action.")
     return
 
+@socketio.on('add_click_sync')
+def handle_add_click_sync(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for p in gsm.players:
+        if p != pid:
+            socketio.emit('add_tid_to_otherHighlight', data, room=p)
+
+@socketio.on('remove_click_sync')
+def handle_remove_click_sync(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for p in gsm.players:
+        if p != pid:
+            socketio.emit('remove_tid_from_otherHighlight', data, room=p)
+
+@socketio.on('clear_otherHighlights')
+def handle_clear_click_sync():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for p in gsm.players:
+        if p != pid:
+            socketio.emit('clear_otherHighlight', room=p)
+            
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

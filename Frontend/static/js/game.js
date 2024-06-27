@@ -154,35 +154,6 @@ socket.on('get_players_stats', function(data){
   });
 });
 
-// socket.on('get_players_stats', function(data){
-//   var pList = $('#stats-list');
-//   $.each(data, function(p, p_info) {
-//     var pBtn = $('<button></button>')
-//       .attr('id', p)
-//       .addClass('btn game_btn')
-//       .css({
-//         'color': 'black',
-//         'background-color': p_info.color,
-//         'width': '10vh',
-//         'max-width': '10vh',
-//         'overflow': 'hidden',
-//         'text-overflow': 'ellipsis',
-//         'white-space': 'nowrap'
-//       })
-//       .html(`
-//         <div style="text-align: left; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-//           ${p}<br>
-//           <div style="display: inline-block; width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-//             ${p_info.trtys} <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">
-//           </div>
-//           <div style="display: inline-block; width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-//             ${p_info.troops} <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;">
-//           </div>
-//         </div>
-//       `);
-//     pList.append(pBtn);
-//   });
-// });
 
 // Player stats list update
 socket.on('update_players_stats', function(data){
@@ -275,6 +246,7 @@ socket.on('change_click_event', function(data){
 socket.on('clear_view', function(){
   $('#control_panel, #middle_display, #proceed_next_stage').hide();
   toHightlight = [];
+  otherHighlight = [];
   clickables = [];
 });
 
@@ -313,6 +285,20 @@ socket.on('GAME_OVER', function(data){
     $('#winners').append(`<div><h3>${wname} => ${mission}</h3></div>`)
   }
 });
+
+// add sync click event
+socket.on('add_tid_to_otherHighlight', function(data){
+  otherHighlight.push(data.tid);
+})
+
+socket.on('remove_tid_from_otherHighlight', function(data){
+  let toRemove = [data.tid];
+  otherHighlight = otherHighlight.filter(item => !toRemove.includes(item));
+})
+
+socket.on('clear_otherHighlight', function(){
+  otherHighlight = [];
+})
 
 //===============================Mission Related Display=============================================
 
@@ -643,7 +629,7 @@ socket.on("battle_propagation", function(data){
     if (data.battlesize) {
       var battleSFX = [document.getElementById('bigbattle'), document.getElementById('railgun')];
       var randomIndex = Math.floor(Math.random() * battleSFX.length);
-      battleSFX[randomIndex].volume = 0.47;
+      battleSFX[randomIndex].volume = 0.45;
       battleSFX[randomIndex].play();
     } else {
       var battleSFX = [document.getElementById('smallbattle'), document.getElementById('smolbattle')];
@@ -703,6 +689,10 @@ function troop_deployment(tid){
   document.getElementById('control_panel').style.display = 'none';
   if (player_territories.includes(tid)){
     toHightlight.push(tid);
+    
+    // Sync clicks
+    socket.emit('add_click_sync', {'tid': tid});
+
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     let troopValue = document.createElement("p");
@@ -723,10 +713,18 @@ function troop_deployment(tid){
     document.getElementById('control_panel').style.display = 'none';
     socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
     toHightlight = [];
+
+    // Sync clicks
+    socket.emit('remove_click_sync', {'tid': tid});
+
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHightlight = [];
+
+      // Sync clicks
+      socket.emit('remove_click_sync', {'tid': tid});
+
     });
   }
 }
@@ -752,19 +750,32 @@ function conquest(tid){
     clickables = [];
     if (toHightlight.length){
       toHightlight = [];
+      // clear sync clicks
+      socket.emit('clear_otherHighlights');
     }
     if (territories[tid].troops == 1){
       popup("NOT ENOUGH TROOPS FOR BATTLE!", 1000);
       return
     }
     toHightlight.push(tid);
+    // Sync clicks
+    socket.emit('add_click_sync', {'tid': tid});
+
     clickables = territories[tid].neighbors;
   } else if (clickables.includes(tid)){
     if (toHightlight.length != 2){
       toHightlight.push(tid);
+      // Sync clicks
+      socket.emit('add_click_sync', {'tid': tid});
     }
     if (toHightlight.length == 2){
       toHightlight[1] = tid;
+      // Sync clicks
+      socket.emit('clear_otherHighlights');
+      for (trty of toHightlight){
+        socket.emit('add_click_sync', {'tid': trty});
+      }
+      
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
       $('#proceed_next_stage').hide();
@@ -787,12 +798,16 @@ function conquest(tid){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
+        // Sync clicks
+        socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
+        // Sync clicks
+        socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
       });
@@ -810,9 +825,16 @@ function rearrange(tid){
   if (clickables.includes(tid) && tid != toHightlight[0]){
     if (toHightlight.length != 2){
       toHightlight.push(tid);
+      // Sync clicks
+      socket.emit('add_click_sync', {'tid': tid});
     }
     if (toHightlight.length == 2){
       toHightlight[1] = tid;
+      // Sync clicks
+      socket.emit('clear_otherHighlights');
+      for (trty of toHightlight){
+        socket.emit('add_click_sync', {'tid': trty});
+      }
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
       $('#proceed_next_stage').hide();
@@ -836,12 +858,14 @@ function rearrange(tid){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_rearrange_data', {'choice': toHightlight, 'amount': troopInput.value});
         toHightlight = [];
+        socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHightlight = [];
+        socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
       });
@@ -857,8 +881,10 @@ function rearrange(tid){
     }
     if (toHightlight.length){
       toHightlight = [];
+      socket.emit('clear_otherHighlights');
     }
     toHightlight.push(tid);
+    socket.emit('add_click_sync', {'tid': tid});
     socket.emit("get_reachable_trty", {'choice': tid})
   }  
 }

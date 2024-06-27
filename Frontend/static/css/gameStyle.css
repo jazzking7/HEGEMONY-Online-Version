@@ -59,7 +59,7 @@ html, body {
     left: 0;
     transform: translateY(-50%);
     max-width: 16vw;
-    max-height: 30vh;
+    max-height: 40vh;
     border: 0;
     background-color: rgba(255, 255, 255, 0)
 }
@@ -67,7 +67,7 @@ html, body {
 
 .stats-list {
     overflow-y: auto;
-    max-height: 30vh;
+    max-height: 40vh;
     max-width: 15vw;
     position: sticky;
     top: 0;

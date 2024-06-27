@@ -129,6 +129,7 @@ class turn_loop_scheduler:
             # notify frontend to change event and clear controls
             gs.server.emit("change_click_event", {'event': None}, room=player)
             gs.server.emit("clear_view", room=player)
+            gs.server.emit('clear_otherHighlight', room=gs.lobby)
             gs.server.emit('signal_hide_btns', room=player)
             print(f"{gs.players[player].name}'s turn ends, buttons have been hidden.")
             # clear deployables
