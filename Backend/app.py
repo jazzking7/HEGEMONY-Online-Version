@@ -31,18 +31,43 @@ def connect(auth):
 def disconnect():
     sid = request.sid
     print('Client disconnected with socket ID:', sid)
+
+    # Player not even connected to a lobby
     if not sid in players:
         return
+
+    # Player is connected to a lobby
     username = players[sid]['username']
     lobby_id = players[sid]['lobby_id']
+    
+    # delete player and leave lobby
     del players[sid]
     leave_room(lobby_id)
+
+    # get lobby if not none
     if lobby_id is None:
         return
     lobby = lobbies[lobby_id]
+
+    # if game started, set player with sid to dead
+    if lobby['game_started']:
+        # disconnect user
+        gsm = lobby['gsm']
+        gsm.players[sid].alive = False
+        gsm.death_logs[sid] = "DC"
+        gsm.perm_elims.append(sid)
+        gsm.signal_MTrackers('death')
+
+    # remove sid from lobby own list of players
     lobby['players'].remove(sid)
     if len(lobby['players']) == 0:
+        # check if game started
+        if lobby['game_started']:
+            gsm = lobby['gsm']
+            # stop the game thread
+            gsm.GES.halt_events()
         del lobbies[lobby_id]
+
         return
     if lobby['host'] == sid:
         lobby['host'] = random.choice(lobby['players'])
@@ -66,7 +91,8 @@ def createLobby(data):
     # TODO populate lobbies dict better
     lobbies[lobby_code] = {
         'host': sid,
-        'players': [sid]
+        'players': [sid],
+        'game_started': False
     }
     socketio.emit('lobby_created', room=sid)
 
@@ -141,6 +167,7 @@ def startGame(data):
         return
     
     # Setup lobby settings ## TO BE UPDATED
+    lobby['game_started'] = True
     lobby['alliance'] = data.get('alliance')
     lobby['turn_time'] = int(data.get('turn_time'))
     lobby['setup_mode'] = "all_manuel"
@@ -216,7 +243,7 @@ def update_player_capital(data):
         # CM
         gsm.players[pid].capital = gsm.map.territories[tid].name
         gsm.map.territories[tid].isCapital = True
-        socketio.emit('update_trty_display', {tid: {'isCapital': True}}, room=gsm.lobby)
+        socketio.emit('update_trty_display', {tid: {'isCapital': True, 'capital_color': gsm.players[pid].color}}, room=gsm.lobby)
         socketio.emit('settle_result', {'resp': True}, room=pid)
         gsm.GES.selected += 1
         return

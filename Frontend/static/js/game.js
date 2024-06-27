@@ -502,16 +502,27 @@ socket.on('choose_territorial_distribution', function(data){
           disabled = true;
           btn_dist.style.border = '2px solid';
           btn_dist.style.borderColor = 'red';
+
+          let tmptid = 0;
+          for (terri of territories) {
+            if (terri.color == trty_dist){
+              toHightlight.push(tmptid);
+            }
+            tmptid ++;
+          }
+
           document.getElementById('control_panel').style.display = 'flex';
           $('#control_confirm').off('click').on('click', function(){
             document.getElementById('control_panel').style.display = 'none';
             socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
             document.getElementById('middle_display').style.display = 'none';
+            toHightlight = []; 
           });
           $('#control_cancel').off('click').on('click' , function(){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_dist.style.border = "none";
+            toHightlight = [];
           });
         }
       };
@@ -624,6 +635,7 @@ socket.on("battle_propagation", function(data){
     if (data.battlesize) {
       var battleSFX = [document.getElementById('bigbattle'), document.getElementById('railgun')];
       var randomIndex = Math.floor(Math.random() * battleSFX.length);
+      battleSFX[randomIndex].volume = 0.47;
       battleSFX[randomIndex].play();
     } else {
       var battleSFX = [document.getElementById('smallbattle'), document.getElementById('smolbattle')];

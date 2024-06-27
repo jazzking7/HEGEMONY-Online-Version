@@ -140,7 +140,7 @@ class setup_event_scheduler:
                 capital = random.choice(player.territories)
                 gs.map.territories[capital].isCapital = True
                 player.capital = gs.map.territories[capital].name
-                gs.server.emit('update_trty_display', {capital:{'isCapital': True}}, room=gs.lobby)
+                gs.server.emit('update_trty_display', {capital:{'isCapital': True, 'capital_color': player.color}}, room=gs.lobby)
                 gs.server.emit('capital_result', {'resp': True}, room=gs.lobby)
         gs.signal_view_clear()
     

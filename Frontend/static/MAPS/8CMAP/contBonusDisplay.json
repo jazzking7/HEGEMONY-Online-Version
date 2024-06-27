@@ -15,7 +15,7 @@
     "dy": 60,
     "cx": 750,
     "cy": 47,
-    "message": "ZEALANDIA\n+8 TROOPS"
+    "message": "ZEALANDIA\n+12 TROOPS"
   },
   {
     "x": 1720,
@@ -24,7 +24,7 @@
     "dy": 60,
     "cx": 1780,
     "cy": 983,
-    "message": "RODINIA\n+6 TROOPS"
+    "message": "RODINIA\n+7 TROOPS"
   },
   {
     "x": 876,
@@ -51,7 +51,7 @@
     "dy": 60,
     "cx": 1840,
     "cy": 70,
-    "message": "BALTICA\n+3 TROOPS"
+    "message": "BALTICA\n+4 TROOPS"
   }
   ,
   {
@@ -61,7 +61,7 @@
     "dy": 60,
     "cx": 640,
     "cy": 1130,
-    "message": "YUDINAVIA\n+4 TROOPS"
+    "message": "YUDINAVIA\n+3 TROOPS"
   }
   ,
   {
@@ -71,6 +71,6 @@
     "dy": 60,
     "cx": 2110,
     "cy": 703,
-    "message": "Iskanbul\n+4 TROOPS"
+    "message": "ISKANBUL\n+3 TROOPS"
   }
 ]

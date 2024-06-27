@@ -96,7 +96,7 @@ class Mission_Distributor:
         while not done:
             choice = random.choice(self.missions)
             if choice == 'Loy':
-                if (count + 2) <= num_p:
+                if (count + 2) <= num_p and num_p > 4:
                     miss_set.append(choice)
                     miss_set.append(choice)
                     count += 2

@@ -63,6 +63,8 @@ class General_Event_Scheduler:
         for event in self.SES:
             print("Event Executed", event)
             event.executable(self.gs, self)
+            if self.interrupt:
+                return
     
     def run_turn_scheduler(self,):
         self.TLS.run_turn_loop(self.gs, self)
@@ -70,7 +72,8 @@ class General_Event_Scheduler:
     def execute_game_events(self,):
         print("Flow Started")
         self.run_setup_events()
-
+        if self.interrupt:
+            return
         self.gs.send_player_list()
         self.gs.get_LAO()
         self.gs.get_MTO()
@@ -78,11 +81,13 @@ class General_Event_Scheduler:
         self.gs.get_TIP()
         self.gs.get_SUP()
         self.gs.update_global_status()
-
+        if self.interrupt:
+            return
         for mk in self.gs.MTrackers:
             if mk != 'round':
                 self.gs.MTrackers[mk].event.set()
-
+        if self.interrupt:
+            return
         self.run_turn_scheduler()
 
     # end game

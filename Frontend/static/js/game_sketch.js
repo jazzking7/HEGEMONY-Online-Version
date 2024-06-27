@@ -121,6 +121,7 @@ async function loadMapComponents(mapName, tnames, tneighbors){
           "is": insigSpaces[i],
           "troops": '',
           "color": "white",
+          "capital_color": "white",
           "isCapital": false,
           "devImg": null,
           "insig": null
@@ -174,10 +175,10 @@ function draw() {
       hover_over.pts = trty.outline;
     } 
     if (toHightlight.includes(tmp_id)){
-      strokeWeight(3);
+      strokeWeight(4);
     }
     if (otherHighlight.includes(tmp_id)){
-      strokeWeight(3);
+      strokeWeight(4);
     }
     // Display territory outline
     beginShape();
@@ -215,7 +216,7 @@ function draw() {
     // Display capital
     if (trty.isCapital){
       push();
-      drawStar(trty.cs.dx, trty.cs.dy, trty.cs.x, trty.cs.y, trty.color)
+      drawStar(trty.cs.dx, trty.cs.dy, trty.cs.x, trty.cs.y, trty.capital_color)
       pop();
     }
 
@@ -226,9 +227,9 @@ function draw() {
       pop();
     }
 
-    // Display insig
+    // Display insig  or  special display
     if (trty.insig){
-      push();
+      push();   
       image(trty.insig, trty.is.x, trty.is.y, trty.is.dx, trty.is.dy);
       pop();
     }
