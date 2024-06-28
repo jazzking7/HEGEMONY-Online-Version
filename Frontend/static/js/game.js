@@ -20,6 +20,10 @@ let current_interval = null;
 let misProgBar;
 let lossProg;
 
+// ShortCut sliders
+let curr_slider = "";
+let curr_slider_val = "";
+
 $(document).ready(async function() {
   
   // Hide control buttons
@@ -789,6 +793,14 @@ function conquest(tid){
 
       let troopValue = document.createElement("p");
       let troopInput = document.createElement("input");
+
+      // set shortcut id
+      troopInput.setAttribute("id", "adjust_attack_amt");
+      troopValue.setAttribute("id", "curr_attack_amt");
+
+      curr_slider = "#adjust_attack_amt";
+      curr_slider_val = "#curr_attack_amt";
+
       troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
       troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
@@ -796,6 +808,7 @@ function conquest(tid){
       troopInput.setAttribute("step", 1);
       troopInput.style.display = "inline-block";
       troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+      troopValue.textContent = 1;
       let c_m = document.getElementById('control_mechanism');
       c_m.innerHTML = "";
       c_m.appendChild(troopInput);
@@ -1406,5 +1419,20 @@ function mouseClicked() {
 function keyPressed(){
   if (key === 'c'){
     scaleFactor = 1.0;
+  }
+
+  // shortcut for fast max deployment
+  if (key === 'f'){
+    if (curr_slider && curr_slider_val) {
+
+      let $slider = $(curr_slider);
+      let $sliderValue = $(curr_slider_val);
+
+      $slider.val($slider.attr('max'));
+      $sliderValue.text($slider.attr('max'));
+
+      curr_slider = '';
+      curr_slider_val = '';
+    }
   }
 }
