@@ -27,7 +27,7 @@ class General_Event_Scheduler:
         # stack of events in case of interruption
         self.event_stack = []
         # inner async
-        self.stats_set = False
+        self.stats_set = False # If stats of player already determined
         self.innerInterrupt = False
         # inter turn summit
         self.summit_requested = False

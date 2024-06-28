@@ -20,14 +20,14 @@ class Player:
         self.territories = []
         self.capital = None
         # battle stats
-        self.temp_stats = None
+        self.temp_stats = None   # determine after deployment stage to prevent infinite growth
         self.industrial = 6
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
         # hidden resources
         self.stars = 0
         self.reserves = 0
-        self.s_city_amt = 0
+        self.s_city_amt = 0  # city amount to settle in innerAsync actions
         # alliance
         self.hasAllies = False
         self.allies = []
@@ -52,6 +52,8 @@ class Player:
         self.total_troops = 0
         # Player Power Index
         self.PPI = 0
+
+        self.con_amt = 0    # keep counts of how many territories the player has conquered during a turn
 
 class Game_State_Manager:
 
@@ -525,6 +527,7 @@ class Game_State_Manager:
 
             # update turn victory
             atk_p.turn_victory = True
+            atk_p.con_amt += 1
 
         # defender wins
         else:
@@ -612,4 +615,3 @@ class Game_State_Manager:
             print(a_troops, d_troops)
 
         return [a_troops, d_troops]
-

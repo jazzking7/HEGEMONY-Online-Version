@@ -87,6 +87,8 @@ class turn_loop_scheduler:
 
         atk_player = gs.players[player]
         atk_player.turn_victory = False
+        atk_player.con_amt = 0
+
         ms.stats_set = False
 
         self.set_curr_state(ms, self.events[0])
@@ -101,6 +103,7 @@ class turn_loop_scheduler:
 
         # prevent immediate growth
         atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
+        # Set stats_set to True to prevent innerAsync actions from giving battle stats growth
         ms.stats_set = True
         self.set_curr_state(ms, self.events[1])
         self.conquer(gs, player)
@@ -137,13 +140,20 @@ class turn_loop_scheduler:
             # assign stars if applicable
             # CM
             p = gs.players[player]
+            # Get stars probability based on territory conquered
             if p.turn_victory:
-                p.stars += random.choices([1,2,3],[0.3, 0.4, 0.3],k=1)[0]
+                s1, s2, s3 = 0.45, 0.3, 0.25
+                p.con_amt = 9 if p.con_amt > 9 else p.con_amt
+                for _ in range(p.con_amt):
+                    s1 -= 0.05
+                    s2 += 0.025
+                    s3 += 0.025
+                p.stars += random.choices([1,2,3],[s1, s2, s3],k=1)[0]
             print(f'{gs.players[player].name} special authority amount: {p.stars}')
             print(f'{gs.players[player].name} reserve amount: {p.reserves}')
 
     def execute_turn(self, gs, ms, curr_player):
-
+        # gs -> game states    ms -> master scheduler/gs.GES
         ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
         ms.timer = threading.Thread(target=ms.activate_timer, args=(90,))
 
