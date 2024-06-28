@@ -286,6 +286,7 @@ def settle_new_cities(data):
 
     gsm.players[pid].s_city_amt = 0
     gsm.players[pid].stars -= len(choices)*3
+    gsm.update_private_status(pid)
 
 @socketio.on('send_troop_update')
 def update_troop_info(data):
@@ -406,6 +407,7 @@ def handle_reserves_deployment(data):
     gsm.update_LAO(pid)
     gsm.get_SUP()
     gsm.update_global_status()
+    gsm.update_private_status(pid)
     gsm.update_player_stats()
     gsm.signal_MTrackers('popu')
 

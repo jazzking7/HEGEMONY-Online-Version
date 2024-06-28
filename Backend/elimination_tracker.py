@@ -14,6 +14,8 @@ class Elimination_tracker:
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars
+            gs.update_private_status(a_pid)
+            gs.update_private_status(d_pid)
             print(f"{victim.name} has been eliminated by {attacker.name}")
             # victim is one of original players
             if d_pid in gs.oriPlayers:

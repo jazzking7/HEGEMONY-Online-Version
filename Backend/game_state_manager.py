@@ -315,6 +315,10 @@ class Game_State_Manager:
         'MTO': self.players[self.MTO].name if self.MTO != None else "Yet to exist",
         'TIP': self.players[self.TIP].name if self.TIP != None else "Yet to exist",
         'SUP': self.players[self.SUP].name if self.SUP != None else "Yet to exist",}, room=self.lobby)
+    
+    # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN
+    def update_private_status(self, pid):
+        self.server.emit('private_overview', {'curr_SA': self.players[pid].stars, 'curr_RS': self.players[pid].reserves}, room=pid)
 
     def convert_reserves(self, amt, player):
         extra = 0
@@ -348,6 +352,7 @@ class Game_State_Manager:
             extra = 60
         self.players[player].reserves += extra
         self.players[player].stars -= amt
+        self.update_private_status(player)
 
     def get_total_troops_of_player(self, player):
         player = self.players[player]
@@ -393,6 +398,7 @@ class Game_State_Manager:
         # CM
         self.players[player].infrastructure_upgrade += amt
         self.players[player].stars -= amt*4
+        self.update_private_status(player)
         self.update_HIP(player)
         self.get_SUP()
         self.update_global_status()

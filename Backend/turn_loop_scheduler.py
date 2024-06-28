@@ -149,6 +149,8 @@ class turn_loop_scheduler:
                     s2 += 0.025
                     s3 += 0.025
                 p.stars += random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+            # Update private overview
+            gs.update_private_status(player)
             print(f'{gs.players[player].name} special authority amount: {p.stars}')
             print(f'{gs.players[player].name} reserve amount: {p.reserves}')
 

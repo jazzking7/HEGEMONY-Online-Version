@@ -185,6 +185,13 @@ socket.on('update_global_status', function(data){
     $('#SUP').text(data.SUP);
 });
 
+// Update private overview status
+socket.on('private_overview', function(data){
+  $('#curr_special_auth').text(data.curr_SA);
+  $('#curr_reserves').text(data.curr_RS);
+});
+
+
 // update player territory list
 socket.on('update_player_territories', function(data){
   player_territories = data.list;
