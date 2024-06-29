@@ -130,6 +130,7 @@ socket.on('stop_timeout', function(){
 // Player stats list initiate
 socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
+  pList.empty();
   $.each(data, function(p, p_info) {
     var pBtn = $('<button></button>')
       .attr('id', p)

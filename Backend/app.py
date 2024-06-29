@@ -67,7 +67,7 @@ def disconnect():
             # stop the game thread
             gsm.GES.halt_events()
         del lobbies[lobby_id]
-        print(lobbies)
+
         return
     
     if lobby['host'] == sid:
@@ -75,10 +75,9 @@ def disconnect():
         socketio.emit('update_lobby', {"event": "change_host", "target": lobby['host']}, room=lobby_id)
     socketio.emit('update_lobby', {"event": "disconnect", "target": username}, room=lobby_id)
 
-    print(lobbies)
 
 ### Main menu functions ###
-    
+
 @socketio.on('create_lobby')
 def createLobby(data):
     print('create_lobby', data)
@@ -108,7 +107,6 @@ def joinLobby(data):
     username = data.get('username')
     lobby_code = data.get('lobby_code')
 
-    print(lobbies)
     # Check if lobby exists
     if lobby_code not in lobbies:
         print(f"ERROR: The lobby {lobby_code} does not exist!")

@@ -191,8 +191,8 @@ class turn_loop_scheduler:
 
         while not ms.interrupt:
 
-            # checking if player is alive and connected
-            if gs.players[curr_player].alive and gs.players[curr_player].connected:
+            # checking if player is alive | permitting entry
+            if gs.players[curr_player].alive:
                 self.execute_turn(gs, ms, curr_player)
             if ms.interrupt:
                 return
