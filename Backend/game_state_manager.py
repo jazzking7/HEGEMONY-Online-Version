@@ -243,7 +243,7 @@ class Game_State_Manager:
                 mission.set_up_tracker_view()
                 mission.check_conditions()
         # Playerlist
-        self.send_player_list()
+        self.update_reconnect_player_list(pid)
         
 
         self.players[pid].connected = True if not self.players[pid].connected else False
@@ -489,6 +489,19 @@ class Game_State_Manager:
                 'PPI': self.players[pid].PPI
             }
         self.server.emit('get_players_stats', data, room=self.lobby)
+
+    # Reconnect send player list
+    def update_reconnect_player_list(self, rid):
+        self.compute_PPI()
+        data = {}
+        for pid in self.pids:
+            data[self.players[pid].name] = {
+                'troops': self.get_total_troops_of_player(pid),
+                'trtys': len(self.players[pid].territories),
+                'color': self.players[pid].color,
+                'PPI': self.players[pid].PPI
+            }
+        self.server.emit('get_players_stats', data, room=rid)
     
     def update_player_stats(self, ):
         self.compute_PPI()
