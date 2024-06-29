@@ -84,11 +84,13 @@ class turn_loop_scheduler:
         return
 
     def execute_turn_events(self, gs, ms, player):
-
+        
+        # Player executing the turn
         atk_player = gs.players[player]
+        # Reset turn based victory
         atk_player.turn_victory = False
         atk_player.con_amt = 0
-
+        # Player temporary battle stats not updated
         ms.stats_set = False
 
         self.set_curr_state(ms, self.events[0])
@@ -96,9 +98,9 @@ class turn_loop_scheduler:
 
         ms.stage_completed = False
         done = False
-        while not ms.stage_completed and not done and not ms.innerInterrupt:
+        while not ms.stage_completed and not done and not ms.innerInterrupt and atk_player.connected:
             done = atk_player.deployable_amt == 0
-        if ms.terminated or ms.innerInterrupt:
+        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
 
         # prevent immediate growth
@@ -109,18 +111,18 @@ class turn_loop_scheduler:
         self.conquer(gs, player)
 
         ms.stage_completed = False
-        while not ms.stage_completed and not ms.innerInterrupt:
+        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
             time.sleep(1)
-        if ms.terminated or ms.innerInterrupt:
+        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
         
         self.set_curr_state(ms, self.events[2])
         self.rearrange(gs, player)
 
         ms.stage_completed = False
-        while not ms.stage_completed and not ms.innerInterrupt:
+        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
             time.sleep(1)
-        if ms.terminated or ms.innerInterrupt:
+        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
         
         # stop timer
@@ -134,7 +136,7 @@ class turn_loop_scheduler:
             gs.server.emit("clear_view", room=player)
             gs.server.emit('clear_otherHighlight', room=gs.lobby)
             gs.server.emit('signal_hide_btns', room=player)
-            print(f"{gs.players[player].name}'s turn ends, buttons have been hidden.")
+            print(f"{gs.players[player].name}'s turn ended.")
             # clear deployables
             gs.clear_deployables(player)
             # assign stars if applicable
@@ -156,30 +158,41 @@ class turn_loop_scheduler:
 
     def execute_turn(self, gs, ms, curr_player):
         # gs -> game states    ms -> master scheduler/gs.GES
+
+        # Thread for turn
         ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
-        ms.timer = threading.Thread(target=ms.activate_timer, args=(90,))
+        # Timer for turn
+        ms.timer = threading.Thread(target=ms.activate_timer, args=(90, curr_player))
 
         ms.terminated = False
         ms.curr_thread.start()
 
         gs.server.emit('start_timeout', {'secs': 90}, room=gs.lobby)
-        print(f"{gs.players[curr_player].name}'s turn starts, buttons have been shown.")
+        print(f"{gs.players[curr_player].name}'s turn started.")
         gs.server.emit('signal_show_btns', room=curr_player)
         gs.server.emit('signal_turn_start', room=curr_player)
 
+        # Timer and curr_thread both depends on self.terminate for counting or executing event
+        # When one of them terminates, the other also terminates
         ms.timer.start()
         ms.timer.join()
         gs.server.emit('stop_timeout', room=gs.lobby)
-
         ms.curr_thread.join()
-
+        
+        # Handle end of turn
         self.handle_end_turn(ms, gs, curr_player)
 
+
+    # MAIN LOOP FOR TURN BASED EVENTS
     def run_turn_loop(self, gs, ms):
+
+        # current_player = index of player in the queue
         curr_player = gs.pids[ms.current_player]
+
         while not ms.interrupt:
-            # checking if player is alive
-            if gs.players[curr_player].alive:
+
+            # checking if player is alive and connected
+            if gs.players[curr_player].alive and gs.players[curr_player].connected:
                 self.execute_turn(gs, ms, curr_player)
             if ms.interrupt:
                 return

@@ -13,15 +13,15 @@ class General_Event_Scheduler:
         self.interrupt = False
         # current turn terminated
         self.terminated = False
-        # stage gate
+        # current stage of a turn terminated
         self.stage_completed = False
         # current round
         self.round = 0
-        # thread for turn execution
+        # thread for turn execution -> serves the player who is on their turn
         self.curr_thread = None
         # thread for timer
         self.timer = None
-        # current event
+        # current event for keeping track of turn stages
         self.current_event = None
         self.current_player = 0
         # stack of events in case of interruption
@@ -47,9 +47,10 @@ class General_Event_Scheduler:
             c += 1
         self.gs.server.emit('stop_timeout', room=self.gs.lobby)
 
-    def activate_timer(self, num_secs):
+    # Timer for turn
+    def activate_timer(self, num_secs, curr_player):
         sec = 0
-        while not self.terminated and sec < num_secs and not self.interrupt:
+        while not self.terminated and sec < num_secs and not self.interrupt and self.gs.players[curr_player].connected:
             time.sleep(1)
             sec += 1
         self.stage_completed = True
@@ -105,8 +106,9 @@ class General_Event_Scheduler:
     def handle_async_event(self, data, pid):
         
         n = data['name']
-        self.innerInterrupt = True
+        self.innerInterrupt = True  # Break current stage of the player's turn
 
+        # Change current thread to handle the async event
         if n == 'R_D':
             self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
         elif n == 'B_C':
@@ -116,11 +118,14 @@ class General_Event_Scheduler:
         self.curr_thread.join()
         print(f"{self.gs.players[pid].name}'s async action thread completed.")
         self.innerInterrupt = False
-        # resume loop event if not terminated
+
+        # resume loop event if not terminated | timer didn't stop
         if not self.terminated:
             self.gs.server.emit('signal_show_btns', room=pid)
             print(f"{self.gs.players[pid].name}'s async action completed.")
-            self.TLS.resume_loop(self, self.gs, pid)
+            self.curr_thread = threading.Thread(target=self.TLS.resume_loop, args=(self, self.gs, pid))
+            self.curr_thread.start()
+        print("Exit async thread")
 
     def reserve_deployment(self, pid):
 
@@ -129,7 +134,7 @@ class General_Event_Scheduler:
         self.gs.server.emit('reserve_deployment', {'amount': self.gs.players[pid].reserves}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
         done = False
-        while not done and self.innerInterrupt and not self.terminated:
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].reserves == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
@@ -142,7 +147,7 @@ class General_Event_Scheduler:
         print(f"{self.gs.players[pid].name}'s async action started.")
         self.gs.players[pid].s_city_amt = data['amt']
         done = False
-        while not done and self.innerInterrupt and not self.terminated:
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
@@ -169,3 +174,8 @@ class General_Event_Scheduler:
         else:
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
         self.summit_requested = False
+
+    def update_all_views_for_reconnected_player(self, pid):
+        
+        New_thread = threading.Thread(target=self.gs.update_all_views, args=(pid, ))
+        New_thread.start()

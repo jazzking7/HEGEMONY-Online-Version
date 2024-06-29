@@ -53,13 +53,13 @@ def disconnect():
     if lobby['game_started']:
         # disconnect user
         gsm = lobby['gsm']
-        gsm.players[sid].alive = False
-        gsm.death_logs[sid] = "DC"
-        gsm.perm_elims.append(sid)
-        gsm.signal_MTrackers('death')
+        gsm.players[sid].connected = False
+        gsm.server.emit('display_new_notification', {'msg': f'Player {gsm.players[sid].name} is disconnected.'}, room=gsm.lobby)
 
-    # remove sid from lobby own list of players
+    # remove sid from lobby own list of players NOT FROM GSM
     lobby['players'].remove(sid)
+
+    print(lobby)
     if len(lobby['players']) == 0:
         # check if game started
         if lobby['game_started']:
@@ -67,12 +67,15 @@ def disconnect():
             # stop the game thread
             gsm.GES.halt_events()
         del lobbies[lobby_id]
-
+        print(lobbies)
         return
+    
     if lobby['host'] == sid:
         lobby['host'] = random.choice(lobby['players'])
         socketio.emit('update_lobby', {"event": "change_host", "target": lobby['host']}, room=lobby_id)
     socketio.emit('update_lobby', {"event": "disconnect", "target": username}, room=lobby_id)
+
+    print(lobbies)
 
 ### Main menu functions ###
     
@@ -96,6 +99,8 @@ def createLobby(data):
     }
     socketio.emit('lobby_created', room=sid)
 
+    print(lobbies)
+
 @socketio.on('join_lobby')
 def joinLobby(data):
     print('join_lobby', data)
@@ -103,6 +108,7 @@ def joinLobby(data):
     username = data.get('username')
     lobby_code = data.get('lobby_code')
 
+    print(lobbies)
     # Check if lobby exists
     if lobby_code not in lobbies:
         print(f"ERROR: The lobby {lobby_code} does not exist!")
@@ -127,9 +133,34 @@ def joinLobby(data):
     lobby['players'].append(sid)
     join_room(lobby_code)
 
-    # Update lobby info
-    socketio.emit('update_lobby', {"event": "join", "target": username}, room=lobby_code)
-    socketio.emit('lobby_joined', room=sid)
+    # Game started
+    if lobby['game_started']:
+        
+        # Find disconnected player to replace
+        gsm = lobby['gsm']
+        pid_to_takeover = None
+        for pid in gsm.players:
+            if not gsm.players[pid].connected:
+                pid_to_takeover = pid
+        # Verify if there is a player
+        if not pid_to_takeover:
+            socketio.emit('error', {'msg': "Lobby full!"}, room=sid)
+        # Verify if turn started for the player
+        if pid_to_takeover == gsm.pids[gsm.GES.current_player]:
+            socketio.emit('error', {'msg': "Not a good timing to join in!"}, room=sid)
+        # Verify if player dead
+        if not gsm.players[pid_to_takeover].alive:
+            socketio.emit('error', {'msg': "No available spots!"}, room=sid)
+
+        # takeover disconnected player
+        if gsm.takeover_disconnected_player(sid, pid_to_takeover, username):
+            socketio.emit('join_lobby_game', room=sid)
+            gsm.GES.update_all_views_for_reconnected_player(sid)
+
+    else:
+        # Update lobby info
+        socketio.emit('update_lobby', {"event": "join", "target": username}, room=lobby_code)
+        socketio.emit('lobby_joined', room=sid)
 
 ### Lobby functions ###
 
@@ -435,6 +466,7 @@ def handle_summit_choice(data):
     socketio.emit('s_voting_fb', {'opt': opt, 'name': gsm.players[pid].name}, room=gsm.lobby)
     gsm.GES.selected += 1
 
+# ENTRY POINT FOR INNER ASYNC EVENTS
 @socketio.on('send_async_event')
 def handle_async_event(data):
     pid = request.sid
@@ -442,6 +474,7 @@ def handle_async_event(data):
     gsm.GES.handle_async_event(data, pid)
     return
 
+# EXIT POINT FOR INNER ASYNC EVENTS
 @socketio.on('signal_async_end')
 def handle_async_end():
     pid = request.sid

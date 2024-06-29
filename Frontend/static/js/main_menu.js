@@ -85,4 +85,23 @@ $(document).ready(function() {
         });
     });
 
+    socket.on('join_lobby_game', function() {
+        console.log('joined game by replacing disconnected player');
+        loadPage('game')
+        .then(() => {
+            return unloadScript('page_script');
+        })
+        .then(() => {
+            return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+        })
+        .then(() => {
+            socket.off('lobby_joined');
+            console.log('game.js script loaded successfully');
+            // Additional logic after loading lobby.js if needed
+        })
+        .catch((error) => {
+            console.error('Error loading page or script:', error);
+        });
+    });
+
 });

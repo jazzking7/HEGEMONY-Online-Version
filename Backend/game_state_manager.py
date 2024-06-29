@@ -14,11 +14,14 @@ class Player:
         self.name = name
         # status
         self.alive = True
+
+        self.connected = True # Keep track if the player is connected
+
         # skill
         self.skill = None
         # ownership
         self.territories = []
-        self.capital = None
+        self.capital = None   # Name of the capital
         # battle stats
         self.temp_stats = None   # determine after deployment stage to prevent infinite growth
         self.industrial = 6
@@ -61,7 +64,7 @@ class Game_State_Manager:
 
         # Player dict => key: player_id (socket connection id)  value: player object
         self.players = {}
-        # All communicatable ids
+        # All communicatable ids | Used as the turn order for turn based events
         self.pids = []
         # Original players -> not created using skills
         self.oriPlayers = []
@@ -132,6 +135,118 @@ class Game_State_Manager:
         self.perm_elims = []
         # victim -> killer/mission failure
         self.death_logs = {}
+
+    # connect player to a disconnected player object
+    def takeover_disconnected_player(self, new_pid, old_pid, new_name):
+
+        # update superpowers
+        self.LAO = self.LAO if self.LAO != old_pid else new_pid
+        self.MTO = self.MTO if self.MTO != old_pid else new_pid
+        self.HIP = self.HIP if self.HIP != old_pid else new_pid
+        self.TIP = self.TIP if self.TIP != old_pid else new_pid
+        self.SUP = self.SUP if self.SUP != old_pid else new_pid
+
+        # change pid in turn queue
+        i_to_c = None
+        for index, pid in enumerate(self.pids):
+            if pid == old_pid:
+                i_to_c = index
+        
+        self.pids[i_to_c] = new_pid
+
+        # change pid in oriplayers
+        for index, pid in enumerate(self.oriPlayers):
+            if pid == old_pid:
+                i_to_c = index
+        
+        self.oriPlayers[i_to_c] = new_pid
+
+        # Update players
+        p_object = self.players[old_pid]
+        self.players[new_pid] = p_object
+        self.players[new_pid].name = new_name
+        del self.players[old_pid]
+
+        # Update mission trackers !!!
+        for mission in self.Mset:
+            # change player of old_pid to new_pid
+            if mission.player == old_pid:
+                mission.player = new_pid
+            # update partner for loyalist
+            if mission.name == 'Loyalist':
+                if mission.target_player == old_pid:
+                    mission.target_player = new_pid
+                    mission.update_tracker_view({
+                    'targets': {mission.gs.players[mission.target_player].name: 's'},
+                    })
+            # update target for bounty hunter
+            if mission.name == 'Bounty_Hunter':
+                if old_pid in mission.target_players:
+                    mission.target_players.remove(old_pid)
+                    mission.target_players.append(new_pid)
+                    mission.check_conditions()
+            # update target for decapitator:
+            if mission.name == 'Decapitator':
+                if old_pid in mission.target_players:
+                    mission.target_players.remove(old_pid)
+                    mission.target_players.append(new_pid)
+                    mission.check_conditions()
+        
+        # Update death logs and per_elims
+        if old_pid in self.perm_elims:
+            self.perm_elims.remove(old_pid)
+            self.perm_elims.append(new_pid)
+        if old_pid in self.death_logs:
+            val = self.death_logs[old_pid]
+            self.death_logs[new_pid] = val
+            del self.death_logs[old_pid]
+
+        return True
+    
+    def update_all_views(self, pid):
+        
+        time.sleep(10)
+        
+        # Territory
+        all_trty_updates = {}
+        for tid, trty in enumerate(self.map.territories):
+
+            all_trty_updates[tid] = {
+                "troops": trty.troops,
+                "isCapital": trty.isCapital
+            }
+            # city
+            if trty.isCity:
+                all_trty_updates[tid]['hasDev'] = 'city'
+
+            # color
+            for p in self.players:
+                if tid in self.players[p].territories:
+                    all_trty_updates[tid]['color'] = self.players[p].color
+
+            # capital color
+            if trty.isCapital:
+                for p in self.players:
+                    if self.players[p].capital == trty.name:
+                        all_trty_updates[tid]['capital_color'] = self.players[p].color
+        
+        # Territory
+        self.server.emit('update_trty_display', all_trty_updates, room=pid)
+
+        # Global overview
+        self.update_global_status()
+        # Private overview
+        self.update_private_status(pid)
+        # Mission overview
+        for mission in self.Mset:
+            if mission.player == pid:
+                mission.set_up_tracker_view()
+                mission.check_conditions()
+        # Playerlist
+        self.send_player_list()
+        
+
+        self.players[pid].connected = True if not self.players[pid].connected else False
 
     def compute_SD(self, metric, avg, alive):
         total_div = 0
@@ -308,6 +423,7 @@ class Game_State_Manager:
                 return
         self.SUP = None
 
+    # Update the global status
     def update_global_status(self, ):
         self.server.emit('update_global_status',
         {'game_round': self.GES.round,
@@ -316,7 +432,7 @@ class Game_State_Manager:
         'TIP': self.players[self.TIP].name if self.TIP != None else "Yet to exist",
         'SUP': self.players[self.SUP].name if self.SUP != None else "Yet to exist",}, room=self.lobby)
     
-    # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN
+    # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN FOR SPECIFIC PLAYER
     def update_private_status(self, pid):
         self.server.emit('private_overview', {'curr_SA': self.players[pid].stars, 'curr_RS': self.players[pid].reserves}, room=pid)
 

@@ -6,13 +6,14 @@
 
 #alert {
     display: none;
-    position: fixed;
-    top: 50px;
-    right: 50px;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     width: 40vw;
+    text-align: center; 
     z-index: 1000;
 }
-
 .card {
 	margin: 4vh auto;
 }

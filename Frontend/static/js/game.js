@@ -195,7 +195,6 @@ socket.on('private_overview', function(data){
   $('#curr_reserves').text(data.curr_RS);
 });
 
-
 // update player territory list
 socket.on('update_player_territories', function(data){
   player_territories = data.list;
@@ -300,15 +299,20 @@ socket.on('GAME_OVER', function(data){
 // add sync click event
 socket.on('add_tid_to_otherHighlight', function(data){
   otherHighlight.push(data.tid);
-})
+});
 
 socket.on('remove_tid_from_otherHighlight', function(data){
   let toRemove = [data.tid];
   otherHighlight = otherHighlight.filter(item => !toRemove.includes(item));
-})
+});
 
 socket.on('clear_otherHighlight', function(){
   otherHighlight = [];
+});
+
+// Popup notification
+socket.on('display_new_notification', function(data){
+  popup(data.msg, 2000);
 })
 
 //===============================Mission Related Display=============================================
