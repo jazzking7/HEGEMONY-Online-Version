@@ -92,6 +92,7 @@ class Warmonger(Mission):
     def __init__(self, player, gs):
         super().__init__("Warmonger", player, gs)
         self.goal_count = len(self.gs.pids)//3
+        self.goal_count = 2 if len(self.gs.pids) == 5 else self.goal_count
         self.peace = 0
         self.type = 'r_based'
         self.max_peace = 9
