@@ -89,21 +89,8 @@ class Game_State_Manager:
 
         # color options
         self.color_options = []
-        # skill options
-        self.skill_options = [
-            "Sturdy_As_Steel",
-            "Usurper",
-            "Air_Superiority",
-            "Divine_Punishment",
-            "Industrial_Revolution",
-            "Zealous_Expansion",
-            "Mass_Mobilization",
-            "Handler_of_Wheel_of_Fortune",
-            "Laplace_Demon",
-            "Necromancer",
-            "Ares_Blessing",
-            "Dictator"
-        ]
+        # skill distributor
+        self.SDIS = None
 
         # server
         self.server = server
@@ -584,11 +571,52 @@ class Game_State_Manager:
 
     def get_player_battle_stats(self, player):
 
-        # get industrial level
+        # 0 -> indus  1 -> infra  2 -> frameshift (min)  3 -> null rate   4 -> dmg multiplier
         stats = []
+        # get industrial level
         stats.append(self.get_player_industrial_level(player)+6)
+        # get infrastructure level
         stats.append(self.get_player_infra_level(player)+3)
+        # frameshift (min roll)
+        stats.append(1)
+        # Default Null rate
+        stats.append(0)
+        # Dmg multipler
+        stats.append(1)
         return stats
+    
+    def apply_skill_related_modification(self, atk_p, atk_stats, def_p, def_stats):
+
+        # Attacker and Defender modify their own stats
+        # Industrialist + Zealous_Expansion + Ares' Blessing + Realm of Permafrost
+        # + Frameshifter
+        if atk_p.skill:
+            if atk_p.skill.active and atk_p.skill.intMod:
+                atk_p.skill.internalStatsMod(atk_stats)
+        
+        if def_p.skill:
+            if def_p.skill.active and def_p.skill.intMod:
+                def_p.skill.internalStatsMod(def_stats)
+        
+        # Attack and Defender modify other's stats
+        # Realm of Permafrost
+        if atk_p.skill:
+            if atk_p.skill.active and atk_p.skill.extMod:
+                atk_p.skill.externalStatsMod(def_stats)
+        
+        if def_p.skill:
+            if def_p.skill.active and def_p.skill.extMod:
+                def_p.skill.externalStatsMod(atk_stats)
+
+        # Attacker and Defender modify their stats according to other's stats
+        # Iron Wall
+        if atk_p.skill:
+            if atk_p.skill.active and atk_p.skill.reactMod:
+                atk_p.skill.reactStatsMod(atk_stats, def_stats, True)
+        
+        if def_p.skill:
+            if def_p.skill.active and def_p.skill.reactMod:
+                def_p.skill.reactStatsMod(def_stats, atk_stats, False)
 
     def handle_battle(self, data):
         # Load territories involved
@@ -622,6 +650,9 @@ class Game_State_Manager:
         atk_stats = atk_p.temp_stats
         def_stats = self.get_player_battle_stats(def_p)
 
+        # Stats modifier
+        self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
+
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
         result = self.simulate_attack(atk_amt, def_amt, atk_stats, def_stats)
@@ -635,7 +666,9 @@ class Game_State_Manager:
         # attacker wins
         # CM
         if result[0] > 0:
-
+            # Counter multiplier overkill
+            if result[1] < 0:
+                result[1] = 0
             # Territory troop change
             trty_def.troops = result[0]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
@@ -653,7 +686,11 @@ class Game_State_Manager:
 
         # defender wins
         else:
-
+            # Counter multiplier overkill
+            if result[1] <= 0:
+                result[1] = 1
+            if result[0] < 0:
+                result[0] = 0
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
 
@@ -667,7 +704,7 @@ class Game_State_Manager:
             f'{t2}': {'tid': t2, 'number': def_amt-result[1]},
         }, room=self.lobby)
 
-
+        # update total troops of players
         atk_p.total_troops -= (atk_amt-result[0])
         def_p.total_troops -= (def_amt-result[1])
 
@@ -699,7 +736,6 @@ class Game_State_Manager:
         self.et.determine_elimination(self, a_pid, d_pid)
         self.egt.determine_end_game(self)
         
-
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
         
         # Troop amount
@@ -707,8 +743,8 @@ class Game_State_Manager:
         d_troops = def_amt
 
         # Max stats
-        a_maxv, a_maxt = atk_stats[0], atk_stats[1]
-        d_maxv, d_maxt = def_stats[0], def_stats[1] - 1
+        a_maxv, a_maxt, a_min, a_null, a_mul = atk_stats[0], atk_stats[1], atk_stats[2], atk_stats[3], atk_stats[4]
+        d_maxv, d_maxt, d_min, d_null, d_mul = def_stats[0], def_stats[1] - 1, def_stats[2], def_stats[3], def_stats[4]
 
         # Adjust stats
         a_maxt = a_troops if a_troops < a_maxt else a_maxt
@@ -719,17 +755,19 @@ class Game_State_Manager:
         # Starts simulation
         while(a_troops > 0 and d_troops > 0):
 
-            a_rolls = sorted([random.randint(1, a_maxv) for _ in range(a_maxt)], reverse=True)
-            d_rolls = sorted([random.randint(1, d_maxv) for _ in range(d_maxt)], reverse=True)
+            a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+            d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
             max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
 
             for i in range(max_dmg):
                 if a_rolls[i] > d_rolls[i]:
-                    d_troops -= 1
+                    if random.randint(1, 100) > d_null:
+                        d_troops -= 1*a_mul
                 else:
-                    a_troops -= 1
+                    a_troops -= 1*d_mul
             
+            # Adjust dice number
             a_maxt = a_troops if a_troops < a_maxt else a_maxt
             d_maxt = d_troops if d_troops < d_maxt else d_maxt
 

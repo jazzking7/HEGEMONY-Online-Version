@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, join_room, leave_room, send
 from string import ascii_uppercase
 from mission_distributor import *
 from game_state_manager import *
+from skill_distributor import *
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -13,6 +14,7 @@ lobbies = {}
 SES = setup_event_scheduler()
 MDIS = Mission_Distributor()
 EGT = End_game_tracker()
+SDIS = Skill_Distributor()
 
 def generate_unique_code(length):
     while True:
@@ -209,6 +211,7 @@ def startGame(data):
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
     lobby['gsm'].egt = EGT
+    lobby['gsm'].SDIS = SDIS
 
     socketio.emit('game_started', room=lobby_id)
 
@@ -350,7 +353,8 @@ def update_troop_info(data):
 def update_skill_choice(data):
     skill = data.get('choice')
     gsm = lobbies[players[request.sid]['lobby_id']]['gsm']
-    gsm.players[request.sid].skill = skill
+    # initiate skill
+    gsm.players[request.sid].skill = gsm.SDIS.initiate_skill(skill, request.sid, gsm)
     # CM
     gsm.GES.selected += 1
     return
@@ -504,7 +508,25 @@ def handle_clear_click_sync():
     for p in gsm.players:
         if p != pid:
             socketio.emit('clear_otherHighlight', room=p)
-            
+
+@socketio.on('get_skill_information')
+def send_skill_information():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.update_current_status()
+
+@socketio.on('signal_skill_usage')
+def handle_skill_usage():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.activate_effect()
+
+@socketio.on('build_free_cities')
+def build_free_cities(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.validate_and_apply_changes(data)
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

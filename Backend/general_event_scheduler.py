@@ -113,6 +113,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
         elif n == 'B_C':
             self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
+        elif n == 'BFC':
+            self.curr_thread = threading.Thread(target=self.build_free_cities, args=(pid,))
         
         self.curr_thread.start()
         self.curr_thread.join()
@@ -179,3 +181,16 @@ class General_Event_Scheduler:
         
         New_thread = threading.Thread(target=self.gs.update_all_views, args=(pid, ))
         New_thread.start()
+
+    def build_free_cities(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('build_free_cities', room=pid)
+        self.gs.server.emit('change_click_event', {'event': "build_free_cities"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        self.gs.players[pid].skill.finish_building = False
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.finish_building
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)

@@ -50,7 +50,7 @@ class setup_event_scheduler:
             mission.set_up_tracker_view()
             gs.server.emit('get_mission', {'msg': f'Your agenda: {mission.name}'}, room=mission.player)
 
-        ms.selection_time_out(20, len(gs.players))
+        ms.selection_time_out(2, len(gs.players))
 
     # FCFS
     def start_color_distribution(self, gs, ms):
@@ -61,7 +61,7 @@ class setup_event_scheduler:
         for player in gs.players:
             gs.server.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': color_options}, room=player)
         
-        ms.selection_time_out(30, len(gs.players))
+        ms.selection_time_out(2, len(gs.players))
 
         # handle timeout
         for player in gs.players.values():
@@ -111,7 +111,7 @@ class setup_event_scheduler:
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
 
-            ms.selection_time_out(30, 1)
+            ms.selection_time_out(2, 1)
             
             # handle timeout
             if not ms.selected:
@@ -130,7 +130,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        ms.selection_time_out(30, len(gs.players))
+        ms.selection_time_out(2, len(gs.players))
 
         # handle not choosing
         for player in gs.players.values():
@@ -148,7 +148,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
-        ms.selection_time_out(30, len(gs.players))
+        ms.selection_time_out(3, len(gs.players))
 
 
         for player in gs.players.values():
@@ -174,25 +174,27 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        ms.selection_time_out(60, len(gs.players))
+        ms.selection_time_out(2, len(gs.players))
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
         gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
-        time.sleep(5)
+        time.sleep(3)
         for player in gs.players:
             gs.clear_deployables(player)
     
-    def start_skill_selection(self,gs, ms):
+    def start_skill_selection(self, gs, ms):
         gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
         for player in gs.players:
-            options = random.sample(gs.skill_options, k=5)
+            options = gs.SDIS.get_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        ms.selection_time_out(10, len(gs.players))
+        ms.selection_time_out(20, len(gs.players))
 
         gs.signal_view_clear()
+
         for player in gs.players:
             # CM
             if gs.players[player].skill == None:
-                gs.players[player].skill = random.choice(gs.skill_options)
+                # Randomly assign mission to player
+                gs.players[player].skill = gs.SDIS.initiate_skill(gs.SDIS.get_single_option(), player, gs)

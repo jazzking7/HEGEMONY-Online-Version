@@ -151,6 +151,10 @@ class turn_loop_scheduler:
                     s2 += 0.025
                     s3 += 0.025
                 p.stars += random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+            # Dictator receives more stars
+            if p.skill:
+                if p.skill.name == "Dictator":
+                    p.skill.get_additional_stars()
             # Update private overview
             gs.update_private_status(player)
             print(f'{gs.players[player].name} special authority amount: {p.stars}')
@@ -200,13 +204,21 @@ class turn_loop_scheduler:
             # inter_turn_summit
             if not ms.interrupt and ms.summit_requested:
                 ms.launch_summit_procedures(ms.current_player)
-             
+
+            # next player 
             ms.current_player += 1
+
+            # next round
             if ms.current_player == len(gs.pids):
                 ms.current_player = 0
                 ms.round += 1
                 # CM
                 gs.signal_MTrackers('round')
                 gs.update_global_status()
+                # update cooldown
+                for p in gs.players:
+                    if gs.players[p].skill.hasCooldown:
+                        if gs.players[p].skill.cooldown:
+                            gs.players[p].skill.cooldown -= 1
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

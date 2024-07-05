@@ -248,6 +248,8 @@ socket.on('change_click_event', function(data){
     currEvent = deploy_reserves;
   } else if (data.event == 'build_cities') {
     currEvent = build_cities;
+  } else if (data.event == 'build_free_cities') {
+    currEvent = build_free_cities;
   } else {
     currEvent = null;
   }
@@ -1285,11 +1287,119 @@ btn_sep_auth.onclick = function () {
   });
 }
 
+// Function to grab information concerning player's skill
+async function get_skill_status(){
+  let skillData = await new Promise((resolve) => {
+    socket.emit('get_skill_information');
+    socket.once('update_skill_status', (data) => {resolve(data);});
+  });
+  return skillData;
+}
 // SKILL USAGE
 // Add display + Functionalities according to user's skill
 btn_skill = document.getElementById('btn-skill');
 btn_skill.onclick = function () {
-  return;
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = "";
+   // Grab the special authority amt of the user
+   get_skill_status().then(skillData => {
+    
+    // operational
+    var op_color = skillData.operational ? '#50C878' : '#E34234';
+    var op_status = skillData.operational? 'Functional' : 'Disabled';
+    // limit and cooldowns
+    var limit_left = "";
+    var cooldown_left = "";
+
+    var showActivateBtn = "none";
+
+    // determine limit and cooldown display
+    if (skillData.operational) {
+      if (skillData.hasLimit) {
+        if (!skillData.limits) {
+          limit_left = "No more usage available"
+        } else {
+          limit_left = `${skillData.limits} usages remaining`
+          if (skillData.cooldown) {
+            cooldown_left = `In cooldown | ${skillData.cooldown} rounds left`
+          } else {
+            cooldown_left = "Ready to activate"
+            showActivateBtn = "flex";
+          }
+        }
+      }
+    }
+
+    // show targets that have been affected by skill if there are any
+    let skill_used_targets = ``
+    if (skillData.forbidden_targets){
+
+      if (skillData.forbidden_targets.length) {
+        skill_used_targets += `<div class="p-1 text-center break-words whitespace=normal">${skillData.ft_msg}</div> <div>`;
+        for (let target of skillData.forbidden_targets) {
+          skill_used_targets += (`<div style="display: inline-block;
+            padding: 2px; margin: 2px; border-radius: 3px; background-color:#F5B301;" class="text-gray-700">${target}</div>`);
+        }
+        skill_used_targets += `</div>`;
+      }
+  
+    }
+  
+    // Show the title
+    document.getElementById('middle_title').innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px;" class="text-center">
+      <h5 style="margin-right: 15px">${skillData.name}</h5>
+      <h5 style="background-color: ${op_color}; border-radius: 3px;" class="p-1">${op_status}</h5>
+    </div>`;
+
+    // Description | Show limits and cooldown if there are any | Show activation button
+    midDis = document.getElementById('middle_content')
+    midDis.innerHTML = `
+
+    <div class="p-2 text-center break-words whitespace=normal">${skillData.description}</div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+
+      <div style="display: inline-block;" class="p-2 mr-2 text-center break-words whitespace=normal">
+      ${limit_left}
+      </div>
+
+      <div style="display: inline-block;" class="p-2 ml-2 text-center break-words whitespace=normal">
+      ${cooldown_left}
+      </div>
+
+    </div>
+
+    ${skill_used_targets}
+
+    <div style="display: ${showActivateBtn};" class="flex items-center justify-center mt-2">
+        <button id='btn-skill-activate' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
+            ${skillData.btn_msg}
+        </button>
+    </div>
+
+    <div class="flex items-center justify-center mt-2">
+        <button id='btn-action-cancel' class="w-9 h-9 bg-red-500 text-white font-bold rounded-lg flex items-center justify-center">
+            X
+        </button>
+    </div>
+    `;
+
+    $('#btn-action-cancel').off('click').on('click', function(){
+      $('#control_panel').hide()
+      $('#middle_display').hide()
+      $('#middle_title, #middle_content').empty()
+    });
+
+    $('#btn-skill-activate').off('click').on('click', function(){
+      $('#control_panel').hide()
+      $('#middle_display').hide()
+      $('#middle_title, #middle_content').empty()
+      socket.emit('signal_skill_usage');
+    });
+
+  });
+
 }
 
 // Function to grab the reserve amt for the user
@@ -1344,6 +1454,34 @@ btn_reserves.onclick = function () {
     });
 
   });
+}
+
+// Industrial Revolution -> Free city building
+socket.on('build_free_cities', function(){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h3>Settle new cities to boost your industrial power!</h3>`
+});
+
+function build_free_cities(tid){
+  if(player_territories.includes(tid)){
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length != 0){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('build_free_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
 }
 
 //========================================================================================================
