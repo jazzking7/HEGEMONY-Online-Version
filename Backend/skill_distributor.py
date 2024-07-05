@@ -9,7 +9,8 @@ class Skill_Distributor:
             "Realm_of_Permafrost",
             "Dictator",
             "Mass_Mobilization",
-            "Industrial_Revolution"
+            "Industrial_Revolution",
+            "Robinhood"
         ]
 
     def get_options(self, ):
@@ -29,3 +30,5 @@ class Skill_Distributor:
             return Mass_Mobilization(player, gs)
         elif skill_name == 'Industrial_Revolution':
             return Industrial_Revolution(player, gs)
+        elif skill_name == 'Robinhood':
+            return Robinhood(player, gs)

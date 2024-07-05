@@ -67,7 +67,13 @@ class turn_loop_scheduler:
                 gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
         if gs.players[curr_p].deployable_amt == 0:
-            gs.players[curr_p].deployable_amt = gs.get_deployable_amt(curr_p) 
+            # Robinhood activated    
+            d_amt = gs.get_deployable_amt(curr_p)
+            for p in gs.players:
+                if gs.players[p].skill.name == 'Robinhood':
+                    if curr_p in gs.players[p].skill.targets and curr_p != p:
+                        d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
+            gs.players[curr_p].deployable_amt = d_amt
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
 
@@ -150,7 +156,15 @@ class turn_loop_scheduler:
                     s1 -= 0.05
                     s2 += 0.025
                     s3 += 0.025
-                p.stars += random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+
+                s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+                # Robinhood!
+                for pid in gs.players:
+                    if gs.players[pid].skill.name == "Robinhood":
+                        if player in gs.players[pid].skill.targets and player != pid:
+                            s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
+                p.stars += s_amt
+
             # Dictator receives more stars
             if p.skill:
                 if p.skill.name == "Dictator":
@@ -217,8 +231,7 @@ class turn_loop_scheduler:
                 gs.update_global_status()
                 # update cooldown
                 for p in gs.players:
-                    if gs.players[p].skill.hasCooldown:
-                        if gs.players[p].skill.cooldown:
-                            gs.players[p].skill.cooldown -= 1
+                    if gs.players[p].skill.hasRoundEffect:
+                        gs.players[p].skill.apply_round_effect()
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

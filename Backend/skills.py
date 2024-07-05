@@ -18,6 +18,7 @@ class Skill:
         self.hasUsageLimit = False
         self.hasCooldown = False
         self.singleTurnActive = False
+        self.hasRoundEffect = False
 
 
     def update_current_status(self, ):
@@ -99,6 +100,7 @@ class Mass_Mobilization(Skill):
         super().__init__("Mass_Mobilization", player, gs)
         self.hasUsageLimit = True
         self.hasCooldown = True
+        self.hasRoundEffect = True
 
         self.limit = 0
         nump = len(gs.players)
@@ -112,6 +114,10 @@ class Mass_Mobilization(Skill):
             self.limit = 5
         
         self.cooldown = 0
+
+    def apply_round_effect(self,):
+        if self.cooldown:
+            self.cooldown -= 1
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -251,3 +257,56 @@ class Industrial_Revolution(Skill):
         
         # terminate building
         self.finish_building = True
+
+class Robinhood(Skill):
+
+    def __init__(self, player, gs):
+        super().__init__("Robinhood", player, gs)
+        self.hasRoundEffect = True
+        self.targets = []
+        self.top_nump = 0
+        l = len(gs.players)
+        if l < 5:
+            self.top_nump = 1
+        elif l < 10:
+            self.top_nump = 2
+        elif l < 16:
+            self.top_nump = 3
+
+    def apply_round_effect(self,):
+        self.targets = []
+        if self.active:
+            # Sort players by their PPI values in descending order and get the top 2 players
+            top2Players = sorted(self.gs.players.items(), key=lambda item: item[1].PPI, reverse=True)[:self.top_nump]  # items -> item[0] = key   item[1] = value
+            # Extract the player sids from the top 2 players
+            self.targets = [player[0] for player in top2Players]
+    
+    def leech_off_reinforcements(self, amt):
+        if self.active:
+            
+            l_amt = amt//3
+            self.gs.players[self.player].reserves += l_amt
+            self.gs.update_private_status(self.player)
+
+            amt -= l_amt
+            return amt
+        
+    def leech_off_stars(self, amt):
+        if self.active:
+            
+            l_amt = 0
+            if amt > 1:
+                l_amt = 1
+
+            self.gs.players[self.player].stars += l_amt
+            self.gs.update_private_status(self.player)
+
+            amt -= l_amt
+            return amt
+        
+    def update_current_status(self):
+        self.gs.server.emit("update_skill_status", {
+            'name': "Robinhood",
+            'description': "Take away resources from the top 2 strongest players to give to yourself",
+            'operational': self.active
+        }, room=self.player)
