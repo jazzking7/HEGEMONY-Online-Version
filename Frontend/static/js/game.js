@@ -1330,6 +1330,13 @@ btn_skill.onclick = function () {
       }
     }
 
+    // single-turn skill activated
+    var showInUse = "none";
+    if (skillData.activated) {
+      showActivateBtn = "none";
+      showInUse = "flex";
+    }
+
     // show targets that have been affected by skill if there are any
     let skill_used_targets = ``
     if (skillData.forbidden_targets){
@@ -1371,6 +1378,12 @@ btn_skill.onclick = function () {
     </div>
 
     ${skill_used_targets}
+
+    <div style="display: ${showInUse};" class="flex items-center justify-center p-2">
+        <h3  style="border-radius: 3px; padding:2px;" class="text-center text-lg font-bold bg-yellow-500 text-black">
+            ${skillData.inUseMsg}
+        </h3>
+    </div>
 
     <div style="display: ${showActivateBtn};" class="flex items-center justify-center mt-2">
         <button id='btn-skill-activate' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
@@ -1462,6 +1475,7 @@ socket.on('build_free_cities', function(){
   announ.innerHTML = `<h3>Settle new cities to boost your industrial power!</h3>`
 });
 
+// Free city building for industrial revolution
 function build_free_cities(tid){
   if(player_territories.includes(tid)){
     if (!toHightlight.includes(tid)){

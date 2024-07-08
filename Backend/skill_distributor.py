@@ -10,11 +10,12 @@ class Skill_Distributor:
             "Dictator",
             "Mass_Mobilization",
             "Industrial_Revolution",
-            "Robinhood"
+            "Robinhood",
+            "Ares' Blessing"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=5)
+        return random.sample(self.skill_options, k=7)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -32,3 +33,5 @@ class Skill_Distributor:
             return Industrial_Revolution(player, gs)
         elif skill_name == 'Robinhood':
             return Robinhood(player, gs)
+        elif skill_name == "Ares' Blessing":
+            return Ares_Blessing(player, gs)

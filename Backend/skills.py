@@ -20,6 +20,8 @@ class Skill:
         self.singleTurnActive = False
         self.hasRoundEffect = False
 
+        self.give_troop_bonus = False
+
 
     def update_current_status(self, ):
         pass
@@ -188,6 +190,8 @@ class Industrial_Revolution(Skill):
             self.freeCityTracker[cont] = 0
 
     def internalStatsMod(self, battle_stats):
+        if self.gs.GES.stats_set and self.gs.pids[self.gs.GES.current_player] == self.player:
+            return
         battle_stats[0] += 1
 
     def update_current_status(self):
@@ -307,6 +311,106 @@ class Robinhood(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Robinhood",
-            'description': "Take away resources from the top 2 strongest players to give to yourself",
+            'description': f"Take away resources from the top {self.top_nump} strongest players to give to yourself",
             'operational': self.active
         }, room=self.player)
+
+# ? make it so that the weaker you are the stronger the bonus stats?
+class Ares_Blessing(Skill):
+
+    def __init__(self, player, gs):
+        super().__init__("Ares' Blessing", player, gs)
+        self.hasUsageLimit = True
+        self.hasCooldown = True
+        self.hasRoundEffect = True
+
+        nump = len(gs.players)
+        self.limit = math.ceil(nump/2)
+
+        self.intMod = True
+        self.cooldown = 0
+
+        self.changed_stats = True
+        self.activated = False
+    
+    def internalStatsMod(self, battle_stats):
+
+        if self.activated and not self.changed_stats:
+            battle_stats[0] += 2
+            battle_stats[1] += 2
+            battle_stats[4] += 1
+            self.changed_stats = True
+
+    def apply_round_effect(self,):
+        self.activated = False
+        self.changed_stats = True
+        if self.cooldown:
+            self.cooldown -= 1
+
+    def update_current_status(self):
+        self.gs.server.emit("update_skill_status", {
+            'name': "Ares' Blessing",
+            'description': "Truth is only found within the range of the cannons! +2 industrial power +2 infrastructure power x2 damage when activated.",
+            'operational': self.active,
+            'hasLimit': self.hasUsageLimit,
+            'limits': self.limit,
+            'cooldown': self.cooldown,
+            'activated': self.activated,
+            'btn_msg': "START RAMPAGE",
+            'inUseMsg': "RAMPAGE ONGOING"
+        }, room=self.player)
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if self.limit == 0:
+            self.gs.server.emit('display_new_notification', {'msg': "Limit reached!"}, room=self.player)
+            return
+        if self.cooldown:
+            self.gs.server.emit('display_new_notification', {'msg': "Still in cooldown!"}, room=self.player)
+            return
+        
+        self.activated = True
+        self.changed_stats = False
+
+        # update limits and cooldown
+        self.limit -= 1
+        self.cooldown = 3
+
+class Zealous_Expansion(Skill):
+
+    def __init__(self, player, gs):
+        super().__init__("Zealous_Expansion", player, gs)
+        self.intMod = True
+        
+        self.give_troop_bonus = True
+
+    def internalStatsMod(self, battle_stats):
+        if self.gs.GES.stats_set and self.gs.pids[self.gs.GES.current_player] == self.player:
+            return
+        battle_stats[1] += 1
+
+    def update_current_status(self):
+
+        self.gs.server.emit("update_skill_status", {
+            'name': "Zealous Expansion",
+            'description': "Cost of increasing infrastructure level decrease from 4 to 2 special authorities. Each additional infrastructure level gives 1 bonus troop as reserve at your turn.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.gs.players[self.player].stars//2,
+            'btn_msg': "Level up infrastructure by 1"
+        }, room=self.player) 
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        
+        self.gs.players[self.player].stars -= 2
+        self.gs.players[self.player].infrastructure_upgrade += 1
+        self.gs.update_private_status(self.player)
+        self.update_HIP(self.player)
+        self.gs.get_SUP()
+        self.gs.update_global_status()
+    

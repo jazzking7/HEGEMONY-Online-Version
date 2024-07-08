@@ -73,6 +73,9 @@ class turn_loop_scheduler:
                 if gs.players[p].skill.name == 'Robinhood':
                     if curr_p in gs.players[p].skill.targets and curr_p != p:
                         d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
+            if gs.players[curr_p].skill:
+                if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
+                    d_amt += gs.players[curr_p].infrastructure_upgrade        
             gs.players[curr_p].deployable_amt = d_amt
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
