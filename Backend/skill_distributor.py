@@ -11,7 +11,8 @@ class Skill_Distributor:
             "Mass_Mobilization",
             "Industrial_Revolution",
             "Robinhood",
-            "Ares' Blessing"
+            "Ares' Blessing",
+            "Zealous_Expansion"
         ]
 
     def get_options(self, ):
@@ -35,3 +36,5 @@ class Skill_Distributor:
             return Robinhood(player, gs)
         elif skill_name == "Ares' Blessing":
             return Ares_Blessing(player, gs)
+        elif skill_name == "Zealous_Expansion":
+            return Zealous_Expansion(player, gs)
