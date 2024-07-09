@@ -12,6 +12,8 @@ class Territory:
         self.isCity = False
         self.isCAD = False
 
+        self.isDeadZone = False
+
         self.isMegacity = False
         self.isTransportcenter = False
         # self.isSEZ = False

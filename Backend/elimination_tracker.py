@@ -15,6 +15,8 @@ class Elimination_tracker:
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars
+            victim.stars = 0
+            victim.reserves = 0
             gs.update_private_status(a_pid)
             gs.update_private_status(d_pid)
             print(f"{victim.name} has been eliminated by {attacker.name}")

@@ -159,7 +159,6 @@ socket.on('get_players_stats', function(data){
   });
 });
 
-
 // Player stats list update
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
@@ -224,8 +223,14 @@ socket.on('update_trty_display', function(data){
         } else {
           territories[tid].devImg = null;
         }
+      // Skill effects
+      } else if (field == 'hasEffect') {
+        if (changes[field] == 'nuke') {
+          territories[tid].insig = radioImage;
+        }
+      }
       // Other properties -> Standard property
-      } else {
+       else {
         territories[tid][field] = changes[field];
       }
     }
@@ -250,7 +255,10 @@ socket.on('change_click_event', function(data){
     currEvent = build_cities;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
-  } else {
+  } else if (data.event == 'launch_orbital_strike'){
+    currEvent = launch_orbital_strike;
+  }
+  else {
     currEvent = null;
   }
 });
@@ -654,6 +662,13 @@ socket.on("battle_propagation", function(data){
       var randomIndex = Math.floor(Math.random() * battleSFX.length);
       battleSFX[randomIndex].play();
     }
+});
+
+// nuke soundFX
+socket.on('nuclear_explosion', function(){
+  nukeFX = document.getElementById('nuclearExplosion');
+  nukeFX.volume = 0.5;
+  nukeFX.play();
 });
 
 // casualty display
@@ -1427,46 +1442,10 @@ async function get_reserves_amt(){
 // RESERVE DEPLOYMENT
 btn_reserves = document.getElementById("btn-reserve");
 btn_reserves.onclick = function () {
-  document.getElementById('middle_display').style.display = 'flex';
-  document.getElementById('middle_title').innerHTML = "";
-  get_reserves_amt().then(ramt => {
-    document.getElementById('middle_title').innerHTML = `
-    <div style="padding: 2px;">
-      <h5 style="padding-left:1px;">TROOPS AVAILABLE: ${ramt}</h5>
-    </div>`;
 
-    midDis = document.getElementById('middle_content')
-    midDis.innerHTML = `
-    <div>
-      <button class="btn" id="btn_DR" style="background-color: #BB6B6B; color:#FFFFFF;">
-        DEPLOY RESERVES
-      </button>
-    </div>
+  hide_async_btns();
+  socket.emit('send_async_event', {'name': "R_D"});
 
-    <div class="flex items-center justify-center mt-2">
-        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
-            X
-        </button>
-    </div>
-    `;
-
-    // close window
-    $('#btn-action-cancel').off('click').on('click', function(){
-      $('#control_panel').hide()
-      $('#middle_display').hide()
-      $('#middle_title, #middle_content').empty()
-    });
-
-
-    // CHOSE AMOUNT TO DEPLOY
-    $('#btn_DR').off('click').on('click', function(){
-      hide_async_btns();
-      socket.emit('send_async_event', {'name': "R_D"});
-      $('#middle_display').hide()
-      $('#middle_title, #middle_content').empty();
-    });
-
-  });
 }
 
 // Industrial Revolution -> Free city building
@@ -1488,6 +1467,36 @@ function build_free_cities(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('build_free_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+socket.on('launch_orbital_strike', function(data){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h3>SELECT ENEMY TERRITORIES TO DESTROY!</h3>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.targets;
+});
+
+function launch_orbital_strike(tid){
+  if(!player_territories.includes(tid)){
+    if (!toHightlight.includes(tid) && clickables.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length != 0){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('strike_targets', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){

@@ -130,7 +130,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        ms.selection_time_out(20, len(gs.players))
+        ms.selection_time_out(30, len(gs.players))
 
         # handle not choosing
         for player in gs.players.values():

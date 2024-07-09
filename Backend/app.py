@@ -306,6 +306,9 @@ def settle_new_cities(data):
         if gsm.map.territories[trty].isCity:
             socketio.emit('update_settle_status', {'msg':'EXISTING CITY AMONG CHOSEN TERRITORIES!'}, room=pid)
             return
+        if gsm.map.territories[trty].isDeadZone:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON RADIOACTIVE ZONE!'}, room=pid)
+            return
     # CM
     for trty in choices:
         gsm.map.territories[trty].isCity = True
@@ -333,6 +336,7 @@ def update_troop_info(data):
     t.troops += amount
     gsm.players[pid].total_troops += amount
     gsm.players[pid].deployable_amt -= amount
+    print(f"Player has {gsm.players[pid].deployable_amt } deployable amount")
     # CM
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
@@ -523,6 +527,12 @@ def handle_skill_usage():
 
 @socketio.on('build_free_cities')
 def build_free_cities(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.validate_and_apply_changes(data)
+
+@socketio.on("strike_targets")
+def strike_targets(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.validate_and_apply_changes(data)

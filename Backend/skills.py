@@ -15,12 +15,15 @@ class Skill:
         self.extMod = False
         self.reactMod = False
 
+        self.turn_stats_mod = False
         self.hasUsageLimit = False
         self.hasCooldown = False
         self.singleTurnActive = False
         self.hasRoundEffect = False
 
         self.give_troop_bonus = False
+
+        self.hasTurnEffect = False
 
 
     def update_current_status(self, ):
@@ -84,8 +87,9 @@ class Dictator(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Dictator", player, gs)
+        self.hasTurnEffect = True
 
-    def get_additional_stars(self,):
+    def apply_turn_effect(self,):
         if self.active:
             self.gs.players[self.player].stars += 2
 
@@ -106,7 +110,7 @@ class Mass_Mobilization(Skill):
 
         self.limit = 0
         nump = len(gs.players)
-        if nump <= 6:
+        if nump < 6:
             self.limit = 2
         elif nump <= 9:
             self.limit = 3
@@ -186,13 +190,23 @@ class Industrial_Revolution(Skill):
         self.finish_building = True
         self.freeCityTracker = {}
 
+        self.hasTurnEffect = True
+
         for cont in self.gs.map.conts:
             self.freeCityTracker[cont] = 0
 
     def internalStatsMod(self, battle_stats):
-        if self.gs.GES.stats_set and self.gs.pids[self.gs.GES.current_player] == self.player:
-            return
+        if self.gs.pids[self.gs.GES.current_player] == self.player: # player is attacker
+            if self.turn_stats_mod:   # player stats modded
+                return
+            else:
+                battle_stats[0] += 1
+                self.turn_stats_mod = True
+                return
         battle_stats[0] += 1
+    
+    def apply_turn_effect(self,):
+        self.turn_stats_mod = False
 
     def update_current_status(self):
 
@@ -233,6 +247,9 @@ class Industrial_Revolution(Skill):
         for choice in choices:
             if self.gs.map.territories[choice].isCity:
                 self.gs.server.emit("display_new_notification", {"msg": f"Selected a territory that already has a city!"}, room=self.player)
+                return
+            if self.gs.map.territories[choice].isDeadZone:
+                self.gs.server.emit("display_new_notification", {"msg": f"Cannot build on radioactive zone!"}, room=self.player)
                 return
             for cont in self.gs.map.conts:
                 if choice in self.gs.map.conts[cont]['trtys']:
@@ -294,6 +311,8 @@ class Robinhood(Skill):
 
             amt -= l_amt
             return amt
+        else:
+            return amt
         
     def leech_off_stars(self, amt):
         if self.active:
@@ -307,6 +326,7 @@ class Robinhood(Skill):
 
             amt -= l_amt
             return amt
+        return amt
         
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -315,7 +335,6 @@ class Robinhood(Skill):
             'operational': self.active
         }, room=self.player)
 
-# ? make it so that the weaker you are the stronger the bonus stats?
 class Ares_Blessing(Skill):
 
     def __init__(self, player, gs):
@@ -323,6 +342,7 @@ class Ares_Blessing(Skill):
         self.hasUsageLimit = True
         self.hasCooldown = True
         self.hasRoundEffect = True
+        self.hasTurnEffect = True
 
         nump = len(gs.players)
         self.limit = math.ceil(nump/2)
@@ -341,9 +361,11 @@ class Ares_Blessing(Skill):
             battle_stats[4] += 1
             self.changed_stats = True
 
-    def apply_round_effect(self,):
+    def apply_turn_effect(self, ):
         self.activated = False
         self.changed_stats = True
+
+    def apply_round_effect(self,):
         if self.cooldown:
             self.cooldown -= 1
 
@@ -385,10 +407,19 @@ class Zealous_Expansion(Skill):
         self.intMod = True
         
         self.give_troop_bonus = True
+        self.hasTurnEffect = True
+
+    def apply_turn_effect(self,):
+        self.turn_stats_mod = False
 
     def internalStatsMod(self, battle_stats):
-        if self.gs.GES.stats_set and self.gs.pids[self.gs.GES.current_player] == self.player:
-            return
+        if self.gs.pids[self.gs.GES.current_player] == self.player: # player is attacker
+            if self.turn_stats_mod:   # player stats modded
+                return
+            else:
+                battle_stats[1] += 1
+                self.turn_stats_mod = True
+                return
         battle_stats[1] += 1
 
     def update_current_status(self):
@@ -410,7 +441,159 @@ class Zealous_Expansion(Skill):
         self.gs.players[self.player].stars -= 2
         self.gs.players[self.player].infrastructure_upgrade += 1
         self.gs.update_private_status(self.player)
-        self.update_HIP(self.player)
+        self.gs.update_HIP(self.player)
         self.gs.get_SUP()
         self.gs.update_global_status()
+
+class Frameshifter(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Frameshifter", player, gs)
     
+    def update_current_status(self):
+
+        limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].min_roll < (self.gs.get_player_industrial_level(self.gs.players[self.player])+6) else 0
+
+        self.gs.server.emit("update_skill_status", {
+            'name': "Frameshifter",
+            'description': "Able to raise the minimum dice roll. Cost 3 special authority to raise the minimum dice roll by 1",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': limit,
+            'btn_msg': "Increase minimum dice roll"
+        }, room=self.player) 
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        
+        self.gs.players[self.player].stars -= 3
+        self.gs.players[self.player].min_roll += 1
+        self.gs.update_private_status(self.player)
+
+class Necromancer(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Necromancer", player, gs)
+        
+        self.hasCooldown = True
+        self.hasRoundEffect = True
+        self.hasTurnEffect = True
+
+        self.activated = False
+        self.cooldown = 0
+
+    def update_current_status(self):
+
+        self.gs.server.emit("update_skill_status", {
+            'name': "Necromancer",
+            'description': "When opponents attack you and fail, their losses become your reserves. Can activate Blood Harvest, where losses from the enemies during your conquest become your reserves.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': "infinite amount of",
+            'btn_msg': "FETCH ME THEIR SOULS!",
+            'cooldown': self.cooldown,
+            'inUseMsg': "BLOOD HARVEST ACTIVE"
+        }, room=self.player) 
+    
+    def apply_round_effect(self,):
+        if self.cooldown:
+            self.cooldown -= 1
+    
+    def apply_turn_effect(self,):
+        self.activated = False
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if self.cooldown:
+            self.gs.server.emit('display_new_notification', {'msg': "Still in cooldown!"}, room=self.player)
+            return
+        
+        self.activated = True
+        self.cooldown = 2
+
+class Divine_Punishment(Skill):
+        
+    def __init__(self, player, gs):
+        super().__init__("Divine_Punishment", player, gs)
+        self.hasUsageLimit = True
+
+        self.limit = len(gs.players) + 2
+        self.finished_bombardment = True
+
+    def update_current_status(self):
+        self.gs.server.emit("update_skill_status", {
+            'name': "Divine Punishment",
+            'description': "Operating an orbital strike station, you can launch bombardment and turn any enemy territory on the map into dead zone.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "LAUNCH ATTACK",
+        }, room=self.player)
+    
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        self.gs.GES.handle_async_event({'name': 'D_P'}, self.player)
+
+    def validate_and_apply_changes(self, data):
+        
+        choices = data['choice']
+
+        # Interruption
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+            return
+
+        # too many targets
+        if len(choices) > self.limit:
+            self.gs.server.emit("display_new_notification", {"msg": f"Number of targets exceeding your usage limit!"}, room=self.player)
+            return
+
+        # not striking yourself
+        for target in choices:
+            if target in self.gs.players[self.player].territories:
+                    self.gs.server.emit("display_new_notification", {"msg": f"Cannot strike your own territories!"}, room=self.player)
+                    return
+
+        # apply changes
+        for choice in choices:
+
+            self.gs.map.territories[choice].isCity = False
+            self.gs.map.territories[choice].isDeadZone = True
+
+            casualties = self.gs.map.territories[choice].troops
+            self.gs.map.territories[choice].troops = 0
+
+            # update total troop
+            for player in self.gs.players:
+                if choice in self.gs.players[player].territories:
+                    self.gs.players[player].total_troops -= casualties
+
+                    # visual effect
+                    self.gs.server.emit('battle_casualties', {
+                        f'{choice}': {'tid': choice, 'number': casualties},
+                    }, room=self.gs.lobby)
+                    break
+
+            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': 0, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+        
+        self.gs.update_player_stats()
+        
+        self.gs.update_LAO(self.player)
+        self.gs.update_TIP(self.player)
+
+        self.gs.get_SUP()
+        self.gs.update_global_status()
+
+        self.gs.signal_MTrackers('indus')
+        self.gs.signal_MTrackers('popu')
+
+        # soundFX
+        self.gs.server.emit('nuclear_explosion', room=self.gs.lobby)
+
+        # terminate strike
+        self.finished_bombardment = True
+        self.limit -= len(choices)

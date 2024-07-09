@@ -66,17 +66,21 @@ class turn_loop_scheduler:
             if player != curr_p:
                 gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
-        if gs.players[curr_p].deployable_amt == 0:
+        print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
+        if gs.players[curr_p].deployable_amt == 0: #???
             # Robinhood activated    
             d_amt = gs.get_deployable_amt(curr_p)
             for p in gs.players:
                 if gs.players[p].skill.name == 'Robinhood':
                     if curr_p in gs.players[p].skill.targets and curr_p != p:
                         d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
+            # Zealous Expansion Reserve Booster
             if gs.players[curr_p].skill:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
-                    d_amt += gs.players[curr_p].infrastructure_upgrade        
+                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade
+                    gs.update_private_status(curr_p)
             gs.players[curr_p].deployable_amt = d_amt
+            print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
 
@@ -161,17 +165,22 @@ class turn_loop_scheduler:
                     s3 += 0.025
 
                 s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+
                 # Robinhood!
                 for pid in gs.players:
                     if gs.players[pid].skill.name == "Robinhood":
                         if player in gs.players[pid].skill.targets and player != pid:
                             s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
+
                 p.stars += s_amt
 
             # Dictator receives more stars
+            # Ares clear stats boost
+            # Zealous and Industrial clear restrictions
             if p.skill:
-                if p.skill.name == "Dictator":
-                    p.skill.get_additional_stars()
+                if p.skill.hasTurnEffect:
+                    p.skill.apply_turn_effect()
+
             # Update private overview
             gs.update_private_status(player)
             print(f'{gs.players[player].name} special authority amount: {p.stars}')
@@ -236,5 +245,14 @@ class turn_loop_scheduler:
                 for p in gs.players:
                     if gs.players[p].skill.hasRoundEffect:
                         gs.players[p].skill.apply_round_effect()
+                # nuclear deadzone kill troops
+                for index, t in enumerate(gs.map.territories):
+                    if t.isDeadZone:
+                        losses = math.ceil(t.troops/2.5)
+                        t.troops -= losses
+                        gs.server.emit('update_trty_display', {index: {'troops': t.troops}}, room=gs.lobby)
+                        gs.server.emit('battle_casualties', {
+                            f'{index}': {'tid': index, 'number': losses},
+                        }, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

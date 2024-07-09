@@ -27,6 +27,7 @@ class Player:
         self.industrial = 6
         self.infrastructure = 3
         self.infrastructure_upgrade = 0
+        self.min_roll = 1
         # hidden resources
         self.stars = 0
         self.reserves = 0
@@ -578,7 +579,7 @@ class Game_State_Manager:
         # get infrastructure level
         stats.append(self.get_player_infra_level(player)+3)
         # frameshift (min roll)
-        stats.append(1)
+        stats.append(player.min_roll)
         # Default Null rate
         stats.append(0)
         # Dmg multipler
@@ -684,6 +685,13 @@ class Game_State_Manager:
             atk_p.turn_victory = True
             atk_p.con_amt += 1
 
+            # Necromancer
+            if atk_p.skill:
+                if atk_p.skill.active:
+                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
+                        atk_p.reserves += def_amt-result[1]
+                        self.update_private_status(a_pid)
+
         # defender wins
         else:
             # Counter multiplier overkill
@@ -693,6 +701,13 @@ class Game_State_Manager:
                 result[0] = 0
             trty_def.troops = result[1]
             self.server.emit('update_trty_display', {t2:{'troops': trty_def.troops}}, room=self.lobby)
+
+            # Necromancer
+            if def_p.skill:
+                if def_p.skill.active:
+                    if def_p.skill.name == "Necromancer":
+                        def_p.reserves += atk_amt-result[0]
+                        self.update_private_status(d_pid)
 
         # Sound effect
         big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25

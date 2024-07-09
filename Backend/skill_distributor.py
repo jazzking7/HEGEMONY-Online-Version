@@ -12,11 +12,14 @@ class Skill_Distributor:
             "Industrial_Revolution",
             "Robinhood",
             "Ares' Blessing",
-            "Zealous_Expansion"
+            "Zealous_Expansion",
+            "Frameshifter",
+            "Necromancer",
+            "Divine_Punishment"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=5)
+        return random.sample(self.skill_options, k=9)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -38,3 +41,9 @@ class Skill_Distributor:
             return Ares_Blessing(player, gs)
         elif skill_name == "Zealous_Expansion":
             return Zealous_Expansion(player, gs)
+        elif skill_name == "Frameshifter":
+            return Frameshifter(player, gs)
+        elif skill_name == "Necromancer":
+            return Necromancer(player, gs)
+        elif skill_name == "Divine_Punishment":
+            return Divine_Punishment(player, gs)

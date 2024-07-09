@@ -53,6 +53,7 @@ function setup() {
   canvas.parent('canvasContainer');
   capitalImage = loadImage('/static/Assets/Capital/CAD3.PNG');
   cityImage = loadImage('/static/Assets/Dev/city.png');
+  radioImage = loadImage('/static/Assets/Insig/radio.png');
   insigImage = loadImage('/static/Assets/Insig/fort.png');
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors)
 }
