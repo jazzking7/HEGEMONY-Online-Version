@@ -708,6 +708,12 @@ class Game_State_Manager:
                     if def_p.skill.name == "Necromancer":
                         def_p.reserves += atk_amt-result[0]
                         self.update_private_status(d_pid)
+        
+            if atk_p.skill:
+                if atk_p.skill.active:
+                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
+                        atk_p.reserves += def_amt-result[1]
+                        self.update_private_status(a_pid)
 
         # Sound effect
         big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25
