@@ -519,7 +519,7 @@ class Divine_Punishment(Skill):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
 
-        self.limit = len(gs.players) + 2
+        self.limit = len(gs.players) + 1
         self.finished_bombardment = True
 
         self.hasRoundEffect = True
@@ -531,6 +531,8 @@ class Divine_Punishment(Skill):
             if self.energy == 3:
                 self.limit += 1
                 self.energy = 0
+                if self.limit > 20:
+                    self.limit = 20
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
