@@ -257,6 +257,8 @@ socket.on('change_click_event', function(data){
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
     currEvent = launch_orbital_strike;
+  } else if (data.event == 'paratrooper_attack'){
+    currEvent = paratrooper_attack;
   }
   else {
     currEvent = null;
@@ -1477,6 +1479,7 @@ function build_free_cities(tid){
   }
 }
 
+// Orbital strike for divine punishment
 socket.on('launch_orbital_strike', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h3>SELECT ENEMY TERRITORIES TO DESTROY!</h3>`;
@@ -1503,6 +1506,87 @@ function launch_orbital_strike(tid){
           $('#control_panel').hide();
           toHightlight = [];
         });
+    }
+  }
+}
+
+// Air superiority
+socket.on('paratrooper_attack', function(){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY TO LAUNCH SURPRISE ATTACK!</h4>`;
+  clickables = [];
+  toHightlight = [];
+});
+
+// Function to grab the reserve amt for the user
+async function get_reachable_airspace(tid){
+  let space = await new Promise((resolve) => {
+    socket.emit('get_reachable_airspace', {'origin': tid});
+    socket.once('receive_reachable_airspace', (data) => {resolve(data);});
+  });
+  return space.spaces;
+}
+
+function paratrooper_attack(tid){
+  if(player_territories.includes(tid)){
+    if (toHightlight.length){
+      toHightlight = [];
+      clickables = [];
+    }
+    toHightlight.push(tid);
+    get_reachable_airspace(tid).then(spaces => {
+      clickables = spaces
+    }).catch(error => {
+      console.error("Error getting reserve amount:", error); });
+  } else if (!player_territories.includes(tid)){
+    if (clickables.includes(tid)){
+      if (toHightlight.length != 2){
+        toHightlight.push(tid);
+      }
+      if (toHightlight.length == 2){
+        toHightlight[1] = tid;
+
+        document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_panel').style.display = 'flex';
+        $('#proceed_next_stage').hide();
+  
+        let troopValue = document.createElement("p");
+        let troopInput = document.createElement("input");
+  
+        // set shortcut id
+        troopInput.setAttribute("id", "adjust_attack_amt");
+        troopValue.setAttribute("id", "curr_attack_amt");
+  
+        curr_slider = "#adjust_attack_amt";
+        curr_slider_val = "#curr_attack_amt";
+  
+        troopInput.setAttribute("type", "range");
+        troopInput.setAttribute("min", 1);
+        troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+        troopInput.setAttribute("value", 1);
+        troopInput.setAttribute("step", 1);
+        troopInput.style.display = "inline-block";
+        troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
+        troopValue.textContent = 1;
+        let c_m = document.getElementById('control_mechanism');
+        c_m.innerHTML = "";
+        c_m.appendChild(troopInput);
+        c_m.appendChild(troopValue);
+  
+        $('#control_confirm').off('click').on('click' , function(){
+          document.getElementById('control_panel').style.display = 'none';
+          socket.emit('send_battle_stats_AS', {'choice': toHightlight, 'amount': troopInput.value});
+          toHightlight = [];
+          clickables = [];
+          $('#proceed_next_stage').show();
+        });
+        $('#control_cancel').off('click').on('click' , function(){
+          document.getElementById('control_panel').style.display = 'none';
+          toHightlight = [];
+          clickables = [];
+          $('#proceed_next_stage').show();
+        });
+     }
     }
   }
 }

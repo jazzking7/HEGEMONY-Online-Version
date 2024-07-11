@@ -537,6 +537,18 @@ def strike_targets(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.validate_and_apply_changes(data)
 
+@socketio.on("send_battle_stats_AS")
+def perform_paratrooper_attack(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.validate_and_apply_changes(data)
+
+@socketio.on('get_reachable_airspace')
+def get_reachable_airspace(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    socketio.emit('receive_reachable_airspace', {'spaces': gsm.map.get_reachable_airspace(data['origin'])})
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

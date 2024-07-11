@@ -75,10 +75,14 @@ class turn_loop_scheduler:
                     if curr_p in gs.players[p].skill.targets and curr_p != p:
                         d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
             # Zealous Expansion Reserve Booster
+            # Air superiority
             if gs.players[curr_p].skill:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
                     gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade
                     gs.update_private_status(curr_p)
+                if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
+                    gs.players[curr_p].skill.long_arm_jurisdiction()
+                    
             gs.players[curr_p].deployable_amt = d_amt
             print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
@@ -250,9 +254,14 @@ class turn_loop_scheduler:
                     if t.isDeadZone:
                         losses = math.ceil(t.troops/2.5)
                         t.troops -= losses
+                        for ps in gs.players:
+                            if index in gs.players[ps].territories:
+                                gs.players[ps].total_troops -= losses
+                                break
                         gs.server.emit('update_trty_display', {index: {'troops': t.troops}}, room=gs.lobby)
                         gs.server.emit('battle_casualties', {
                             f'{index}': {'tid': index, 'number': losses},
                         }, room=gs.lobby)
+                gs.update_player_stats()
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

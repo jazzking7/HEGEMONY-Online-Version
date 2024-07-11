@@ -162,17 +162,17 @@ class Mass_Mobilization(Skill):
 
         # increase reserves
         if diff < -10:
-            self.gs.players[self.player].reserves += math.ceil(0.23*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.3*total_troops)
         elif diff < -5:
-            self.gs.players[self.player].reserves += math.ceil(0.2*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.25*total_troops)
         elif diff < 0:
-            self.gs.players[self.player].reserves += math.ceil(0.17*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.22*total_troops)
         elif diff < 5:
-            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.17*total_troops)
         elif diff < 10:
-            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops)
         else:
-            self.gs.players[self.player].reserves += math.ceil(0.1*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops)
 
         # update private view
         self.gs.update_private_status(self.player)
@@ -522,6 +522,16 @@ class Divine_Punishment(Skill):
         self.limit = len(gs.players) + 2
         self.finished_bombardment = True
 
+        self.hasRoundEffect = True
+        self.energy = 0
+
+    def apply_round_effect(self,):
+        if self.active:
+            self.energy += 1
+            if self.energy == 3:
+                self.limit += 1
+                self.energy = 0
+
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Divine Punishment",
@@ -597,3 +607,83 @@ class Divine_Punishment(Skill):
         # terminate strike
         self.finished_bombardment = True
         self.limit -= len(choices)
+
+class Air_Superiority(Skill):
+
+    def __init__(self, player, gs):
+        super().__init__("Air_Superiority", player, gs)
+
+        self.hasUsageLimit = True
+
+        self.limit = 3
+
+        self.hasTurnEffect = True
+        self.energy = 0
+
+    def apply_turn_effect(self,):
+        self.limit = 3
+
+    def calculate_bonuses(self, x):
+        # Constants for the polynomial function
+        a = 0.1
+        b = 0.6
+        c = 0.5
+
+        # Calculate the bonus using the quadratic function and round up
+        bonus = math.ceil(a * x ** 2 + b * x + c)
+        return bonus
+
+    def long_arm_jurisdiction(self,):
+        if self.active:
+            distincts = []
+            for t in self.gs.players[self.player].territories:
+                for cont in self.gs.map.conts:
+                    if t in self.gs.map.conts[cont]['trtys']:
+                        if cont not in distincts:
+                            distincts.append(cont)
+
+            bonus = len(distincts)
+            self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            self.gs.update_private_status(self.player)
+    
+    def update_current_status(self):
+        self.gs.server.emit("update_skill_status", {
+            'name': "Air Superiority",
+            'description': "Able to jump over territory to attack, 3 times per turn, not skipping over more than 3 territories per jump. Long-Arm Jurisdiction give you extra reserves based on how many distinct continents your troops are stationed on.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "LAUNCH PARATROOPER ATTACK",
+        }, room=self.player)
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        if self.gs.pids[self.gs.GES.current_player] != self.player or self.gs.GES.current_event.name != 'conquer':
+            self.gs.server.emit("display_new_notification", {"msg": "Not the right timing to attack!"}, room=self.player)
+            return
+        self.gs.GES.handle_async_event({'name': 'A_S'}, self.player)
+
+    def validate_and_apply_changes(self, data):
+        
+        t1, t2 = data['choice']
+
+        # Interruption
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+            return
+
+        if not self.limit:
+            self.gs.server.emit("display_new_notification", {"msg": f"No more paratrooper attacks for this round!"}, room=self.player)
+            return
+        
+        if t2 not in self.gs.map.get_reachable_airspace(t1):
+            self.gs.server.emit("display_new_notification", {"msg": f"Invalid attack option!"}, room=self.player)
+            return
+        
+        # if this is a air strike or not
+        if t2 not in self.gs.map.territories[t1].neighbors:
+            self.limit -= 1
+
+        self.gs.handle_battle(data)

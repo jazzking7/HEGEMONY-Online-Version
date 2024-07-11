@@ -15,7 +15,8 @@ class Skill_Distributor:
             "Zealous_Expansion",
             "Frameshifter",
             "Necromancer",
-            "Divine_Punishment"
+            "Divine_Punishment",
+            "Air_Superiority"
         ]
 
     def get_options(self, ):
@@ -47,3 +48,5 @@ class Skill_Distributor:
             return Necromancer(player, gs)
         elif skill_name == "Divine_Punishment":
             return Divine_Punishment(player, gs)
+        elif skill_name == "Air_Superiority":
+            return Air_Superiority(player, gs)

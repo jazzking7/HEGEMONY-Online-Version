@@ -117,6 +117,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.build_free_cities, args=(pid,))
         elif n == 'D_P':
             self.curr_thread = threading.Thread(target=self.launch_orbital_strike, args=(pid,))
+        elif n == 'A_S':
+            self.curr_thread = threading.Thread(target=self.paratrooper_attack, args=(pid,))
         
         self.curr_thread.start()
         self.curr_thread.join()
@@ -209,6 +211,18 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finished_bombardment
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def paratrooper_attack(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('paratrooper_attack', room=pid)
+        self.gs.server.emit('change_click_event', {'event': "paratrooper_attack"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.limit == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
