@@ -738,6 +738,14 @@ function troop_deployment(tid){
     let troopValue = document.createElement("p");
     troopValue.textContent = 1;
     let troopInput = document.createElement("input");
+
+    // set shortcut id
+    troopInput.setAttribute("id", "adjust_attack_amt");
+    troopValue.setAttribute("id", "curr_attack_amt");
+
+    curr_slider = "#adjust_attack_amt";
+    curr_slider_val = "#curr_attack_amt";
+
     troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
     troopInput.setAttribute("max", deployable);
@@ -891,6 +899,15 @@ function rearrange(tid){
       let troopValue = document.createElement("p");
       troopValue.textContent = 1;
       let troopInput = document.createElement("input");
+
+      // set shortcut id
+      troopInput.setAttribute("id", "adjust_attack_amt");
+      troopValue.setAttribute("id", "curr_attack_amt");
+
+      curr_slider = "#adjust_attack_amt";
+      curr_slider_val = "#curr_attack_amt";
+
+
       troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
       troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
@@ -983,6 +1000,14 @@ function deploy_reserves(tid){
     let troopValue = document.createElement("p");
     troopValue.textContent = 1;
     let troopInput = document.createElement("input");
+
+    // set shortcut id
+    troopInput.setAttribute("id", "adjust_attack_amt");
+    troopValue.setAttribute("id", "curr_attack_amt");
+
+    curr_slider = "#adjust_attack_amt";
+    curr_slider_val = "#curr_attack_amt";
+
     troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
     troopInput.setAttribute("max", reserves);
@@ -1677,7 +1702,7 @@ function keyPressed(){
   }
 
   // shortcut for fast max deployment
-  if (key === 'f'){
+  if (key === 'a'){
     if (curr_slider && curr_slider_val) {
 
       let $slider = $(curr_slider);
@@ -1690,4 +1715,45 @@ function keyPressed(){
       curr_slider_val = '';
     }
   }
+
+  if (key === 's') {
+    if (curr_slider && curr_slider_val) {
+  
+      let $slider = $(curr_slider);
+      let $sliderValue = $(curr_slider_val);
+      let maxVal = parseInt($slider.attr('max'), 10);
+      let halfMax = Math.round(maxVal / 2);
+
+      if (halfMax < 1) {
+        halfMax = 1;
+      }
+  
+      $slider.val(halfMax);
+      $sliderValue.text(halfMax);
+  
+      curr_slider = '';
+      curr_slider_val = '';
+    }
+  }
+
+  if (key === 'd') {
+    if (curr_slider && curr_slider_val) {
+  
+      let $slider = $(curr_slider);
+      let $sliderValue = $(curr_slider_val);
+      let maxVal = parseInt($slider.attr('max'), 10);
+      let thirdMax = Math.round(maxVal / 3);
+
+      if (thirdMax < 1) {
+        thirdMax = 1;
+      }
+  
+      $slider.val(thirdMax);
+      $sliderValue.text(thirdMax);
+  
+      curr_slider = '';
+      curr_slider_val = '';
+    }
+  }
+
 }
