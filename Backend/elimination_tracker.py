@@ -21,7 +21,7 @@ class Elimination_tracker:
             gs.update_private_status(d_pid)
             print(f"{victim.name} has been eliminated by {attacker.name}")
             # victim is one of original players
-            if d_pid in gs.oriPlayers:
+            if d_pid in gs.oriPlayers and d_pid not in gs.perm_elims:
                 gs.perm_elims.append(d_pid)
             # update kill logs if player not dead by mission failure
             if d_pid not in gs.death_logs:

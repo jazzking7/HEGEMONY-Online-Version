@@ -200,6 +200,11 @@ socket.on('update_player_territories', function(data){
   player_territories = data.list;
 });
 
+// update target display
+socket.on('mod_targets_to_capture', function(data){
+  targetsToCapture = data.targets;
+});
+
 // UPDATE TERRITORIAL DISPLAY
 // FORMAT: 
 // { 

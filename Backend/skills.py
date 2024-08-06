@@ -40,17 +40,24 @@ class Realm_of_Permafrost(Skill):
 
         battle_stats[0] = 6
         battle_stats[1] = 3
+        battle_stats[2] = 1
+        battle_stats[3] = 0
+        battle_stats[4] = 1
 
 
     def externalStatsMod(self, battle_stats):
 
         battle_stats[0] = 6
         battle_stats[1] = 3
+        battle_stats[2] = 1
+        battle_stats[3] = 0
+        battle_stats[4] = 1
+
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Realm of Permafrost",
-            'description': "In any battle you engage in, the industrial and infrastructure levels of both you and your enemies are ignored.",
+            'description': "In any battle you engage in, all stats of both you and your enemies are set to default.",
             'operational': self.active
         }, room=self.player)
 

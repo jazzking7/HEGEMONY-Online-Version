@@ -80,11 +80,15 @@ class Map:
         self.tneighbors = []
         self.conts = {}
         self.territories = []
+        self.landlocked = []
         self.mappath = f'MAPS/{mapName}'
         
         # Get the number of continents
         file = open(self.mappath+'/properties.txt', 'r')
-        numContent = int(file.read().split('\n')[0])
+        lines = file.read().split('\n')
+        numContent = int(lines[0])
+        hasLandlock = lines[1]
+        print(hasLandlock)
         file.close()
 
         # Get the territory names and neighbor list continent by continent
@@ -124,6 +128,13 @@ class Map:
             cur = self.conts[c]['trtys']
             for i in range(len(cur)):
                 cur[i] = t_convert[cur[i]]
+        
+        # landlock territory names
+        if hasLandlock != 'no':
+            file = open(self.mappath+f'/landlocked.txt', 'r')
+            tnames = [name for name in file.read().split('\n') if name != '']
+            self.landlocked += tnames
+            file.close()
 
         # Create territory object for each name + list of neighbors
         for tname, tneighbors in zip(self.tnames, self.tneighbors):

@@ -82,7 +82,16 @@ class turn_loop_scheduler:
                     gs.update_private_status(curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()
-                    
+
+            # Fanatic receive troop booster
+            for miss in gs.Mset:
+                if miss.player == curr_p:
+                    if miss.name == 'Fanatic':
+                        for t in miss.targets:
+                            if t in gs.players[curr_p].territories:
+                                gs.players[curr_p].reserves += 1
+                        gs.update_private_status(curr_p)
+                        break
             gs.players[curr_p].deployable_amt = d_amt
             print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)

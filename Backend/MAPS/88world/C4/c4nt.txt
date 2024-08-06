@@ -1,0 +1,9 @@
+Vichada,Parana,Mendoza,Formosa,Gastark
+Formosa,Bolivar,Normandie
+Altiplano,Vichada,Asuncion,Mendoza,Formosa,Tromso
+Patagonia,Bolivar,Parana,Rondonia,Asuncion,Mendoza
+Vichada,Patagonia,Rondonia,Emmett
+Oran,Vichada,Parana,Asuncion
+Vichada,Rondonia,Bolivar
+Patagonia,Formosa,Bolivar,Vichada
+Patagonia,Bolivar,Altiplano,Mendoza,Mujik

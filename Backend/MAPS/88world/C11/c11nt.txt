@@ -1,0 +1,8 @@
+Avalon,Runan,Edogawa
+Valka,Narumi
+Ibuki,Jiangnan,Narumi,Shinagawa
+Haikou,Sakanoshita,Hamamatsu
+Edogawa,Narumi,Sakanoshita
+Fukuoka,Hamamatsu,Narumi,Shinagawa,Zhujiangkou
+Fukuoka,Sakanoshita,Narumi
+Aragane,Hamamatsu,Sakanoshita,Shinagawa,Edogawa

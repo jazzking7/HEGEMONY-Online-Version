@@ -206,7 +206,7 @@ def startGame(data):
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
-    lobby['map_name'] = '8CMAP'
+    lobby['map_name'] = '88world' # MAP NAME
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
@@ -236,7 +236,8 @@ def get_game_settings():
     socketio.emit('game_settings',
      {'map': lobby['map_name'], 
     'tnames': lobby_map.tnames, 
-    'tneighbors': lobby_map.tneighbors}, room=sid)
+    'tneighbors': lobby_map.tneighbors,
+    'landlocked': lobby_map.landlocked}, room=sid)
 
 @socketio.on('send_color_choice')
 def update_color_choice(data):

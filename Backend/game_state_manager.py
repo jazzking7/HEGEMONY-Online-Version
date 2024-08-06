@@ -153,9 +153,20 @@ class Game_State_Manager:
         p_object = self.players[old_pid]
         self.players[new_pid] = p_object
         self.players[new_pid].name = new_name
+        if self.players[new_pid].skill:
+            self.players[new_pid].skill.player = new_pid
         del self.players[old_pid]
 
-        # Update mission trackers !!!
+        # Update death logs and perm_elims
+        if old_pid in self.perm_elims:
+            self.perm_elims.remove(old_pid)
+            self.perm_elims.append(new_pid)
+        if old_pid in self.death_logs:
+            val = self.death_logs[old_pid]
+            self.death_logs[new_pid] = val
+            del self.death_logs[old_pid]
+
+        # Update mission trackers !!! Condition check for missions need update
         for mission in self.Mset:
             # change player of old_pid to new_pid
             if mission.player == old_pid:
@@ -166,6 +177,12 @@ class Game_State_Manager:
                     mission.target_player = new_pid
                     mission.update_tracker_view({
                     'targets': {mission.gs.players[mission.target_player].name: 's'},
+                    })
+            if mission.name == 'Dualist':
+                if mission.target_player == old_pid:
+                    mission.target_player = new_pid
+                    mission.update_tracker_view({
+                    'targets': {mission.gs.players[mission.target_player].name: 'f'},
                     })
             # update target for bounty hunter
             if mission.name == 'Bounty_Hunter':
@@ -180,15 +197,6 @@ class Game_State_Manager:
                     mission.target_players.append(new_pid)
                     mission.check_conditions()
         
-        # Update death logs and per_elims
-        if old_pid in self.perm_elims:
-            self.perm_elims.remove(old_pid)
-            self.perm_elims.append(new_pid)
-        if old_pid in self.death_logs:
-            val = self.death_logs[old_pid]
-            self.death_logs[new_pid] = val
-            del self.death_logs[old_pid]
-
         return True
     
     def update_all_views(self, pid):

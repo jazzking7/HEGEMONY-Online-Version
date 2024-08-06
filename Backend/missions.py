@@ -48,7 +48,7 @@ class Pacifist(Mission):
             return
         dc = len(self.gs.perm_elims)
         if dc > self.death_count:
-            self.round = -1
+            self.round = 0
             self.death_count = dc
             self.update_tracker_view({
                 'misProgBar': [0, self.goal_round],
@@ -110,7 +110,7 @@ class Warmonger(Mission):
                 dc += 1
 
         if dc > self.death_count:
-            self.peace = -1
+            self.peace = 0
             self.death_count = dc
             # Signal update
             self.update_tracker_view({
@@ -275,9 +275,9 @@ class Unifier(Mission):
         if l <= 5:
             self.target_round = 5
         elif l <= 10:
-            self.target_round = 3
+            self.target_round = 4
         else:
-            self.target_round = 2
+            self.target_round = 3
         self.round = 0
         self.type = 'r_based'
     
@@ -288,7 +288,7 @@ class Unifier(Mission):
         if not self.gs.players[self.player].alive:
             return
         if not self.own_target_cont():
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({
             'targets': {self.target_continent: 'f'},
             'misProgBar': [0, self.target_round],
@@ -327,7 +327,7 @@ class Polarizer(Mission):
         super().__init__("Polarizer", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 2
+        self.target_round = 3
 
     def no_unification(self,):
         for cont in self.gs.map.conts:
@@ -340,7 +340,7 @@ class Polarizer(Mission):
         if not self.gs.players[self.player].alive:
             return
         if not self.no_unification():
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({'misProgBar': [0, self.target_round],
             'misProgDesp': f'{0}/{self.target_round} consecutive rounds without continental unification'})
     
@@ -370,9 +370,34 @@ class Fanatic(Mission):
         super().__init__("Fanatic", player, gs)
         self.type = 'r_based'
         self.round = 0
-        m = len(gs.map.territories)
-        self.targets = random.sample([i for i in range(m)], 5)
-        self.target_round = 4
+        self.target_round = 5
+        self.targets = []
+
+    def set_targets(self, ):
+        m = len(self.gs.map.territories)
+        if len(self.targets) == 0:
+            self.targets = random.sample([i for i in range(m)], 5)
+        else:
+            while len(self.targets) < 5:
+                target = random.randint(0, m-1)
+                if target not in self.targets:
+                    self.targets.append(target)
+        for miss in self.gs.Mset:
+            if miss.name == "Fanatic":
+                if len(miss.targets) < 5:
+                    for t in self.targets:
+                        if t not in miss.targets:
+                            miss.targets.append(t)
+                            break
+                else:
+                    for t in self.targets:
+                        if t not in miss.targets:
+                            miss.targets[random.randint(0, 4)] = t
+                            break
+                    for t in miss.targets:
+                        if t not in self.targets:
+                            self.targets[random.randint(0, 4)] = t
+                            break
     
     def own_all_targets(self, ):
         p_list = self.gs.players[self.player].territories
@@ -390,7 +415,7 @@ class Fanatic(Mission):
             return
         # verify if player owns the targets
         if not self.own_all_targets():
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({'misProgBar': [0, self.target_round],
             'misProgDesp': f'Controlled target territories for {0}/{self.target_round} consecutive rounds',})
     
@@ -407,6 +432,8 @@ class Fanatic(Mission):
                 
     def set_up_tracker_view(self, ):
         targets = {}
+        print(self.targets)
+        self.gs.server.emit('mod_targets_to_capture', {'targets': self.targets}, room=self.player)
         for t in self.targets:
             targets[self.gs.map.territories[t].name] = 'f'
         self.gs.server.emit('initiate_tracker', {
@@ -424,13 +451,13 @@ class Industrialist(Mission):
         super().__init__("Industrialist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 3
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
         if self.gs.TIP != self.player:
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({
             'misProgBar': [0, self.target_round],
             'misProgDesp': f'Being the most industrialized player for {0}/{self.target_round} consecutive rounds',
@@ -464,13 +491,13 @@ class Expansionist(Mission):
         super().__init__("Expansionist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 3
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
         if self.gs.MTO != self.player:
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({
             'misProgBar': [0, self.target_round],
             'misProgDesp': f'Controlled the most territories for {0}/{self.target_round} consecutive rounds',
@@ -504,14 +531,14 @@ class Populist(Mission):
         super().__init__("Populist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 4
+        self.target_round = 5
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
         # verify if player holds LAO title
         if self.gs.LAO != self.player:
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({'misProgBar': [0, self.target_round],
             'misProgDesp': f'Holding the largest army for {0}/{self.target_round} consecutive rounds',})
 
@@ -541,14 +568,14 @@ class Dominator(Mission):
         super().__init__("Dominator", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 2
+        self.target_round = 3
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
             return
         # verify if player holds SUP title
         if self.gs.SUP != self.player:
-            self.round = -1
+            self.round = 0
             self.update_tracker_view({'misProgBar': [0, self.target_round],
             'misProgDesp': f'Exercising supremacy for {0}/{self.target_round} consecutive rounds',})
 
@@ -610,6 +637,7 @@ class Decapitator(Mission):
         numt = 0
         nump = len(gs.pids)
         numt = nump//2
+        numt = numt if numt >= 2 else 2
         while self.target_players is None:
             self.target_players = random.sample(gs.pids, numt)
             if player in self.target_players:
@@ -673,11 +701,18 @@ class Starchaser(Mission):
         
         self.chase_completed = 0
         self.target_chases = 7
+        if m > 80:
+            self.target_chases += 5
+        elif m > 60:
+            self.target_chases += 3
+        elif m > 40:
+            self.target_chases += 1
 
         self.round = 0
         self.death_round = 5
 
     def set_up_tracker_view(self, ):
+        self.gs.server.emit('mod_targets_to_capture', {'targets': [self.curr_target]}, room=self.player)
         targets = {}
         targets[self.gs.map.territories[self.curr_target].name] = 'f'
         self.gs.server.emit('initiate_tracker', {
@@ -719,6 +754,7 @@ class Starchaser(Mission):
                     targets = {}
                     targets[self.gs.map.territories[t].name] = 'f'
                     self.update_tracker_view({'targets': targets, 'new_target': True})
+                    self.gs.server.emit('mod_targets_to_capture', {'targets': [self.curr_target]}, room=self.player)
                     valid = True
     
     def check_round_condition(self, ):
@@ -735,3 +771,90 @@ class Starchaser(Mission):
         if not self.gs.players[self.player].alive:
             return False
         return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
+
+class Dualist(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Dualist", player, gs)
+        self.target_player = None
+
+    def set_nemesis(self,):
+        if self.target_player is not None:
+            return
+        for miss in self.gs.Mset:
+            if miss.name == "Dualist":
+                if miss.player != self.player and miss.target_player is None:
+                    miss.target_player = self.player
+                    self.target_player = miss.player
+                    return
+
+    def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        # check if target player is dead
+        if self.target_player in self.gs.perm_elims:
+            if self.gs.death_logs[self.target_player] != self.player:
+                self.update_tracker_view({'misProgDesp': 'Failed to kill your nemesis'})
+                self.signal_mission_failure()
+            else:
+                self.update_tracker_view({'targets': {self.gs.players[self.target_player].name: 's'}})
+                self.update_tracker_view({'misProgDesp': 'Nemesis eliminated'})
+                self.signal_mission_success()
+
+    def set_up_tracker_view(self, ):
+        targets = {}
+        targets[self.gs.players[self.target_player].name] = 'f'
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'targets': targets,
+            'misProgDesp': 'Kill your nemesis!'
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.target_player in self.gs.perm_elims:
+            if self.gs.death_logs[self.target_player] != self.player:
+                return False
+            else:
+                return True
+        return False
+
+class Punisher(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Punisher", player, gs)
+        self.targets = ['Punisher', 'Dualist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist']
+
+    def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+
+        c = 0
+        for miss in self.gs.Mset:
+            if miss.name in self.targets:
+                if miss.player in self.gs.perm_elims:
+                    if self.gs.death_logs[miss.player] == self.player:
+                        self.update_tracker_view({'misProgDesp': 'Justice served!'})
+                        self.signal_mission_success()
+                        return
+                else:
+                    c += 1
+
+        if c == 0:
+            self.update_tracker_view({'misProgDesp': 'No more justice to be served!'})
+            self.signal_mission_failure()
+
+    def set_up_tracker_view(self, ):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': 'Bring judgement to the sinners!'
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        for miss in self.gs.Mset:
+            if miss.name in self.targets:
+                if miss.player in self.gs.perm_elims:
+                    if self.gs.death_logs[miss.player] == self.player:
+                        return True
+        return False

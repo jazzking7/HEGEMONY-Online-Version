@@ -44,6 +44,10 @@ class setup_event_scheduler:
         for m in gs.Mset:
             if m.name == "Loyalist":
                 m.set_partner()
+            elif m.name == "Fanatic":
+                m.set_targets()
+            elif m.name == 'Dualist':
+                m.set_nemesis()
 
         # Set up user view for mission
         for mission in gs.Mset:

@@ -34,6 +34,7 @@ let showContBorders = false;
 // Highlight
 let toHightlight = [];
 let clickables = [];
+let targetsToCapture = [];
 
 // Other player action
 let otherHighlight = [];
@@ -55,15 +56,15 @@ function setup() {
   cityImage = loadImage('/static/Assets/Dev/city.png');
   radioImage = loadImage('/static/Assets/Insig/radio.png');
   insigImage = loadImage('/static/Assets/Insig/fort.png');
-  loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors)
+  loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
-async function loadMapComponents(mapName, tnames, tneighbors){
-
+async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
+  console.log(landlocked)
   await fetch(`/static/MAPS/${mapName}/properties.json`)
   .then((res) => res.json())
   .then((data) => {mapProperties = data;}).catch(e => console.error(e));
-  let t_index = 0;
+  let t_index = 0; // index of territory -> need to make sure that all territory is loaded according to continent order
   for (let i = 1; i < mapProperties.numConts+1; i++){
     let sr_per_trty;
     let numt;
@@ -75,6 +76,7 @@ async function loadMapComponents(mapName, tnames, tneighbors){
     let capitalSpaces = [];
     let devSpaces = [];
     let insigSpaces = [];
+    let sea_side_counter = 0;
     // properties.json
     await fetch(`/static/MAPS/${mapName}/C${i}/properties.json`)
     .then((res) => res.json())
@@ -107,7 +109,10 @@ async function loadMapComponents(mapName, tnames, tneighbors){
       .then((data) => {for(let is of data){insigSpaces.push(is)}}).catch(e => console.error(e)); 
     for (let i = 0; i < numt; i++){
       let srcs = [];
-      for (let j = 0; j < sr_per_trty; j++){srcs.push(srs[sr_per_trty*i+j]);}
+      if (!(landlocked.includes(tnames[t_index]) ) ){
+        for (let j = 0; j < sr_per_trty; j++){srcs.push(srs[sr_per_trty*sea_side_counter+j]);}
+        sea_side_counter += 1;
+      }
       territories.push({
           "name": tnames[t_index],
           "neighbors": tneighbors[t_index], 
@@ -174,10 +179,16 @@ function draw() {
       hover_over.id = tmp_id;
       hover_over.pts = trty.outline;
     } 
-    if (toHightlight.includes(tmp_id)){
+    if (targetsToCapture.includes(tmp_id)){
+      stroke("#ffbf00");
       strokeWeight(4);
     }
     if (otherHighlight.includes(tmp_id)){
+      stroke("black");
+      strokeWeight(4);
+    }
+    if (toHightlight.includes(tmp_id)){
+      stroke("black");
       strokeWeight(4);
     }
     // Display territory outline
@@ -189,12 +200,15 @@ function draw() {
     pop();
 
     // Display sea route coordinates
-    for (let src of trty.srcs){
-      push();
-      fill(0,200,100);
-      ellipse(src.x, src.y, 10, 10)
-      pop();
+    if (trty.srcs.length){
+      for (let src of trty.srcs){
+        push();
+        fill(0,200,100);
+        ellipse(src.x, src.y, 10, 10)
+        pop();
+      }
     }
+
 
     // Display name
     push();
@@ -268,6 +282,7 @@ function draw() {
     for (let border of contBorders){
       push();
       fill(128,128,128,100);
+      strokeWeight(4)
       beginShape();
       for (let p of border){
         vertex(p.x, p.y);
