@@ -702,9 +702,9 @@ class Starchaser(Mission):
         self.chase_completed = 0
         self.target_chases = 7
         if m > 80:
-            self.target_chases += 5
-        elif m > 60:
             self.target_chases += 3
+        elif m > 60:
+            self.target_chases += 2
         elif m > 40:
             self.target_chases += 1
 
