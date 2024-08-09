@@ -205,7 +205,7 @@ class turn_loop_scheduler:
         # Thread for turn
         ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
         # Timer for turn
-        ms.timer = threading.Thread(target=ms.activate_timer, args=(90, curr_player))
+        ms.timer = threading.Thread(target=ms.activate_timer, args=(120, curr_player))
 
         ms.terminated = False
         ms.curr_thread.start()
