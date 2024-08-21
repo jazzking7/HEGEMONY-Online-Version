@@ -62,15 +62,15 @@ class Mission_Distributor:
             ['Dom', 'Exp', 'Pop'],
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Dua', 'Pun']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
         self.missions = [
             'Pac', 'War', 'Loy', 'Bon',
             'Uni', 'Pol', 'Fan', 'Ind',
             'Exp', 'Pop', 'Dom', 'Gua',
-            'Dec', 'Str', 'Dua', 'Pun'
+            'Dec', 'Str', 'Due', 'Pun'
         ]
 
-        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Dualist', 'Punisher']
+        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']
         self.A_tier = ['Loyalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter']
 
@@ -111,7 +111,7 @@ class Mission_Distributor:
                     else:
                         miss_set.append(choice)
                         count += 1
-            elif choice == 'Dua':
+            elif choice == 'Due':
                 if (count + 2) <= num_p:
                     miss_set.append(choice)
                     miss_set.append(choice)
@@ -160,14 +160,14 @@ class Mission_Distributor:
             return Decapitator(player, gs)
         elif name == 'Str':
             return Starchaser(player, gs)
-        elif name == 'Dua':
-            return Dualist(player, gs)
+        elif name == 'Due':
+            return Duelist(player, gs)
         elif name == 'Pun':
             return Punisher(player, gs)
 
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Dualist', 'Punisher']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)

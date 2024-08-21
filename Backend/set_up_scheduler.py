@@ -46,7 +46,7 @@ class setup_event_scheduler:
                 m.set_partner()
             elif m.name == "Fanatic":
                 m.set_targets()
-            elif m.name == 'Dualist':
+            elif m.name == 'Duelist':
                 m.set_nemesis()
 
         # Set up user view for mission

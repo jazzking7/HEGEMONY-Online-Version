@@ -178,7 +178,7 @@ class Game_State_Manager:
                     mission.update_tracker_view({
                     'targets': {mission.gs.players[mission.target_player].name: 's'},
                     })
-            if mission.name == 'Dualist':
+            if mission.name == 'Duelist':
                 if mission.target_player == old_pid:
                     mission.target_player = new_pid
                     mission.update_tracker_view({

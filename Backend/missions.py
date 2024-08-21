@@ -772,16 +772,16 @@ class Starchaser(Mission):
             return False
         return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
 
-class Dualist(Mission):
+class Duelist(Mission):
     def __init__(self, player, gs):
-        super().__init__("Dualist", player, gs)
+        super().__init__("Duelist", player, gs)
         self.target_player = None
 
     def set_nemesis(self,):
         if self.target_player is not None:
             return
         for miss in self.gs.Mset:
-            if miss.name == "Dualist":
+            if miss.name == "Duelist":
                 if miss.player != self.player and miss.target_player is None:
                     miss.target_player = self.player
                     self.target_player = miss.player
@@ -822,7 +822,7 @@ class Dualist(Mission):
 class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
-        self.targets = ['Punisher', 'Dualist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist']
+        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist']
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
