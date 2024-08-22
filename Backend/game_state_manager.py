@@ -724,8 +724,9 @@ class Game_State_Manager:
                         self.update_private_status(a_pid)
 
         # Sound effect
-        big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25
-        self.server.emit('battle_propagation', {'battlesize': big_battle}, room=self.lobby)
+        if def_p.total_troops != 0:
+            big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25
+            self.server.emit('battle_propagation', {'battlesize': big_battle}, room=self.lobby)
 
         # visual effect
         self.server.emit('battle_casualties', {
