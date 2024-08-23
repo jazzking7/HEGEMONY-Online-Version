@@ -376,15 +376,15 @@ class Fanatic(Mission):
     def set_targets(self, ):
         m = len(self.gs.map.territories)
         if len(self.targets) == 0:
-            self.targets = random.sample([i for i in range(m)], 5)
+            self.targets = random.sample([i for i in range(m)], 4)
         else:
-            while len(self.targets) < 5:
+            while len(self.targets) < 4:
                 target = random.randint(0, m-1)
                 if target not in self.targets:
                     self.targets.append(target)
         for miss in self.gs.Mset:
             if miss.name == "Fanatic":
-                if len(miss.targets) < 5:
+                if len(miss.targets) < 4:
                     for t in self.targets:
                         if t not in miss.targets:
                             miss.targets.append(t)
@@ -392,11 +392,11 @@ class Fanatic(Mission):
                 else:
                     for t in self.targets:
                         if t not in miss.targets:
-                            miss.targets[random.randint(0, 4)] = t
+                            miss.targets[random.randint(0, 3)] = t
                             break
                     for t in miss.targets:
                         if t not in self.targets:
-                            self.targets[random.randint(0, 4)] = t
+                            self.targets[random.randint(0, 3)] = t
                             break
     
     def own_all_targets(self, ):

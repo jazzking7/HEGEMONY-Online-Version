@@ -235,3 +235,6 @@ class Mission_Distributor:
             return B_tier
         else:
             return C_tier
+        
+a = Mission_Distributor()
+print(a.get_mission_set(5))
