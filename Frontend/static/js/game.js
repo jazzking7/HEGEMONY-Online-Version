@@ -801,7 +801,7 @@ function conquest(tid){
       // clear sync clicks
       socket.emit('clear_otherHighlights');
     }
-    if (territories[tid].troops == 1){
+    if (territories[tid].troops <= 1){
       popup("NOT ENOUGH TROOPS FOR BATTLE!", 1000);
       return
     }
