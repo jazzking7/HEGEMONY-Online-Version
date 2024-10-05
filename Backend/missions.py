@@ -327,7 +327,7 @@ class Polarizer(Mission):
         super().__init__("Polarizer", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 3
+        self.target_round = 4
 
     def no_unification(self,):
         for cont in self.gs.map.conts:

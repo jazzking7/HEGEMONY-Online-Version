@@ -193,7 +193,7 @@ class setup_event_scheduler:
             options = gs.SDIS.get_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        ms.selection_time_out(30, len(gs.players))
+        ms.selection_time_out(90, len(gs.players))
 
         gs.signal_view_clear()
 

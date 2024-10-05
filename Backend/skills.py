@@ -44,7 +44,6 @@ class Realm_of_Permafrost(Skill):
         battle_stats[3] = 0
         battle_stats[4] = 1
 
-
     def externalStatsMod(self, battle_stats):
 
         battle_stats[0] = 6
@@ -52,7 +51,6 @@ class Realm_of_Permafrost(Skill):
         battle_stats[2] = 1
         battle_stats[3] = 0
         battle_stats[4] = 1
-
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -115,6 +113,10 @@ class Mass_Mobilization(Skill):
         self.hasCooldown = True
         self.hasRoundEffect = True
 
+        self.maxcooldown = 3
+        self.will_cost = 8
+        self.will = 0
+
         self.limit = 0
         nump = len(gs.players)
         if nump < 6:
@@ -125,12 +127,17 @@ class Mass_Mobilization(Skill):
             self.limit = 4
         else:
             self.limit = 5
-        
+
         self.cooldown = 0
 
     def apply_round_effect(self,):
-        if self.cooldown:
-            self.cooldown -= 1
+        if self.active:
+            if self.cooldown:
+                self.cooldown -= 1
+            self.will += 1
+            if self.will == self.will_cost:
+                self.limit += 1
+                self.will = 0
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -186,7 +193,7 @@ class Mass_Mobilization(Skill):
 
         # update limits and cooldown
         self.limit -= 1
-        self.cooldown = 3
+        self.cooldown = self.maxcooldown
 
 class Industrial_Revolution(Skill):
 
@@ -352,7 +359,7 @@ class Ares_Blessing(Skill):
         self.hasTurnEffect = True
 
         nump = len(gs.players)
-        self.limit = math.ceil(nump/2)
+        self.limit = math.ceil(nump/2) if math.ceil(nump/2) >= 3 else 3
 
         self.intMod = True
         self.cooldown = 0
@@ -525,9 +532,13 @@ class Divine_Punishment(Skill):
     def __init__(self, player, gs):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
-
-        self.limit = len(gs.players) + 1
+        self.energy_cost = 3
+        self.limit = len(gs.players)
         self.finished_bombardment = True
+
+        if self.limit > len(gs.map.territories)//len(gs.players):
+            self.limit = len(gs.map.territories)//len(gs.players) - 2
+            self.energy_cost = 2
 
         self.hasRoundEffect = True
         self.energy = 0
@@ -535,7 +546,7 @@ class Divine_Punishment(Skill):
     def apply_round_effect(self,):
         if self.active:
             self.energy += 1
-            if self.energy == 3:
+            if self.energy == self.energy_cost:
                 self.limit += 1
                 self.energy = 0
                 if self.limit > 20:

@@ -587,7 +587,10 @@ class Game_State_Manager:
         # get infrastructure level
         stats.append(self.get_player_infra_level(player)+3)
         # frameshift (min roll)
-        stats.append(player.min_roll)
+        if stats[0] < player.min_roll:
+            stats.append(stats[0])
+        else:
+            stats.append(player.min_roll)
         # Default Null rate
         stats.append(0)
         # Dmg multipler
