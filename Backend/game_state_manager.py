@@ -430,7 +430,10 @@ class Game_State_Manager:
     
     # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN FOR SPECIFIC PLAYER
     def update_private_status(self, pid):
-        self.server.emit('private_overview', {'curr_SA': self.players[pid].stars, 'curr_RS': self.players[pid].reserves}, room=pid)
+        self.server.emit('private_overview', {'curr_SA': self.players[pid].stars,
+                                               'curr_RS': self.players[pid].reserves,
+                                               'curr_infra': self.get_player_infra_level(self.players[pid])+3,
+                                               'curr_min_roll': self.players[pid].min_roll}, room=pid)
 
     def convert_reserves(self, amt, player):
         extra = 0

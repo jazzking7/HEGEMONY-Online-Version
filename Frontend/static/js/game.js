@@ -193,6 +193,8 @@ socket.on('update_global_status', function(data){
 socket.on('private_overview', function(data){
   $('#curr_special_auth').text(data.curr_SA);
   $('#curr_reserves').text(data.curr_RS);
+  $('#curr_infra').text(data.curr_infra);
+  $('#curr_min_roll').text(data.curr_min_roll)
 });
 
 // update player territory list
