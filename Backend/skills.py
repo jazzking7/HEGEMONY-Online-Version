@@ -301,10 +301,10 @@ class Robinhood(Skill):
         self.targets = []
         self.top_nump = 0
         l = len(gs.players)
-        if l < 5:
+        if l < 6:
             self.top_nump = 1
         elif l < 10:
-            self.top_nump = 2
+            self.top_nump = 2  
         elif l < 16:
             self.top_nump = 3
 
