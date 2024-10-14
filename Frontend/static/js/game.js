@@ -1477,7 +1477,6 @@ async function get_reserves_amt(){
 btn_reserves = document.getElementById("btn-reserve");
 btn_reserves.onclick = function () {
 
-  hide_async_btns();
   socket.emit('send_async_event', {'name': "R_D"});
 
 }

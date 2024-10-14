@@ -422,13 +422,21 @@ def send_reserves_amt():
 def convert_reserves(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.convert_reserves(int(data['amt']), pid)
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.convert_reserves(int(data['amt']), pid)
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot convert reserves outside of your turn!'}, room=pid)
+        socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('upgrade_infrastructure')
 def upgrade_infrastructure(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.upgrade_infrastructure(int(data['amt']), pid)
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.upgrade_infrastructure(int(data['amt']), pid)
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot upgrade infrastructure outside of your turn!'}, room=pid)
+        socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('send_reserves_deployed')
 def handle_reserves_deployment(data):
@@ -456,10 +464,13 @@ def handle_reserves_deployment(data):
 def handle_summit_request():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    if gsm.players[pid].num_summit > 0:
-        gsm.GES.summit_requested = True
+    if pid == gsm.pids[gsm.GES.current_player]:
+        if gsm.players[pid].num_summit > 0:
+            gsm.GES.summit_requested = True
+        else:
+            socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
     else:
-        socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
+        socketio.emit('display_new_notification',{'msg': 'Cannot launch summit outside of your turn!'}, room=pid)
 
 @socketio.on('send_summit_choice')
 def handle_summit_choice(data):
@@ -478,8 +489,11 @@ def handle_summit_choice(data):
 def handle_async_event(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.GES.handle_async_event(data, pid)
-    return
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.GES.handle_async_event(data, pid)
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot perform special operation outside of your turn!'}, room=pid)
+        socketio.emit('signal_show_btns', room=pid)
 
 # EXIT POINT FOR INNER ASYNC EVENTS
 @socketio.on('signal_async_end')
@@ -524,7 +538,10 @@ def send_skill_information():
 def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.players[pid].skill.activate_effect()
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.players[pid].skill.activate_effect()
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
 
 @socketio.on('build_free_cities')
 def build_free_cities(data):

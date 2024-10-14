@@ -332,7 +332,7 @@ class Polarizer(Mission):
     def no_unification(self,):
         for cont in self.gs.map.conts:
             for p in self.gs.players:
-                if self.gs.map.own_continent(self.gs.players[p].territories, self.gs.map.conts[cont]['trtys']):
+                if self.gs.map.own_continent(self.gs.players[p].territories, self.gs.map.conts[cont]['trtys']) and p != self.player:
                     return False
         return True
 
