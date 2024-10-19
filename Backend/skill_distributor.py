@@ -16,11 +16,12 @@ class Skill_Distributor:
             "Frameshifter",
             "Necromancer",
             "Divine_Punishment",
-            "Air_Superiority"
+            "Air_Superiority",
+            "Corruption"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=6)
+        return random.sample(self.skill_options, k=13)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -50,3 +51,5 @@ class Skill_Distributor:
             return Divine_Punishment(player, gs)
         elif skill_name == "Air_Superiority":
             return Air_Superiority(player, gs)
+        elif skill_name == "Corruption":
+            return Corruption(player, gs)

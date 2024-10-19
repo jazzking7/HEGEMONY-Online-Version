@@ -87,7 +87,7 @@ class Game_State_Manager:
         # SELECTION TRACKER
         self.aval_choices = []
         self.made_choices = []
-
+# Jasper is a pig! Pig! Pig!
         # color options
         self.color_options = []
         # skill distributor
@@ -519,11 +519,25 @@ class Game_State_Manager:
         self.update_global_status()
         self.signal_MTrackers('popu')
 
+    # Corruption
+    def in_secret_control(self, trty_number, player_id):
+        for pid in self.players:
+            if self.players[pid].skill:
+                if self.players[pid].skill.name == "Corruption" and self.players[pid].skill.active:
+                    if trty_number in self.players[pid].skill.secret_control_list and player_id != pid:
+                        return True
+        return False
+
     def get_deployable_amt(self, player):
         bonus = 0
         t_score = 0
         p = self.players[player]
         for trty in p.territories:
+
+            # Corruption takeaway
+            if self.in_secret_control(trty, player):
+                continue
+
             t = self.map.territories[trty]
             if t.isCapital:
                 bonus += 1
@@ -534,6 +548,23 @@ class Game_State_Manager:
             if t.isTransportcenter:
                 bonus += 2
             t_score += 1
+
+        # Corruption bonus
+        if p.skill:
+            if p.skill.name == "Corruption" and p.skill.active:
+                for trty in p.skill.secret_control_list:
+                    if trty in p.territories:
+                        continue
+                    t = self.map.territories[trty]
+                    if t.isCapital:
+                        bonus += 1
+                    if t.isCity:
+                        t_score += 1
+                    if t.isMegacity:
+                        bonus += 1
+                    if t.isTransportcenter:
+                        bonus += 2
+                    t_score += 1
         bonus += self.map.get_continental_bonus(p.territories)
         if t_score < 9:
             return bonus + 3
@@ -564,20 +595,59 @@ class Game_State_Manager:
     def get_player_industrial_level(self, player):
         lvl = 0
         c_amt = self.map.count_cities(player.territories)
+
+        pid = None
+        for p in self.players:
+            if self.players[p] == player:
+                pid = p
+                break
+
+        # Corruption takeaway
+        for trty in player.territories:
+            if self.in_secret_control(trty, pid):
+                if self.map.territories[trty].isCity:
+                    c_amt -= 1
+
+        # Corruption bonus
+        if player.skill:
+            if player.skill.name == "Corruption" and player.skill.active:
+                for trty in player.skill.secret_control_list:
+                    if trty not in player.territories:
+                        if self.map.territories[trty].isCity:
+                            c_amt += 1
+                        if self.map.territories[trty].isMegacity:
+                            lvl += 1
+
         if c_amt == 3:
             lvl += 1
         elif c_amt > 3:
             lvl += 1 + (c_amt-3)//2
         for trty in player.territories:
+            if self.in_secret_control(trty, pid):
+                continue
             if self.map.territories[trty].isMegacity:
                 lvl += 1
         return lvl
 
     def get_player_infra_level(self, player):
         lvl = 0
+        pid = None
+        for p in self.players:
+            if self.players[p] == player:
+                pid = p
+                break
         for trty in player.territories:
+            # Corruption takeaway
+            if self.in_secret_control(trty, pid):
+                continue
             if self.map.territories[trty].isTransportcenter:
                 lvl += 1
+        # Corruption bonus
+        if player.skill:
+            if player.skill.name == "Corruption" and player.skill.active:
+                for trty in player.skill.secret_control_list:
+                    if self.map.territories[trty].isTransportcenter:
+                        lvl += 1
         lvl += player.infrastructure_upgrade
         return lvl
 

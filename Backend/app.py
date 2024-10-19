@@ -567,6 +567,12 @@ def get_reachable_airspace(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     socketio.emit('receive_reachable_airspace', {'spaces': gsm.map.get_reachable_airspace(data['origin'])})
 
+@socketio.on('send_corrupt_territory')
+def handle_corrupt_territory(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.validate_and_apply_changes(data)
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

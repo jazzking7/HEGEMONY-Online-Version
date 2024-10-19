@@ -266,6 +266,8 @@ socket.on('change_click_event', function(data){
     currEvent = launch_orbital_strike;
   } else if (data.event == 'paratrooper_attack'){
     currEvent = paratrooper_attack;
+  } else if (data.event == 'corrupt_territory'){
+    currEvent = corrupt_territory;
   }
   else {
     currEvent = null;
@@ -1620,6 +1622,34 @@ function paratrooper_attack(tid){
      }
     }
   }
+}
+
+// Corruption
+socket.on('corrupt_territory', function(data){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h4>CHOOSE AN ENEMY TERRITORY TO CORRUPT!</h4>`;
+  clickables = data.targets;
+  toHightlight = [];
+});
+
+function corrupt_territory(tid){
+  toHightlight = [];
+  document.getElementById('control_panel').style.display = 'none';
+  toHightlight.push(tid);
+  document.getElementById('control_mechanism').innerHTML = '';
+  document.getElementById('control_panel').style.display = 'none';
+  document.getElementById('control_panel').style.display = 'flex';
+  $('#proceed_next_stage').hide();
+  $('#control_confirm').off('click').on('click' , function(){
+    document.getElementById('control_panel').style.display = 'none';
+    socket.emit('send_corrupt_territory', {'choice': toHightlight[0]});
+    toHightlight = [];
+  });
+  $('#control_cancel').off('click').on('click' , function(){
+    document.getElementById('control_panel').style.display = 'none';
+    $('#proceed_next_stage').show();
+    toHightlight = [];
+  });
 }
 
 //========================================================================================================
