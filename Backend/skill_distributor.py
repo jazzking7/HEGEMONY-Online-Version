@@ -17,7 +17,7 @@ class Skill_Distributor:
             "Necromancer",
             "Divine_Punishment",
             "Air_Superiority",
-            "Corruption"
+            "Collusion"
         ]
 
     def get_options(self, ):
@@ -51,5 +51,5 @@ class Skill_Distributor:
             return Divine_Punishment(player, gs)
         elif skill_name == "Air_Superiority":
             return Air_Superiority(player, gs)
-        elif skill_name == "Corruption":
-            return Corruption(player, gs)
+        elif skill_name == "Collusion":
+            return Collusion(player, gs)

@@ -1624,7 +1624,7 @@ function paratrooper_attack(tid){
   }
 }
 
-// Corruption
+// Collusion
 socket.on('corrupt_territory', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h4>CHOOSE AN ENEMY TERRITORY TO CORRUPT!</h4>`;

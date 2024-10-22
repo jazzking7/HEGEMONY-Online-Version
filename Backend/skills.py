@@ -711,23 +711,23 @@ class Air_Superiority(Skill):
         self.gs.handle_battle(data)
 
 
-class Corruption(Skill):
+class Collusion(Skill):
     def __init__(self, player, gs):
-        super().__init__("Corruption", player, gs)
+        super().__init__("Collusion", player, gs)
         self.finised_choosing = True
         self.secret_control_list = []
     
     def update_current_status(self):
 
-        limit = self.gs.players[self.player].stars//5 if self.gs.players[self.player].stars >= 5 else 0
-
+        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
+        controlled_trtys = [self.gs.map.territories[tid].name for tid in self.secret_control_list]
         self.gs.server.emit("update_skill_status", {
-            'name': "Corruption",
+            'name': "Collusion",
             'description': "Buy over ownership of an enemy territory with 5* and secretly control it.",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
-            'forbidden_targets': self.secret_control_list,
+            'forbidden_targets': controlled_trtys,
             'ft_msg': "Secretly controlling:",
             'btn_msg': "Corrupt a territory"
         }, room=self.player) 
@@ -736,7 +736,7 @@ class Corruption(Skill):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 5:
+        if self.gs.players[self.player].stars < 4:
             self.gs.server.emit('display_new_notification', {'msg': "Not enough stars to corrupt any territory!"}, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
@@ -750,20 +750,20 @@ class Corruption(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
             return
 
-        if self.gs.players[self.player].stars < 5:
+        if self.gs.players[self.player].stars < 4:
             self.gs.server.emit("display_new_notification", {"msg": f"Not enough stars!"}, room=self.player)
             return
         
         for p in self.gs.players:
             if self.gs.players[p].skill:
-                if self.gs.players[p].skill.name == "Corruption":
+                if self.gs.players[p].skill.name == "Collusion":
                     if choice in self.gs.players[p].skill.secret_control_list:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Invalid corruption target!"}, room=self.player)
+                        self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
                         return
 
         self.finised_choosing = True
         self.secret_control_list.append(choice)
-        self.gs.players[self.player].stars -= 5
+        self.gs.players[self.player].stars -= 4
         self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)

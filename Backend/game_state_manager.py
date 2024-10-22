@@ -519,11 +519,11 @@ class Game_State_Manager:
         self.update_global_status()
         self.signal_MTrackers('popu')
 
-    # Corruption
+    # Collusion
     def in_secret_control(self, trty_number, player_id):
         for pid in self.players:
             if self.players[pid].skill:
-                if self.players[pid].skill.name == "Corruption" and self.players[pid].skill.active:
+                if self.players[pid].skill.name == "Collusion" and self.players[pid].skill.active:
                     if trty_number in self.players[pid].skill.secret_control_list and player_id != pid:
                         return True
         return False
@@ -534,7 +534,7 @@ class Game_State_Manager:
         p = self.players[player]
         for trty in p.territories:
 
-            # Corruption takeaway
+            # Collusion takeaway
             if self.in_secret_control(trty, player):
                 continue
 
@@ -549,9 +549,9 @@ class Game_State_Manager:
                 bonus += 2
             t_score += 1
 
-        # Corruption bonus
+        # Collusion bonus
         if p.skill:
-            if p.skill.name == "Corruption" and p.skill.active:
+            if p.skill.name == "Collusion" and p.skill.active:
                 for trty in p.skill.secret_control_list:
                     if trty in p.territories:
                         continue
@@ -602,15 +602,15 @@ class Game_State_Manager:
                 pid = p
                 break
 
-        # Corruption takeaway
+        # Collusion takeaway
         for trty in player.territories:
             if self.in_secret_control(trty, pid):
                 if self.map.territories[trty].isCity:
                     c_amt -= 1
 
-        # Corruption bonus
+        # Collusion bonus
         if player.skill:
-            if player.skill.name == "Corruption" and player.skill.active:
+            if player.skill.name == "Collusion" and player.skill.active:
                 for trty in player.skill.secret_control_list:
                     if trty not in player.territories:
                         if self.map.territories[trty].isCity:
@@ -637,14 +637,14 @@ class Game_State_Manager:
                 pid = p
                 break
         for trty in player.territories:
-            # Corruption takeaway
+            # Collusion takeaway
             if self.in_secret_control(trty, pid):
                 continue
             if self.map.territories[trty].isTransportcenter:
                 lvl += 1
-        # Corruption bonus
+        # Collusion bonus
         if player.skill:
-            if player.skill.name == "Corruption" and player.skill.active:
+            if player.skill.name == "Collusion" and player.skill.active:
                 for trty in player.skill.secret_control_list:
                     if self.map.territories[trty].isTransportcenter:
                         lvl += 1
