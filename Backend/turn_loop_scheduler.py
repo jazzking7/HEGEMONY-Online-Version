@@ -266,9 +266,16 @@ class turn_loop_scheduler:
                 for p in gs.players:
                     if gs.players[p].skill.hasRoundEffect:
                         gs.players[p].skill.apply_round_effect()
+
+                # set ice age
+                if gs.set_ice_age:
+                    gs.set_ice_age = False
+                    gs.in_ice_age += 3
                 # update ice age
                 if gs.in_ice_age:
                     gs.in_ice_age -= 1
+                    gs.server.emit("display_special_notification", {"msg": f"ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
+
                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:

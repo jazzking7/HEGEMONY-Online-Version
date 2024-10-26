@@ -125,6 +125,7 @@ class Game_State_Manager:
         self.death_logs = {}
 
         # Ice age
+        self.set_ice_age = False
         self.in_ice_age = 0
 
     # connect player to a disconnected player object
@@ -578,8 +579,8 @@ class Game_State_Manager:
                 return bonus + t_score//3
         if self.in_ice_age:
             if t_score < 15:
-                return math.ceil(bonus*0.7) + 2
-            return math.ceil(bonus*0.7) + t_score//5
+                return math.ceil(bonus*0.6) + 2
+            return math.ceil(bonus*0.6) + t_score//5
         if t_score < 9:
             return bonus + 3
         return bonus + t_score//3
@@ -716,6 +717,12 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.active and def_p.skill.reactMod:
                 def_p.skill.reactStatsMod(def_stats, atk_stats, False)
+
+        if "Realm_of_Permafrost" == atk_p.skill.name or "Realm_of_Permafrost" == def_p.skill.name:
+            atk_stats[3] = 0
+            atk_stats[4] = 1
+            def_stats[3] = 0
+            def_stats[4] = 1
 
     def handle_battle(self, data):
         # Load territories involved
