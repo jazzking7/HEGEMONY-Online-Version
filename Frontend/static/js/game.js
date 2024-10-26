@@ -337,6 +337,10 @@ socket.on('display_new_notification', function(data){
   popup(data.msg, 2000);
 })
 
+socket.on('display_special_notification', function(data){
+  special_popup(data.msg, 3000, data.t_color, data.b_color);
+})
+
 //===============================Mission Related Display=============================================
 
 // Receive Mission + Display info on Mission Tracker
