@@ -63,6 +63,7 @@ class Realm_of_Permafrost(Skill):
             self.gs.server.emit("display_new_notification", {"msg": "Not enough stars to activate ice age!"}, room=self.player)
             return
         self.gs.in_ice_age += 2
+        self.gs.server.emit("display_new_notification", {"msg": "ICE AGE HAS BEGAN!"}, room=self.gs.lobby)
         self.gs.players[self.player].stars -= 5
         self.gs.update_private_status(self.player)
 
