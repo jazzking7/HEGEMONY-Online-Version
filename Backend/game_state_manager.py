@@ -124,6 +124,9 @@ class Game_State_Manager:
         # victim -> killer/mission failure
         self.death_logs = {}
 
+        # Ice age
+        self.in_ice_age = 0
+
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
 
@@ -566,6 +569,17 @@ class Game_State_Manager:
                         bonus += 2
                     t_score += 1
         bonus += self.map.get_continental_bonus(p.territories)
+
+        # Permafrost skip ice age debuff
+        if p.skill:
+            if p.skill.name == "Realm_of_Permafrost" and p.skill.active:
+                if t_score < 9:
+                    return bonus + 3
+                return bonus + t_score//3
+        if self.in_ice_age:
+            if t_score < 15:
+                return math.ceil(bonus*0.7) + 2
+            return math.ceil(bonus*0.7) + t_score//5
         if t_score < 9:
             return bonus + 3
         return bonus + t_score//3

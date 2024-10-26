@@ -52,11 +52,31 @@ class Realm_of_Permafrost(Skill):
         battle_stats[3] = 0
         battle_stats[4] = 1
 
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        if self.gs.pids[self.gs.GES.current_player] != self.player:
+            self.gs.server.emit("display_new_notification", {"msg": "Cannot activate outside your turn!"}, room=self.player)
+            return
+        if self.gs.players[self.player].stars < 5:
+            self.gs.server.emit("display_new_notification", {"msg": "Not enough stars to activate ice age!"}, room=self.player)
+            return
+        self.gs.in_ice_age += 2
+        self.gs.players[self.player].stars -= 5
+        self.gs.update_private_status(self.player)
+
     def update_current_status(self):
+
+        limit = self.gs.players[self.player].stars//5 if self.gs.players[self.player].stars >= 5 else 0
+
         self.gs.server.emit("update_skill_status", {
             'name': "Realm of Permafrost",
-            'description': "In any battle you engage in, all stats of both you and your enemies are set to default.",
-            'operational': self.active
+            'description': "In any battle you engage in, all stats of both you and your enemies are set to default. For 5★, you can activate Ice Age that lasts 2 rounds",
+            'hasLimit': True,
+            'limits': limit,
+            'operational': self.active,
+            'btn_msg': "Begin Ice Age"
         }, room=self.player)
 
 class Iron_Wall(Skill):
@@ -101,7 +121,7 @@ class Dictator(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': self.name,
-            'description': "Gain a minimum of 2 stars per turn regardless of successful conquests.",
+            'description': "Gain a minimum of 2 ★ per turn regardless of successful conquests.",
             'operational': self.active
         }, room=self.player)
 
@@ -723,7 +743,7 @@ class Collusion(Skill):
         controlled_trtys = [self.gs.map.territories[tid].name for tid in self.secret_control_list]
         self.gs.server.emit("update_skill_status", {
             'name': "Collusion",
-            'description': "Buy over ownership of an enemy territory with 5* and secretly control it.",
+            'description': "Buy over ownership of an enemy territory with 4* and secretly control it.",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,

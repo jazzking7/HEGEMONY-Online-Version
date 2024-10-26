@@ -179,6 +179,14 @@ class turn_loop_scheduler:
 
                 s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
 
+                # Ice Age!
+                if gs.in_ice_age:
+                    if p.skill.name != 'Realm_of_Permafrost':
+                        s_amt -= 1
+                    else:
+                        if not p.skill.active:
+                            s_amt -= 1
+
                 # Robinhood!
                 for pid in gs.players:
                     if gs.players[pid].skill.name == "Robinhood":
@@ -258,6 +266,9 @@ class turn_loop_scheduler:
                 for p in gs.players:
                     if gs.players[p].skill.hasRoundEffect:
                         gs.players[p].skill.apply_round_effect()
+                # update ice age
+                if gs.in_ice_age:
+                    gs.in_ice_age -= 1
                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:
