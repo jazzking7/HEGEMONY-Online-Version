@@ -59,21 +59,21 @@ class Realm_of_Permafrost(Skill):
         if self.gs.pids[self.gs.GES.current_player] != self.player:
             self.gs.server.emit("display_new_notification", {"msg": "Cannot activate outside your turn!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 5:
+        if self.gs.players[self.player].stars < 4:
             self.gs.server.emit("display_new_notification", {"msg": "Not enough stars to activate ice age!"}, room=self.player)
             return
         self.gs.in_ice_age += 2
         self.gs.server.emit("display_new_notification", {"msg": "ICE AGE HAS BEGAN!"}, room=self.gs.lobby)
-        self.gs.players[self.player].stars -= 5
+        self.gs.players[self.player].stars -= 4
         self.gs.update_private_status(self.player)
 
     def update_current_status(self):
 
-        limit = self.gs.players[self.player].stars//5 if self.gs.players[self.player].stars >= 5 else 0
+        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
 
         self.gs.server.emit("update_skill_status", {
             'name': "Realm of Permafrost",
-            'description': "In any battle you engage in, all stats of both you and your enemies are set to default. For 5★, you can activate Ice Age that lasts 2 rounds",
+            'description': "In any battle you engage in, all stats of both you and your enemies are set to default. For 4★, you can activate Ice Age that lasts 2 rounds",
             'hasLimit': True,
             'limits': limit,
             'operational': self.active,
