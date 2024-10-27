@@ -315,7 +315,10 @@ class Game_State_Manager:
 
     def game_over(self, ):
         winners = self.Mdist.determine_winners(self)
-        winners = [{self.players[w].name: winners[w]} for w in winners]
+        if winners:
+            winners = [{self.players[w].name: winners[w]} for w in winners]
+        else:
+            winners = []
         self.signal_view_clear()
         time.sleep(1)
         self.server.emit('GAME_OVER', {
