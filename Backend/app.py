@@ -472,6 +472,18 @@ def handle_summit_request():
     else:
         socketio.emit('display_new_notification',{'msg': 'Cannot launch summit outside of your turn!'}, room=pid)
 
+@socketio.on('request_global_peace')
+def handle_global_peace_request():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if pid == gsm.pids[gsm.GES.current_player]:
+        if gsm.players[pid].num_summit > 0:
+            gsm.GES.global_peace_proposed = True
+        else:
+            socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF GLOBAL PEACE PROPOSED!"} ,room=pid)
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot launch summit outside of your turn!'}, room=pid)
+
 @socketio.on('send_summit_choice')
 def handle_summit_choice(data):
     pid = request.sid

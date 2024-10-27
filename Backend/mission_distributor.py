@@ -235,3 +235,47 @@ class Mission_Distributor:
             return B_tier
         else:
             return C_tier
+    
+    def determine_gp_winners(self, gs):
+        # Redefine this
+        c = []
+        for p in gs.players:
+            if gs.players[p].alive:
+                c.append(p)
+        # Solo Winner
+        if len(c) == 1:
+            for mis in gs.Mset:
+                if mis.player == c[0]:
+                    return {c[0]: mis.name}
+        
+        Pac = {}
+        S_tier = {}
+        A_tier = {}
+        B_tier = {}
+        C_tier = {}
+        miss_set = gs.Mset
+        for m in miss_set:
+            if m.end_game_global_peace_checking():
+                if m.name in self.S_tier:
+                    if m.name == 'Pacifist':
+                        Pac[m.player] = m.name
+                    else:
+                        S_tier[m.player] = m.name
+                elif m.name in self.A_tier:
+                    A_tier[m.player] = m.name
+                elif m.name in self.B_tier:
+                    B_tier[m.player] = m.name
+                else:
+                    C_tier[m.player] = m.name
+
+        # Return {} -> key: pid   value: name of mission
+        if len(Pac) > 0:
+            return Pac
+        if len(S_tier) > 0:
+            return S_tier
+        elif len(A_tier) > 0:
+            return A_tier
+        elif len(B_tier) > 0:
+            return B_tier
+        else:
+            return C_tier

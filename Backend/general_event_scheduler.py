@@ -32,6 +32,7 @@ class General_Event_Scheduler:
         # inter turn summit
         self.summit_requested = False
         self.summit_voter = {'y': 0, 'n': 0}
+        self.global_peace_proposed = False
         # locking mechanism
         self.lock = threading.Lock()
 
@@ -182,6 +183,24 @@ class General_Event_Scheduler:
         else:
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
         self.summit_requested = False
+
+    def launch_global_peace_procedures(self, player):
+        pid = self.gs.pids[player]
+        self.global_peace_proposed = False
+        self.summit_voter = {'y': 0, 'n': 0}
+
+        c = 0
+        for player in self.gs.players:
+            if self.gs.players[player].alive:
+                c += 1
+                self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a global peace. The game ends immediately if nobody refuse."}, room=player)
+
+        self.selection_time_out(60, c)
+        if self.summit_voter['n']:
+            self.gs.players[pid].num_global_cease -= 1
+            self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, GLOBAL PEACE NOT ACHIEVED!"}, room=self.gs.lobby)
+        else:
+            self.gs.global_peace_game_over()
 
     def update_all_views_for_reconnected_player(self, pid):
         

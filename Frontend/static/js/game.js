@@ -1084,12 +1084,6 @@ btn_diplomatic.off('click').click(function () {
   <div style="display: flex; justify-content: space-between; align-items: center;">
 
     <div style="display: inline-block;">
-      <button class="btn" style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; ">
-        FORM ALLIANCE
-      </button>
-    </div>
-
-    <div style="display: inline-block;">
       <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; margin-left:1px;">
         REQUEST SUMMIT
       </button>
@@ -1120,6 +1114,13 @@ btn_diplomatic.off('click').click(function () {
   // Summit button functionality
   $('#btn-summit').off('click').on('click', function(){
     socket.emit('request_summit')
+    $('#middle_display').hide()
+    $('#middle_title, #middle_content').empty();
+  });
+
+  // Ceasefire button functionality
+  $('#btn-globalpeace').off('click').on('click', function(){
+    socket.emit('request_global_peace')
     $('#middle_display').hide()
     $('#middle_title, #middle_content').empty();
   });

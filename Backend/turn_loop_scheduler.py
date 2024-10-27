@@ -252,6 +252,12 @@ class turn_loop_scheduler:
             if not ms.interrupt and ms.summit_requested:
                 ms.launch_summit_procedures(ms.current_player)
 
+            # global peace
+            if not ms.interrupt and ms.global_peace_proposed:
+                ms.launch_global_peace_procedures(ms.current_player)
+                if ms.interrupt:
+                    return
+
             # next player 
             ms.current_player += 1
 

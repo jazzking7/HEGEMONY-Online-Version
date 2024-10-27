@@ -20,6 +20,9 @@ class Mission:
 
     def end_game_checking(self, ):
         raise NotImplementedError("Subclasses must implement end_game_checking method")
+    
+    def end_game_global_peace_checking(self, ):
+        raise NotImplementedError("Subclasses must implement end_game_checking method")
 
     def update_tracker_view(self, updates):
         self.gs.server.emit('update_tracker', updates, room=self.player)
@@ -88,6 +91,9 @@ class Pacifist(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.goal_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.round == self.goal_round
 
 class Warmonger(Mission):
     def __init__(self, player, gs):
@@ -158,6 +164,15 @@ class Warmonger(Mission):
         self.death_count = dc
 
         return self.death_count == self.goal_count and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        dc = 0
+        for d in self.gs.death_logs:
+            if self.player == self.gs.death_logs[d]:
+                dc += 1
+        self.death_count = dc
+
+        return self.death_count == self.goal_count and self.gs.players[self.player].alive
 
 class Loyalist(Mission):
     def __init__(self, player, gs):
@@ -212,6 +227,9 @@ class Loyalist(Mission):
 
     def end_game_checking(self, ):
         return self.exactly_two_players_left()
+    
+    def end_game_global_peace_checking(self, ):
+        return self.exactly_two_players_left()
         
 class Bounty_Hunter(Mission):
     def __init__(self, player, gs):
@@ -257,6 +275,16 @@ class Bounty_Hunter(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        for target in self.target_players:
+            if target in self.gs.perm_elims:
+                    continue
+            else:
+                return False
+        return True
+    
+    def end_game_global_peace_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
         for target in self.target_players:
@@ -321,6 +349,9 @@ class Unifier(Mission):
     
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.own_target_cont() and self.gs.players[self.player].alive
 
 class Polarizer(Mission):
     def __init__(self, player, gs):
@@ -364,6 +395,9 @@ class Polarizer(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+
+    def end_game_global_peace_checking(self, ):
+        return self.no_unification() and self.gs.players[self.player].alive
 
 class Fanatic(Mission):
     def __init__(self, player, gs):
@@ -445,6 +479,9 @@ class Fanatic(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.own_all_targets() and self.gs.players[self.player].alive
 
 class Industrialist(Mission):
     def __init__(self, player, gs):
@@ -485,6 +522,9 @@ class Industrialist(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.gs.TIP == self.player and self.gs.players[self.player].alive
 
 class Expansionist(Mission):
     def __init__(self, player, gs):
@@ -525,6 +565,9 @@ class Expansionist(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.gs.MTO == self.player and self.gs.players[self.player].alive
 
 class Populist(Mission):
     def __init__(self, player, gs):
@@ -562,6 +605,9 @@ class Populist(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.gs.LAO == self.player and self.gs.players[self.player].alive
         
 class Dominator(Mission):
     def __init__(self, player, gs):
@@ -599,6 +645,9 @@ class Dominator(Mission):
 
     def end_game_checking(self, ):
         return self.round == self.target_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.gs.SUP == self.player and self.gs.players[self.player].alive
 
 class Guardian(Mission):
     def __init__(self, player, gs):
@@ -628,6 +677,9 @@ class Guardian(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
+        return self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
         return self.gs.players[self.player].alive
     
 class Decapitator(Mission):
@@ -675,6 +727,16 @@ class Decapitator(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        for target in self.target_players:
+            # check if capital tid is in player's control
+            capital_id = self.get_capital_id(self.gs.players[target].capital)
+            if capital_id not in self.gs.players[self.player].territories:
+                return False
+        return True
+    
+    def end_game_global_peace_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
         for target in self.target_players:
@@ -771,6 +833,11 @@ class Starchaser(Mission):
         if not self.gs.players[self.player].alive:
             return False
         return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
+    
+    def end_game_global_peace_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
 
 class Duelist(Mission):
     def __init__(self, player, gs):
@@ -818,6 +885,17 @@ class Duelist(Mission):
             else:
                 return True
         return False
+    
+    def end_game_global_peace_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.target_player in self.gs.perm_elims:
+            if self.gs.death_logs[self.target_player] != self.player:
+                return False
+            else:
+                return True
+        return False
+
 
 class Punisher(Mission):
     def __init__(self, player, gs):
@@ -850,6 +928,16 @@ class Punisher(Mission):
         }, room=self.player)
 
     def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        for miss in self.gs.Mset:
+            if miss.name in self.targets:
+                if miss.player in self.gs.perm_elims:
+                    if self.gs.death_logs[miss.player] == self.player:
+                        return True
+        return False
+    
+    def end_game_global_peace_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
         for miss in self.gs.Mset:

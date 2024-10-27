@@ -52,6 +52,7 @@ class Player:
         self.cumulative_gdp = 0
         # summit
         self.num_summit = 2
+        self.num_global_cease = 2
         # status monitoringg
         self.total_troops = 0
         # Player Power Index
@@ -314,6 +315,15 @@ class Game_State_Manager:
 
     def game_over(self, ):
         winners = self.Mdist.determine_winners(self)
+        winners = [{self.players[w].name: winners[w]} for w in winners]
+        self.signal_view_clear()
+        time.sleep(1)
+        self.server.emit('GAME_OVER', {
+            'winners': winners,
+        }, room=self.lobby)
+
+    def global_peace_game_over(self,):
+        winners = self.Mdist.determine_gp_winners(self)
         winners = [{self.players[w].name: winners[w]} for w in winners]
         self.signal_view_clear()
         time.sleep(1)
