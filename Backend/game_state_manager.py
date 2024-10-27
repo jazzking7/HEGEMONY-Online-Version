@@ -52,7 +52,7 @@ class Player:
         self.cumulative_gdp = 0
         # summit
         self.num_summit = 2
-        self.num_global_cease = 2
+        self.num_global_cease = 1
         # status monitoringg
         self.total_troops = 0
         # Player Power Index

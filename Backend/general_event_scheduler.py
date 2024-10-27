@@ -201,6 +201,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, GLOBAL PEACE NOT ACHIEVED!"}, room=self.gs.lobby)
         else:
             self.gs.global_peace_game_over()
+            self.gs.interrupt
 
     def update_all_views_for_reconnected_player(self, pid):
         
