@@ -732,7 +732,6 @@ class Air_Superiority(Skill):
 
         self.gs.handle_battle(data)
 
-
 class Collusion(Skill):
     def __init__(self, player, gs):
         super().__init__("Collusion", player, gs)
