@@ -12,7 +12,8 @@ class Territory:
         self.isCity = False
         self.isCAD = False
 
-        self.isDeadZone = False
+        self.isDeadZone = 0
+        
 
         self.isMegacity = False
         self.isTransportcenter = False

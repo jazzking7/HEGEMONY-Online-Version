@@ -234,6 +234,8 @@ socket.on('update_trty_display', function(data){
       } else if (field == 'hasEffect') {
         if (changes[field] == 'nuke') {
           territories[tid].insig = radioImage;
+        } else {
+          territories[tid].insig = null;
         }
       }
       // Other properties -> Standard property
@@ -696,6 +698,18 @@ socket.on('battle_casualties', function(data){
   dis_cas = true;
   cas_count = 30;
 });
+
+// addition display
+socket.on('troop_addition_display', function(data){
+
+  for (tdis in data) {
+    additions.push(data[tdis]);
+  }
+
+  dis_add = true;
+  add_count = 30;
+});
+
 
 // Display and update how many troops are deployable. Used both in initial deployment and turn-based troop deployment
 socket.on("troop_deployment", function(data){

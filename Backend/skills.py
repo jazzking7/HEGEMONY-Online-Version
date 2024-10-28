@@ -616,7 +616,7 @@ class Divine_Punishment(Skill):
         for choice in choices:
 
             self.gs.map.territories[choice].isCity = False
-            self.gs.map.territories[choice].isDeadZone = True
+            self.gs.map.territories[choice].isDeadZone += 2
 
             casualties = self.gs.map.territories[choice].troops
             self.gs.map.territories[choice].troops = 0

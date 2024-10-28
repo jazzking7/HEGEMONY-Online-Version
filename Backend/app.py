@@ -339,6 +339,9 @@ def update_troop_info(data):
     gsm.players[pid].deployable_amt -= amount
     print(f"Player has {gsm.players[pid].deployable_amt } deployable amount")
     # CM
+    socketio.emit('troop_addition_display', {
+                            f'{choice}': {'tid': choice, 'number': amount},
+                        }, room=gsm.lobby)
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
     gsm.get_SUP()
@@ -449,6 +452,9 @@ def handle_reserves_deployment(data):
     gsm.players[pid].total_troops += amount
     gsm.players[pid].reserves -= amount
     # CM
+    socketio.emit('troop_addition_display', {
+                            f'{choice}': {'tid': choice, 'number': amount},
+                        }, room=gsm.lobby)
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
     gsm.get_SUP()

@@ -295,6 +295,9 @@ class turn_loop_scheduler:
                         gs.server.emit('battle_casualties', {
                             f'{index}': {'tid': index, 'number': losses},
                         }, room=gs.lobby)
+                        t.isDeadZone -= 1
+                        if not t.isDeadZone:
+                            gs.server.emit('update_trty_display', {index: {'hasEffect': 'gone'}}, room=gs.lobby)
                 gs.update_player_stats()
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

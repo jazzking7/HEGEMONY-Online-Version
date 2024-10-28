@@ -46,6 +46,10 @@ let ani_direction = 1;
 let dis_cas = false;
 let cas_count = 60;
 let casualties = [];
+// troop addition display
+let dis_add = false;
+let add_count = 60;
+let additions = [];
 
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -272,6 +276,24 @@ function draw() {
       } 
     }
   }
+
+  // additions display
+  if (additions.length > 0){
+    for (adding of additions) {
+      if (add_count > 0) {
+        if (adding.number > 0) {
+          push();
+          stroke(255);
+          strokeWeight(1); 
+          fill(39, 165, 103);
+          textSize(35);
+          textStyle(BOLD);
+          text("+" + adding.number, territories[adding.tid].cps.x, territories[adding.tid].cps.y);
+          pop();
+        }
+      } 
+    }
+  }
   
 
   for (let route of seaRoutes){
@@ -318,6 +340,15 @@ function draw() {
     if (cas_count == 0) {
       dis_cas = false;
       casualties = [];
+    }
+  }
+  
+  // addition display counter
+  if (dis_add){
+    add_count--;
+    if (add_count == 0){
+      dis_add = false;
+      additions = [];
     }
   }
 

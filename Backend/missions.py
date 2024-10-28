@@ -896,7 +896,6 @@ class Duelist(Mission):
                 return True
         return False
 
-
 class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
