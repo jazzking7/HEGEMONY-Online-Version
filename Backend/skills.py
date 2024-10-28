@@ -619,7 +619,7 @@ class Divine_Punishment(Skill):
             self.gs.map.territories[choice].isDeadZone += 2
 
             casualties = self.gs.map.territories[choice].troops
-            self.gs.map.territories[choice].troops = 0
+            self.gs.map.territories[choice].troops = math.ceil(0.25*self.gs.map.territories[choice].troops)
 
             # update total troop
             for player in self.gs.players:
