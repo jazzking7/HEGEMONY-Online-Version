@@ -529,6 +529,11 @@ class Game_State_Manager:
         shuffled_dict = {key: self.players[key] for key in self.pids}
         self.players = shuffled_dict
 
+    def reverse_players(self):
+        self.pids.reverse()
+        reversed_dict = {key: self.players[key] for key in self.pids}
+        self.players = reversed_dict
+
     def signal_view_clear(self,):
         for player in self.players:
             self.server.emit('clear_view', room=player)

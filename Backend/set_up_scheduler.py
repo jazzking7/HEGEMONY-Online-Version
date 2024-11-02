@@ -166,11 +166,12 @@ class setup_event_scheduler:
                     gs.server.emit('city_result', {'resp': True}, room=gs.lobby)
         gs.signal_view_clear()
     
-    def start_initial_deployment(self,gs, ms):
+    def start_initial_deployment(self, gs, ms):
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=gs.lobby)
+        gs.reverse_players()
         curr = 0
         for player in gs.players:
-            amount = len(gs.players[player].territories) + curr + curr//2
+            amount = len(gs.players[player].territories) + curr
             curr += 1
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
