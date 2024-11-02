@@ -660,7 +660,7 @@ class Divine_Punishment(Skill):
                     }, room=self.gs.lobby)
                     break
 
-            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': 0, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': self.gs.map.territories[choice].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
 
