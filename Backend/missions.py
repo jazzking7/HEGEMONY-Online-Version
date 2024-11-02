@@ -100,9 +100,6 @@ class Warmonger(Mission):
         super().__init__("Warmonger", player, gs)
         self.goal_count = len(self.gs.pids)//3
         self.goal_count = 2 if len(self.gs.pids) == 5 else self.goal_count
-        self.peace = 0
-        self.type = 'r_based'
-        self.max_peace = 9
         self.death_count = 0
 
     def check_conditions(self, ):
@@ -116,42 +113,21 @@ class Warmonger(Mission):
                 dc += 1
 
         if dc > self.death_count:
-            self.peace = 0
             self.death_count = dc
             # Signal update
             self.update_tracker_view({
                 'misProgBar': [self.death_count, self.goal_count],
-                'misProgDesp': f'{self.death_count}/{self.goal_count} deaths until mission success',
-                'lossProg': [0, self.max_peace],
-                'lossDesp': f'{0}/{self.max_peace} consecutives round of peace until mission failure'
+                'misProgDesp': f'{self.death_count}/{self.goal_count} personal kills until mission success',
             })
         if self.death_count == self.goal_count:
             # signal end
             self.signal_mission_success()
-
-    def check_round_condition(self, ):
-        if not self.gs.players[self.player].alive:
-            return
-        self.peace += 1
-        self.update_tracker_view({
-            'lossProg': [self.peace, self.max_peace],
-            'lossDesp': f'{self.peace}/{self.max_peace} consecutives round of peace until mission failure'
-            })
-        if self.peace == self.max_peace:
-            self.update_tracker_view({
-            'misProgBar': [0, self.goal_count],
-            'misProgDesp': f'-/- deaths until mission success',
-            'lossDesp': f'Eliminated due to mission failure'
-            })
-            self.signal_mission_failure()
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
             'misProgBar': [self.death_count, self.goal_count],
-            'misProgDesp': f'{self.death_count}/{self.goal_count} deaths until mission success',
-            'lossProg': [self.peace, self.max_peace],
-            'lossDesp': f'{self.peace}/{self.max_peace} consecutives round of peace until mission failure'
+            'misProgDesp': f'{self.death_count}/{self.goal_count} personal kills until mission success',
         }, room=self.player)
 
     def end_game_checking(self, ):
