@@ -614,7 +614,7 @@ class Dominator(Mission):
         super().__init__("Dominator", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 3
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:

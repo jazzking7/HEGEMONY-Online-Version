@@ -296,6 +296,7 @@ class turn_loop_scheduler:
                                     if gs.players[ps].skill.name == "Ares' Blessing" and gs.players[ps].skill.active:
                                         gs.players[ps].skill.checking_rage_meter()
                                 gs.update_LAO(ps)
+                                gs.update_player_stats()
                                 gs.get_SUP()
                                 gs.update_global_status()
                                 gs.signal_MTrackers('popu')
@@ -307,6 +308,5 @@ class turn_loop_scheduler:
                         t.isDeadZone -= 1
                         if not t.isDeadZone:
                             gs.server.emit('update_trty_display', {index: {'hasEffect': 'gone'}}, room=gs.lobby)
-                gs.update_player_stats()
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

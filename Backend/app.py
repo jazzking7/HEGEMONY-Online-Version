@@ -352,9 +352,11 @@ def update_troop_info(data):
                         }, room=gsm.lobby)
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
+
+    gsm.update_player_stats()
     gsm.get_SUP()
     gsm.update_global_status()
-    gsm.update_player_stats()
+
     gsm.signal_MTrackers('popu')
 
     if gsm.players[pid].deployable_amt > 0:
@@ -465,10 +467,12 @@ def handle_reserves_deployment(data):
                         }, room=gsm.lobby)
     socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
     gsm.update_LAO(pid)
+    gsm.update_private_status(pid)
+
+    gsm.update_player_stats()
     gsm.get_SUP()
     gsm.update_global_status()
-    gsm.update_private_status(pid)
-    gsm.update_player_stats()
+    
     gsm.signal_MTrackers('popu')
 
     if gsm.players[pid].reserves > 0:

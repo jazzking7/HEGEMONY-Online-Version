@@ -429,12 +429,13 @@ class Game_State_Manager:
                     self.TIP = None
     
     def get_SUP(self,):
-        l = [self.LAO, self.MTO, self.HIP, self.TIP]
-        for p in l:
-            if l.count(p) >= 3:
-                self.SUP = p
-                return
-        self.SUP = None
+        highest_ppi = max(player.PPI for player in self.players.values())
+        highest_pids = [pid for pid, player in self.players.items() if player.PPI == highest_ppi]
+
+        if len(highest_pids) > 1:
+            self.SUP = None
+        else:
+            self.SUP = highest_pids[0]
 
     # Update the global status
     def update_global_status(self, ):
@@ -627,9 +628,9 @@ class Game_State_Manager:
             print(updated_tids)
             self.server.emit('update_trty_display', updated_tids, room=self.lobby)
             self.update_LAO(player)
+            self.update_player_stats()
             self.get_SUP()
             self.update_global_status()
-            self.update_player_stats()
             self.signal_MTrackers('popu')
 
     def get_player_industrial_level(self, player):
