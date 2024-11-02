@@ -30,7 +30,8 @@ class Mission:
     def signal_mission_failure(self, ):
         if self.gs.players[self.player].alive:
             self.gs.players[self.player].alive = False
-            self.gs.players[self.player].skill.active = False
+            if self.gsplayers[self.player].skill:
+                self.gs.players[self.player].skill.active = False
             self.gs.perm_elims.append(self.player)
             self.gs.death_logs[self.player] = 'MF'
             self.gs.signal_MTrackers('death')

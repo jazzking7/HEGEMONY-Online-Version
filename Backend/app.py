@@ -562,14 +562,16 @@ def handle_clear_click_sync():
 def send_skill_information():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.players[pid].skill.update_current_status()
+    if gsm.players[pid].skill:
+        gsm.players[pid].skill.update_current_status()
 
 @socketio.on('signal_skill_usage')
 def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if pid == gsm.pids[gsm.GES.current_player]:
-        gsm.players[pid].skill.activate_effect()
+        if gsm.players[pid].skill:
+            gsm.players[pid].skill.activate_effect()
     else:
         socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
 

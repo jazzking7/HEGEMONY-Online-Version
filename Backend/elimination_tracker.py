@@ -11,7 +11,8 @@ class Elimination_tracker:
         # victim died
         if len(victim.territories) == 0:
             victim.alive = False
-            victim.skill.active = False
+            if victim.skill:
+                victim.skill.active = False
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars

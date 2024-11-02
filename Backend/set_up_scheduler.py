@@ -197,6 +197,6 @@ class setup_event_scheduler:
 
         for player in gs.players:
             # CM
-            if gs.players[player].skill == None:
+            if not gs.players[player].skill:
                 # Randomly assign mission to player
                 gs.players[player].skill = gs.SDIS.initiate_skill(gs.SDIS.get_single_option(), player, gs)

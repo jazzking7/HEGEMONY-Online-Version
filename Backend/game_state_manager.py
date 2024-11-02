@@ -749,11 +749,19 @@ class Game_State_Manager:
             if def_p.skill.active and def_p.skill.reactMod:
                 def_p.skill.reactStatsMod(def_stats, atk_stats, False)
 
-        if "Realm_of_Permafrost" == atk_p.skill.name or "Realm_of_Permafrost" == def_p.skill.name:
-            atk_stats[3] = 0
-            atk_stats[4] = 1
-            def_stats[3] = 0
-            def_stats[4] = 1
+        if atk_p.skill:
+            if "Realm_of_Permafrost" == atk_p.skill.name:
+                atk_stats[3] = 0
+                atk_stats[4] = 1
+                def_stats[3] = 0
+                def_stats[4] = 1
+
+        if def_p.skill:
+            if "Realm_of_Permafrost" == def_p.skill.name:
+                atk_stats[3] = 0
+                atk_stats[4] = 1
+                def_stats[3] = 0
+                def_stats[4] = 1
 
     def handle_battle(self, data):
         # Load territories involved

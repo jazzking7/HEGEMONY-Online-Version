@@ -71,9 +71,10 @@ class turn_loop_scheduler:
             # Robinhood activated    
             d_amt = gs.get_deployable_amt(curr_p)
             for p in gs.players:
-                if gs.players[p].skill.name == 'Robinhood':
-                    if curr_p in gs.players[p].skill.targets and curr_p != p:
-                        d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
+                if gs.players[p].skill:
+                    if gs.players[p].skill.name == 'Robinhood':
+                        if curr_p in gs.players[p].skill.targets and curr_p != p:
+                            d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
             # Zealous Expansion Reserve Booster
             # Air superiority
             if gs.players[curr_p].skill:
@@ -181,17 +182,21 @@ class turn_loop_scheduler:
 
                 # Ice Age!
                 if gs.in_ice_age:
-                    if p.skill.name != 'Realm_of_Permafrost':
-                        s_amt = 0
-                    else:
-                        if not p.skill.active:
+                    if p.skill:
+                        if p.skill.name != 'Realm_of_Permafrost':
                             s_amt = 0
+                        else:
+                            if not p.skill.active:
+                                s_amt = 0
+                    else:
+                        s_amt = 0
 
                 # Robinhood!
                 for pid in gs.players:
-                    if gs.players[pid].skill.name == "Robinhood":
-                        if player in gs.players[pid].skill.targets and player != pid:
-                            s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
+                    if gs.players[pid].skill:
+                        if gs.players[pid].skill.name == "Robinhood":
+                            if player in gs.players[pid].skill.targets and player != pid:
+                                s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
 
                 p.stars += s_amt
 
@@ -270,8 +275,9 @@ class turn_loop_scheduler:
                 gs.update_global_status()
                 # update cooldown
                 for p in gs.players:
-                    if gs.players[p].skill.hasRoundEffect:
-                        gs.players[p].skill.apply_round_effect()
+                    if gs.players[p].skill:
+                        if gs.players[p].skill.hasRoundEffect:
+                            gs.players[p].skill.apply_round_effect()
 
                 # set ice age
                 if gs.set_ice_age:
