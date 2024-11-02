@@ -90,17 +90,23 @@ class Iron_Wall(Skill):
     def reactStatsMod(self, ownStats, enemyStats, attacking):
         if not attacking:
 
-            ownStats[3] = 40
+            ownStats[3] = 30
             ownStats[4] = 2
 
             disparity = (enemyStats[0] - ownStats[0]) + (enemyStats[1] - ownStats[1])
 
-            if disparity > 3:
+            if disparity > 4:
+                ownStats[3] += 30
+                ownStats[4] += 1
+            elif disparity == 4:
                 ownStats[3] += 20
                 ownStats[4] += 1
-            elif disparity > 2:
+            elif disparity == 3:
+                ownStats[3] += 15
+                ownStats[4] += 1    
+            elif disparity == 2:
                 ownStats[3] += 10
-            elif disparity > 1:
+            elif disparity == 1:
                 ownStats[3] += 5
     
     def update_current_status(self):

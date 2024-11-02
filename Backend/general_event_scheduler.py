@@ -169,7 +169,8 @@ class General_Event_Scheduler:
     def launch_summit_procedures(self, player):
         pid = self.gs.pids[player]
         self.summit_voter = {'y': 0, 'n': 0}
-
+        self.summit_requested = False
+        
         c = 0
         for player in self.gs.players:
             if self.gs.players[player].alive:
@@ -182,7 +183,6 @@ class General_Event_Scheduler:
             self.activate_summit()
         else:
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, NO SUMMIT HELD!"}, room=self.gs.lobby)
-        self.summit_requested = False
 
     def launch_global_peace_procedures(self, player):
         pid = self.gs.pids[player]
