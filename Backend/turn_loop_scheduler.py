@@ -182,10 +182,10 @@ class turn_loop_scheduler:
                 # Ice Age!
                 if gs.in_ice_age:
                     if p.skill.name != 'Realm_of_Permafrost':
-                        s_amt -= 1
+                        s_amt = 0
                     else:
                         if not p.skill.active:
-                            s_amt -= 1
+                            s_amt = 0
 
                 # Robinhood!
                 for pid in gs.players:
@@ -290,6 +290,15 @@ class turn_loop_scheduler:
                         for ps in gs.players:
                             if index in gs.players[ps].territories:
                                 gs.players[ps].total_troops -= losses
+
+                                # Ares' Blessing Rage Meter check
+                                if gs.players[ps].skill:
+                                    if gs.players[ps].skill.name == "Ares' Blessing" and gs.players[ps].skill.active:
+                                        gs.players[ps].skill.checking_rage_meter()
+                                gs.update_LAO(ps)
+                                gs.get_SUP()
+                                gs.update_global_status()
+                                gs.signal_MTrackers('popu')
                                 break
                         gs.server.emit('update_trty_display', {index: {'troops': t.troops}}, room=gs.lobby)
                         gs.server.emit('battle_casualties', {

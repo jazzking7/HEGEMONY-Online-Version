@@ -453,6 +453,12 @@ class Game_State_Manager:
                                                'curr_min_roll': self.players[pid].min_roll}, room=pid)
 
     def convert_reserves(self, amt, player):
+        if self.in_ice_age:
+            if self.players[player].skill:
+                if self.players[player].skill.name != 'Realm_of_Permafrost':
+                    return
+                elif not self.players[player].skill.active:
+                    return
         extra = 0
         if amt == 2:
             extra = 3
@@ -528,6 +534,12 @@ class Game_State_Manager:
 
     def upgrade_infrastructure(self, amt, player):
         # CM
+        if self.in_ice_age:
+            if self.players[player].skill:
+                if self.players[player].skill.name != 'Realm_of_Permafrost':
+                    return
+                elif not self.players[player].skill.active:
+                    return
         self.players[player].infrastructure_upgrade += amt
         self.players[player].stars -= amt*4
         self.update_private_status(player)
@@ -847,6 +859,11 @@ class Game_State_Manager:
         # update total troops of players
         atk_p.total_troops -= (atk_amt-result[0])
         def_p.total_troops -= (def_amt-result[1])
+
+        # Ares' Blessing checking for rage meter
+        if def_p.skill:
+            if def_p.skill.name == "Ares' Blessing" and def_p.skill.active:
+                def_p.skill.checking_rage_meter()
 
         # update player stats list
         self.update_player_stats()

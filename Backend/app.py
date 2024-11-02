@@ -310,6 +310,14 @@ def settle_new_cities(data):
         if gsm.map.territories[trty].isDeadZone:
             socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON RADIOACTIVE ZONE!'}, room=pid)
             return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                return
+            elif not gsm.players[pid].skill.active:
+                return
+
     # CM
     for trty in choices:
         gsm.map.territories[trty].isCity = True

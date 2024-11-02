@@ -381,13 +381,27 @@ class Ares_Blessing(Skill):
         self.hasTurnEffect = True
 
         nump = len(gs.players)
-        self.limit = math.ceil(nump/2) if math.ceil(nump/2) >= 3 else 3
+        self.limit = math.ceil(nump/2) if math.ceil(nump/2) >= 2 else 2
 
         self.intMod = True
         self.cooldown = 0
 
         self.changed_stats = True
         self.activated = False
+
+        self.current_max = 0
+        self.rage_not_activated = True
+
+    # checking only when being attacked
+    def checking_rage_meter(self,):
+        curr_total = self.gs.players[self.player].total_troops
+        if curr_total > self.current_max:
+            self.current_max = curr_total
+            self.rage_not_activated = True
+        if curr_total < (self.current_max*0.5) and self.rage_not_activated:
+            self.cooldown = 0
+            self.limit += 1
+            self.rage_not_activated = False
     
     def internalStatsMod(self, battle_stats):
 
@@ -626,6 +640,14 @@ class Divine_Punishment(Skill):
                 if choice in self.gs.players[player].territories:
                     self.gs.players[player].total_troops -= casualties
 
+                    self.gs.update_LAO(player)
+                    self.gs.update_TIP(player)
+
+                    # Ares' Blessing Rage meter checking
+                    if self.gs.players[player].skill:
+                        if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                            self.gs.players[player].skill.checking_rage_meter()
+
                     # visual effect
                     self.gs.server.emit('battle_casualties', {
                         f'{choice}': {'tid': choice, 'number': casualties},
@@ -635,9 +657,6 @@ class Divine_Punishment(Skill):
             self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': 0, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
-        
-        self.gs.update_LAO(self.player)
-        self.gs.update_TIP(self.player)
 
         self.gs.get_SUP()
         self.gs.update_global_status()
@@ -740,11 +759,11 @@ class Collusion(Skill):
     
     def update_current_status(self):
 
-        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
+        limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].stars >= 3 else 0
         controlled_trtys = [self.gs.map.territories[tid].name for tid in self.secret_control_list]
         self.gs.server.emit("update_skill_status", {
             'name': "Collusion",
-            'description': "Buy over ownership of an enemy territory with 4* and secretly control it.",
+            'description': "Buy over ownership of an enemy territory with 3★ and secretly control it.",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
@@ -757,7 +776,7 @@ class Collusion(Skill):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 4:
+        if self.gs.players[self.player].stars < 3:
             self.gs.server.emit('display_new_notification', {'msg': "Not enough stars to corrupt any territory!"}, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
@@ -771,7 +790,7 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
             return
 
-        if self.gs.players[self.player].stars < 4:
+        if self.gs.players[self.player].stars < 3:
             self.gs.server.emit("display_new_notification", {"msg": f"Not enough stars!"}, room=self.player)
             return
         
@@ -784,7 +803,7 @@ class Collusion(Skill):
 
         self.finised_choosing = True
         self.secret_control_list.append(choice)
-        self.gs.players[self.player].stars -= 4
+        self.gs.players[self.player].stars -= 3
         self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)
