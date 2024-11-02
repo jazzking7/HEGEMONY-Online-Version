@@ -56,10 +56,7 @@ class Mission_Distributor:
 
     def __init__(self,):
         self.nat_con = [
-            ['Uni', 'Pol'],
-            ['Dom', 'Ind', 'Exp'],
-            ['Dom', 'Ind', 'Pop'],
-            ['Dom', 'Exp', 'Pop'],
+            ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
         self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
