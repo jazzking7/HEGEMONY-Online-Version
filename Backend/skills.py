@@ -816,3 +816,15 @@ class Collusion(Skill):
         self.gs.signal_MTrackers('indus')
         self.gs.get_SUP()
         self.gs.update_global_status()
+
+class Laplace_Demon(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Laplace_Demon", player, gs)
+        self.finised_choosing = True
+        self.secret_control_list = []
+
+class Handler_of_Wheel_of_Fate(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Handler_of_Wheel_of_Fate", player, gs)
+        self.finised_choosing = True
+        self.secret_control_list = []

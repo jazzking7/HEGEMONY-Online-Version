@@ -621,7 +621,7 @@ class Game_State_Manager:
         if p.deployable_amt > 0:
             # CM
             updated_trty = []
-            while (p.deployable_amt != 0):
+            while (p.deployable_amt > 0):
                 trty = random.choice(p.territories)
                 t = self.map.territories[trty]
                 t.troops += 1

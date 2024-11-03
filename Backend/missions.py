@@ -32,6 +32,8 @@ class Mission:
             self.gs.players[self.player].alive = False
             if self.gsplayers[self.player].skill:
                 self.gs.players[self.player].skill.active = False
+                if self.gs.players[self.player].skill.name == 'Collusion':
+                    self.gs.players[self.player].skill.secret_control_list = []
             self.gs.perm_elims.append(self.player)
             self.gs.death_logs[self.player] = 'MF'
             self.gs.signal_MTrackers('death')

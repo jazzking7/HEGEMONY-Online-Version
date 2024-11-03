@@ -305,6 +305,7 @@ function hide_async_btns(){
 
 // game over announcement
 socket.on('GAME_OVER', function(data){
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
   $('#middle_display, #middle_title, #middle_content').show();

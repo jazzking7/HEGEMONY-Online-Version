@@ -31,7 +31,7 @@ class turn_loop_scheduler:
                 ms.stage_completed = False
                 done = False
                 while not ms.stage_completed and not done and not ms.innerInterrupt:
-                    done = atk_player.deployable_amt == 0
+                    done = atk_player.deployable_amt < 1
                 if ms.terminated or ms.innerInterrupt:
                     return
 
@@ -126,7 +126,7 @@ class turn_loop_scheduler:
         ms.stage_completed = False
         done = False
         while not ms.stage_completed and not done and not ms.innerInterrupt and atk_player.connected:
-            done = atk_player.deployable_amt == 0
+            done = atk_player.deployable_amt < 1
         if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
 

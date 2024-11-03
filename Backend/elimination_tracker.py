@@ -13,6 +13,8 @@ class Elimination_tracker:
             victim.alive = False
             if victim.skill:
                 victim.skill.active = False
+                if victim.skill.name == 'Collusion':
+                    victim.skill.secret_control_list = []
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars
