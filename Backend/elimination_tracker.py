@@ -15,6 +15,12 @@ class Elimination_tracker:
                 victim.skill.active = False
                 if victim.skill.name == 'Collusion':
                     victim.skill.secret_control_list = []
+                    gs.get_TIP()
+                    gs.update_player_stats()
+                    gs.get_SUP()
+                    gs.update_global_status()
+                    gs.signal_MTrackers('indus')
+                
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars

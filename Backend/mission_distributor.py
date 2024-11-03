@@ -39,8 +39,10 @@ class Round_Based_Incrementor(Mission_Tracker):
         super().__init__(gs)
     
     def check_conditions(self,):
+        print('Round mission tracker activated')
         for obs in self.observers:
             obs.check_round_condition()
+            print(f'Checked {obs.name} of player {obs.gs.players[obs.player]}')
 
 # Check condition at specific point     Death | Trty | Indus | Popu
 class Event_Based_Tracker(Mission_Tracker):
@@ -49,8 +51,10 @@ class Event_Based_Tracker(Mission_Tracker):
         super().__init__(gs)
     
     def check_conditions(self, ):
+        print('Mission tracker activated')
         for obs in self.observers:
             obs.check_conditions()
+            print(f'Checked {obs.name} of player {obs.gs.players[obs.player]}')
 
 class Mission_Distributor:
 

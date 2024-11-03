@@ -34,6 +34,11 @@ class Mission:
                 self.gs.players[self.player].skill.active = False
                 if self.gs.players[self.player].skill.name == 'Collusion':
                     self.gs.players[self.player].skill.secret_control_list = []
+                    self.gs.get_TIP()
+                    self.gs.update_player_stats()
+                    self.gs.get_SUP()
+                    self.gs.update_global_status()
+                    self.gs.signal_MTrackers('indus')
             self.gs.perm_elims.append(self.player)
             self.gs.death_logs[self.player] = 'MF'
             self.gs.signal_MTrackers('death')
