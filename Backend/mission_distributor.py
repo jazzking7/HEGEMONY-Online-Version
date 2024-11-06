@@ -236,8 +236,69 @@ class Mission_Distributor:
             return B_tier
         else:
             return C_tier
+        
+    def no_conflicts(self, mission_name_list, mission_list):
+        for name in mission_name_list:
+            if name in self.self_wins:
+                return False
+            if name in self.dup_con and mission_name_list.count(name) > 1:
+                return False
+            if name == 'Fanatic' and mission_name_list.count(name) > 1:
+                return False
+        if 'Unifier' in mission_name_list and 'Fanatic' in mission_name_list:
+            U, F = [], None
+            for mission in mission_list:
+                if mission.name == 'Unifier':
+                    U.append(mission)
+                if mission.name == 'Fanatic':
+                    F = mission
+            for miss in U:
+                if bool(set(miss.gs.map.conts[miss.target_continent]['trtys']) & set(F.targets)):
+                    return False
+        if 'Guardian' in mission_name_list and 'Fanatic' in mission_name_list:
+            G, F = [], None
+            for mission in mission_list:
+                if mission.name == 'Guardian':
+                    G.append(mission)
+                if mission.name == 'Fanatic':
+                    F = mission
+            for miss in G:
+                curr_id = 0
+                for trty in miss.gs.map.territories:
+                    if trty.name == miss.gs.players[miss.player].capital:
+                        break
+                    curr_id += 1
+                
+                if curr_id in F.targets:
+                    return False
+        if 'Guardian' in mission_name_list and 'Unifier' in mission_name_list:
+            G, U = [], []
+            for mission in mission_list:
+                if mission.name == 'Guardian':
+                    G.append(mission)
+                if mission.name == 'Fanatic':
+                    U.append(mission)
+            for miss in G:
+                curr_id = 0
+                for trty in miss.gs.map.territories:
+                    if trty.name == miss.gs.players[miss.player].capital:
+                        break
+                    curr_id += 1
+                for uni in U:
+                    if curr_id in uni.gs.map.conts[uni.target_continent]['trtys']:
+                        return False
+        return True
     
     def determine_gp_winners(self, gs):
+
+        mission_name_list = [mission.name for mission in gs.Mset if gs.players[mission.player].alive]
+        mission_list = [mission for mission in gs.Mset if gs.players[mission.player].alive]
+        if self.no_conflicts(mission_name_list, mission_list):
+            winners = {}
+            for miss in mission_list:
+                winners[miss.player] = miss.name
+            return winners
+
         # Redefine this
         c = []
         for p in gs.players:
