@@ -254,17 +254,17 @@ class Industrial_Revolution(Skill):
 
         ft = []
         for cont in self.freeCityTracker:
-            if self.freeCityTracker[cont]:
+            if self.freeCityTracker[cont] >= 2:
                 ft.append(cont)
 
         self.gs.server.emit("update_skill_status", {
             'name': "Industrial Revolution",
-            'description': "Can build 1 city for free per continent, +1 industrial power in battles",
+            'description': "Can build up to 2 cities for free per continent, +1 industrial power in battles",
             'operational': self.active,
             'forbidden_targets': ft,
-            'ft_msg': "Free city already built in:",
+            'ft_msg': "Free city limit already reached in:",
             'hasLimit': True,
-            'limits': len(self.freeCityTracker) - len(ft),
+            'limits': 2 * len(self.freeCityTracker) - sum(self.freeCityTracker.values()),
             'btn_msg': "Activate rapid industrialization"
         }, room=self.player) 
 
@@ -279,7 +279,8 @@ class Industrial_Revolution(Skill):
         choices = data['choice']
 
         # too many cities
-        if len(choices) > len(self.freeCityTracker):
+        total_allowed_cities = 2 * len(self.freeCityTracker) - sum(self.freeCityTracker.values())
+        if len(choices) > total_allowed_cities:
             self.gs.server.emit("display_new_notification", {"msg": f"Selected more than allowed amount of cities!"}, room=self.player)
             return
 
@@ -298,10 +299,13 @@ class Industrial_Revolution(Skill):
                     if cont not in tmp_count:
                         tmp_count[cont] = 1
                     else:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Multiple selections on {cont}!"}, room=self.player)
+                        tmp_count[cont] += 1
+                    
+                    if tmp_count[cont] > 2:
+                        self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
                         return
-                    if self.freeCityTracker[cont]:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Already built free city on {cont}!"}, room=self.player)
+                    if self.freeCityTracker[cont] + tmp_count[cont] >= 2:
+                        self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
                         return
 
         # apply changes
