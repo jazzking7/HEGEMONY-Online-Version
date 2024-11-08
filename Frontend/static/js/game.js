@@ -303,21 +303,33 @@ function hide_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
 }
 
-// game over announcement
-socket.on('GAME_OVER', function(data){
+// Game over announcement
+socket.on('GAME_OVER', function(data) {
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
+  $('#middle_display').css({
+    'max-width': '50vw',
+    'max-height': '50vh'
+  });
   $('#middle_display, #middle_title, #middle_content').show();
   $('#middle_title').html('<h1 style="padding-right: 5px">FINAL VICTORS</h1>');
-  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;" ></div>`);
+  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;"></div>`);
   for (winner of data.winners) {
-    var wname; var mission;
+    var wname;
+    var mission;
     for (w in winner) {
       wname = w;
       mission = winner[w];
     }
-    $('#winners').append(`<div><h3>${wname} => ${mission}</h3></div>`)
+    $('#winners').append(`<div><h3>${wname} => ${mission}</h3></div>`);
+  }
+  $('#middle_content').append('<div id="player_overview" style="margin-top: 5px; max-height: 7em; overflow-y: auto; display: flex; flex-direction: column; align-items: flex-start;"></div>');
+  for (let overview of data.player_overview) {
+    let [playerName, skillName, missionName] = overview;
+    $('#player_overview').append(
+      `<div style="font-size: 0.875rem; word-wrap: break-word;">${playerName} had war art ${skillName} with ${missionName} as secret agenda.</div>`
+    );
   }
 });
 

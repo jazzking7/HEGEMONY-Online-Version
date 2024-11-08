@@ -238,13 +238,29 @@ class Mission_Distributor:
             return C_tier
         
     def no_conflicts(self, mission_name_list, mission_list):
+        print(mission_name_list)
+        print(mission_list)
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
         for name in mission_name_list:
-            if name in self.self_wins:
+            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']:
                 return False
-            if name in self.dup_con and mission_name_list.count(name) > 1:
+            if name in ['Industrialist', 'Expansionist', 'Dominator', 'Populist'] and mission_name_list.count(name) > 1:
                 return False
             if name == 'Fanatic' and mission_name_list.count(name) > 1:
                 return False
+        if 'Unifier' in mission_name_list and 'Polarizer' in mission_name_list:
+            return False
+        if mission_name_list.count('Unifier') > 2:
+            count_cont = {}
+            for mission in mission_list:
+                if mission.name == 'Unifier':
+                    if mission.target_continent not in count_cont:
+                        count_cont[mission.target_continent] = 1
+                    else:
+                        count_cont[mission.target_continent] += 1
+            for cont, count in count_cont.items():
+                if count > 1:
+                    return False
         if 'Unifier' in mission_name_list and 'Fanatic' in mission_name_list:
             U, F = [], None
             for mission in mission_list:

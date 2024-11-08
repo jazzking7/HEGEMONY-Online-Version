@@ -319,19 +319,32 @@ class Game_State_Manager:
             winners = [{self.players[w].name: winners[w]} for w in winners]
         else:
             winners = []
+        player_overview = [
+            [self.players[pid].name, self.players[pid].skill.name] + [mission.name for mission in self.Mset if mission.player == pid][:1]
+            for pid in self.oriPlayers
+        ]
         self.signal_view_clear()
         time.sleep(1)
         self.server.emit('GAME_OVER', {
             'winners': winners,
+            "player_overview": player_overview,
         }, room=self.lobby)
 
     def global_peace_game_over(self,):
         winners = self.Mdist.determine_gp_winners(self)
-        winners = [{self.players[w].name: winners[w]} for w in winners]
+        if winners:
+            winners = [{self.players[w].name: winners[w]} for w in winners]
+        else:
+            winners = []
+        player_overview = [
+            [self.players[pid].name, self.players[pid].skill.name] + [mission.name for mission in self.Mset if mission.player == pid][:1]
+            for pid in self.oriPlayers
+        ]
         self.signal_view_clear()
         time.sleep(1)
         self.server.emit('GAME_OVER', {
             'winners': winners,
+            'player_overview': player_overview,
         }, room=self.lobby)
 
     def get_LAO(self,):

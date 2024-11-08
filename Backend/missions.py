@@ -30,7 +30,7 @@ class Mission:
     def signal_mission_failure(self, ):
         if self.gs.players[self.player].alive:
             self.gs.players[self.player].alive = False
-            if self.gsplayers[self.player].skill:
+            if self.gs.players[self.player].skill:
                 self.gs.players[self.player].skill.active = False
                 if self.gs.players[self.player].skill.name == 'Collusion':
                     self.gs.players[self.player].skill.secret_control_list = []

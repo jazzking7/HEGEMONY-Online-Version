@@ -304,7 +304,7 @@ class Industrial_Revolution(Skill):
                     if tmp_count[cont] > 2:
                         self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
                         return
-                    if self.freeCityTracker[cont] + tmp_count[cont] >= 2:
+                    if self.freeCityTracker[cont] + tmp_count[cont] > 2:
                         self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
                         return
 
