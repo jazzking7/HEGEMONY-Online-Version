@@ -522,7 +522,8 @@ class Game_State_Manager:
                 'troops': self.get_total_troops_of_player(pid),
                 'trtys': len(self.players[pid].territories),
                 'color': self.players[pid].color,
-                'PPI': self.players[pid].PPI
+                'PPI': self.players[pid].PPI,
+                'player_id': pid,
             }
         self.server.emit('get_players_stats', data, room=self.lobby)
     

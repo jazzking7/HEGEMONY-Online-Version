@@ -24,6 +24,9 @@ let lossProg;
 let curr_slider = "";
 let curr_slider_val = "";
 
+// Laplace Mode
+let laplace_mode = false;
+
 $(document).ready(async function() {
   
   // Hide control buttons
@@ -125,7 +128,49 @@ socket.on('start_timeout', function(data){
 // Stop timer animation
 socket.on('stop_timeout', function(){
   clearInterval(current_interval);
-})
+});
+
+// Laplace setting
+socket.on('laplace_mode', function(){
+  laplace_mode = true;
+});
+
+function laplace_info_fetch(player_id){
+  if (laplace_mode){
+    socket.emit('laplace_info_fetch', {'pid': player_id});
+  }
+}
+
+socket.on('laplace_info', function(data) {
+  $('#laplace_info_display').empty();
+  $('#laplace_info_display').css({
+    'display': 'block',
+    'background-color': data.color,
+    'color': 'black',
+    'overflow-y': 'auto',
+    'max-height': '10em',
+  });
+
+  $.each(data.info, function(fieldName, fieldValue) {
+    $('#laplace_info_display').append(`
+      <div class="text-sm" style="word-wrap: break-word; max-width: 13vw;">
+        <strong>${fieldName}:</strong> ${fieldValue}
+      </div>
+    `);
+  });
+});
+
+// hide the display if clicked outside
+$(document).on('click', function(event) {
+  if (!$(event.target).closest('#laplace_info_display').length) {
+    $('#laplace_info_display').empty().hide();
+  }
+});
+
+// prevent propagation if clicked on it
+$('#laplace_info_display').on('click', function(event) {
+  event.stopPropagation();
+});
 
 // Player stats list initiate
 socket.on('get_players_stats', function(data){
@@ -156,6 +201,9 @@ socket.on('get_players_stats', function(data){
         </div>
       `);
     pList.append(pBtn);
+    pBtn.on('click', function() {
+      laplace_info_fetch(p_info.player_id);
+    });
   });
 });
 
@@ -163,19 +211,19 @@ socket.on('get_players_stats', function(data){
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
   btn.html(`
-    <div style="text-align: left;" class="mb-1">
-      ${data.name}<br>
-      <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
-          <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"><span>${data.troops}</span>
+      <div style="text-align: left;" class="mb-1">
+        ${data.name}<br>
+        <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
+            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"><span>${data.troops}</span>
+        </div>
+        <div style="display: inline-block; vertical-align: middle;">
+          <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;"><span>${data.trtys}</span>
+        </div>
+        <br>
+        <div style="display: inline-block; vertical-align: middle; direction: ltr;">
+          <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"><span>${data.PPI}</span>
+        </div>
       </div>
-      <div style="display: inline-block; vertical-align: middle;">
-         <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;"><span>${data.trtys}</span>
-      </div>
-      <br>
-      <div style="display: inline-block; vertical-align: middle; direction: ltr;">
-        <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"><span>${data.PPI}</span>
-      </div>
-    </div>
   `);
 });
 

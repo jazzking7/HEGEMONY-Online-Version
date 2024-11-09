@@ -78,6 +78,18 @@ html, body {
     background-color: rgba(255, 255, 255, 0)
 }
 
+#laplace_info_display{
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 15%;
+    max-width: 15vw;
+    border: 0;
+    padding: 2px;
+    border-radius: 3%
+}
+
 
 .stats-list {
     overflow-y: auto;

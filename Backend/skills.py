@@ -1,6 +1,8 @@
 import math
 import random
 
+# Skill usage button shows when hasLimit, limits, cooldown
+
 class Skill:
     
     def __init__(self, name, player, gs):
@@ -27,6 +29,9 @@ class Skill:
 
 
     def update_current_status(self, ):
+        pass
+
+    def get_skill_status(self, ):
         pass
 
 class Realm_of_Permafrost(Skill):
@@ -81,6 +86,10 @@ class Realm_of_Permafrost(Skill):
             'btn_msg': "Begin Ice Age"
         }, room=self.player)
 
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
 class Iron_Wall(Skill):
 
     def __init__(self, player, gs):
@@ -116,6 +125,10 @@ class Iron_Wall(Skill):
             'operational': self.active
         }, room=self.player)
 
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
 class Dictator(Skill):
 
     def __init__(self, player, gs):
@@ -132,6 +145,10 @@ class Dictator(Skill):
             'description': "Gain a minimum of 2 ★ per turn regardless of successful conquests.",
             'operational': self.active
         }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
 
 class Mass_Mobilization(Skill):
 
@@ -177,6 +194,12 @@ class Mass_Mobilization(Skill):
             'cooldown': self.cooldown,
             'btn_msg': "Activate Mobilization"
         }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f'Number of rounds of cooldown: {self.cooldown} | ' if self.cooldown else 'Ready to activate | '
+        info += f'Number of usages left: {self.limit}'
+        return info
 
     def activate_effect(self):
         if not self.active:
@@ -249,6 +272,11 @@ class Industrial_Revolution(Skill):
     
     def apply_turn_effect(self,):
         self.turn_stats_mod = False
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f'{2 * len(self.freeCityTracker) - sum(self.freeCityTracker.values())} free cities ready to be built\n'
+        return info
 
     def update_current_status(self):
 
@@ -339,6 +367,16 @@ class Robinhood(Skill):
             self.top_nump = 2  
         elif l < 16:
             self.top_nump = 3
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        names = ''
+        for p in self.targets:
+            names += self.gs.players[p].name + " "
+        if not names:
+            names = 'nobody'
+        info += 'Currently targeting ' + names
+        return info
 
     def apply_round_effect(self,):
         self.targets = []
@@ -442,6 +480,12 @@ class Ares_Blessing(Skill):
             'inUseMsg': "RAMPAGE ONGOING"
         }, room=self.player)
 
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f'{self.limit} usages left | '
+        info += f'Number of rounds of cooldown left: {self.cooldown}' if self.cooldown else 'Ready to activate'
+        return info
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
@@ -493,6 +537,10 @@ class Zealous_Expansion(Skill):
             'btn_msg': "Level up infrastructure by 1"
         }, room=self.player) 
 
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
@@ -533,6 +581,10 @@ class Frameshifter(Skill):
         self.gs.players[self.player].min_roll += 1
         self.gs.update_private_status(self.player)
 
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
 class Necromancer(Skill):
     def __init__(self, player, gs):
         super().__init__("Necromancer", player, gs)
@@ -556,6 +608,11 @@ class Necromancer(Skill):
             'cooldown': self.cooldown,
             'inUseMsg': "BLOOD HARVEST ACTIVE"
         }, room=self.player) 
+    
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f'Number of rounds of cooldown left: {self.cooldown}\n' if self.cooldown else "Ready to activate"
+        return info
     
     def apply_round_effect(self,):
         if self.cooldown:
@@ -586,7 +643,7 @@ class Divine_Punishment(Skill):
 
         if self.limit > len(gs.map.territories)//len(gs.players):
             self.limit = len(gs.map.territories)//len(gs.players) - 2
-            self.energy_cost = 2
+            self.energy_cost = 1
 
         self.hasRoundEffect = True
         self.energy = 0
@@ -609,6 +666,12 @@ class Divine_Punishment(Skill):
             'limits': self.limit,
             'btn_msg': "LAUNCH ATTACK",
         }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f'{self.limit} usages left\n'
+        return info
+
     
     def activate_effect(self):
         if not self.active:
@@ -729,6 +792,10 @@ class Air_Superiority(Skill):
             'btn_msg': "LAUNCH PARATROOPER ATTACK",
         }, room=self.player)
 
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
@@ -782,6 +849,13 @@ class Collusion(Skill):
             'btn_msg': "Corrupt a territory"
         }, room=self.player) 
 
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += 'Secretly controlling '
+        for tid in self.secret_control_list:
+            info += ' ' + self.gs.map.territories[tid].name
+        return info
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
@@ -823,9 +897,39 @@ class Collusion(Skill):
 
 class Laplace_Demon(Skill):
     def __init__(self, player, gs):
-        super().__init__("Laplace_Demon", player, gs)
-        self.finised_choosing = True
-        self.secret_control_list = []
+        super().__init__("Laplace's Demon", player, gs)
+        self.gs.server.emit('laplace_mode', room=self.player)
+        names = []
+        for miss in self.gs.Mset:
+            if miss.name not in names:
+                names.append(miss.name)
+        if len(names) < 16:
+            count = 0
+            MList = ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher',
+                     'Industrialist', 'Expansionist', 'Dominator', 'Populist', 'Fanatic', 'Unifier', 'Polarizer', 'Guardian']
+            while len(names) < 16 and count != 2:
+                random_miss = random.choice(MList)
+                if random_miss not in names:
+                    names.append(random_miss)
+                    count += 1
+        random.shuffle(names)
+        self.names = names
+
+    def update_current_status(self):
+        # modify this
+        information = "You own the top information gathering group, click on player to know their hidden stats. Missions that are most likely in game: "
+        for name in self.names:
+            information += name + ' '
+        self.gs.server.emit("update_skill_status", {
+            'name': "Laplace's Demon",
+            'description': information,
+            'operational': self.active,
+        }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += "Know as much as you do :)"
+        return info
 
 class Handler_of_Wheel_of_Fate(Skill):
     def __init__(self, player, gs):

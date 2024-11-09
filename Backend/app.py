@@ -605,6 +605,24 @@ def handle_corrupt_territory(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.validate_and_apply_changes(data)
 
+@socketio.on('laplace_info_fetch')
+def handle_laplace_fetching(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    player_id = data['pid']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Laplace's Demon" and gsm.players[pid].skill.active:
+            info_player = gsm.players[player_id]
+            secret_data = {}
+            secret_data['Reserves'] = info_player.reserves
+            secret_data['Special Authority'] = info_player.stars
+            secret_data['Infrastructure Level'] = gsm.get_player_infra_level(info_player) + 3
+            secret_data['Min Roll'] = info_player.min_roll
+            if info_player.skill:
+                secret_data['Skill'] = info_player.skill.name
+                secret_data['Skill Status'] = info_player.skill.get_skill_status()
+            socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

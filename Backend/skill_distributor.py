@@ -17,11 +17,12 @@ class Skill_Distributor:
             "Necromancer",
             "Divine_Punishment",
             "Air_Superiority",
-            "Collusion"
+            "Collusion",
+            "Laplace's Demon"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=6)
+        return random.sample(self.skill_options, k=7)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -53,3 +54,5 @@ class Skill_Distributor:
             return Air_Superiority(player, gs)
         elif skill_name == "Collusion":
             return Collusion(player, gs)
+        elif skill_name == "Laplace's Demon":
+            return Laplace_Demon(player, gs)
