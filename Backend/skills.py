@@ -643,7 +643,7 @@ class Divine_Punishment(Skill):
 
         if self.limit > len(gs.map.territories)//len(gs.players):
             self.limit = len(gs.map.territories)//len(gs.players) - 2
-            self.energy_cost = 1
+            self.energy_cost = 2
 
         self.hasRoundEffect = True
         self.energy = 0
