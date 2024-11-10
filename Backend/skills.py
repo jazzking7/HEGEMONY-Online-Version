@@ -931,6 +931,23 @@ class Laplace_Demon(Skill):
         info += "Know as much as you do :)"
         return info
 
+class Loan_Shark(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Loan Shark", player, gs)
+        self.loan_list = []
+        self.secret_control_list = []
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += "Know as much as you do :)"
+        return info
+
+class Usurper(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Usurper", player, gs)
+        self.finised_choosing = True
+        self.secret_control_list = []
+
 class Handler_of_Wheel_of_Fate(Skill):
     def __init__(self, player, gs):
         super().__init__("Handler_of_Wheel_of_Fate", player, gs)
