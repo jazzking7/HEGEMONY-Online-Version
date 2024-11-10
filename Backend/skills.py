@@ -345,6 +345,7 @@ class Industrial_Revolution(Skill):
                 if choice in self.gs.map.conts[cont]['trtys']:
                     self.freeCityTracker[cont] += 1
         
+        self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
         self.gs.update_TIP(self.player)
         self.gs.get_SUP()
         self.gs.update_global_status()

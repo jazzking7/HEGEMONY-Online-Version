@@ -353,6 +353,7 @@ function hide_async_btns(){
 
 // Game over announcement
 socket.on('GAME_OVER', function(data) {
+  $('#gameEndSound').trigger('play');
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
@@ -740,6 +741,14 @@ socket.on("battle_propagation", function(data){
       var randomIndex = Math.floor(Math.random() * battleSFX.length);
       battleSFX[randomIndex].play();
     }
+});
+
+socket.on('selectionSoundFx', function() {
+  $('#selectionSound').prop('volume', 0.5).trigger('play');
+});
+
+socket.on('cityBuildingSFX', function() {
+  $('#constructionSound').prop('volume', 0.5).trigger('play');
 });
 
 // nuke soundFX
@@ -1204,7 +1213,11 @@ btn_diplomatic.off('click').click(function () {
 
 // VOTING EVENT FOR SUMMIT
 socket.on('summit_voting', function(data){
-  $("#announcement").html(`<h3>${data.msg}<h3>`)
+  $("#announcement").html(`<h3>${data.msg}<h3>`);
+  var votingSFX = [document.getElementById('votingSound1'), document.getElementById('votingSound2')];
+  var randomIndex = Math.floor(Math.random() * votingSFX.length);
+  votingSFX[randomIndex].volume = 0.7;
+  votingSFX[randomIndex].play();
   $("#middle_display").show();
   let middis = $('#middle_content');
   // Voting menu with options + ul showing who voted what

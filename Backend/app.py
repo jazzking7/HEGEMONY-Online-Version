@@ -297,6 +297,7 @@ def update_player_city(data):
         socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
     gsm.GES.selected += 1
     socketio.emit('settle_result', {'resp': True}, room=pid)
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
 
 @socketio.on('settle_cities')
 def settle_new_cities(data):
@@ -323,6 +324,8 @@ def settle_new_cities(data):
         gsm.map.territories[trty].isCity = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
 
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
     gsm.update_TIP(pid)
     gsm.get_SUP()
     gsm.update_global_status()
@@ -346,6 +349,9 @@ def update_troop_info(data):
     gsm.players[pid].total_troops += amount
     gsm.players[pid].deployable_amt -= amount
     print(f"Player has {gsm.players[pid].deployable_amt } deployable amount")
+
+    # add troop soundfx
+    socketio.emit('selectionSoundFx', room=gsm.lobby)
     # CM
     socketio.emit('troop_addition_display', {
                             f'{choice}': {'tid': choice, 'number': amount},
@@ -461,6 +467,8 @@ def handle_reserves_deployment(data):
     t.troops += amount
     gsm.players[pid].total_troops += amount
     gsm.players[pid].reserves -= amount
+    # add troop soundfx
+    socketio.emit('selectionSoundFx', room=gsm.lobby)
     # CM
     socketio.emit('troop_addition_display', {
                             f'{choice}': {'tid': choice, 'number': amount},
