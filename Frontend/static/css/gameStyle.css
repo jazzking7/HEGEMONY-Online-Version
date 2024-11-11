@@ -62,11 +62,6 @@ html, body {
     max-width: 30%;
 }
 
-
-#btn_show_cont{
-    margin: 0;
-}
-
 #player_info{
     position: absolute;
     top: 45%;
