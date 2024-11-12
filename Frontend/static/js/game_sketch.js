@@ -175,7 +175,8 @@ function draw() {
   tmp_id = 0;
   for (let trty of territories){
     push();
-    fill(trty.color)
+    fill(trty.color);
+    strokeWeight(1.5);
     // update hover_over
     if(isMouseInsidePolygon(mouseX, mouseY, trty.outline))
     {
@@ -216,7 +217,7 @@ function draw() {
 
     // Display name
     push();
-    fill(0); 
+    fill(0);
     textStyle(BOLD);
     textFont("Helvetica");
     text(trty.name, trty.ns.x, trty.ns.y);
