@@ -51,6 +51,10 @@ let dis_add = false;
 let add_count = 60;
 let additions = [];
 
+function preload() {
+  urbanistFont = loadFont('/static/Fonts/Urbanist-SemiBold.ttf');
+}
+
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
   currWinWid = windowWidth;
@@ -214,43 +218,51 @@ function draw() {
       }
     }
 
-
-    // Display name
-    push();
-    fill(0);
-    textStyle(BOLD);
-    textFont("Helvetica");
-    text(trty.name, trty.ns.x, trty.ns.y);
-    pop();
-    
-    // Display troop number
-    push();
-    fill(0); 
-    textStyle(BOLD);
-    textSize(16);
-    textFont("Helvetica");
-    text(trty.troops, trty.ts.x, trty.ts.y);
-    pop();
-
-    // Display capital
-    if (trty.isCapital){
+    if (scaleFactor < 0.4) {
       push();
-      drawStar(trty.cs.dx, trty.cs.dy, trty.cs.x, trty.cs.y, trty.capital_color)
+      textFont(urbanistFont);
+      textSize(35);
+      textStyle(BOLD);
+      text(trty.troops, trty.cps.x, trty.cps.y);
       pop();
-    }
-
-    // Display dev
-    if (trty.devImg){
+    } else {
+      // Display name
       push();
-      image(cityImage, trty.ds.x, trty.ds.y, trty.ds.dx, trty.ds.dy)
+      fill(0);
+      textStyle(BOLD);
+      textFont(urbanistFont);
+      text(trty.name, trty.ns.x, trty.ns.y);
       pop();
-    }
+      
+      // Display troop number
+      push();
+      fill(0); 
+      textStyle(BOLD);
+      textSize(16);
+      textFont(urbanistFont);
+      text(trty.troops, trty.ts.x, trty.ts.y);
+      pop();
 
-    // Display insig  or  special display
-    if (trty.insig){
-      push();   
-      image(trty.insig, trty.is.x, trty.is.y, trty.is.dx, trty.is.dy);
-      pop();
+      // Display capital
+      if (trty.isCapital){
+        push();
+        drawStar(trty.cs.dx, trty.cs.dy, trty.cs.x, trty.cs.y, trty.capital_color)
+        pop();
+      }
+
+      // Display dev
+      if (trty.devImg){
+        push();
+        image(cityImage, trty.ds.x, trty.ds.y, trty.ds.dx, trty.ds.dy)
+        pop();
+      }
+
+      // Display insig  or  special display
+      if (trty.insig){
+        push();   
+        image(trty.insig, trty.is.x, trty.is.y, trty.is.dx, trty.is.dy);
+        pop();
+      }
     }
 
     // clickable animation
@@ -259,6 +271,7 @@ function draw() {
     }
     tmp_id++;
   }
+  // outside for loop
 
   // casualties display
   if (casualties.length > 0){
@@ -269,6 +282,7 @@ function draw() {
           stroke(255); // Dark red color
           strokeWeight(1); 
           fill(139, 0, 0);
+          textFont(urbanistFont);
           textSize(35);
           textStyle(BOLD);
           text("-" + cas.number, territories[cas.tid].cps.x, territories[cas.tid].cps.y);
@@ -287,6 +301,7 @@ function draw() {
           stroke(255);
           strokeWeight(1); 
           fill(39, 165, 103);
+          textFont(urbanistFont);
           textSize(35);
           textStyle(BOLD);
           text("+" + adding.number, territories[adding.tid].cps.x, territories[adding.tid].cps.y);
@@ -320,6 +335,7 @@ function draw() {
       rect(bonus.x, bonus.y, bonus.dx, bonus.dy);
       fill(0,0,0);
       textStyle(BOLD);
+      textFont(urbanistFont);
       textSize(15);
       textAlign(CENTER, CENTER);
       text(bonus.message, bonus.cx, bonus.cy);
@@ -423,7 +439,7 @@ function drawStar(dimX, dimY, x, y, scolor) {
   rotate(-PI / 2); // Rotate the star to point upward
 
   beginShape();
-  strokeWeight(3);
+  strokeWeight(2);
   let angle = TWO_PI / numPoints;
   for (let a = 0; a < TWO_PI; a += angle) {
     let sx = cos(a) * outerRadius;
