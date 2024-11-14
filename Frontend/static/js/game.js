@@ -141,11 +141,28 @@ function laplace_info_fetch(player_id){
   }
 }
 
+function isColorDark(hexColor) {
+  // Convert hex to RGB
+  let r = parseInt(hexColor.substring(1, 3), 16);
+  let g = parseInt(hexColor.substring(3, 5), 16);
+  let b = parseInt(hexColor.substring(5, 7), 16);
+  
+  // Calculate brightness
+  let brightness = (0.299 * r) + (0.587 * g) + (0.114 * b);
+  
+  // Return true if the color is dark
+  return brightness < 128;
+}
+
 socket.on('laplace_info', function(data) {
+  var tcolor = 'black';
+  if (isColorDark(data.color)){
+    tcolor = 'rgb(245, 245, 245)'
+  }
   $('#laplace_info_display').empty();
   $('#laplace_info_display').css({
     'display': 'block',
-    'background-color': data.color,
+    'background-color': tcolor,
     'color': 'black',
     'overflow-y': 'auto',
     'max-height': '10em',
@@ -177,11 +194,15 @@ socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
   pList.empty();
   $.each(data, function(p, p_info) {
+    var tcolor = 'black';
+    if (isColorDark(p_info.color)){
+      tcolor = 'rgb(245, 245, 245)'
+    }
     var pBtn = $('<button></button>')
       .attr('id', p)
       .addClass('btn game_btn mb-1')
       .css({
-        'color': 'black',
+        'color': tcolor,
         'background-color': p_info.color,
         'width': '100%',
       })

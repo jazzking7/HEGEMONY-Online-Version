@@ -51,6 +51,13 @@ let dis_add = false;
 let add_count = 60;
 let additions = [];
 
+// Brightness
+let dark = false;
+let r;
+let b;
+let g;
+let brightness;
+
 function preload() {
   urbanistFont = loadFont('/static/Fonts/Urbanist-SemiBold.ttf');
 }
@@ -178,6 +185,14 @@ function draw() {
   // Draw territories
   tmp_id = 0;
   for (let trty of territories){
+
+    // Extract RGB values and calculate brightness
+    r = red(trty.color);
+    g = green(trty.color);
+    b = blue(trty.color);
+    brightness = (0.299 * r) + (0.587 * g) + (0.114 * b);
+    dark = brightness < 128;
+
     push();
     fill(trty.color);
     strokeWeight(1.5);
@@ -221,6 +236,9 @@ function draw() {
     if (scaleFactor < 0.4) {
       push();
       textFont(urbanistFont);
+      if (dark) {
+        fill(color(245,245,245));
+      }
       textSize(35);
       textStyle(BOLD);
       text(trty.troops, trty.cps.x, trty.cps.y);
@@ -229,6 +247,9 @@ function draw() {
       // Display name
       push();
       fill(0);
+      if (dark) {
+        fill(color(245,245,245));
+      }
       textStyle(BOLD);
       textFont(urbanistFont);
       text(trty.name, trty.ns.x, trty.ns.y);
@@ -237,6 +258,9 @@ function draw() {
       // Display troop number
       push();
       fill(0); 
+      if (dark) {
+        fill(color(245,245,245));
+      }
       textStyle(BOLD);
       textSize(16);
       textFont(urbanistFont);
