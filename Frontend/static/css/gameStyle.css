@@ -4,6 +4,13 @@
     padding: 0;
 }
 
+@font-face {
+    font-family: 'Rajdhani';
+    src: url('/static/Fonts/Rajdhani-Medium.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
 html, body {
     display: flex;
     /* align-items: center;
@@ -56,6 +63,8 @@ html, body {
 
 #view_mode_btns {
     position: absolute;
+    opacity: 0.95;
+    font-family: 'Rajdhani', sans-serif;
     top: 1%;
     left: 0;
     padding: 0;
@@ -64,6 +73,7 @@ html, body {
 
 #player_info{
     position: absolute;
+    font-family: 'Rajdhani', sans-serif;
     top: 45%;
     left: 0;
     transform: translateY(-50%);
@@ -75,6 +85,7 @@ html, body {
 
 #laplace_info_display{
     display: none;
+    font-family: 'Rajdhani', sans-serif;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -90,6 +101,7 @@ html, body {
     overflow-y: auto;
     max-height: 40vh;
     max-width: 15vw;
+    font-family: 'Rajdhani', sans-serif;
     position: sticky;
     top: 0;
     direction: rtl;
@@ -101,6 +113,7 @@ html, body {
 .card-head{
     padding-left: 1vw;
     padding-top: 1vh;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #event_announcement{
@@ -111,6 +124,7 @@ html, body {
     max-width: 40vw;
     max-height: 15vh;
     text-align: center;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 
@@ -122,20 +136,24 @@ html, body {
     max-height: 35vh;
     display: flex;
     flex-direction: column;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .winning_condition {
     display: flex;
     flex-direction: column;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .losing_condition {
     display: flex;
     flex-direction: column;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #misTargets {
     display: None;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #misProgBar {
@@ -144,6 +162,7 @@ html, body {
 
 #misProgDesp {
     display: None;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #lossProg {
@@ -152,6 +171,7 @@ html, body {
 
 #lossDesp {
     display: None;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #control_panel{
@@ -164,12 +184,14 @@ html, body {
     display: none;
     align-items: center;
     justify-content: center;
-    overflow: auto
+    overflow: auto;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #control_mechanism{
     padding: 0;
     margin-top: 1%;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #middle_display{
@@ -180,6 +202,7 @@ html, body {
     transform: translate(-50%, -50%);
     max-width: 40vw;
     max-height: 40vh;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #middle_title{
@@ -187,10 +210,12 @@ html, body {
     justify-content: center;
     align-items: center;
     text-align: center;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #middle_content{
     text-align: center;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #proceed_next_stage {
@@ -203,6 +228,7 @@ html, body {
     height: 10vh;
     justify-content: center;
     align-items: center;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 #timeout-bar {
@@ -215,6 +241,7 @@ html, body {
 
 .text {
     font-size: 1.2vw;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .circular-button {
@@ -261,6 +288,7 @@ html, body {
 
 #global_status {
     display: none;
+    font-family: 'Rajdhani', sans-serif;
     background-color: #1E2328;
     position: absolute; 
     right: 0;
