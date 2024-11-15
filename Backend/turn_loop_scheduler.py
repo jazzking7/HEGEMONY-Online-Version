@@ -67,9 +67,9 @@ class turn_loop_scheduler:
                 gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
         print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
-        if gs.players[curr_p].deployable_amt == 0: #???
-            # Robinhood activated    
+        if gs.players[curr_p].deployable_amt < 1: #???
             d_amt = gs.get_deployable_amt(curr_p)
+            # Robinhood activated    
             for p in gs.players:
                 if gs.players[p].skill:
                     if gs.players[p].skill.name == 'Robinhood':
