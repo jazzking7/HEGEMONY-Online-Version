@@ -162,8 +162,8 @@ socket.on('laplace_info', function(data) {
   $('#laplace_info_display').empty();
   $('#laplace_info_display').css({
     'display': 'block',
-    'background-color': tcolor,
-    'color': 'black',
+    'background-color': data.color,
+    'color': tcolor,
     'overflow-y': 'auto',
     'max-height': '10em',
   });
