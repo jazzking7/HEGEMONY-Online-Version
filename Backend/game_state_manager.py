@@ -806,7 +806,7 @@ class Game_State_Manager:
         def_amt = trty_def.troops
 
         # Compute player battle stats
-        atk_stats = atk_p.temp_stats
+        atk_stats = atk_p.temp_stats[:]
         def_stats = self.get_player_battle_stats(def_p)
 
         # Stats modifier

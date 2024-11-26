@@ -307,7 +307,7 @@ class Mission_Distributor:
     
     def determine_gp_winners(self, gs):
 
-        mission_name_list = [mission.name for mission in gs.Mset if gs.players[mission.player].alive]
+        mission_name_list = [mission.name for mission in gs.Mset if (gs.players[mission.player].alive and gs.players[mission.player].connected)]
         mission_list = [mission for mission in gs.Mset if gs.players[mission.player].alive]
         if self.no_conflicts(mission_name_list, mission_list):
             winners = {}

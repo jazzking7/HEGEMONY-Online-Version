@@ -121,7 +121,7 @@ class Iron_Wall(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Iron Wall",
-            'description': "At least 40% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
+            'description': "At least 35% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
             'operational': self.active
         }, room=self.player)
 
@@ -142,7 +142,7 @@ class Dictator(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': self.name,
-            'description': "Gain a minimum of 2 ★ per turn regardless of successful conquests.",
+            'description': "Gain a minimum of 2★ per turn regardless of successful conquests.",
             'operational': self.active
         }, room=self.player)
 
@@ -261,14 +261,8 @@ class Industrial_Revolution(Skill):
             self.freeCityTracker[cont] = 0
 
     def internalStatsMod(self, battle_stats):
-        if self.gs.pids[self.gs.GES.current_player] == self.player: # player is attacker
-            if self.turn_stats_mod:   # player stats modded
-                return
-            else:
-                battle_stats[0] += 1
-                self.turn_stats_mod = True
-                return
-        battle_stats[0] += 1
+        if self.active:
+            battle_stats[0] += 1
     
     def apply_turn_effect(self,):
         self.turn_stats_mod = False
@@ -454,11 +448,10 @@ class Ares_Blessing(Skill):
     
     def internalStatsMod(self, battle_stats):
 
-        if self.activated and not self.changed_stats:
+        if self.activated:
             battle_stats[0] += 2
             battle_stats[1] += 2
             battle_stats[4] += 1
-            self.changed_stats = True
 
     def apply_turn_effect(self, ):
         self.activated = False
@@ -518,20 +511,14 @@ class Zealous_Expansion(Skill):
         self.turn_stats_mod = False
 
     def internalStatsMod(self, battle_stats):
-        if self.gs.pids[self.gs.GES.current_player] == self.player: # player is attacker
-            if self.turn_stats_mod:   # player stats modded
-                return
-            else:
-                battle_stats[1] += 1
-                self.turn_stats_mod = True
-                return
-        battle_stats[1] += 1
+        if self.active:
+            battle_stats[1] += 1
 
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4 to 2 special authorities. Each additional infrastructure level gives 1 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 1 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
@@ -557,6 +544,11 @@ class Zealous_Expansion(Skill):
 class Frameshifter(Skill):
     def __init__(self, player, gs):
         super().__init__("Frameshifter", player, gs)
+        self.intMod = True
+
+    def internalStatsMod(self, battle_stats):
+        if self.active:
+            battle_stats[4] = self.gs.players[self.player].min_roll//3 + 1
     
     def update_current_status(self):
 
@@ -564,7 +556,7 @@ class Frameshifter(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Frameshifter",
-            'description': "Able to raise the minimum dice roll. Cost 3 special authority to raise the minimum dice roll by 1",
+            'description': "Able to raise the minimum dice roll. Cost 3★ to raise the minimum dice roll by 1. For every 3 level increased, your damage multiplier increase by 1",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
@@ -935,13 +927,24 @@ class Laplace_Demon(Skill):
 class Loan_Shark(Skill):
     def __init__(self, player, gs):
         super().__init__("Loan Shark", player, gs)
+        self.max_loan = 1
         self.loan_list = []
-        self.secret_control_list = []
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
-        info += "Know as much as you do :)"
         return info
+
+    def update_current_status(self):
+        # modify this
+        information = "Players on your loan list each needs to pay you 7★ within 5 turns."
+        if self.load_list:
+            for name in self.names:
+                information += name + ' '
+        self.gs.server.emit("update_skill_status", {
+            'name': "Loan Shark",
+            'description': information,
+            'operational': self.active,
+        }, room=self.player)
 
 class Usurper(Skill):
     def __init__(self, player, gs):
