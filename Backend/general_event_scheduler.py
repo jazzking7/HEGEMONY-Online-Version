@@ -2,10 +2,13 @@ from turn_loop_scheduler import *
 
 class General_Event_Scheduler:
 
-    def __init__(self, gs, setup_events):
+    def __init__(self, gs, setup_events, time_settings):
         self.gs = gs
         self.SES = setup_events
         self.TLS = turn_loop_scheduler()
+        self.trty_set_time = time_settings[0]
+        self.power_set_time = time_settings[1]
+        self.turn_time = time_settings[2]
 
         # set up selection controller
         self.selected = 0

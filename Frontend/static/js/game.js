@@ -1529,7 +1529,11 @@ btn_skill.onclick = function () {
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
 
-    <div class="p-2 text-center break-words whitespace=normal">${skillData.description}</div>
+    <div class="p-2 text-center break-words whitespace-normal" 
+        style="max-height: calc(1.5em * 3); overflow-y: auto; line-height: 1.5;">
+        ${skillData.description}
+    </div>
+
 
     <div style="display: flex; justify-content: space-between; align-items: center;">
 

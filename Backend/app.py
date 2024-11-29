@@ -199,16 +199,20 @@ def startGame(data):
     
     # Setup lobby settings ## TO BE UPDATED
     lobby['game_started'] = True
-    lobby['alliance'] = data.get('alliance')
-    lobby['turn_time'] = int(data.get('turn_time'))
+    time_settings = [
+        int(data.get('trty_set_time')),
+        int(data.get('power_set_time')),
+        int(data.get('turn_time'))
+    ]
     lobby['setup_mode'] = "all_manuel"
     print(lobby)
+    print(time_settings)
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
-    lobby['map_name'] = '88world' # MAP NAME
+    lobby['map_name'] = data.get('map_selected')
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
-    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), socketio, lobby_id)
+    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), time_settings, socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
     lobby['gsm'].egt = EGT
     lobby['gsm'].SDIS = SDIS

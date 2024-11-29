@@ -62,7 +62,7 @@ class Player:
 
 class Game_State_Manager:
 
-    def __init__(self, mapName, player_list, setup_events, server, lobby):
+    def __init__(self, mapName, player_list, setup_events, time_settings, server, lobby):
 
         # Player dict => key: player_id (socket connection id)  value: player object
         self.players = {}
@@ -99,7 +99,7 @@ class Game_State_Manager:
         self.lobby = lobby
 
         # EVENT SCHEDULER
-        self.GES = General_Event_Scheduler(self, setup_events)
+        self.GES = General_Event_Scheduler(self, setup_events, time_settings)
 
         # Mission
         self.Mdist = None

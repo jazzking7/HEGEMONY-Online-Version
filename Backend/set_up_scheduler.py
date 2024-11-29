@@ -115,7 +115,7 @@ class setup_event_scheduler:
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
 
-            ms.selection_time_out(60, 1)
+            ms.selection_time_out(ms.trty_set_time, 1)
             
             # handle timeout
             if not ms.selected:
@@ -134,7 +134,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        ms.selection_time_out(60, len(gs.players))
+        ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
         # handle not choosing
         for player in gs.players.values():
@@ -152,7 +152,7 @@ class setup_event_scheduler:
         gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
-        ms.selection_time_out(60, len(gs.players))
+        ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
 
         for player in gs.players.values():
@@ -176,7 +176,7 @@ class setup_event_scheduler:
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        ms.selection_time_out(60, len(gs.players))
+        ms.selection_time_out(ms.power_set_time, len(gs.players))
 
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
@@ -191,7 +191,7 @@ class setup_event_scheduler:
             options = gs.SDIS.get_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        ms.selection_time_out(90, len(gs.players))
+        ms.selection_time_out(ms.power_set_time, len(gs.players))
 
         gs.signal_view_clear()
 

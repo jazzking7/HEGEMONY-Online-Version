@@ -5,8 +5,10 @@ $(document).ready(function() {
         // TODO Display kick player option
 
         // Display enable settings
-        $("#alliance").prop("disabled", false);
+        $("#map_selection").prop("disabled", false);
         $("#turn_time").prop("disabled", false);
+        $('#trty_set_time').prop("disabled", false);
+        $('#power_set_time').prop("disabled", false);
 
         // Display start game button
         $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
@@ -15,8 +17,10 @@ $(document).ready(function() {
         $('#start_game').click(function() {
             console.log('start_game');
             let data = {
-                'alliance': $('#alliance').val() == "true",
-                'turn_time': $('#turn_time').val()
+                'trty_set_time': $("#trty_set_time").val(),
+                'power_set_time': $('#power_set_time').val(),
+                'turn_time': $('#turn_time').val(),
+                'map_selected': $('#map_selection').val()
             };
             socket.emit('start_game', data);
         });
