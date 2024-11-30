@@ -121,7 +121,7 @@ class Iron_Wall(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Iron Wall",
-            'description': "At least 35% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
+            'description': "At least 30% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
             'operational': self.active
         }, room=self.player)
 
