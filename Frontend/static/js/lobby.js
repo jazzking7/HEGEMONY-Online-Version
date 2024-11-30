@@ -6,9 +6,42 @@ $(document).ready(function() {
 
         // Display enable settings
         $("#map_selection").prop("disabled", false);
-        $("#turn_time").prop("disabled", false);
         $('#trty_set_time').prop("disabled", false);
         $('#power_set_time').prop("disabled", false);
+        $("#turn_time").prop("disabled", false);
+
+        // Share updates on settings
+        $("#map_selection").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'map_change',
+                map_selected: selectedMap
+            });
+        });
+
+        $("#trty_set_time").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'trty_set_time',
+                trty_set_time: selectedMap
+            });
+        });
+
+        $("#turn_time").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'turn_time',
+                turn_time: selectedMap
+            });
+        });
+
+        $("#power_set_time").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'power_set_time',
+                power_set_time: selectedMap
+            });
+        });
 
         // Display start game button
         $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
@@ -73,6 +106,18 @@ $(document).ready(function() {
                     // Display host only options
                     displayHostOptions();
                 }
+                break;
+            case 'map_change':
+                $("#map_selection").val(data.map_selected);
+                break;
+            case 'turn_time':
+                $("#turn_time").val(data.turn_time)
+                break;
+            case 'trty_set_time':
+                $("#trty_set_time").val(data.trty_set_time)
+                break;
+            case 'power_set_time':
+                $('#power_set_time').val(data.power_set_time)
                 break;
         }
     });

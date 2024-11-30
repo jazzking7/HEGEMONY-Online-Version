@@ -183,6 +183,12 @@ def get_lobby_data():
     }
     socketio.emit('lobby_data', out_data, room=sid)
 
+@socketio.on('update_lobby_settings')
+def update_lobby_settings(data):
+    sid = request.sid
+    lobby_id = players[sid]['lobby_id']
+    socketio.emit('update_lobby', data, room=lobby_id)
+
 @socketio.on('start_game')
 def startGame(data):
     sid = request.sid
