@@ -541,9 +541,9 @@ class Zealous_Expansion(Skill):
         self.gs.get_SUP()
         self.gs.update_global_status()
 
-class Frameshifter(Skill):
+class Elitocracy(Skill):
     def __init__(self, player, gs):
-        super().__init__("Frameshifter", player, gs)
+        super().__init__("Elitocracy", player, gs)
         self.intMod = True
 
     def internalStatsMod(self, battle_stats):
@@ -555,7 +555,7 @@ class Frameshifter(Skill):
         limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].min_roll < (self.gs.get_player_industrial_level(self.gs.players[self.player])+6) else 0
 
         self.gs.server.emit("update_skill_status", {
-            'name': "Frameshifter",
+            'name': "Elitocracy",
             'description': "Able to raise the minimum dice roll. Cost 3★ to raise the minimum dice roll by 1. For every 3 level increased, your damage multiplier increase by 1",
             'operational': self.active,
             'hasLimit': True,

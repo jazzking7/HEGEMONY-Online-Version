@@ -734,7 +734,7 @@ class Game_State_Manager:
 
         # Attacker and Defender modify their own stats
         # Industrialist + Zealous_Expansion + Ares' Blessing + Realm of Permafrost
-        # + Frameshifter
+        # + Elitocracy
         if atk_p.skill:
             if atk_p.skill.active and atk_p.skill.intMod:
                 atk_p.skill.internalStatsMod(atk_stats)

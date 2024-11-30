@@ -13,7 +13,7 @@ class Skill_Distributor:
             "Robinhood",
             "Ares' Blessing",
             "Zealous_Expansion",
-            "Frameshifter",
+            "Elitocracy",
             "Necromancer",
             "Divine_Punishment",
             "Air_Superiority",
@@ -44,8 +44,8 @@ class Skill_Distributor:
             return Ares_Blessing(player, gs)
         elif skill_name == "Zealous_Expansion":
             return Zealous_Expansion(player, gs)
-        elif skill_name == "Frameshifter":
-            return Frameshifter(player, gs)
+        elif skill_name == "Elitocracy":
+            return Elitocracy(player, gs)
         elif skill_name == "Necromancer":
             return Necromancer(player, gs)
         elif skill_name == "Divine_Punishment":
