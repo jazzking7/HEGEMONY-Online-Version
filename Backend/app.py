@@ -229,6 +229,92 @@ def startGame(data):
     lobby['gsm'].GES.main_flow.start()
     print("GAME LAUNCHED")
 
+
+### Simulator Function ###
+
+# Simulate dice battles function (already provided, included here for context)
+def simulate_dice_battles(attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul,
+                          defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul,
+                          samples=10000):
+    outcomes = {
+        "attacker_wins_all": 0,
+        "attacker_advantage": 0,
+        "split": 0,
+        "defender_advantage": 0,
+        "defender_wins_all": 0
+    }
+    attacker_min_roll = attacker_range if attacker_range < attacker_min_roll else attacker_min_roll
+    defender_min_roll = defender_range if defender_range < defender_min_roll else defender_min_roll
+    for _ in range(samples):
+        attacker_rolls = sorted(
+            [random.randint(attacker_min_roll, attacker_range) for _ in range(attacker_dice)], reverse=True
+        )
+        defender_rolls = sorted(
+            [random.randint(defender_min_roll, defender_range) for _ in range(defender_dice-1)], reverse=True
+        )
+
+        num_comparisons = min(len(attacker_rolls), len(defender_rolls))
+        attacker_top = attacker_rolls[:num_comparisons]
+        defender_top = defender_rolls[:num_comparisons]
+
+        results = [attacker_top[i] > defender_top[i] for i in range(num_comparisons)]
+        attacker_wins = sum(results)
+        defender_wins = num_comparisons - attacker_wins
+
+        if random.randint(1, 100) <= attacker_block_rate:
+            defender_wins = 0
+        if random.randint(1, 100) <= defender_block_rate:
+            attacker_wins = 0
+
+        if attacker_wins == num_comparisons:
+            outcomes["attacker_wins_all"] += 1
+        elif defender_wins == num_comparisons:
+            outcomes["defender_wins_all"] += 1
+        elif attacker_wins * attacker_dmg_mul > defender_wins * defender_dmg_mul:
+            outcomes["attacker_advantage"] += 1
+        elif defender_wins * defender_dmg_mul > attacker_wins * attacker_dmg_mul:
+            outcomes["defender_advantage"] += 1
+        else:
+            outcomes["split"] += 1
+
+    probabilities = {key: value / samples for key, value in outcomes.items()}
+    return probabilities
+
+# Flask-SocketIO event handler
+@socketio.on('send_simulation_data')
+def compute_simulation_result(data):
+    # Extract attacker and defender stats from the received data
+    attacker_stats = data.get('attackerStats', {})
+    defender_stats = data.get('defenderStats', {})
+
+    # Prepare arguments for simulate_dice_battles
+    attacker_dice = attacker_stats.get('infrastructureLevel', 3)
+    attacker_range = attacker_stats.get('industrialLevel', 6)
+    attacker_min_roll = attacker_stats.get('minRoll', 1)
+    attacker_block_rate = attacker_stats.get('nullificationRate', 0)
+    attacker_dmg_mul = attacker_stats.get('damageMultiplier', 1)
+
+    defender_dice = defender_stats.get('infrastructureLevel', 3)
+    defender_range = defender_stats.get('industrialLevel', 6)
+    defender_min_roll = defender_stats.get('minRoll', 1)
+    defender_block_rate = defender_stats.get('nullificationRate', 0)
+    defender_dmg_mul = defender_stats.get('damageMultiplier', 1)
+
+    # Call the simulation function
+    results = simulate_dice_battles(
+        attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul,
+        defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul
+    )
+
+    # Extract the results and send them back to the frontend
+    socketio.emit('get_simulation_result', {
+        'attackerWinAll': round(results['attacker_wins_all'] * 100, 2),
+        'attackerAdvantage': round(results['attacker_advantage'] * 100, 2),
+        'split': round(results['split'] * 100, 2),
+        'defenderAdvantage': round(results['defender_advantage'] * 100, 2),
+        'defenderWinAll': round(results['defender_wins_all'] * 100, 2)
+    }, room=request.sid)
+
 ### Game functions ###
 
 ## SET UP 

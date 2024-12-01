@@ -32,6 +32,10 @@ def lobby():
 def gameMap():
     return render_template('game.html')
 
+@app.route("/roll_simulator")
+def rollSimulator():
+    return render_template('roll_simulator.html')
+
 if __name__ == "__main__":
     # app.run(host='127.0.0.1', port=8080, debug=True)
     app.run(host='0.0.0.0', port=8080, debug=True)

@@ -1,0 +1,84 @@
+<div class="container my-3">
+    <h1 class="text-center mb-2">Roll Simulator</h1>
+    <p class="text-center text-muted fs-6 mb-1">Approximating win rate by simulating 10,000 rolls using the given stats. Each roll uses the full capacity of the given stats. Empty inputs use their indicated default value.</p>
+    <div class="row g-3">
+        <!-- Attacker Stats -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center py-2">
+                    <h3 class="fs-5 mb-0">Attacker Stats</h3>
+                </div>
+                <div class="card-body py-3">
+                    <form id="attackerForm">
+                        <div class="mb-2">
+                            <label for="attackerIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
+                            <input type="number" id="attackerIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="attackerInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
+                            <input type="number" id="attackerInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="attackerMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
+                            <input type="number" id="attackerMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="attackerDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
+                            <input type="number" id="attackerDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="attackerNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
+                            <input type="number" id="attackerNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Defender Stats -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center py-2">
+                    <h3 class="fs-5 mb-0">Defender Stats</h3>
+                </div>
+                <div class="card-body py-3">
+                    <form id="defenderForm">
+                        <div class="mb-2">
+                            <label for="defenderIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
+                            <input type="number" id="defenderIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="defenderInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
+                            <input type="number" id="defenderInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="defenderMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
+                            <input type="number" id="defenderMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="defenderDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
+                            <input type="number" id="defenderDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="defenderNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
+                            <input type="number" id="defenderNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Result -->
+        <div class="col-md-4">
+            <div class="card d-none" id="resultCard">
+                <div class="card-header text-center py-2">
+                    <h3 class="fs-5 mb-0">Result</h3>
+                </div>
+                <div class="card-body py-3">
+                    <!-- Content will be dynamically updated via JavaScript -->
+                </div>
+            </div>
+        </div>        
+    </div>
+    <div class="text-center mt-2">
+        <button class="btn btn-primary btn-lg" id="startSimulation">Start Simulation</button>
+    </div>
+</div>
