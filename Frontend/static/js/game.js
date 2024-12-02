@@ -811,10 +811,23 @@ socket.on("troop_deployment", function(data){
   announ.innerHTML += `<h2>` + String(data.amount) + ' deployable' + `</h2>`;
 });
 
+// Show the button that ends the preparation stage
+socket.on('preparation', function(){
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Start Conquest');
+  $('#proceed_next_stage').off('click').on('click', () => {
+    $('#proceed_next_stage').hide();
+    socket.emit("terminate_preparation_stage");
+    currEvent = null;
+    toHightlight = [];
+    clickables = [];
+  });
+});
+
 // Show the button that ends the conquest stage
 socket.on('conquest', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .text').text('Finished Conquest');
+  $('#proceed_next_stage .text').text('Finish Conquest');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
     socket.emit("terminate_conquer_stage");
@@ -827,7 +840,7 @@ socket.on('conquest', function(){
 // Show the button that ends the rearrangement stage
 socket.on('rearrangement', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .text').text('Finished Rearrangement');
+  $('#proceed_next_stage .text').text('Finish Rearrangement');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
     socket.emit("terminate_rearrangement_stage");

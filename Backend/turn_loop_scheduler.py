@@ -8,6 +8,7 @@ class turn_loop_scheduler:
     def __init__(self, ):
         self.events = [
             Event("reinforcement", self.reinforcement),
+            Event("preparation", self.preparation),
             Event("conquer", self.conquer),
             Event("rearrangement", self.rearrange)
         ]
@@ -34,13 +35,23 @@ class turn_loop_scheduler:
                     done = atk_player.deployable_amt < 1
                 if ms.terminated or ms.innerInterrupt:
                     return
+                
+            if event.name == 'preparation':
+                self.set_curr_state(ms, self.events[1])
+                self.preparation(gs, pid)
+
+                ms.stage_completed = False
+                while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
+                    time.sleep(1)
+                if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+                    return
 
             if event.name == 'conquer':
                 # prevent immediate growth
                 if not ms.stats_set:
                     atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
                     ms.stats_set = True
-                self.set_curr_state(ms, self.events[1])
+                self.set_curr_state(ms, self.events[2])
                 self.conquer(gs, pid)
 
                 ms.stage_completed = False
@@ -49,7 +60,7 @@ class turn_loop_scheduler:
                 if ms.terminated or ms.innerInterrupt:
                     return
             if event.name == 'rearrangement':
-                self.set_curr_state(ms, self.events[2])
+                self.set_curr_state(ms, self.events[3])
                 self.rearrange(gs, pid)
 
                 ms.stage_completed = False
@@ -98,6 +109,12 @@ class turn_loop_scheduler:
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
 
+    def preparation(self, gs, curr_player):
+        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: preparation"}, room=gs.lobby)
+        gs.server.emit("change_click_event", {'event': None}, room=curr_player)
+        gs.server.emit("preparation", room=curr_player)
+        return
+
     def conquer(self, gs, curr_player):
         gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=gs.lobby)
         gs.server.emit("change_click_event", {'event': 'conquest'}, room=curr_player)
@@ -130,11 +147,20 @@ class turn_loop_scheduler:
         if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
 
+        self.set_curr_state(ms, self.events[1])
+        self.preparation(gs, player)
+
+        ms.stage_completed = False
+        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
+            time.sleep(1)
+        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+            return
+
         # prevent immediate growth
         atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
         # Set stats_set to True to prevent innerAsync actions from giving battle stats growth
         ms.stats_set = True
-        self.set_curr_state(ms, self.events[1])
+        self.set_curr_state(ms, self.events[2])
         self.conquer(gs, player)
 
         ms.stage_completed = False
@@ -143,7 +169,7 @@ class turn_loop_scheduler:
         if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
         
-        self.set_curr_state(ms, self.events[2])
+        self.set_curr_state(ms, self.events[3])
         self.rearrange(gs, player)
 
         ms.stage_completed = False

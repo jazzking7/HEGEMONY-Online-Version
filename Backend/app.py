@@ -493,6 +493,12 @@ def get_reachable_trty(data):
     reachable_trty = gsm.map.get_reachable_trty(data['choice'], gsm.players[pid].territories)
     socketio.emit('update_clickables', {'trtys': reachable_trty}, room=pid)
 
+@socketio.on("terminate_preparation_stage")
+def terminate_preparation_stage():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.GES.stage_completed = True
+
 @socketio.on("terminate_conquer_stage")
 def terminate_conquer_stage():
     pid = request.sid
