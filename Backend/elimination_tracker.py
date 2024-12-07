@@ -20,7 +20,8 @@ class Elimination_tracker:
                     gs.get_SUP()
                     gs.update_global_status()
                     gs.signal_MTrackers('indus')
-                
+            # flush concurrent event
+            gs.GES.flush_concurrent_event(d_pid)
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars

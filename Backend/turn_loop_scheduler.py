@@ -270,6 +270,7 @@ class turn_loop_scheduler:
 
         # current_player = index of player in the queue
         curr_player = gs.pids[ms.current_player]
+        ms.flush_concurrent_event(curr_player)
 
         while not ms.interrupt:
 

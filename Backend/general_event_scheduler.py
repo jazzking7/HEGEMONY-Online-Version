@@ -58,6 +58,15 @@ class General_Event_Scheduler:
                 'flag': flag
             }
 
+    def flush_concurrent_event(self, pid):
+        if pid in self.concurrent_events:
+            self.concurrent_events[pid]['flag'] = True
+            del self.concurrent_events[pid]
+    
+    def flush_all_concurrent_events(self):
+        for pid in self.gs.players:
+            self.flush_concurrent_event(pid)
+
     def selection_time_out(self, num_secs, count):
         self.selected = 0
         self.gs.server.emit('start_timeout',{'secs': num_secs}, room=self.gs.lobby)
@@ -119,6 +128,7 @@ class General_Event_Scheduler:
             self.gs.signal_view_clear()
             # PAUSE TO GIVE TIME TO COMPUTE END RESULT
             time.sleep(2)
+            self.flush_all_concurrent_events()
             self.gs.game_over()
         self.lock.release()
 
@@ -195,7 +205,7 @@ class General_Event_Scheduler:
         pid = self.gs.pids[player]
         self.summit_voter = {'y': 0, 'n': 0}
         self.summit_requested = False
-        
+        self.flush_all_concurrent_events()
         c = 0
         for player in self.gs.players:
             if self.gs.players[player].alive:
@@ -213,7 +223,7 @@ class General_Event_Scheduler:
         pid = self.gs.pids[player]
         self.global_peace_proposed = False
         self.summit_voter = {'y': 0, 'n': 0}
-
+        self.flush_all_concurrent_events()
         c = 0
         for player in self.gs.players:
             if self.gs.players[player].alive:
@@ -225,6 +235,7 @@ class General_Event_Scheduler:
             self.gs.players[pid].num_global_cease -= 1
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, GLOBAL PEACE NOT ACHIEVED!"}, room=self.gs.lobby)
         else:
+            self.flush_all_concurrent_events()
             self.gs.global_peace_game_over()
             self.gs.GES.interrupt = True
 
