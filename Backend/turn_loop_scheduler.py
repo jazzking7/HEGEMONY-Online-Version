@@ -128,7 +128,7 @@ class turn_loop_scheduler:
         return
 
     def execute_turn_events(self, gs, ms, player):
-        
+        ms.flush_concurrent_event(player)
         # Player executing the turn
         atk_player = gs.players[player]
         # Reset turn based victory
@@ -270,7 +270,6 @@ class turn_loop_scheduler:
 
         # current_player = index of player in the queue
         curr_player = gs.pids[ms.current_player]
-        ms.flush_concurrent_event(curr_player)
 
         while not ms.interrupt:
 
