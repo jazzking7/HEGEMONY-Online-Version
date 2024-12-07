@@ -188,7 +188,6 @@ class turn_loop_scheduler:
             gs.server.emit("change_click_event", {'event': None}, room=player)
             gs.server.emit("clear_view", room=player)
             gs.server.emit('clear_otherHighlight', room=gs.lobby)
-            # gs.server.emit('signal_hide_btns', room=player)
             print(f"{gs.players[player].name}'s turn ended.")
             # clear deployables
             gs.clear_deployables(player)

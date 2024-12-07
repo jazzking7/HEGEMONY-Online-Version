@@ -982,7 +982,7 @@ class Arsenal_of_the_Underworld(Skill):
                 data['silo_usable'] = True
                 data['underground_silo_location'] = self.gs.map.territories[self.underground_silo].name
                 data['silo_usage'] = self.silo_usage - self.silo_used
-                data['occupied'] = self.underground_silo in self.gs.players[self.player].territories
+                data['occupied'] = self.underground_silo not in self.gs.players[self.player].territories
             else:
                 if self.gs.players[self.player].stars >= 4:
                     data['silo_build'] = True

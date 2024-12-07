@@ -158,8 +158,10 @@ class General_Event_Scheduler:
         elif n == 'LUS':
             self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
         
+        self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
         self.curr_thread.join()
+        self.gs.server.emit('signal_show_btns', room=pid)
         print(f"{self.gs.players[pid].name}'s async action thread completed.")
         self.innerInterrupt = False
 
@@ -211,8 +213,9 @@ class General_Event_Scheduler:
             if self.gs.players[player].alive:
                 c += 1
                 self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=player)
-
+        self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         self.selection_time_out(20, c)
+        self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
         if self.summit_voter['y'] > self.summit_voter['n']:
             self.gs.players[pid].num_summit -= 1
             self.activate_summit()
@@ -229,8 +232,9 @@ class General_Event_Scheduler:
             if self.gs.players[player].alive:
                 c += 1
                 self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a global peace. The game ends immediately if nobody refuse."}, room=player)
-
+        self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         self.selection_time_out(60, c)
+        self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
         if self.summit_voter['n']:
             self.gs.players[pid].num_global_cease -= 1
             self.gs.server.emit('summit_failed', {'msg': "VOTING FAILED, GLOBAL PEACE NOT ACHIEVED!"}, room=self.gs.lobby)
@@ -379,6 +383,7 @@ class General_Event_Scheduler:
             options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
             options = list(set(options) - set(player.territories))
 
+            self.gs.server.emit('signal_hide_btns', room=pid)
             self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
             self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
 
@@ -388,6 +393,7 @@ class General_Event_Scheduler:
                 done = flag
 
             print(f"{player.name}'s concurrent event exited loop.")
+            self.gs.server.emit('signal_show_btns', room=pid)
             self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             self.gs.server.emit("clear_view", room=pid)
             self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
