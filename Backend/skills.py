@@ -24,9 +24,8 @@ class Skill:
         self.hasRoundEffect = False
 
         self.give_troop_bonus = False
-
         self.hasTurnEffect = False
-
+        self.out_of_turn_activation = False
 
     def update_current_status(self, ):
         pass
@@ -664,7 +663,6 @@ class Divine_Punishment(Skill):
         info = 'Operational | ' if self.active else 'Inactive | '
         info += f'{self.limit} usages left\n'
         return info
-
     
     def activate_effect(self):
         if not self.active:
@@ -923,6 +921,155 @@ class Laplace_Demon(Skill):
         info = 'Operational | ' if self.active else 'Inactive | '
         info += "Know as much as you do :)"
         return info
+
+class Arsenal_of_the_Underworld(Skill):
+    
+    def __init__(self, player, gs):
+        super().__init__("Arsenal of the Underworld", player, gs)
+        # tid : number of mines
+        self.minefields = {}
+        # tid
+        self.underground_silo = None
+        self.silo_usage = 0
+        self.silo_used = 0
+        self.range = 0
+        self.damage = 0
+        self.hasRoundEffect = True
+        self.finished_setting = True
+        self.finished_launching = True
+        self.out_of_turn_activation = True
+        self.missile_waitlist = []
+
+    # at the start of each round, compute the number of usages and range
+    def apply_round_effect(self):
+        dev_lvls = self.gs.get_player_industrial_level(self.gs.players[self.player]) + self.gs.get_player_infra_level(self.gs.players[self.player])
+        self.silo_usage = 1 + dev_lvls
+        self.silo_used = 0
+        self.damage = 5 + dev_lvls
+        self.range = 5 + dev_lvls//2
+    
+    def update_current_status(self):
+
+        self.gs.server.emit("update_skill_status", {
+            'name': "Arsenal of the Underworld",
+            'description': "Controls underground arsenal that can deal heavy damage to enemy forces.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': 'Depends on action',
+            'btn_msg': "Manage Arsenal"
+        }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        if self.minefields:
+            info += 'Minefields located in '
+        for tid in self.minefields:
+            info += ' ' + self.gs.map.territories[tid].name
+        if self.underground_silo:
+            info += ' | Underground Silo located in ' + self.gs.map.territories[self.underground_silo].name
+        return info
+    
+    def activate_effect(self):
+        if self.active:
+            data = {}
+            if self.minefields:
+                data['minefields'] = []
+                for tid in self.minefields:
+                    data['minefields'].append([self.gs.map.territories[tid].name, self.minefields[tid]])
+            if len(self.minefields) < 3:
+                data['set_minefields'] = True
+            if self.underground_silo:
+                data['silo_usable'] = True
+                data['underground_silo_location'] = self.gs.map.territories[self.underground_silo].name
+                data['silo_usage'] = self.silo_usage - self.silo_used
+                data['occupied'] = self.underground_silo in self.gs.players[self.player].territories
+            else:
+                if self.gs.players[self.player].stars >= 4:
+                    data['silo_build'] = True
+            self.gs.server.emit("arsenal_controls", data, room=self.player)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "Arsenal management has been blocked!"}, room=self.player)
+
+    def handle_minefield_placements(self, choices):
+        ### Safeguard In GES and app.py ###
+        for choice in choices:
+            self.minefields[int(choice)] = 5
+        self.finished_setting = True
+
+    def get_landmine_damage(self, t2, atk_amt):
+        if t2 in self.minefields:
+            if atk_amt > 20:
+                damage = math.ceil(self.minefields[t2]*5*atk_amt/100)
+                del self.minefields[t2]
+                return damage
+            else:
+                if atk_amt <= self.minefields[t2]:
+                    self.minefields[t2] -= atk_amt
+                    if not self.minefields[t2]:
+                        del self.minefields[t2]
+                    return atk_amt
+                else:
+                    damage = self.minefields[t2]
+                    del self.minefields[t2]
+                    return damage
+        return 0
+                
+    def handle_silo_placement(self, choice):
+        self.underground_silo = int(choice)
+        self.finished_setting = True
+        self.gs.players[self.player].stars -= 4
+        self.gs.update_private_status(self.player)
+        # set up usage, range and damage
+        self.apply_round_effect()
+
+    def apply_missile_damages(self, choices):
+        for choice in choices:
+            choice = int(choice)
+            casualties = self.damage
+            if casualties <= self.gs.map.territories[choice].troops:
+                self.gs.map.territories[choice].troops -= casualties
+            else:
+                casualties = self.gs.map.territories[choice].troops
+                self.gs.map.territories[choice].troops = 0
+
+            for player in self.gs.players:
+                if choice in self.gs.players[player].territories:
+                    self.gs.players[player].total_troops -= casualties
+
+                    self.gs.update_LAO(player)
+
+                    # Ares' Blessing Rage meter checking
+                    if self.gs.players[player].skill:
+                        if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                            self.gs.players[player].skill.checking_rage_meter()
+
+                    # visual effect
+                    self.gs.server.emit('battle_casualties', {
+                        f'{choice}': {'tid': choice, 'number': casualties},
+                    }, room=self.gs.lobby)
+                    break
+            self.gs.server.emit('update_trty_display', {choice: {'troops': self.gs.map.territories[choice].troops}}, room=self.gs.lobby)
+        self.gs.update_player_stats()
+        self.gs.get_SUP()
+        self.gs.update_global_status()
+        self.gs.signal_MTrackers('popu')
+        self.gs.server.emit('play_missile_sound', room=self.gs.lobby)
+
+    def execute_interturn(self):
+        self.apply_missile_damages(self.missile_waitlist)
+        self.missile_waitlist = []
+
+    def handle_US_strike(self, choices):
+        self.finished_launching = True
+        if len(choices) > (self.silo_usage - self.silo_used):
+            self.gs.server.emit("display_new_notification", {'msg': "Not enough usages left!"}, room=self.player)
+            return
+        if self.player == self.gs.pids[self.gs.GES.current_player]:
+            self.apply_missile_damages(choices)
+        else:
+            self.missile_waitlist += choices
+            self.gs.GES.interturn_events.append(self)
+        self.silo_used += len(choices)
 
 class Loan_Shark(Skill):
     def __init__(self, player, gs):

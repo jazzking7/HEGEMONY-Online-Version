@@ -812,9 +812,15 @@ class Game_State_Manager:
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
 
+        # landmine explosion
+        ld = 0
+        if def_p.skill:
+            if def_p.skill.name == 'Arsenal of the Underworld':
+                ld = def_p.skill.get_landmine_damage(t2, atk_amt)
+
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
-        result = self.simulate_attack(atk_amt, def_amt, atk_stats, def_stats)
+        result = self.simulate_attack(atk_amt-ld, def_amt, atk_stats, def_stats)
 
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt

@@ -679,11 +679,11 @@ def send_skill_information():
 def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    if pid == gsm.pids[gsm.GES.current_player]:
-        if gsm.players[pid].skill:
+    if gsm.players[pid].skill:
+        if pid == gsm.pids[gsm.GES.current_player] or gsm.players[pid].skill.out_of_turn_activation:
             gsm.players[pid].skill.activate_effect()
-    else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
+        else:
+            socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
 
 @socketio.on('build_free_cities')
 def build_free_cities(data):
@@ -732,6 +732,49 @@ def handle_laplace_fetching(data):
                 secret_data['Skill'] = info_player.skill.name
                 secret_data['Skill Status'] = info_player.skill.get_skill_status()
             socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
+
+@socketio.on('launch_silo')
+def handle_silo_launching():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Arsenal of the Underworld":
+            if pid == gsm.pids[gsm.GES.current_player]:
+                gsm.GES.handle_async_event({'name': 'LUS'}, pid)
+            else:
+                gsm.GES.add_concurrent_event('LUS', pid)
+
+@socketio.on('send_minefield_choices')
+def handle_minefield_placements(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Arsenal of the Underworld":
+            gsm.players[pid].skill.handle_minefield_placements(data['choices'])
+
+@socketio.on('send_silo_location')
+def handle_silo_placement(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Arsenal of the Underworld":
+            gsm.players[pid].skill.handle_silo_placement(data['choice'])
+
+@socketio.on('send_missile_targets')
+def handle_underground_strike(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Arsenal of the Underworld":
+            gsm.players[pid].skill.handle_US_strike(data['choices'])
+
+@socketio.on('signal_concurr_end')
+def handle_concurr_end(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if data['pid'] in gsm.GES.concurrent_events:
+        gsm.GES.concurrent_events[pid]['flag'] = True
+        del gsm.GES.concurrent_events[pid]
 
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)

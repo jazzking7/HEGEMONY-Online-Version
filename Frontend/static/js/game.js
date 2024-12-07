@@ -26,6 +26,9 @@ let curr_slider_val = "";
 
 // Laplace Mode
 let laplace_mode = false;
+// Arsenal of Underworld
+let minefields_amount = 0;
+let US_usages = 0;
 
 $(document).ready(async function() {
   
@@ -339,6 +342,12 @@ socket.on('change_click_event', function(data){
     currEvent = paratrooper_attack;
   } else if (data.event == 'corrupt_territory'){
     currEvent = corrupt_territory;
+  } else if (data.event == 'set_minefields'){
+    currEvent = set_minefields;
+  } else if (data.event == 'set_underground_silo'){
+    currEvent = set_underground_silo;
+  } else if (data.event == 'underground_silo_launch'){
+    currEvent = underground_silo_launch;
   }
   else {
     currEvent = null;
@@ -1082,6 +1091,20 @@ function rearrange(tid){
   }  
 }
 
+//=============================Concurrent Events=================================
+socket.on('concurr_terminate_event_setup', function(data){
+  $("#proceed_next_stage").show();
+  $("#proceed_next_stage .text").text('DONE');
+  $("#proceed_next_stage").off('click').on('click', function(){
+    socket.emit('signal_concurr_end', {'pid': data.pid});
+    $("#proceed_next_stage").hide(); 
+    currEvent = null;
+    toHightlight = [];
+    clickables = [];
+  });
+});
+
+
 //==============================INNER ASYNC======================================
 
 // Set the button that can trigger a stop to the async event
@@ -1783,6 +1806,222 @@ function corrupt_territory(tid){
     toHightlight = [];
   });
 }
+
+// Arsenal of the Underworld
+socket.on('arsenal_controls', function(data) {
+  // Get the middle_display card and show it
+  let middleDisplay = $('#middle_display');
+  let middleTitle = $('#middle_title');
+  let middleContent = $('#middle_content');
+  middleDisplay.show(); // Ensure the card is visible
+  middleTitle.text('Arsenal Controls'); // Set the title
+  middleContent.empty(); // Clear the content
+
+  // Create container for descriptions and buttons
+  let descriptionsDiv = $('<div></div>')
+      .addClass('mb-3')
+      .addClass('py-1')
+      .css({
+          'max-height': '6rem', // Max height for 3 lines
+          'overflow-y': 'auto', // Enable scrolling if content exceeds max height
+          'line-height': '1.2'  // Compact line spacing
+      });
+
+  let buttonsDiv = $('<div></div>')
+      .addClass('d-flex justify-content-around'); // Buttons inline with spacing
+
+  // Descriptions
+  if (data.minefields && data.minefields.length > 0) {
+      data.minefields.forEach(minefield => {
+          descriptionsDiv.append(
+              `<p style="margin: 0.2rem 0;">${minefield[0]} has ${minefield[1]} mines active.</p>`
+          );
+      });
+  } else {
+      descriptionsDiv.append('<p style="margin: 0.2rem 0;">No active minefields.</p>');
+  }
+
+  let availableMinefields = 3 - (data.minefields ? data.minefields.length : 0);
+  descriptionsDiv.append(
+      `<p style="margin: 0.2rem 0;">${availableMinefields} available minefield placement.</p>`
+  );
+
+  if (data.silo_usable) {
+      descriptionsDiv.append(
+          `<p style="margin: 0.2rem 0;">Underground Silo active in ${data.underground_silo_location} | ${data.silo_usage} usages available for this round.</p>`
+      );
+  } else if (data.occupied) {
+      descriptionsDiv.append('<p style="margin: 0.2rem 0;">Underground Silo Occupied by enemy forces.</p>');
+  } else {
+      descriptionsDiv.append('<p style="margin: 0.2rem 0;">No active underground silo.</p>');
+  }
+
+  // Buttons
+  if (data.set_minefields) {
+      let setMinefieldsButton = $('<button></button>')
+          .addClass('btn btn-primary ml-2')
+          .text('Set up minefields')
+          .off('click') // Clear any existing click event handlers
+          .click(function() {
+              socket.emit('send_async_event', {'name': 'S_M'}); 
+              $('#middle_display').hide();
+              $('#middle_title').empty();
+              $('#middle_content').empty(); 
+          });
+      buttonsDiv.append(setMinefieldsButton);
+  }
+
+  if (data.silo_build) {
+      let buildSiloButton = $('<button></button>')
+          .addClass('btn btn-success ml-2')
+          .text('Build Silo')
+          .click(function() {
+              socket.emit('send_async_event', {'name': 'B_S'});
+              $('#middle_display').hide();
+              $('#middle_title').empty();
+              $('#middle_content').empty(); 
+          });
+      buttonsDiv.append(buildSiloButton);
+  }
+
+  if (data.silo_usage && !data.occupied) {
+      let launchSiloButton = $('<button></button>')
+          .addClass('btn btn-danger ml-2')
+          .text('Launch from Silo')
+          .click(function() {
+              socket.emit('launch_silo');
+              $('#middle_display').hide();
+              $('#middle_title').empty();
+              $('#middle_content').empty(); 
+          });
+      buttonsDiv.append(launchSiloButton);
+  }
+
+  middleContent.append(descriptionsDiv);
+  middleContent.append(buttonsDiv);
+  middleContent.append(`
+    <div style="display: flex; justify-content: center; margin-top: 3px;">
+        <button id='btn-action-cancel' 
+                class="w-9 h-9 bg-red-600 text-white font-bold rounded-lg flex items-center justify-center">
+            X
+        </button>
+    </div>
+  `);
+
+  $('#btn-action-cancel').off('click').on('click', function() {
+      $('#control_panel').hide();
+      $('#middle_display').hide();
+      $('#middle_title, #middle_content').empty();
+  });
+});
+
+
+  // Set minefields
+  socket.on('set_minefields', function(data){
+    announ = document.getElementById('announcement');
+    announ.innerHTML = `<h4>Choose territories to set up minefields! ${data.limits} can be set.</h4>`;
+    clickables = data.targets;
+    minefields_amount = data.limits;
+    toHightlight = [];
+  });
+
+  function set_minefields(tid){
+    if (!clickables.includes(tid)){
+      return;
+    }
+    document.getElementById('control_panel').style.display = 'none';
+    toHightlight.push(tid);
+    if (toHightlight.length > minefields_amount) {
+        toHightlight.shift();
+    }
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit('send_minefield_choices', {'choices': toHightlight});
+      toHightlight = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+      toHightlight = [];
+    });
+  }
+
+  // set_underground_silo
+  socket.on('set_underground_silo', function(data){
+    announ = document.getElementById('announcement');
+    announ.innerHTML = `<h4>Choose a territory to build underground silo! Only one silo can be built.</h4>`;
+    clickables = data.targets;
+    toHightlight = [];
+  });
+
+  function set_underground_silo(tid){
+    if (!clickables.includes(tid)){
+      return;
+    }
+    toHightlight = [];
+    document.getElementById('control_panel').style.display = 'none';
+    toHightlight.push(tid);
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit('send_silo_location', {'choice': toHightlight[0]});
+      toHightlight = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+      toHightlight = [];
+    });
+  }
+
+  // launch from silo
+  socket.on('underground_silo_launch', function(data){
+    announ = document.getElementById('announcement');
+    announ.innerHTML = `<h4>Launching missiles from underground silo. Choose up to ${data.usages} targets!</h4>`;
+    clickables = data.targets;
+    US_usages = data.usages;
+    toHightlight = [];
+  });
+
+  // launching from silo
+  function underground_silo_launch(tid){
+    if (!clickables.includes(tid)){
+      return;
+    }
+    document.getElementById('control_panel').style.display = 'none';
+    toHightlight.push(tid);
+    if (toHightlight.length > US_usages) {
+        toHightlight.shift();
+    }
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit('send_missile_targets', {'choices': toHightlight});
+      toHightlight = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+      toHightlight = [];
+    });
+  }
+
+  socket.on('play_missile_sound', function(){
+    var battleSFX = [document.getElementById('missile1'), document.getElementById('missile2')];
+    var randomIndex = Math.floor(Math.random() * battleSFX.length);
+    battleSFX[randomIndex].volume = 0.45;
+    battleSFX[randomIndex].play();
+  });
 
 //========================================================================================================
 

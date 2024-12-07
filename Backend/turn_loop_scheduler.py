@@ -278,6 +278,12 @@ class turn_loop_scheduler:
                 self.execute_turn(gs, ms, curr_player)
             if ms.interrupt:
                 return
+            
+            # inter_turn_skill_effect
+            if ms.interturn_events: 
+                for event in ms.interturn_events:
+                    event.execute_interturn()
+                ms.interturn_events = []
 
             # inter_turn_summit
             if not ms.interrupt and ms.summit_requested:

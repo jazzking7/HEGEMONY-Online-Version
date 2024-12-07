@@ -28,7 +28,10 @@ class General_Event_Scheduler:
         self.current_event = None
         self.current_player = 0
         # stack of events in case of interruption
-        self.event_stack = []
+        # Event + Halter + ID
+        self.concurrent_events = {}
+        # Inter-turn skill effects
+        self.interturn_events = []
         # inner async
         self.stats_set = False # If stats of player already determined
         self.innerInterrupt = False
@@ -41,6 +44,19 @@ class General_Event_Scheduler:
 
         # Main thread
         self.main_flow = threading.Thread(target=self.execute_game_events)
+
+    def add_concurrent_event(self, event_name, pid):
+
+        if event_name == 'LUS':
+            flag = False
+            def event_function():
+                self.launch_from_silo(pid, flag)
+            event_thread = threading.Thread(target=event_function)
+            event_thread.start()
+            self.concurrent_events[pid] = {
+                'thread': event_thread,
+                'flag': flag
+            }
 
     def selection_time_out(self, num_secs, count):
         self.selected = 0
@@ -125,6 +141,12 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.paratrooper_attack, args=(pid,))
         elif n == 'C_T':
             self.curr_thread = threading.Thread(target=self.corrupt_territory, args=(pid,))
+        elif n == 'S_M':
+            self.curr_thread = threading.Thread(target=self.set_minefields, args=(pid, ))
+        elif n == 'B_S':
+            self.curr_thread = threading.Thread(target=self.build_silo, args=(pid, ))
+        elif n == 'LUS':
+            self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
         
         self.curr_thread.start()
         self.curr_thread.join()
@@ -265,3 +287,98 @@ class General_Event_Scheduler:
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
+
+    def set_minefields(self, pid):
+        player = self.gs.players[pid]
+        if player.skill.active:
+            if 3-len(player.skill.minefields) > 0:
+                self.gs.server.emit('async_terminate_button_setup', room=pid)
+                options = [tid for tid in player.territories if tid not in player.skill.minefields]
+                player.skill.finished_setting = False
+
+                self.gs.server.emit('set_minefields', {'targets': options, 'limits': 3-len(player.skill.minefields)}, room=pid)
+                self.gs.server.emit('change_click_event', {'event': "set_minefields"}, room=pid)
+
+                print(f"{player.name}'s war art triggered an inner async event.")
+                done = False
+                while not done and self.innerInterrupt and not self.terminated and player.connected:
+                    done = player.skill.finished_setting
+                print(f"{player.name}'s async action exited loop.")
+                self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+                self.gs.server.emit("clear_view", room=pid)
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "Cannot set up more than 3 minefields!"}, room=pid)
+    
+    def build_silo(self, pid):
+        player = self.gs.players[pid]
+        if player.skill.active:
+            if not player.skill.underground_silo:
+                self.gs.server.emit('async_terminate_button_setup', room=pid)
+                options = [tid for tid in player.territories]
+                player.skill.finished_setting = False
+
+                self.gs.server.emit('set_underground_silo', {'targets': options}, room=pid)
+                self.gs.server.emit('change_click_event', {'event': "set_underground_silo"}, room=pid)
+
+                print(f"{player.name}'s war art triggered an inner async event.")
+                done = False
+                while not done and self.innerInterrupt and not self.terminated and player.connected:
+                    done = player.skill.finished_setting
+                print(f"{player.name}'s async action exited loop.")
+                self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+                self.gs.server.emit("clear_view", room=pid)
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "Cannot build more than 1 silo!"}, room=pid)
+
+    # TBH switch from concurr to innerasync
+    def launch_from_silo_inner(self, pid):
+        player = self.gs.players[pid]
+        skill = player.skill
+        if skill.active:
+
+            self.gs.server.emit('async_terminate_button_setup', room=pid)
+            skill.finished_launching = False
+
+            options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            options = list(set(options) - set(player.territories))
+
+            self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
+            self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
+
+            print(f"{player.name}'s war art triggered an async event.")
+            done = False
+            while not done and self.innerInterrupt and not self.terminated and player.connected:
+                done = skill.finished_launching
+
+            print(f"{player.name}'s async event exited loop.")
+            self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+            self.gs.server.emit("clear_view", room=pid)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
+
+    # concurrent events 
+    def launch_from_silo(self, pid, flag):
+        player = self.gs.players[pid]
+        skill = player.skill
+        if skill.active:
+
+            self.gs.server.emit('concurr_terminate_event_setup', {'pid': pid}, room=pid)
+            skill.finished_launching = False
+
+            options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            options = list(set(options) - set(player.territories))
+
+            self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
+            self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
+
+            print(f"{player.name}'s war art triggered a concurrent event.")
+            done = flag
+            while not skill.finished_launching and not done and player.connected:
+                done = flag
+
+            print(f"{player.name}'s concurrent event exited loop.")
+            self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+            self.gs.server.emit("clear_view", room=pid)
+            self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)

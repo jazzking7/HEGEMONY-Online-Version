@@ -18,11 +18,12 @@ class Skill_Distributor:
             "Divine_Punishment",
             "Air_Superiority",
             "Collusion",
-            "Laplace's Demon"
+            "Laplace's Demon",
+            "Arsenal of the Underworld"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=7)
+        return random.sample(self.skill_options, k=8)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -56,3 +57,5 @@ class Skill_Distributor:
             return Collusion(player, gs)
         elif skill_name == "Laplace's Demon":
             return Laplace_Demon(player, gs)
+        elif skill_name == "Arsenal of the Underworld":
+            return Arsenal_of_the_Underworld(player, gs)
