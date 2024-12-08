@@ -396,6 +396,9 @@ class General_Event_Scheduler:
             self.gs.server.emit('signal_show_btns', room=pid)
             self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             self.gs.server.emit("clear_view", room=pid)
-            self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
+            if skill.finished_launching:
+                self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
+            else:
+                self.gs.server.emit("set_up_announcement", {'msg': "Launching operation cancelled..."}, room=pid)
         else:
             self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
