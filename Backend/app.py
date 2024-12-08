@@ -280,9 +280,89 @@ def simulate_dice_battles(attacker_dice, attacker_range, attacker_min_roll, atta
     probabilities = {key: value / samples for key, value in outcomes.items()}
     return probabilities
 
+def battle_simulation(
+            attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul, attacker_troop_size,
+            defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul, defender_troop_size,
+            samples=1000
+        ):
+    outcomes = {
+        "attacker_win_rate": 0,
+        "defender_win_rate": 0,
+        "avg_attacker_damage": 0,
+        "avg_defender_damage": 0,
+    }
+    avg_loss = {
+        "attacker_dmg": 0,
+        "defender_dmg": 0
+    }
+    # print( attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul, attacker_troop_size,
+    #         defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul, defender_troop_size,)
+    attacker_min_roll = attacker_range if attacker_range < attacker_min_roll else attacker_min_roll
+    defender_min_roll = defender_range if defender_range < defender_min_roll else defender_min_roll
+    for _ in range(samples):
+        curr_a_size, curr_d_size = attacker_troop_size, defender_troop_size
+        curr_d_dice = defender_dice-1
+        curr_a_dice = attacker_dice
+        while curr_a_size > 0 and curr_d_size > 0:
+            if curr_d_size <= curr_d_dice:
+                curr_d_dice = curr_d_size
+            if curr_a_size <= curr_a_dice:
+                curr_a_dice = curr_a_size
+            attacker_rolls = sorted(
+                [random.randint(attacker_min_roll, attacker_range) for _ in range(curr_a_dice)], reverse=True
+            )
+            defender_rolls = sorted(
+                [random.randint(defender_min_roll, defender_range) for _ in range(curr_d_dice)], reverse=True
+            )
+            num_comparisons = min(len(attacker_rolls), len(defender_rolls))
+            attacker_top = attacker_rolls[:num_comparisons]
+            defender_top = defender_rolls[:num_comparisons]
+
+            results = [attacker_top[i] > defender_top[i] for i in range(num_comparisons)]
+            attacker_wins = sum(results)
+            defender_wins = num_comparisons - attacker_wins
+
+            if random.randint(1, 100) <= attacker_block_rate:
+                defender_wins = 0
+            if random.randint(1, 100) <= defender_block_rate:
+                attacker_wins = 0
+
+            atk_dmg = attacker_wins * attacker_dmg_mul
+            def_dmg = defender_wins * defender_dmg_mul
+
+            curr_a_size -= def_dmg
+            curr_d_size -= atk_dmg
+        
+        # defender win
+        if curr_a_size <= 0:
+            if curr_d_size <= 0:
+                curr_d_size = 1
+            if curr_a_size < 0:
+                curr_a_size = 0
+            outcomes["defender_win_rate"] += 1
+            avg_loss['attacker_dmg'] += defender_troop_size - curr_d_size
+        # attacker win
+        else:
+            if curr_d_size < 0:
+                curr_d_size = 0
+            outcomes["attacker_win_rate"] += 1
+            avg_loss['defender_dmg'] += attacker_troop_size - curr_a_size
+        
+        outcomes["avg_attacker_damage"] += defender_troop_size - curr_d_size
+        outcomes["avg_defender_damage"] += attacker_troop_size - curr_a_size
+
+
+    probabilities = {key: value / samples for key, value in outcomes.items()}
+    avg_losses = {"average_attack_damage_on_loss": avg_loss['attacker_dmg']/outcomes["defender_win_rate"] if outcomes["defender_win_rate"] else -1,
+                  "average_defend_damage_on_loss": avg_loss['defender_dmg']/outcomes["attacker_win_rate"] if outcomes["attacker_win_rate"] else -1,}
+    return {**probabilities, **avg_losses }
+
 # Flask-SocketIO event handler
 @socketio.on('send_simulation_data')
 def compute_simulation_result(data):
+    # Extract general data
+    mode = data.get('simulationMode', 'singleRoll')
+
     # Extract attacker and defender stats from the received data
     attacker_stats = data.get('attackerStats', {})
     defender_stats = data.get('defenderStats', {})
@@ -300,20 +380,43 @@ def compute_simulation_result(data):
     defender_block_rate = defender_stats.get('nullificationRate', 0)
     defender_dmg_mul = defender_stats.get('damageMultiplier', 1)
 
-    # Call the simulation function
-    results = simulate_dice_battles(
-        attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul,
-        defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul
-    )
+    if mode == 'battleSimulation':
+        # Extract troop sizes
+        attacker_troop_size = attacker_stats.get('troopSize', 1)
+        defender_troop_size = defender_stats.get('troopSize', 1)
+        
+        # Call the battle simulation function
+        battle_results = battle_simulation(
+            attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul, attacker_troop_size,
+            defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul, defender_troop_size
+        )
 
-    # Extract the results and send them back to the frontend
-    socketio.emit('get_simulation_result', {
-        'attackerWinAll': round(results['attacker_wins_all'] * 100, 2),
-        'attackerAdvantage': round(results['attacker_advantage'] * 100, 2),
-        'split': round(results['split'] * 100, 2),
-        'defenderAdvantage': round(results['defender_advantage'] * 100, 2),
-        'defenderWinAll': round(results['defender_wins_all'] * 100, 2)
-    }, room=request.sid)
+        # Emit battle simulation results
+        socketio.emit('get_battle_results', {
+            'attackerWinRate': round(battle_results['attacker_win_rate'] * 100, 2),
+            'defenderWinRate': round(battle_results['defender_win_rate'] * 100, 2),
+            'avgAttackerDamage': round(battle_results['avg_attacker_damage'], 2),
+            'avgDefenderDamage': round(battle_results['avg_defender_damage'], 2),
+            'avgAttackerDamageOnLoss': round(battle_results['average_attack_damage_on_loss'], 2),
+            'avgDefenderDamageOnLoss': round(battle_results['average_defend_damage_on_loss'], 2),
+        }, room=request.sid)
+
+    else:
+        # Call the simulation function for single roll
+        results = simulate_dice_battles(
+            attacker_dice, attacker_range, attacker_min_roll, attacker_block_rate, attacker_dmg_mul,
+            defender_dice, defender_range, defender_min_roll, defender_block_rate, defender_dmg_mul
+        )
+
+        # Extract the results and send them back to the frontend
+        socketio.emit('get_simulation_result', {
+            'attackerWinAll': round(results['attacker_wins_all'] * 100, 2),
+            'attackerAdvantage': round(results['attacker_advantage'] * 100, 2),
+            'split': round(results['split'] * 100, 2),
+            'defenderAdvantage': round(results['defender_advantage'] * 100, 2),
+            'defenderWinAll': round(results['defender_wins_all'] * 100, 2)
+        }, room=request.sid)
+
 
 ### Game functions ###
 

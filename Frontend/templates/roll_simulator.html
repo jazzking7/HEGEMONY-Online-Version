@@ -1,6 +1,20 @@
 <div class="container my-3">
     <h1 class="text-center mb-2">Roll Simulator</h1>
-    <p class="text-center text-muted fs-6 mb-1">Approximating win rate by simulating 10,000 rolls using the given stats. Each roll uses the full capacity of the given stats. Empty inputs use their indicated default value.</p>
+
+    <!-- Mode Selection -->
+    <div class="text-center mb-3">
+        <label class="me-3">
+            <input type="radio" name="simulationMode" value="singleRoll" checked> Single Roll
+        </label>
+        <label>
+            <input type="radio" name="simulationMode" value="battleSimulation"> Battle Simulation
+        </label>
+    </div>
+
+    <p class="text-center text-muted fs-6 mb-1" id="description">
+        Approximating win rate by simulating 10,000 rolls using the given stats. Each roll uses the full capacity of the given stats. Empty inputs use their indicated default value.
+    </p>
+
     <div class="row g-3">
         <!-- Attacker Stats -->
         <div class="col-md-4">
@@ -30,10 +44,15 @@
                             <label for="attackerNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
                             <input type="number" id="attackerNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
                         </div>
+                        <div class="mb-2 d-none" id="attackerTroopSizeContainer">
+                            <label for="attackerTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
+                            <input type="number" id="attackerTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
+
         <!-- Defender Stats -->
         <div class="col-md-4">
             <div class="card">
@@ -62,10 +81,15 @@
                             <label for="defenderNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
                             <input type="number" id="defenderNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
                         </div>
+                        <div class="mb-2 d-none" id="defenderTroopSizeContainer">
+                            <label for="defenderTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
+                            <input type="number" id="defenderTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
+
         <!-- Result -->
         <div class="col-md-4">
             <div class="card d-none" id="resultCard">
