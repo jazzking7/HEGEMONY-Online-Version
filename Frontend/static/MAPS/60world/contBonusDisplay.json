@@ -1,0 +1,77 @@
+[
+  {
+    "x": 815, 
+    "y": 245, 
+    "dx": 120,
+    "dy": 60,
+    "cx": 873,
+    "cy": 274, 
+    "message": "MOSCOVA\n+20 TROOPS"
+  },
+  {
+    "x": 1600, 
+    "y": 360, 
+    "dx": 150,
+    "dy": 60,
+    "cx": 1675, 
+    "cy": 390,  
+    "message": "ROMANA\n+17 TROOPS"
+  },
+  {
+    "x": 1870,
+    "y": 670,
+    "dx": 150,
+    "dy": 60,
+    "cx": 1945,
+    "cy": 700,
+    "message": "NUSANTARA\n+3 TROOPS"
+  },
+  {
+    "x": 480, 
+    "y": 765, 
+    "dx": 120,
+    "dy": 60,
+    "cx": 540,
+    "cy": 795,
+    "message": "HINOMOTO\n+3 TROOPS"
+  },
+  {
+    "x": 370, 
+    "y": 1030, 
+    "dx": 160,
+    "dy": 60,
+    "cx": 450,
+    "cy": 1060,
+    "message": "CYPRUS\n+2 TROOPS"
+  },
+  {
+    "x": 450,
+    "y": 1330,
+    "dx": 120,
+    "dy": 60,
+    "cx": 510,
+    "cy": 1360,
+    "message": "JEJU\n+2 TROOPS"
+  }
+  ,
+  {
+    "x": 850,
+    "y": 840,
+    "dx": 120,
+    "dy": 60,
+    "cx": 910,
+    "cy": 870,
+    "message": "CEYLON\n+2 TROOPS"
+  }
+  ,
+  {
+    "x": 1030,
+    "y": 1310,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1090,
+    "cy": 1340,
+    "message": "BRITANNIA\n+3 TROOPS"
+  }
+
+]

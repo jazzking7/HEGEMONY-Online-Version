@@ -1,0 +1,1710 @@
+[
+  [
+    {
+      "isPInst": true,
+      "x": 2048,
+      "y": 708,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2054,
+      "y": 699,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2061,
+      "y": 687,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2062,
+      "y": 680,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2062,
+      "y": 660,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2069,
+      "y": 656,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2077,
+      "y": 656,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2074,
+      "y": 667,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2073,
+      "y": 677,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2073,
+      "y": 686,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2070,
+      "y": 696,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2069,
+      "y": 702,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2071,
+      "y": 707,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2084,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2086,
+      "y": 724,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2088,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2098,
+      "y": 722,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2111,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2118,
+      "y": 708,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2123,
+      "y": 700,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2124,
+      "y": 693,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2118,
+      "y": 686,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2114,
+      "y": 679,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2111,
+      "y": 668,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2105,
+      "y": 657,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2105,
+      "y": 648,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2108,
+      "y": 639,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2105,
+      "y": 628,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2092,
+      "y": 616,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2075,
+      "y": 607,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2060,
+      "y": 603,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2047,
+      "y": 596,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2041,
+      "y": 586,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2029,
+      "y": 576,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2019,
+      "y": 568,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2005,
+      "y": 564,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1992,
+      "y": 564,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1984,
+      "y": 570,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1991,
+      "y": 584,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 600,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1989,
+      "y": 614,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 632,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 643,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1990,
+      "y": 650,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1986,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1977,
+      "y": 665,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1973,
+      "y": 675,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1974,
+      "y": 684,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1980,
+      "y": 692,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 702,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1994,
+      "y": 708,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1994,
+      "y": 720,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2004,
+      "y": 721,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2009,
+      "y": 717,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2025,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2033,
+      "y": 711,
+      "z": 0
+    }
+  ],
+  [
+    {
+      "isPInst": true,
+      "x": 1922,
+      "y": 780,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1940,
+      "y": 772,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1961,
+      "y": 772,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1970,
+      "y": 766,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1979,
+      "y": 764,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 764,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2008,
+      "y": 773,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2011,
+      "y": 778,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1995,
+      "y": 778,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1989,
+      "y": 782,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1980,
+      "y": 785,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1973,
+      "y": 792,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1973,
+      "y": 801,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1977,
+      "y": 808,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1972,
+      "y": 812,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1957,
+      "y": 813,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1957,
+      "y": 813,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1960,
+      "y": 823,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1966,
+      "y": 825,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1985,
+      "y": 825,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1997,
+      "y": 826,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2008,
+      "y": 827,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2013,
+      "y": 827,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2029,
+      "y": 825,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2043,
+      "y": 824,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2057,
+      "y": 828,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2058,
+      "y": 808,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2062,
+      "y": 796,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2074,
+      "y": 790,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2079,
+      "y": 781,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2080,
+      "y": 768,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2081,
+      "y": 753,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2081,
+      "y": 738,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2073,
+      "y": 726,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2061,
+      "y": 727,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2045,
+      "y": 723,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2048,
+      "y": 708,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2033,
+      "y": 711,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2025,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2009,
+      "y": 717,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 2004,
+      "y": 721,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1994,
+      "y": 720,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1986,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1976,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1969,
+      "y": 726,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1957,
+      "y": 726,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1945,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1933,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1929,
+      "y": 741,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1921,
+      "y": 749,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1914,
+      "y": 759,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1912,
+      "y": 763,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1912,
+      "y": 771,
+      "z": 0
+    }
+  ],
+  [
+    {
+      "isPInst": true,
+      "x": 1816,
+      "y": 640,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1805,
+      "y": 644,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1798,
+      "y": 641,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1797,
+      "y": 633,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1801,
+      "y": 625,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1805,
+      "y": 620,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1798,
+      "y": 616,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1789,
+      "y": 612,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1780,
+      "y": 621,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1770,
+      "y": 624,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1765,
+      "y": 634,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1765,
+      "y": 644,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1753,
+      "y": 649,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1753,
+      "y": 660,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1753,
+      "y": 672,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1740,
+      "y": 681,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1737,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1737,
+      "y": 700,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1741,
+      "y": 703,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1747,
+      "y": 711,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1766,
+      "y": 712,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1782,
+      "y": 715,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1786,
+      "y": 720,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1771,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1765,
+      "y": 742,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1764,
+      "y": 749,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1769,
+      "y": 763,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1781,
+      "y": 765,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1783,
+      "y": 777,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1798,
+      "y": 782,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1799,
+      "y": 790,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1799,
+      "y": 796,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1803,
+      "y": 802,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1820,
+      "y": 800,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1828,
+      "y": 789,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1829,
+      "y": 781,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1844,
+      "y": 777,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1852,
+      "y": 775,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1862,
+      "y": 774,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1871,
+      "y": 783,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1882,
+      "y": 788,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1890,
+      "y": 800,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1894,
+      "y": 809,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1906,
+      "y": 810,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1913,
+      "y": 805,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1915,
+      "y": 796,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1924,
+      "y": 791,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1922,
+      "y": 780,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1912,
+      "y": 771,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1912,
+      "y": 763,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1914,
+      "y": 759,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1921,
+      "y": 749,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1905,
+      "y": 740,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1901,
+      "y": 734,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1899,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1884,
+      "y": 733,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1874,
+      "y": 739,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1857,
+      "y": 738,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1860,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1860,
+      "y": 724,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1861,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1865,
+      "y": 703,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1869,
+      "y": 696,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1867,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1849,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1841,
+      "y": 689,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1841,
+      "y": 681,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1829,
+      "y": 680,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1822,
+      "y": 676,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1821,
+      "y": 663,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1820,
+      "y": 656,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1818,
+      "y": 648,
+      "z": 0
+    }
+  ],
+  [
+    {
+      "isPInst": true,
+      "x": 1867,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1869,
+      "y": 696,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1865,
+      "y": 703,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1861,
+      "y": 713,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1860,
+      "y": 724,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1860,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1857,
+      "y": 738,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1874,
+      "y": 739,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1884,
+      "y": 733,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1899,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1901,
+      "y": 734,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1905,
+      "y": 740,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1921,
+      "y": 749,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1929,
+      "y": 741,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1933,
+      "y": 732,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1945,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1957,
+      "y": 726,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1969,
+      "y": 726,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1976,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1986,
+      "y": 725,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1994,
+      "y": 720,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1994,
+      "y": 708,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 702,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1980,
+      "y": 692,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1974,
+      "y": 684,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1973,
+      "y": 675,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1977,
+      "y": 665,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1967,
+      "y": 659,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1964,
+      "y": 652,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1964,
+      "y": 647,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1961,
+      "y": 644,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1953,
+      "y": 654,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1948,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1941,
+      "y": 657,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1941,
+      "y": 650,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1943,
+      "y": 640,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1933,
+      "y": 639,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1928,
+      "y": 645,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1921,
+      "y": 652,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1920,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1917,
+      "y": 666,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1907,
+      "y": 670,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1899,
+      "y": 675,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1893,
+      "y": 678,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1890,
+      "y": 684,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1885,
+      "y": 688,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1874,
+      "y": 688,
+      "z": 0
+    }
+  ],
+  [
+    {
+      "isPInst": true,
+      "x": 1977,
+      "y": 665,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1986,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1990,
+      "y": 650,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 643,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 632,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1989,
+      "y": 614,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1993,
+      "y": 600,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1991,
+      "y": 584,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1984,
+      "y": 570,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1946,
+      "y": 572,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1937,
+      "y": 578,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1917,
+      "y": 580,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1905,
+      "y": 576,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1901,
+      "y": 581,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1888,
+      "y": 585,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1886,
+      "y": 596,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1875,
+      "y": 603,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1870,
+      "y": 607,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1853,
+      "y": 599,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1841,
+      "y": 602,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1833,
+      "y": 606,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1829,
+      "y": 614,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1822,
+      "y": 618,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1823,
+      "y": 626,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1816,
+      "y": 632,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1816,
+      "y": 640,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1818,
+      "y": 648,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1820,
+      "y": 656,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1821,
+      "y": 663,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1822,
+      "y": 676,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1829,
+      "y": 680,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1841,
+      "y": 681,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1841,
+      "y": 689,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1849,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1867,
+      "y": 691,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1874,
+      "y": 688,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1885,
+      "y": 688,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1890,
+      "y": 684,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1893,
+      "y": 678,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1899,
+      "y": 675,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1907,
+      "y": 670,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1917,
+      "y": 666,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1920,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1921,
+      "y": 652,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1928,
+      "y": 645,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1933,
+      "y": 639,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1943,
+      "y": 640,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1941,
+      "y": 650,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1941,
+      "y": 657,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1948,
+      "y": 658,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1953,
+      "y": 654,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1961,
+      "y": 644,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1964,
+      "y": 647,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1964,
+      "y": 652,
+      "z": 0
+    },
+    {
+      "isPInst": true,
+      "x": 1967,
+      "y": 659,
+      "z": 0
+    }
+  ]
+]

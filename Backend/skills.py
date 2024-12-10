@@ -1083,7 +1083,7 @@ class Loan_Shark(Skill):
 
     def update_current_status(self):
         # modify this
-        information = "Players on your loan list each needs to pay you 7★ within 5 turns."
+        information = "Players on your loan list each needs to pay you 3★ to regain control of their war art and special authority. Current list: "
         if self.load_list:
             for name in self.names:
                 information += name + ' '

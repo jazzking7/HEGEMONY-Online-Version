@@ -1,0 +1,5 @@
+Surabaya,Medan,Sulawesi
+Batam,Kupang,Medan
+Dacia,Surabaya,Medan,Sulawesi
+Batam,Surabaya,Kupang,Sulawesi
+Trajan,Batam,Kupang,Medan

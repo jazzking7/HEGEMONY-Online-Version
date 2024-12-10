@@ -1,0 +1,6 @@
+Pyoseon,Edinburgh
+Larnaca,Glasgow,London,Brighton
+Galle,Norwich,London
+Bristol,London,Brighton
+Edinburgh,Bristol,Norwich,Brighton
+Edinburgh,Norwich,London

@@ -1,0 +1,5 @@
+Nagasaki,Colombo
+Murmansk,Hiroshima,Sendai
+Nagasaki,Fukuoka
+Sendai,Sapporo
+Fukuoka,Larnaca
