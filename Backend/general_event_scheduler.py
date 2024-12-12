@@ -48,20 +48,18 @@ class General_Event_Scheduler:
     def add_concurrent_event(self, event_name, pid):
 
         if event_name == 'LUS':
-            flag = False
             def event_function():
-                self.launch_from_silo(pid, flag)
+                self.launch_from_silo(pid)
             event_thread = threading.Thread(target=event_function)
-            event_thread.start()
             self.concurrent_events[pid] = {
                 'thread': event_thread,
-                'flag': flag
+                'flag': False
             }
+            event_thread.start()
 
     def flush_concurrent_event(self, pid):
         if pid in self.concurrent_events:
             self.concurrent_events[pid]['flag'] = True
-            del self.concurrent_events[pid]
     
     def flush_all_concurrent_events(self):
         for pid in self.gs.players:
@@ -372,7 +370,7 @@ class General_Event_Scheduler:
             self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
 
     # concurrent events 
-    def launch_from_silo(self, pid, flag):
+    def launch_from_silo(self, pid):
         player = self.gs.players[pid]
         skill = player.skill
         if skill.active:
@@ -388,14 +386,16 @@ class General_Event_Scheduler:
             self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
 
             print(f"{player.name}'s war art triggered a concurrent event.")
-            done = flag
+            done = self.concurrent_events[pid]['flag']
             while not skill.finished_launching and not done and player.connected:
-                done = flag
-
+                done = self.concurrent_events[pid]['flag']
+            del self.concurrent_events[pid]
             print(f"{player.name}'s concurrent event exited loop.")
             self.gs.server.emit('signal_show_btns', room=pid)
-            self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             self.gs.server.emit("clear_view", room=pid)
+            # not the player's turn, clear click event
+            if not (pid == self.gs.pids[self.current_player]):
+                self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_launching:
                 self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
             else:

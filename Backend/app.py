@@ -668,28 +668,29 @@ def handle_reserves_deployment(data):
     amount = int(data['amount'])
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    t = gsm.map.territories[choice]
-    t.troops += amount
-    gsm.players[pid].total_troops += amount
-    gsm.players[pid].reserves -= amount
-    # add troop soundfx
-    socketio.emit('selectionSoundFx', room=gsm.lobby)
-    # CM
-    socketio.emit('troop_addition_display', {
-                            f'{choice}': {'tid': choice, 'number': amount},
-                        }, room=gsm.lobby)
-    socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
-    gsm.update_LAO(pid)
-    gsm.update_private_status(pid)
+    if amount <= gsm.players[pid].reserves:
+        t = gsm.map.territories[choice]
+        t.troops += amount
+        gsm.players[pid].total_troops += amount
+        gsm.players[pid].reserves -= amount
+        # add troop soundfx
+        socketio.emit('selectionSoundFx', room=gsm.lobby)
+        # CM
+        socketio.emit('troop_addition_display', {
+                                f'{choice}': {'tid': choice, 'number': amount},
+                            }, room=gsm.lobby)
+        socketio.emit('update_trty_display',{choice:{'troops':t.troops}}, room=gsm.lobby)
+        gsm.update_LAO(pid)
+        gsm.update_private_status(pid)
 
-    gsm.update_player_stats()
-    gsm.get_SUP()
-    gsm.update_global_status()
-    
-    gsm.signal_MTrackers('popu')
+        gsm.update_player_stats()
+        gsm.get_SUP()
+        gsm.update_global_status()
+        
+        gsm.signal_MTrackers('popu')
 
-    if gsm.players[pid].reserves > 0:
-        socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
+        if gsm.players[pid].reserves > 0:
+            socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
 
 @socketio.on('request_summit')
 def handle_summit_request():
@@ -877,7 +878,6 @@ def handle_concurr_end(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if data['pid'] in gsm.GES.concurrent_events:
         gsm.GES.concurrent_events[pid]['flag'] = True
-        del gsm.GES.concurrent_events[pid]
 
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
