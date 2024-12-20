@@ -1191,7 +1191,7 @@ class Loan_Shark(Skill):
                         debt_amt -= 1
                         self.gs.update_LAO(player)
                         if debtor.skill:
-                            if debtor.skill.name == "Ares' Blessing" and debtor.skill.active:
+                            if debtor.skill.name == "Ares' Blessing":
                                 debtor.skill.checking_rage_meter()
                         self.gs.server.emit('battle_casualties', {
                         f'{curr_tid}': {'tid': curr_tid, 'number': 1},

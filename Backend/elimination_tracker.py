@@ -22,6 +22,9 @@ class Elimination_tracker:
                     gs.signal_MTrackers('indus')
                 if victim.skill.name == 'Loan Shark':
                     for debtor in victim.skill.loan_list:
+                        gs.players[debtor].hijacked = False
+                        if gs.players[debtor].skill:
+                            gs.players[debtor].skill.active = True
                         gs.server.emit('debt_off', room=debtor)
             for player in gs.players:
                 currp = gs.players[player]

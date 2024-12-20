@@ -41,6 +41,9 @@ class Mission:
                     self.gs.signal_MTrackers('indus')
                 if self.gs.players[self.player].skill.name == 'Loan Shark':
                     for debtor in self.gs.players[self.player].skill.loan_list:
+                        self.gs.players[debtor].hijacked = False
+                        if self.gs.players[debtor].skill:
+                            self.gs.players[debtor].skill.active = True
                         self.gs.server.emit('debt_off', room=debtor)
             for player in self.gs.players:
                 curr_p = self.gs.players[player]
