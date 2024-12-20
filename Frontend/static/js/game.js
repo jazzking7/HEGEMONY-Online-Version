@@ -29,11 +29,13 @@ let laplace_mode = false;
 // Arsenal of Underworld
 let minefields_amount = 0;
 let US_usages = 0;
+// Loan Shark
+let in_debt = false;
 
 $(document).ready(async function() {
   
   // Hide control buttons
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 
   // Load in gameStyle.css
   var newLink = $('<link>', {
@@ -370,21 +372,24 @@ socket.on('set_up_announcement', function(data){
 // show buttons
 socket.on('signal_show_btns', function(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').show();
+  if (in_debt) {
+    $('#btn-debt').show();
+  }
 });
 
 // hide buttons
 socket.on('signal_hide_btns', function(){
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 });
 
 function hide_async_btns(){
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 }
 
 // Game over announcement
 socket.on('GAME_OVER', function(data) {
   $('#gameEndSound').trigger('play');
-  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve').hide();
+  $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
   currEvent = null;
   $('#announcement').show();
   $('#announcement').html('<h1>GAME OVER<h1>');
@@ -2021,6 +2026,215 @@ socket.on('arsenal_controls', function(data) {
     battleSFX[randomIndex].volume = 0.45;
     battleSFX[randomIndex].play();
   });
+
+  // loan shark
+  socket.on('make_ransom', function(data) {
+    // Set the announcement message
+    announ = document.getElementById('announcement');
+    announ.innerHTML = `<h4>Choose a target to send your ransomware!</h4>`;
+
+    // Ensure required elements are visible
+    let middleDisplay = $('#middle_display');
+    let middleTitle = $('#middle_title');
+    let middleContent = $('#middle_content');
+
+    middleDisplay.show();
+    middleTitle.empty();
+    middleContent.empty();
+
+    // Create container for buttons
+    let buttonContainer = $('<div></div>')
+        .addClass('d-flex flex-wrap justify-content-between')
+        .css({
+            'max-height': '8rem',  // Limit the height to make it scrollable if too many rows
+            'overflow-y': 'auto',  // Enable vertical scrolling
+            'gap': '2px'          // Space between buttons
+        });
+
+    // Variable to track the currently selected button
+    let selectedButton = null;
+
+    // Loop through each target name and create buttons
+    data.targets.forEach(function(name) {
+        let button = $('<button></button>')
+            .addClass('btn m-2')
+            .css({
+                'padding': '2px',
+                'text-align': 'center',
+                'background-color': '#FFC107', // Bootstrap warning color
+                'color': '#333333' // Dark gray text
+            })
+            .text(name)
+            .click(function(){
+                // Remove red border from previously selected button
+                if (selectedButton) {
+                    selectedButton.css('border', 'none');
+                }
+
+                // Highlight the current button with a red border
+                $(this).css({
+                    'border': '2px solid red'
+                });
+
+                // Update the reference to the selected button
+                selectedButton = $(this);
+
+                // Show the control panel
+                document.getElementById('control_mechanism').innerHTML = '';
+                document.getElementById('control_panel').style.display = 'none';
+                document.getElementById('control_panel').style.display = 'flex';
+                $('#proceed_next_stage').hide();
+
+                // Confirm button action
+                $('#control_confirm').off('click').on('click', function(){
+                    document.getElementById('control_panel').style.display = 'none';
+                    socket.emit('send_ransom_target', {'choice': name});
+
+                    // Clear middle content and title
+                    middleTitle.empty();
+                    middleContent.empty();
+
+                    // Remove red border from selected button
+                    if (selectedButton) {
+                        selectedButton.css('border', 'none');
+                        selectedButton = null;
+                    }
+                });
+
+                // Cancel button action
+                $('#control_cancel').off('click').on('click', function(){
+                    document.getElementById('control_panel').style.display = 'none';
+                    $('#proceed_next_stage').show();
+
+                    // Remove red border from selected button
+                    if (selectedButton) {
+                        selectedButton.css('border', 'none');
+                        selectedButton = null;
+                    }
+                });
+            });
+
+        buttonContainer.append(button);
+    });
+
+    // Add the button container to middle_content
+    middleContent.append(buttonContainer);
+});
+
+
+socket.on('show_debt_button', function(){
+  popup("Your command system is currently restricted by enemy ransomware!", 3000);
+  in_debt = true;
+  $('#btn-debt').show();
+  $('#btn-debt').off('click').on('click', function() {
+    // Ensure middle_display, middle_title, and middle_content are visible and cleared
+    let middleDisplay = $('#middle_display');
+    let middleTitle = $('#middle_title');
+    let middleContent = $('#middle_content');
+    
+    middleDisplay.show();
+    middleTitle.empty();
+    middleContent.empty();
+
+    // Await for the "debt_info" event from the backend
+    socket.on('debt_info', function(data) {
+        // Clear existing content to avoid duplicate information
+        middleTitle.empty();
+        middleContent.empty();
+
+        // Display debt information in a scrollable div
+        let debtInfoDiv = $('<div></div>')
+            .css({
+                'max-height': '6rem', // Roughly 4 lines of text (6rem = 4 * 1.5rem per line)
+                'overflow-y': 'auto',
+                'margin-bottom': '10px'
+            })
+            .html(`
+                <p>Current debt amount: ${data.debt_amount} troops, which is equivalent to ${Math.ceil(data.debt_amount / 5)} ★</p>
+                <p>Your current reserves: ${data.curr_reserves}</p>
+                <p>Your total troops: ${data.total_troops}</p>
+                <p>Your current special authority: ${data.stars}★</p>
+            `);
+
+        // Create buttons for "Pay with ★" and "Pay with Troops"
+        let payWithStarsButton = $('<button></button>')
+            .addClass('btn btn-warning m-2')
+            .css({
+                'background-color': '#FF8C00', // Dark orange
+                'color': '#333333', // Dark grey text
+                'width': '45%',
+                'text-align': 'center'
+            })
+            .text('Pay with ★')
+            .on('click', function() {
+                socket.emit('make_debt_payment', { 'method': 'sepauth' });
+                middleDisplay.hide();
+                middleTitle.empty();
+                middleContent.empty();
+            });
+
+        let payWithTroopsButton = $('<button></button>')
+            .addClass('btn btn-warning m-2')
+            .css({
+                'background-color': '#FF8C00', // Dark orange
+                'color': '#333333', // Dark grey text
+                'width': '45%',
+                'text-align': 'center'
+            })
+            .text('Pay with troops')
+            .on('click', function() {
+                socket.emit('make_debt_payment', { 'method': 'troops' });
+                middleDisplay.hide();
+                middleTitle.empty();
+                middleContent.empty();
+            });
+
+        // Create a button container to align "Pay with ★" and "Pay with troops" side by side
+        let buttonContainer = $('<div></div>')
+            .addClass('d-flex justify-content-between')
+            .css({
+                'gap': '10px'
+            });
+
+        buttonContainer.append(payWithStarsButton);
+        buttonContainer.append(payWithTroopsButton);
+
+        // Create the close button
+        let closeButton = $('<button></button>')
+            .addClass('btn m-2')
+            .css({
+                'background-color': 'red',
+                'color': 'white',
+                'width': '30%', // Small width to center it properly
+                'margin': '10px auto', // Center horizontally
+                'display': 'block', // Makes the button a block element
+                'text-align': 'center'
+            })
+            .text('X')
+            .on('click', function() {
+                middleDisplay.hide();
+                middleTitle.empty();
+                middleContent.empty();
+            });
+
+        // Append everything to the content
+        middleTitle.text('Debt Information');
+        
+        // Add the debt info, button container, and close button to the middle content
+        middleContent.append(debtInfoDiv);
+        middleContent.append(buttonContainer);
+        middleContent.append(closeButton);
+    });
+
+    // Emit the event to fetch debt info
+    socket.emit('fetch_debt_info');
+  });
+});
+
+socket.on('debt_off', function(){
+  in_debt = false;
+  $('#btn-debt').hide();
+});
 
 //========================================================================================================
 

@@ -39,10 +39,27 @@ class Mission:
                     self.gs.get_SUP()
                     self.gs.update_global_status()
                     self.gs.signal_MTrackers('indus')
-            self.gs.GES.flush_concurrent_event(d_pid)
+                if self.gs.players[self.player].skill.name == 'Loan Shark':
+                    for debtor in self.gs.players[self.player].skill.loan_list:
+                        self.gs.server.emit('debt_off', room=debtor)
+            for player in self.gs.players:
+                curr_p = self.gs.players[player]
+                if curr_p.skill:
+                    if curr_p.skill.name == 'Loan Shark':
+                        if self.player in curr_p.skill.loan_list:
+                            curr_p.skill.handle_payment(self.player, 'sepauth')
+                            curr_p.skill.handle_payment(self.player, 'troops')
+                            del curr_p.skill.loan_list[self.player]
+                            self.gs.server.emit('debt_off', room=self.player)
+            self.gs.GES.flush_concurrent_event(self.player)
             self.gs.perm_elims.append(self.player)
             self.gs.death_logs[self.player] = 'MF'
             self.gs.signal_MTrackers('death')
+            self.gs.get_TIP()
+            self.gs.get_HIP()
+            self.gs.get_MTO()
+            self.gs.get_LAO()
+            self.gs.get_SUP()
             self.gs.egt.determine_end_game(self.gs)
 
 class Pacifist(Mission):

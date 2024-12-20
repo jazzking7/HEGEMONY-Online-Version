@@ -16,6 +16,7 @@ class Player:
         self.alive = True
 
         self.connected = True # Keep track if the player is connected
+        self.hijacked = False
 
         # skill
         self.skill = None
@@ -161,6 +162,21 @@ class Game_State_Manager:
         if self.players[new_pid].skill:
             self.players[new_pid].skill.player = new_pid
         del self.players[old_pid]
+        
+        # skill update
+        for skill_holder in self.players:
+            curr_p = self.players[skill_holder]
+            if curr_p.skill:
+                if curr_p.skill.name == 'Loan Shark':
+                    if old_pid in curr_p.skill.loan_list:
+                        debt = curr_p.skill.loan_list[old_pid]
+                        del curr_p.skill.loan_list[old_pid]
+                        curr_p.skill.loan_list[new_pid] = debt
+                if curr_p.skill.name == 'Robinhood':
+                    if old_pid in curr_p.skill.targets:
+                        curr_p.skill.targets.remove(old_pid)
+                        curr_p.skill.targets.append(new_pid)
+                
 
         # Update death logs and perm_elims
         if old_pid in self.perm_elims:
@@ -502,9 +518,12 @@ class Game_State_Manager:
             extra = 52
         elif amt == 15:
             extra = 60
-        self.players[player].reserves += extra
-        self.players[player].stars -= amt
-        self.update_private_status(player)
+        if not self.players[player].hijacked:
+            self.players[player].reserves += extra
+            self.players[player].stars -= amt
+            self.update_private_status(player)
+        else:
+            self.server.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=player)
 
     def get_total_troops_of_player(self, player):
         player = self.players[player]
@@ -560,13 +579,16 @@ class Game_State_Manager:
                     return
                 elif not self.players[player].skill.active:
                     return
-        self.players[player].infrastructure_upgrade += amt
-        self.players[player].stars -= amt*4
-        self.update_private_status(player)
-        self.update_HIP(player)
-        self.get_SUP()
-        self.update_global_status()
-        self.signal_MTrackers('popu')
+        if not self.players[player].hijacked:
+            self.players[player].infrastructure_upgrade += amt
+            self.players[player].stars -= amt*4
+            self.update_private_status(player)
+            self.update_HIP(player)
+            self.get_SUP()
+            self.update_global_status()
+            self.signal_MTrackers('popu')
+        else:
+            self.server.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=player)
 
     # Collusion
     def in_secret_control(self, trty_number, player_id):

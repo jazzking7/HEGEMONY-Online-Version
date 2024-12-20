@@ -285,22 +285,27 @@ html, body {
 
 #btn-diplomatic {
     background-color: #BEBEBE;
-    left: 3%;
+    left: 2%;
 }
 
 #btn-sep-auth {
     background-color: #BEBEBE;
-    left: 10%;
+    left: 8%;
 }
 
 #btn-skill {
     background-color: #BEBEBE;
-    left: 17%;
+    left: 14%;
 }
 
 #btn-reserve {
     background-color: #BEBEBE;
-    left: 24%;
+    left: 20%;
+}
+
+#btn-debt {
+    background-color: #BEBEBE;
+    left: 26%;
 }
 
 #global_status {

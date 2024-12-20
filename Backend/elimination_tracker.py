@@ -20,6 +20,18 @@ class Elimination_tracker:
                     gs.get_SUP()
                     gs.update_global_status()
                     gs.signal_MTrackers('indus')
+                if victim.skill.name == 'Loan Shark':
+                    for debtor in victim.skill.loan_list:
+                        gs.server.emit('debt_off', room=debtor)
+            for player in gs.players:
+                currp = gs.players[player]
+                if currp.skill:
+                    if currp.skill.name == 'Loan Shark':
+                        if d_pid in currp.skill.loan_list:
+                            currp.skill.handle_payment(d_pid, 'sepauth')
+                            currp.skill.handle_payment(d_pid, 'troops')
+                            del currp.skill.loan_list[d_pid]
+                            gs.server.emit('debt_off', room=d_pid)                           
             # flush concurrent event
             gs.GES.flush_concurrent_event(d_pid)
             # take away the victim's resources

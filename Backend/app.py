@@ -514,9 +514,15 @@ def settle_new_cities(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot settle cities during ice age!'}, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot settle cities during ice age!'}, room=pid)
                 return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
 
     # CM
     for trty in choices:
@@ -879,6 +885,40 @@ def handle_concurr_end(data):
     if data['pid'] in gsm.GES.concurrent_events:
         gsm.GES.concurrent_events[pid]['flag'] = True
 
+@socketio.on('send_ransom_target')
+def handle_ransom(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.set_ransom(data['choice'])
+
+@socketio.on('fetch_debt_info')
+def handle_fetch_debt_info():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    debt_amt = 0
+    for player in gsm.players:
+        curr_p = gsm.players[player]
+        if curr_p.skill:
+            if curr_p.skill.name == 'Loan Shark':
+                if pid in curr_p.skill.loan_list:
+                    debt_amt = curr_p.skill.loan_list[pid]
+                    break
+    socketio.emit('debt_info', {'debt_amount': debt_amt, 'curr_reserves': gsm.players[pid].reserves, 'total_troops': gsm.players[pid].total_troops, 'stars': gsm.players[pid].stars}, room=pid)
+
+@socketio.on('make_debt_payment')
+def handle_debt_payment(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if pid == gsm.pids[gsm.GES.current_player]:
+        for player in gsm.players:
+            curr_p = gsm.players[player]
+            if curr_p.skill:
+                if curr_p.skill.name == 'Loan Shark':
+                    if pid in curr_p.skill.loan_list:
+                        curr_p.skill.handle_payment(pid, data['method'])
+                        break
+    else:
+        socketio.emit('display_new_notification',{'msg': 'Cannot make payment outside your turn!'}, room=pid)
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

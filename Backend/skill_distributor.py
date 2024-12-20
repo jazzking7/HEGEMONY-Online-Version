@@ -19,7 +19,8 @@ class Skill_Distributor:
             "Air_Superiority",
             "Collusion",
             "Laplace's Demon",
-            "Arsenal of the Underworld"
+            "Arsenal of the Underworld",
+            "Loan Shark"
         ]
 
     def get_options(self, ):
@@ -59,3 +60,5 @@ class Skill_Distributor:
             return Laplace_Demon(player, gs)
         elif skill_name == "Arsenal of the Underworld":
             return Arsenal_of_the_Underworld(player, gs)
+        elif skill_name == "Loan Shark":
+            return Loan_Shark(player, gs)

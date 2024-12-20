@@ -440,7 +440,7 @@ class Ares_Blessing(Skill):
         if curr_total > self.current_max:
             self.current_max = curr_total
             self.rage_not_activated = True
-        if curr_total < (self.current_max*0.5) and self.rage_not_activated:
+        if curr_total < (self.current_max*0.6) and self.rage_not_activated:
             self.cooldown = 0
             self.limit += 1
             self.rage_not_activated = False
@@ -822,7 +822,7 @@ class Air_Superiority(Skill):
 class Collusion(Skill):
     def __init__(self, player, gs):
         super().__init__("Collusion", player, gs)
-        self.finised_choosing = True
+        self.finished_choosing = True
         self.secret_control_list = []
     
     def update_current_status(self):
@@ -876,7 +876,7 @@ class Collusion(Skill):
                         self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
                         return
 
-        self.finised_choosing = True
+        self.finished_choosing = True
         self.secret_control_list.append(choice)
         self.gs.players[self.player].stars -= 3
         self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
@@ -1075,32 +1075,188 @@ class Loan_Shark(Skill):
     def __init__(self, player, gs):
         super().__init__("Loan Shark", player, gs)
         self.max_loan = 1
-        self.loan_list = []
+        # pid : due amount
+        self.loan_list = {}
+        # pid : last payment round
+        self.ransom_history = {}
+        self.hasRoundEffect = True
+        self.finished_choosing = True
+
+    def apply_round_effect(self):
+        not_safe = []
+        for player in self.ransom_history:
+            if self.gs.GES.round - self.ransom_history[player] == 3:
+                if player not in not_safe:
+                    not_safe.append(player)
+        for p in not_safe:
+            del self.ransom_history[p]
+
+    def get_potential_targets(self):
+        potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and player != self.player and player not in self.ransom_history]
+        invalid_targets = []
+        for player in potential_targets:
+            curr_p = self.gs.players[player]
+            if curr_p.alive:
+                if curr_p.skill:
+                    if curr_p.skill.name == "Loan Shark":
+                        for t in potential_targets:
+                            if t in curr_p.skill.loan_list:
+                                if t not in invalid_targets:
+                                    invalid_targets.append(t)
+        potential_targets = [self.gs.players[player].name for player in potential_targets if player not in invalid_targets]
+        return potential_targets
+
+    def activate_effect(self):
+        if self.active:
+            if not self.loan_list:
+                self.gs.GES.handle_async_event({'name':"M_R"}, self.player)
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "Ransom list is full!"}, room=self.player)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "War art is currently sealed!"}, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
+        
         return info
+    
+    def set_ransom(self, target):
+        self.finished_choosing = True
+        pid = ""
+        for player in self.gs.players:
+            if self.gs.players[player].name == target:
+                pid = player
+                break
+        self.loan_list[pid] = 15
+        curr = self.gs.players[player]
+        curr.hijacked = True
+        if curr.skill:
+            curr.skill.active = False
+        self.gs.server.emit('show_debt_button', room=player)
+
+    def handle_payment(self, player, method):
+        debt_amt = self.loan_list[player]
+        debtor = self.gs.players[player]
+        loaner = self.gs.players[self.player]
+        if method == 'sepauth':
+            r_amt = math.ceil(debt_amt/5)
+            if r_amt <= debtor.stars:
+                debtor.stars -= r_amt
+                loaner.stars += r_amt
+                del self.loan_list[player]
+                self.ransom_history[player] = self.gs.GES.round
+                debtor.hijacked = False
+                if debtor.skill:
+                    debtor.skill.active = True
+                self.gs.server.emit('debt_off', room=player)
+            else:
+                self.loan_list[player] -= debtor.stars*5
+                loaner.stars += debtor.stars
+                debtor.stars = 0
+            if debtor.stars < 0:
+                debtor.stars = 0
+            if loaner.stars < 0:
+                loaner.stars = 0
+            self.gs.update_private_status(self.player)
+            self.gs.update_private_status(player)
+        #payment with troops
+        else:
+            if debt_amt <= debtor.reserves:
+                debtor.reserves -= debt_amt
+                loaner.reserves += debt_amt
+                del self.loan_list[player]
+                self.ransom_history[player] = self.gs.GES.round
+                debtor.hijacked = False
+                if debtor.skill:
+                    debtor.skill.active = True
+                self.gs.update_private_status(self.player)
+                self.gs.update_private_status(player)
+                self.gs.server.emit('debt_off', room=player)
+                return
+            else:
+                debt_amt -= debtor.reserves
+                self.loan_list[player] -= debtor.reserves
+                loaner.reserves += debtor.reserves
+                debtor.reserves = 0
+                self.gs.update_private_status(self.player)
+                self.gs.update_private_status(player)
+
+            if debt_amt <= debtor.total_troops:
+                while debt_amt > 0:
+                    curr_tid = random.choice(debtor.territories)
+                    if self.gs.map.territories[curr_tid].troops:
+                        loaner.reserves += 1
+                        self.gs.map.territories[curr_tid].troops -= 1
+                        debtor.total_troops -= 1
+                        debt_amt -= 1
+                        self.gs.update_LAO(player)
+                        if debtor.skill:
+                            if debtor.skill.name == "Ares' Blessing" and debtor.skill.active:
+                                debtor.skill.checking_rage_meter()
+                        self.gs.server.emit('battle_casualties', {
+                        f'{curr_tid}': {'tid': curr_tid, 'number': 1},
+                        }, room=self.gs.lobby)
+                        self.gs.server.emit('update_trty_display', {curr_tid: {'troops': self.gs.map.territories[curr_tid].troops}}, room=self.gs.lobby)
+                del self.loan_list[player]
+                self.ransom_history[player] = self.gs.GES.round
+                debtor.hijacked = False
+                if debtor.skill:
+                    debtor.skill.active = True
+                self.gs.server.emit('debt_off', room=player)
+                self.gs.update_private_status(self.player)
+                self.gs.update_player_stats()
+                self.gs.get_SUP()
+                self.gs.update_global_status()
+                self.gs.signal_MTrackers('popu')
+            else:
+                debt_off = debtor.total_troops
+                while debtor.total_troops > 0:
+                    curr_tid = random.choice(debtor.territories)
+                    if self.gs.map.territories[curr_tid].troops:
+                        loaner.reserves += 1
+                        self.gs.map.territories[curr_tid].troops -= 1
+                        debtor.total_troops -= 1
+                        self.gs.update_LAO(player)
+                        if debtor.skill:
+                            if debtor.skill.name == "Ares' Blessing" and debtor.skill.active:
+                                debtor.skill.checking_rage_meter()
+                        self.gs.server.emit('battle_casualties', {
+                        f'{curr_tid}': {'tid': curr_tid, 'number': 1},
+                        }, room=self.gs.lobby)
+                        self.gs.server.emit('update_trty_display', {curr_tid: {'troops': self.gs.map.territories[curr_tid].troops}}, room=self.gs.lobby)
+                self.loan_list[player] -= debt_off
+                self.gs.update_private_status(self.player)
+                self.gs.update_player_stats()
+                self.gs.get_SUP()
+                self.gs.update_global_status()
+                self.gs.signal_MTrackers('popu')
 
     def update_current_status(self):
         # modify this
-        information = "Players on your loan list each needs to pay you 3★ to regain control of their war art and special authority. Current list: "
-        if self.load_list:
+        information = "Players on your ransom list each needs to pay you 3★ to regain control of their war art and special authority. Current list"
+        if self.loan_list:
+            information += ": "
             for name in self.names:
                 information += name + ' '
+        else:
+            information += "is empty."
         self.gs.server.emit("update_skill_status", {
             'name': "Loan Shark",
             'description': information,
             'operational': self.active,
+            'hasLimit': True,
+            'limits': self.max_loan - len(self.loan_list),
+            'btn_msg': "Make Ransom"
         }, room=self.player)
 
 class Usurper(Skill):
     def __init__(self, player, gs):
         super().__init__("Usurper", player, gs)
-        self.finised_choosing = True
+        self.finished_choosing = True
         self.secret_control_list = []
 
 class Handler_of_Wheel_of_Fate(Skill):
     def __init__(self, player, gs):
         super().__init__("Handler_of_Wheel_of_Fate", player, gs)
-        self.finised_choosing = True
+        self.finished_choosing = True
         self.secret_control_list = []

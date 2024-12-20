@@ -155,6 +155,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.build_silo, args=(pid, ))
         elif n == 'LUS':
             self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
+        elif n == 'M_R':
+            self.curr_thread = threading.Thread(target=self.make_ransom, args=(pid,))
         
         self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
@@ -290,13 +292,27 @@ class General_Event_Scheduler:
     def corrupt_territory(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories]
-        self.gs.players[pid].skill.finised_choosing = False
+        self.gs.players[pid].skill.finished_choosing = False
         self.gs.server.emit('corrupt_territory', {'targets': corruptables}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "corrupt_territory"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
-            done = self.gs.players[pid].skill.finised_choosing
+            done = self.gs.players[pid].skill.finished_choosing
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def make_ransom(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        potential_targets = self.gs.players[pid].skill.get_potential_targets()
+        self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('make_ransom', {'targets': potential_targets}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': None}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.finished_choosing
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
