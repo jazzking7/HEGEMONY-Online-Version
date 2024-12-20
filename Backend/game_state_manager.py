@@ -30,7 +30,7 @@ class Player:
         self.infrastructure_upgrade = 0
         self.min_roll = 1
         # hidden resources
-        self.stars = 10
+        self.stars = 0
         self.reserves = 0
         self.s_city_amt = 0  # city amount to settle in innerAsync actions
         # alliance
