@@ -1117,7 +1117,11 @@ class Loan_Shark(Skill):
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
-        
+        if self.loan_list:
+            for debtor in self.loan_list:
+                info += self.gs.players[debtor].name + " is currently in debt. "
+        else:
+            info += "No ransomware victim yet."
         return info
     
     def set_ransom(self, target):
@@ -1236,8 +1240,8 @@ class Loan_Shark(Skill):
         information = "Players on your ransom list each needs to pay you 3★ to regain control of their war art and special authority. Current list"
         if self.loan_list:
             information += ": "
-            for name in self.names:
-                information += name + ' '
+            for debtor in self.loan_list:
+                information += self.gs.players[debtor].name + ' '
         else:
             information += "is empty."
         self.gs.server.emit("update_skill_status", {
