@@ -2119,6 +2119,9 @@ socket.on('arsenal_controls', function(data) {
 
     // Add the button container to middle_content
     middleContent.append(buttonContainer);
+    if (data.targets.length === 0) {
+      middleContent.append('<p>No target available.</p>');
+    }  
 });
 
 
