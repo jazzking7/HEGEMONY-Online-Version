@@ -306,9 +306,9 @@ class Unifier(Mission):
         self.target_round = 0
         l = len(gs.map.conts[self.target_continent]['trtys'])
         if l <= 5:
-            self.target_round = 5
+            self.target_round = 7
         elif l <= 10:
-            self.target_round = 4
+            self.target_round = 5
         else:
             self.target_round = 3
         self.round = 0
