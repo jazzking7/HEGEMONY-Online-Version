@@ -776,7 +776,7 @@ class Starchaser(Mission):
             self.target_chases += 1
 
         self.round = 0
-        self.death_round = 5
+        self.death_round = 8
 
     def set_up_tracker_view(self, ):
         self.gs.server.emit('mod_targets_to_capture', {'targets': [self.curr_target]}, room=self.player)
