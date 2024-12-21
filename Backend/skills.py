@@ -984,7 +984,7 @@ class Arsenal_of_the_Underworld(Skill):
                 data['silo_usage'] = self.silo_usage - self.silo_used
                 data['occupied'] = self.underground_silo not in self.gs.players[self.player].territories
             else:
-                if self.gs.players[self.player].stars >= 4:
+                if self.gs.players[self.player].stars >= 3:
                     data['silo_build'] = True
             self.gs.server.emit("arsenal_controls", data, room=self.player)
         else:
@@ -1017,7 +1017,7 @@ class Arsenal_of_the_Underworld(Skill):
     def handle_silo_placement(self, choice):
         self.underground_silo = int(choice)
         self.finished_setting = True
-        self.gs.players[self.player].stars -= 4
+        self.gs.players[self.player].stars -= 3
         self.gs.update_private_status(self.player)
         # set up usage, range and damage
         self.apply_round_effect()
