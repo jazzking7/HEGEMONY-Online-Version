@@ -755,7 +755,7 @@ class Game_State_Manager:
     def apply_skill_related_modification(self, atk_p, atk_stats, def_p, def_stats):
 
         # Attacker and Defender modify their own stats
-        # Industrialist + Zealous_Expansion + Ares' Blessing + Realm of Permafrost
+        # Industrialist + Ares' Blessing + Realm of Permafrost
         # + Elitocracy
         if atk_p.skill:
             if atk_p.skill.active and atk_p.skill.intMod:

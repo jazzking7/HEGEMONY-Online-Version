@@ -501,17 +501,7 @@ class Zealous_Expansion(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Zealous_Expansion", player, gs)
-        self.intMod = True
-        
         self.give_troop_bonus = True
-        self.hasTurnEffect = True
-
-    def apply_turn_effect(self,):
-        self.turn_stats_mod = False
-
-    def internalStatsMod(self, battle_stats):
-        if self.active:
-            battle_stats[1] += 1
 
     def update_current_status(self):
 
