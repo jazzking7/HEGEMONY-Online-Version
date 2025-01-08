@@ -901,7 +901,7 @@ def handle_fetch_debt_info():
         if curr_p.skill:
             if curr_p.skill.name == 'Loan Shark':
                 if pid in curr_p.skill.loan_list:
-                    debt_amt = curr_p.skill.loan_list[pid]
+                    debt_amt = curr_p.skill.loan_list[pid][0]
                     break
     socketio.emit('debt_info', {'debt_amount': debt_amt, 'curr_reserves': gsm.players[pid].reserves, 'total_troops': gsm.players[pid].total_troops, 'stars': gsm.players[pid].stars}, room=pid)
 

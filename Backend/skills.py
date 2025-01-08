@@ -1065,7 +1065,7 @@ class Loan_Shark(Skill):
     def __init__(self, player, gs):
         super().__init__("Loan Shark", player, gs)
         self.max_loan = 1
-        # pid : due amount
+        # pid : [due amount, start round]
         self.loan_list = {}
         # pid : last payment round
         self.ransom_history = {}
@@ -1080,6 +1080,12 @@ class Loan_Shark(Skill):
                     not_safe.append(player)
         for p in not_safe:
             del self.ransom_history[p]
+        
+        # adding interest to unpaid ransom
+        for debtor in self.loan_list:
+            if self.loan_list[debtor][1] - self.gs.GES.round > 1:
+                self.loan_list[debtor][0] += 5
+                self.loan_list[debtor][1] = self.gs.GES.round
 
     def get_potential_targets(self):
         potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and player != self.player and player not in self.ransom_history]
@@ -1121,7 +1127,10 @@ class Loan_Shark(Skill):
             if self.gs.players[player].name == target:
                 pid = player
                 break
-        self.loan_list[pid] = 15
+        self.loan_list[pid] = [15, self.gs.GES.round]
+        if self.gs.GES.round == 0:
+            self.loan_list[pid] = [10, self.gs.GES.round]
+
         curr = self.gs.players[player]
         curr.hijacked = True
         if curr.skill:
@@ -1129,7 +1138,7 @@ class Loan_Shark(Skill):
         self.gs.server.emit('show_debt_button', room=player)
 
     def handle_payment(self, player, method):
-        debt_amt = self.loan_list[player]
+        debt_amt = self.loan_list[player][0]
         debtor = self.gs.players[player]
         loaner = self.gs.players[self.player]
         if method == 'sepauth':
@@ -1144,7 +1153,7 @@ class Loan_Shark(Skill):
                     debtor.skill.active = True
                 self.gs.server.emit('debt_off', room=player)
             else:
-                self.loan_list[player] -= debtor.stars*5
+                self.loan_list[player][0] -= debtor.stars*5
                 loaner.stars += debtor.stars
                 debtor.stars = 0
             if debtor.stars < 0:
@@ -1169,7 +1178,7 @@ class Loan_Shark(Skill):
                 return
             else:
                 debt_amt -= debtor.reserves
-                self.loan_list[player] -= debtor.reserves
+                self.loan_list[player][0] -= debtor.reserves
                 loaner.reserves += debtor.reserves
                 debtor.reserves = 0
                 self.gs.update_private_status(self.player)
@@ -1218,7 +1227,7 @@ class Loan_Shark(Skill):
                         f'{curr_tid}': {'tid': curr_tid, 'number': 1},
                         }, room=self.gs.lobby)
                         self.gs.server.emit('update_trty_display', {curr_tid: {'troops': self.gs.map.territories[curr_tid].troops}}, room=self.gs.lobby)
-                self.loan_list[player] -= debt_off
+                self.loan_list[player][0] -= debt_off
                 self.gs.update_private_status(self.player)
                 self.gs.update_player_stats()
                 self.gs.get_SUP()
