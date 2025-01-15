@@ -1083,9 +1083,13 @@ class Loan_Shark(Skill):
         
         # adding interest to unpaid ransom
         for debtor in self.loan_list:
-            if self.loan_list[debtor][1] - self.gs.GES.round > 1:
+            curr_diff = self.gs.GES.round - self.loan_list[debtor][1]
+            if curr_diff > 1 and curr_diff%2 == 0:
                 self.loan_list[debtor][0] += 5
-                self.loan_list[debtor][1] = self.gs.GES.round
+            # deadline is reached
+            if curr_diff == 5:
+                self.handle_payment(debtor, "sepauth")
+                self.handle_payment(debtor, "troops")
 
     def get_potential_targets(self):
         potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and player != self.player and player not in self.ransom_history]
