@@ -399,7 +399,7 @@ socket.on('GAME_OVER', function(data) {
   });
   $('#middle_display, #middle_title, #middle_content').show();
   $('#middle_title').html('<h1 style="padding-right: 5px">FINAL VICTORS</h1>');
-  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center;"></div>`);
+  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center; max-height: calc(3 * 1.5em); overflow-y: auto;"></div>`);
   for (winner of data.winners) {
     var wname;
     var mission;
