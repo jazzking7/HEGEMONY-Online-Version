@@ -71,11 +71,13 @@ function setup() {
   cityImage = loadImage('/static/Assets/Dev/city.png');
   radioImage = loadImage('/static/Assets/Insig/radio.png');
   insigImage = loadImage('/static/Assets/Insig/fort.png');
+  backgroundOceanImage = loadImage('/static/Assets/Background/gameBackground1.png', img => {
+    backgroundOceanImage.resize(currWinWid, currWinHeight);
+  });
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
 async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
-  console.log(landlocked)
   await fetch(`/static/MAPS/${mapName}/properties.json`)
   .then((res) => res.json())
   .then((data) => {mapProperties = data;}).catch(e => console.error(e));
@@ -161,7 +163,12 @@ function draw() {
     currWinHeight = windowHeight;
   }
   // clear the background
-  background(8, 145, 212);
+  background(0); // Placeholder background color
+  if (backgroundOceanImage) {
+    let x = (width - backgroundOceanImage.width) / 2;
+    let y = (height - backgroundOceanImage.height) / 2;
+    image(backgroundOceanImage, x, y);
+  }
   push();
   // Calculate center of canvas
   let canvasCenterX = width / 2;
