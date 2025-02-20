@@ -1084,7 +1084,7 @@ class Loan_Shark(Skill):
         # adding interest to unpaid ransom
         for debtor in self.loan_list:
             curr_diff = self.gs.GES.round - self.loan_list[debtor][1]
-            if curr_diff > 1 and curr_diff%2 == 0:
+            if curr_diff > 1:
                 self.loan_list[debtor][0] += 5
             # deadline is reached
             if curr_diff == 5:

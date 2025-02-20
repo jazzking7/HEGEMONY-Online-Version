@@ -974,6 +974,12 @@ class Game_State_Manager:
         a_maxt = a_troops if a_troops < a_maxt else a_maxt
         d_maxt = d_troops if d_troops < d_maxt else d_maxt
 
+        if a_min > a_maxv:
+            a_min = a_maxv
+        
+        if d_min > d_maxv:
+            d_min = d_maxv
+
         print(a_troops, d_troops)
 
         # Starts simulation
