@@ -1227,20 +1227,20 @@ btn_diplomatic.off('click').click(function () {
 
   // Alliance   Summit   Global Ceasefire
   midDis.innerHTML = `
-  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div class="d-flex justify-content-between align-items-center">
+      <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-summit" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;">
+              <img src="/static/Assets/Logo/summit.png"  style="max-height: 60px;">
+              <span class="small mt-1">REQUEST SUMMIT</span>
+          </button>
+      </div>
 
-    <div style="display: inline-block;">
-      <button class="btn" id='btn-summit' style="background-color: #BA6868; color:#FFFFFF; margin-right:1px; margin-left:1px;">
-        REQUEST SUMMIT
-      </button>
-    </div>
-
-    <div style="display: inline-block;">
-      <button class="btn" id='btn-globalpeace' style="background-color: #BA6868; color:#FFFFFF; margin-left:1px;">
-        GLOBAL CEASEFIRE
-      </button>
-    </div>
-
+      <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-globalpeace" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;">
+              <img src="/static/Assets/Logo/globalpeace.png" style="max-height: 60px;">
+              <span class="small mt-1">GLOBAL CEASEFIRE</span>
+          </button>
+      </div>
   </div>
 
   <div class="flex items-center justify-center mt-2">
@@ -1383,26 +1383,27 @@ btn_sep_auth.onclick = function () {
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-
-      <div style="display: inline-block;">
-        <button class="btn" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin-right:1px; ">
-          UPGRADE INFRASTRUCTURE
-        </button>
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;">
+              <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
+              <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
+          </button>
       </div>
 
-      <div style="display: inline-block;">
-        <button class="btn" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin-left:1px;">
-          BUILD CITIES
-        </button>
+      <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;">
+              <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
+              <span class="small mt-1">BUILD CITIES</span>
+          </button>
       </div>
 
-      <div style="display: inline-block;">
-        <button class="btn" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin-left:2px;">
-          MOBILIZATION
-        </button>
+      <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;">
+              <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
+              <span class="small mt-1">MOBILIZATION</span>
+          </button>
       </div>
-
     </div>
 
     <div class="flex items-center justify-center mt-2">

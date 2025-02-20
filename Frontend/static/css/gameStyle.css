@@ -213,8 +213,8 @@ html, body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-width: 40vw;
-    max-height: 40vh;
+    max-width: 45vw;
+    max-height: 45vh;
     font-family: 'Rajdhani', sans-serif;
     opacity: 0.95;
 }
