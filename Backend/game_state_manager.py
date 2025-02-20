@@ -840,6 +840,17 @@ class Game_State_Manager:
             if def_p.skill.name == 'Arsenal of the Underworld':
                 ld = def_p.skill.get_landmine_damage(t2, atk_amt)
 
+        # elitocracy territory based stat increase
+        if atk_p.skill:
+            if atk_p.skill.name == "Elitocracy" and atk_p.skill.active:
+                if trty_atk.isCity or trty_atk.isCapital:
+                    atk_stats[2] += 1
+
+        if def_p.skill:
+            if def_p.skill.name == "Elitocracy" and def_p.skill.active:
+                if trty_def.isCity or trty_def.isCapital:
+                    def_stats[2] += 1
+
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
         result = self.simulate_attack(atk_amt-ld, def_amt, atk_stats, def_stats)
