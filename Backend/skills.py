@@ -1131,9 +1131,9 @@ class Loan_Shark(Skill):
             if self.gs.players[player].name == target:
                 pid = player
                 break
-        self.loan_list[pid] = [15, self.gs.GES.round]
+        self.loan_list[pid] = [10, self.gs.GES.round]
         if self.gs.GES.round == 0:
-            self.loan_list[pid] = [10, self.gs.GES.round]
+            self.loan_list[pid] = [5, self.gs.GES.round]
 
         curr = self.gs.players[player]
         curr.hijacked = True
