@@ -33,7 +33,8 @@ class Elimination_tracker:
                         if d_pid in currp.skill.loan_list:
                             currp.skill.handle_payment(d_pid, 'sepauth')
                             currp.skill.handle_payment(d_pid, 'troops')
-                            del currp.skill.loan_list[d_pid]
+                            if d_pid in currp.skill.loan_list:
+                                del currp.skill.loan_list[d_pid]
                             gs.server.emit('debt_off', room=d_pid)                           
             # flush concurrent event
             gs.GES.flush_concurrent_event(d_pid)

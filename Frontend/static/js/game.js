@@ -1229,14 +1229,16 @@ btn_diplomatic.off('click').click(function () {
   midDis.innerHTML = `
   <div class="d-flex justify-content-between align-items-center">
       <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-summit" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;">
+          <button class="btn d-flex flex-column align-items-center" id="btn-summit" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#9E5454'"
+    onmouseout="this.style.backgroundColor='#BA6868'">
               <img src="/static/Assets/Logo/summit.png"  style="max-height: 60px;">
               <span class="small mt-1">REQUEST SUMMIT</span>
           </button>
       </div>
 
       <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-globalpeace" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;">
+          <button class="btn d-flex flex-column align-items-center" id="btn-globalpeace" style="background-color: #BA6868; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#9E5454'"
+    onmouseout="this.style.backgroundColor='#BA6868'">
               <img src="/static/Assets/Logo/globalpeace.png" style="max-height: 60px;">
               <span class="small mt-1">GLOBAL CEASEFIRE</span>
           </button>
@@ -1385,21 +1387,24 @@ btn_sep_auth.onclick = function () {
     midDis.innerHTML = `
     <div class="d-flex justify-content-between align-items-center">
       <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;">
+          <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#3F805E'"
+    onmouseout="this.style.backgroundColor='#58A680'">
               <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
               <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
           </button>
       </div>
 
       <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;">
+          <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#484E80'"
+    onmouseout="this.style.backgroundColor='#6067A1'">
               <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
               <span class="small mt-1">BUILD CITIES</span>
           </button>
       </div>
 
       <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;">
+          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#814B56'"
+    onmouseout="this.style.backgroundColor='#A1606C'">
               <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
               <span class="small mt-1">MOBILIZATION</span>
           </button>

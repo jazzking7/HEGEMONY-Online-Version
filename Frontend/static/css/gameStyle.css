@@ -273,6 +273,10 @@ html, body {
     cursor: pointer;
 }
 
+.circular-button:hover {
+    background-color: grey;
+}
+
 .circular-button img {
     position: absolute; 
     top: 50%; 

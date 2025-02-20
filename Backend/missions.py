@@ -52,7 +52,8 @@ class Mission:
                         if self.player in curr_p.skill.loan_list:
                             curr_p.skill.handle_payment(self.player, 'sepauth')
                             curr_p.skill.handle_payment(self.player, 'troops')
-                            del curr_p.skill.loan_list[self.player]
+                            if self.player in curr_p.skill.loan_list:
+                                del curr_p.skill.loan_list[self.player]
                             self.gs.server.emit('debt_off', room=self.player)
             self.gs.GES.flush_concurrent_event(self.player)
             self.gs.perm_elims.append(self.player)

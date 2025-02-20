@@ -1082,7 +1082,7 @@ class Loan_Shark(Skill):
             del self.ransom_history[p]
         
         # adding interest to unpaid ransom
-        for debtor in self.loan_list:
+        for debtor in list(self.loan_list.keys()):
             curr_diff = self.gs.GES.round - self.loan_list[debtor][1]
             if curr_diff > 1:
                 self.loan_list[debtor][0] += 5
@@ -1145,6 +1145,8 @@ class Loan_Shark(Skill):
         debt_amt = self.loan_list[player][0]
         debtor = self.gs.players[player]
         loaner = self.gs.players[self.player]
+        if player not in self.loan_list:
+            return
         if method == 'sepauth':
             r_amt = math.ceil(debt_amt/5)
             if r_amt <= debtor.stars:
