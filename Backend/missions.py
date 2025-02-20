@@ -186,10 +186,13 @@ class Loyalist(Mission):
         self.target_player = None
 
     def set_partner(self, ):
+        # you forgot to check this condition
+        if self.target_player is not None:
+            return
         for m in self.gs.Mset:
             if m.name == "Loyalist":
                 if m.target_player == None:
-                    if m.player != self.player:
+                    if m.player != self.player:                    
                         self.target_player = m.player
                         m.target_player = self.player
                         return
