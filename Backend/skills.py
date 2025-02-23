@@ -537,8 +537,8 @@ class Elitocracy(Skill):
 
     def internalStatsMod(self, battle_stats):
         if self.active:
-            battle_stats[4] = self.gs.players[self.player].min_roll//3 + 1
-    
+            battle_stats[4] = battle_stats[2]//2 + 1
+
     def update_current_status(self):
 
         limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].min_roll < (self.gs.get_player_industrial_level(self.gs.players[self.player])+6) else 0

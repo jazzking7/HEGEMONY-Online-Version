@@ -831,15 +831,6 @@ class Game_State_Manager:
         atk_stats = atk_p.temp_stats[:]
         def_stats = self.get_player_battle_stats(def_p)
 
-        # Stats modifier
-        self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
-
-        # landmine explosion
-        ld = 0
-        if def_p.skill:
-            if def_p.skill.name == 'Arsenal of the Underworld':
-                ld = def_p.skill.get_landmine_damage(t2, atk_amt)
-
         # elitocracy territory based stat increase
         if atk_p.skill:
             if atk_p.skill.name == "Elitocracy" and atk_p.skill.active:
@@ -850,6 +841,15 @@ class Game_State_Manager:
             if def_p.skill.name == "Elitocracy" and def_p.skill.active:
                 if trty_def.isCity or trty_def.isCapital:
                     def_stats[2] += 1
+
+        # Stats modifier
+        self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
+
+        # landmine explosion
+        ld = 0
+        if def_p.skill:
+            if def_p.skill.name == 'Arsenal of the Underworld':
+                ld = def_p.skill.get_landmine_damage(t2, atk_amt)
 
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
