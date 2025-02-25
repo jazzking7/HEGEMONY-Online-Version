@@ -556,7 +556,7 @@ class Elitocracy(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Elitocracy",
-            'description': "Able to raise the minimum dice roll. Cost 3★ to raise the minimum dice roll by 1. For every 3 level increased, your damage multiplier increase by 1",
+            'description': "Able to raise the minimum dice roll. Cost 3★ to raise the minimum dice roll by 1. For every 2 level increased, your damage multiplier increase by 1",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
