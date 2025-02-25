@@ -825,17 +825,23 @@ class Collusion(Skill):
         super().__init__("Collusion", player, gs)
         self.finished_choosing = True
         self.secret_control_list = []
-    
+        self.free_usages = 1
+        self.hasRoundEffect = True
+
+    def apply_round_effect(self):
+        if self.gs.GES.round == 3:
+            self.free_usages += 1
+
     def update_current_status(self):
 
         limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].stars >= 3 else 0
         controlled_trtys = [self.gs.map.territories[tid].name for tid in self.secret_control_list]
         self.gs.server.emit("update_skill_status", {
             'name': "Collusion",
-            'description': "Buy over ownership of an enemy territory with 3★ and secretly control it.",
+            'description': f"Buy over ownership of an enemy territory with 3★ and secretly control it. Currently have {self.free_usages} free usages.",
             'operational': self.active,
             'hasLimit': True,
-            'limits': limit,
+            'limits': limit+self.free_usages,
             'forbidden_targets': controlled_trtys,
             'ft_msg': "Secretly controlling:",
             'btn_msg': "Corrupt a territory"
@@ -852,8 +858,8 @@ class Collusion(Skill):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 3:
-            self.gs.server.emit('display_new_notification', {'msg': "Not enough stars to corrupt any territory!"}, room=self.player)
+        if self.gs.players[self.player].stars < 3 or not self.free_usages:
+            self.gs.server.emit('display_new_notification', {'msg': "Not enough usages to corrupt any territory!"}, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
 
@@ -866,8 +872,8 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
             return
 
-        if self.gs.players[self.player].stars < 3:
-            self.gs.server.emit("display_new_notification", {"msg": f"Not enough stars!"}, room=self.player)
+        if self.gs.players[self.player].stars < 3 or not self.free_usages:
+            self.gs.server.emit("display_new_notification", {"msg": f"No usages available!"}, room=self.player)
             return
         
         for p in self.gs.players:
@@ -879,7 +885,10 @@ class Collusion(Skill):
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
-        self.gs.players[self.player].stars -= 3
+        if self.free_usages:
+            self.free_usages -= 1
+        else:
+            self.gs.players[self.player].stars -= 3
         self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)
