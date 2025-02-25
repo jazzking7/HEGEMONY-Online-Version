@@ -39,6 +39,8 @@ class Realm_of_Permafrost(Skill):
         super().__init__("Realm_of_Permafrost", player, gs)
         self.intMod = True
         self.extMod = True
+        self.hasRoundEffect = True
+        self.iceAgeCd = 0
 
     def internalStatsMod(self, battle_stats):
 
@@ -63,23 +65,32 @@ class Realm_of_Permafrost(Skill):
         if self.gs.pids[self.gs.GES.current_player] != self.player:
             self.gs.server.emit("display_new_notification", {"msg": "Cannot activate outside your turn!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 4:
+        if self.gs.players[self.player].stars < 2:
             self.gs.server.emit("display_new_notification", {"msg": "Not enough stars to activate ice age!"}, room=self.player)
+            return
+        if self.iceAgeCd:
+            self.gs.server.emit("display_new_notification", {"msg": "Ice age activation in cooldown!"}, room=self.player)
             return
 
         self.gs.set_ice_age = True
-        self.gs.players[self.player].stars -= 4
+        self.iceAgeCd = 4
+        self.gs.players[self.player].stars -= 2
         self.gs.server.emit("display_new_notification", {"msg": "Ice Age Activated!"}, room=self.player)
         self.gs.update_private_status(self.player)
+    
+    def apply_round_effect(self):
+        if self.iceAgeCd:
+            self.iceAgeCd -= 1
 
     def update_current_status(self):
 
-        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
+        limit = self.gs.players[self.player].stars//2 if self.gs.players[self.player].stars >= 2 else 0
 
         self.gs.server.emit("update_skill_status", {
             'name': "Realm of Permafrost",
-            'description': "In any battle you engage in, all stats of both you and your enemies are set to default. For 4★, you can activate Ice Age that lasts 2 rounds",
+            'description': "In any battle you engage in, all stats of both you and your enemies are set to default. For 2★, you can activate Ice Age that lasts 2 rounds",
             'hasLimit': True,
+            'cooldown': self.iceAgeCd,
             'limits': limit,
             'operational': self.active,
             'btn_msg': "Begin Ice Age"
