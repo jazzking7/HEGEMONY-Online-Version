@@ -858,7 +858,7 @@ class Collusion(Skill):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 3 or not self.free_usages:
+        if self.gs.players[self.player].stars < 3 and not self.free_usages:
             self.gs.server.emit('display_new_notification', {'msg': "Not enough usages to corrupt any territory!"}, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
@@ -872,7 +872,7 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
             return
 
-        if self.gs.players[self.player].stars < 3 or not self.free_usages:
+        if self.gs.players[self.player].stars < 3 and not self.free_usages:
             self.gs.server.emit("display_new_notification", {"msg": f"No usages available!"}, room=self.player)
             return
         
