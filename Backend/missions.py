@@ -11,8 +11,11 @@ class Mission:
     def check_conditions(self, ):
         raise NotImplementedError("Subclasses must implement check_conditions method")
 
-    def signal_mission_success(self,):
-        self.gs.GES.halt_events()
+    def signal_mission_success(self, win_type="solo"):
+        if win_type == "solo":
+            self.gs.GES.halt_events()
+        else:
+            self.gs.round_based_win = True
         return
 
     def set_up_tracker_view(self, ):
@@ -108,7 +111,7 @@ class Pacifist(Mission):
             })
         if self.round == self.goal_round:
             # signal end
-            self.signal_mission_success()
+            self.signal_mission_success("round")
 
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -346,7 +349,7 @@ class Unifier(Mission):
                 })
         if self.round == self.target_round:
             # signal end
-            self.signal_mission_success()
+            self.signal_mission_success("round")
 
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -393,7 +396,7 @@ class Polarizer(Mission):
             'misProgDesp': f'{self.round}/{self.target_round} consecutive rounds without continental unification'})
         if self.round == self.target_round:
             # signal end
-            self.signal_mission_success()
+            self.signal_mission_success("round")
         
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -471,7 +474,7 @@ class Fanatic(Mission):
             'misProgDesp': f'Controlled target territories for {self.round}/{self.target_round} consecutive rounds',})
             if self.round == self.target_round:
                 # signal end 
-                self.signal_mission_success()
+                self.signal_mission_success("round")
                 
     def set_up_tracker_view(self, ):
         targets = {}
@@ -520,7 +523,7 @@ class Industrialist(Mission):
             })
             if self.round == self.target_round:
                 # signal end
-                self.signal_mission_success()
+                self.signal_mission_success("round")
 
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -563,7 +566,7 @@ class Expansionist(Mission):
             })
             if self.round == self.target_round:
                 # signal end
-                self.signal_mission_success()
+                self.signal_mission_success("round")
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -603,7 +606,7 @@ class Populist(Mission):
             'misProgDesp': f'Holding the largest army for {self.round}/{self.target_round} consecutive rounds',})
             if self.round == self.target_round:
                 # signal end 
-                self.signal_mission_success()
+                self.signal_mission_success("round")
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -643,7 +646,7 @@ class Dominator(Mission):
             'misProgDesp': f'Exercising supremacy for {self.round}/{self.target_round} consecutive rounds',})
             if self.round == self.target_round:
                 # signal end 
-                self.signal_mission_success()
+                self.signal_mission_success("round")
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {

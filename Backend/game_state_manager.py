@@ -130,6 +130,9 @@ class Game_State_Manager:
         self.set_ice_age = False
         self.in_ice_age = 0
 
+        # Round based win
+        self.round_based_win = False
+
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
 

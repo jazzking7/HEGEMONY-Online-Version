@@ -304,6 +304,8 @@ class turn_loop_scheduler:
                 # CM
                 gs.signal_MTrackers('round')
                 gs.update_global_status()
+                if gs.round_based_win:
+                    ms.halt_events()
                 # update cooldown
                 for p in gs.players:
                     if gs.players[p].skill:
