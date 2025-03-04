@@ -319,8 +319,10 @@ class turn_loop_scheduler:
                 # update ice age
                 if gs.in_ice_age:
                     gs.in_ice_age -= 1
-                    gs.server.emit("display_special_notification", {"msg": f"ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
-
+                    if gs.in_ice_age:
+                        gs.server.emit("display_special_notification", {"msg": f"ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
+                    else:
+                        gs.server.emit("display_special_notification", {"msg": "ICE AGE TERMINATED", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:
