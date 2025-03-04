@@ -349,5 +349,12 @@ class turn_loop_scheduler:
                         t.isDeadZone -= 1
                         if not t.isDeadZone:
                             gs.server.emit('update_trty_display', {index: {'hasEffect': 'gone'}}, room=gs.lobby)
+
+                # Loyalist announcement
+                for miss in gs.Mset:
+                    if miss.name == "Loyalist":
+                        if ms.round == 2:
+                            time.sleep(2)
+                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]
