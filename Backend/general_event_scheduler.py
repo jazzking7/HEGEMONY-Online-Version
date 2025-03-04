@@ -116,6 +116,7 @@ class General_Event_Scheduler:
                 self.gs.MTrackers[mk].event.set()
         if self.interrupt:
             return
+        self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
         self.run_turn_scheduler()
 
     # end game
