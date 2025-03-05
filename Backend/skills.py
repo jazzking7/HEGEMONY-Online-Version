@@ -237,17 +237,17 @@ class Mass_Mobilization(Skill):
 
         # increase reserves
         if diff < -10:
-            self.gs.players[self.player].reserves += math.ceil(0.3*total_troops)
-        elif diff < -5:
             self.gs.players[self.player].reserves += math.ceil(0.25*total_troops)
-        elif diff < 0:
+        elif diff < -5:
             self.gs.players[self.player].reserves += math.ceil(0.22*total_troops)
+        elif diff < 0:
+            self.gs.players[self.player].reserves += math.ceil(0.18*total_troops)
         elif diff < 5:
-            self.gs.players[self.player].reserves += math.ceil(0.17*total_troops)
-        elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.15*total_troops)
-        else:
+        elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops)
+        else:
+            self.gs.players[self.player].reserves += math.ceil(0.1*total_troops)
 
         # update private view
         self.gs.update_private_status(self.player)

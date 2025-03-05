@@ -353,7 +353,7 @@ class turn_loop_scheduler:
                 # Loyalist announcement
                 for miss in gs.Mset:
                     if miss.name == "Loyalist":
-                        if ms.round == 2:
+                        if ms.round == 3:
                             time.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                 print(f"Round {ms.round} completed.")

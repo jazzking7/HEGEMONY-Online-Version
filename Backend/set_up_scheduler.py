@@ -78,6 +78,7 @@ class setup_event_scheduler:
         gs.made_choices = []
         gs.color_options = gs.aval_choices
         gs.made_choices = []
+        gs.send_player_list()
 
     # TURN-BASED
     def start_territorial_distribution(self,gs, ms):

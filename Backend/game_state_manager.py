@@ -849,17 +849,17 @@ class Game_State_Manager:
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
 
         # Realm of Permafrost ice age buff
-        if atk_p.skill:
-            if atk_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
-                if def_p.skill:
-                    if def_p.skill.name != "Realm_of_Permafrost":
-                        def_stats[0] = 5
+        # if atk_p.skill:
+        #     if atk_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
+        #         if def_p.skill:
+        #             if def_p.skill.name != "Realm_of_Permafrost":
+        #                 def_stats[0] = 5
 
-        if def_p.skill:
-            if def_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
-                if atk_p.skill:
-                    if atk_p.skill.name != "Realm_of_Permafrost":
-                        atk_stats[0] = 5
+        # if def_p.skill:
+        #     if def_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
+        #         if atk_p.skill:
+        #             if atk_p.skill.name != "Realm_of_Permafrost":
+        #                 atk_stats[0] = 5
 
         # landmine explosion
         ld = 0
