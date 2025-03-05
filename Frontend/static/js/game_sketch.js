@@ -464,10 +464,22 @@ function drawStar(dimX, dimY, x, y, scolor) {
   let innerRadius = starSize / 4;
   let numPoints = 5;
 
+  let r = red(scolor);
+  let g = green(scolor);
+  let b = blue(scolor);
+  let luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+
   push();
   fill(scolor);
+
+  if (luminance < 100) {
+    stroke(245, 245, 245); 
+  } else {
+    stroke(0); 
+  }
+
   translate(centerX, centerY);
-  rotate(-PI / 2); // Rotate the star to point upward
+  rotate(-PI / 2); 
 
   beginShape();
   strokeWeight(2);
