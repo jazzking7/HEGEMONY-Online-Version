@@ -43,6 +43,8 @@ class Round_Based_Incrementor(Mission_Tracker):
         for obs in self.observers:
             obs.check_round_condition()
             print(f'Checked {obs.name} of player {obs.gs.players[obs.player]}')
+        if self.gs.round_based_win:
+            self.gs.GES.halt_events()
 
 # Check condition at specific point     Death | Trty | Indus | Popu
 class Event_Based_Tracker(Mission_Tracker):
