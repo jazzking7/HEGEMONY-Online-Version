@@ -949,7 +949,8 @@ function conquest(tid){
     // Sync clicks
     socket.emit('add_click_sync', {'tid': tid});
 
-    clickables = territories[tid].neighbors;
+    clickables = territories[tid].neighbors.filter(tmp_id => territories[tid].color !== territories[tmp_id].color);
+    
   } else if (clickables.includes(tid)){
     if (toHightlight.length != 2){
       toHightlight.push(tid);

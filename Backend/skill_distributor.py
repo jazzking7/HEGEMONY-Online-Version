@@ -6,21 +6,21 @@ class Skill_Distributor:
         
         self.skill_options = [
             "Iron_Wall",
-            "Realm_of_Permafrost",
+            #"Realm_of_Permafrost",
             "Dictator",
             "Mass_Mobilization",
             "Industrial_Revolution",
-            "Robinhood",
+            #"Robinhood",
             "Ares' Blessing",
             "Zealous_Expansion",
             "Elitocracy",
-            "Necromancer",
+            #"Necromancer",
             "Divine_Punishment",
-            "Air_Superiority",
-            "Collusion",
-            "Laplace's Demon",
-            "Arsenal of the Underworld",
-            "Loan Shark"
+            #"Air_Superiority",
+            #"Collusion",
+           # "Laplace's Demon",
+            #"Arsenal of the Underworld",
+           # "Loan Shark"
         ]
 
     def get_options(self, ):
