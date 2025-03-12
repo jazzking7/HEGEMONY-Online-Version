@@ -1067,6 +1067,8 @@ class Arsenal_of_the_Underworld(Skill):
             self.gs.server.emit('update_trty_display', {choice: {'troops': curr_territory.troops}}, room=self.gs.lobby)
             # neighboring territory shockwave damage
             for nt in curr_territory.neighbors:
+                if nt in self.gs.players[self.player].territories:
+                    continue
                 curr_neighbor = self.gs.map.territories[nt]
                 shockwave = self.shockwaveDamage
                 if shockwave <= curr_neighbor.troops:
