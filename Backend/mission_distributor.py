@@ -68,12 +68,12 @@ class Mission_Distributor:
         self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
         self.missions = [
             'Pac', 
-           'War', 'Loy', 'Bon',
+            'War', 'Loy', 'Bon',
             'Uni', 'Pol', 'Fan', 
             'Ind',
             'Exp', 'Pop', 'Dom',
-              'Gua',
-            'Dec'
+            'Gua',
+            'Dec',
             'Str', 'Due', 'Pun'
         ]
 

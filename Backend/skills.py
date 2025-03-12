@@ -949,6 +949,7 @@ class Arsenal_of_the_Underworld(Skill):
         self.finished_setting = True
         self.finished_launching = True
         self.out_of_turn_activation = True
+        self.shockwaveDamage = 1
         self.missile_waitlist = []
 
     # at the start of each round, compute the number of usages and range
@@ -959,6 +960,7 @@ class Arsenal_of_the_Underworld(Skill):
         self.damage = 5 + dev_lvls
         self.range = 5 + dev_lvls//2
         self.max_minefields = 3 + dev_lvls//2
+        self.shockwaveDamage = 1 + dev_lvls//2
     
     def update_current_status(self):
 
@@ -998,6 +1000,7 @@ class Arsenal_of_the_Underworld(Skill):
             else:
                 if self.gs.players[self.player].stars >= 3:
                     data['silo_build'] = True
+            data['minefield_limit'] = self.max_minefields
             self.gs.server.emit("arsenal_controls", data, room=self.player)
         else:
             self.gs.server.emit("display_new_notification", {'msg': "Arsenal management has been blocked!"}, room=self.player)
@@ -1038,11 +1041,12 @@ class Arsenal_of_the_Underworld(Skill):
         for choice in choices:
             choice = int(choice)
             casualties = self.damage
-            if casualties <= self.gs.map.territories[choice].troops:
-                self.gs.map.territories[choice].troops -= casualties
+            curr_territory = self.gs.map.territories[choice]
+            if casualties <= curr_territory.troops:
+                curr_territory.troops -= casualties
             else:
-                casualties = self.gs.map.territories[choice].troops
-                self.gs.map.territories[choice].troops = 0
+                casualties = curr_territory.troops
+                curr_territory.troops = 0
 
             for player in self.gs.players:
                 if choice in self.gs.players[player].territories:
@@ -1060,7 +1064,34 @@ class Arsenal_of_the_Underworld(Skill):
                         f'{choice}': {'tid': choice, 'number': casualties},
                     }, room=self.gs.lobby)
                     break
-            self.gs.server.emit('update_trty_display', {choice: {'troops': self.gs.map.territories[choice].troops}}, room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {choice: {'troops': curr_territory.troops}}, room=self.gs.lobby)
+            # neighboring territory shockwave damage
+            for nt in curr_territory.neighbors:
+                curr_neighbor = self.gs.map.territories[nt]
+                shockwave = self.shockwaveDamage
+                if shockwave <= curr_neighbor.troops:
+                    curr_neighbor.troops -= shockwave
+                else:
+                    shockwave = curr_neighbor.troops
+                    curr_neighbor.troops = 0
+
+                for player in self.gs.players:
+                    if nt in self.gs.players[player].territories:
+                        self.gs.players[player].total_troops -= shockwave
+
+                        self.gs.update_LAO(player)
+
+                        # Ares' Blessing Rage meter checking
+                        if self.gs.players[player].skill:
+                            if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                self.gs.players[player].skill.checking_rage_meter()
+
+                        # visual effect
+                        self.gs.server.emit('battle_casualties', {
+                            f'{nt}': {'tid': nt, 'number': shockwave},
+                        }, room=self.gs.lobby)
+                        break
+                self.gs.server.emit('update_trty_display', {nt: {'troops': curr_neighbor.troops}}, room=self.gs.lobby)
         self.gs.update_player_stats()
         self.gs.get_SUP()
         self.gs.update_global_status()

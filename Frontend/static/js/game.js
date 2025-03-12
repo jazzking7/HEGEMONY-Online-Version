@@ -1852,7 +1852,10 @@ socket.on('arsenal_controls', function(data) {
       descriptionsDiv.append('<p style="margin: 0.2rem 0;">No active minefields.</p>');
   }
 
-  let availableMinefields = 3 - (data.minefields ? data.minefields.length : 0);
+  let availableMinefields = data.minefield_limit - (data.minefields ? data.minefields.length : 0);
+  if (availableMinefields < 0) {
+    availableMinefields = 0;
+  }
   descriptionsDiv.append(
       `<p style="margin: 0.2rem 0;">${availableMinefields} available minefield placement.</p>`
   );

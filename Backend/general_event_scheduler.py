@@ -326,7 +326,7 @@ class General_Event_Scheduler:
                 options = [tid for tid in player.territories if tid not in player.skill.minefields]
                 player.skill.finished_setting = False
 
-                self.gs.server.emit('set_minefields', {'targets': options, 'limits': 3-len(player.skill.minefields)}, room=pid)
+                self.gs.server.emit('set_minefields', {'targets': options, 'limits': player.skill.max_minefields-len(player.skill.minefields)}, room=pid)
                 self.gs.server.emit('change_click_event', {'event': "set_minefields"}, room=pid)
 
                 print(f"{player.name}'s war art triggered an inner async event.")
