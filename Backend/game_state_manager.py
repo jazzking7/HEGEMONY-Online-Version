@@ -322,7 +322,7 @@ class Game_State_Manager:
 
         for p in p_alive:
             curr_p = self.players[p]
-            z_score = 0.25*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.25*((self.get_player_industrial_level(curr_p)-avg_ind)/indsd) + 0.25*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.25*((curr_p.total_troops-avg_popu)/popusd)
+            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_player_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
             curr_p.PPI = round(self.logistic_function(z_score) * 100, 3)
 
     # Signal the specific mission tracker to check condition
