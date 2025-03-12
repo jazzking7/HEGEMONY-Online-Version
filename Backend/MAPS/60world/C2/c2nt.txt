@@ -2,7 +2,7 @@ Kazan,Omsk,Corinth,Pompeii
 Carthage,Pompeii,Rome,Tarentum
 Carthage,Corinth,Ephesus,Verona,Gaul,Rome
 Pompeii,Gaul
-Pompeii,Ephesus,Gaul,Rome,Tarsus
+Pompeii,Gaul,Rome,Tarsus
 Pompeii,Ephesus,Verona,Tarsus
 Corinth,Pompeii,Verona,Tarentum,Sardis,Tarsus
 Sochi,Corinth,Rome,Sardis
