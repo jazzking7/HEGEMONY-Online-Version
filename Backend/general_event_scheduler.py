@@ -321,7 +321,7 @@ class General_Event_Scheduler:
     def set_minefields(self, pid):
         player = self.gs.players[pid]
         if player.skill.active:
-            if 3-len(player.skill.minefields) > 0:
+            if player.skill.max_minefields-len(player.skill.minefields) > 0:
                 self.gs.server.emit('async_terminate_button_setup', room=pid)
                 options = [tid for tid in player.territories if tid not in player.skill.minefields]
                 player.skill.finished_setting = False

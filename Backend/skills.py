@@ -938,6 +938,7 @@ class Arsenal_of_the_Underworld(Skill):
         super().__init__("Arsenal of the Underworld", player, gs)
         # tid : number of mines
         self.minefields = {}
+        self.max_minefields = 3
         # tid
         self.underground_silo = None
         self.silo_usage = 0
@@ -957,6 +958,7 @@ class Arsenal_of_the_Underworld(Skill):
         self.silo_used = 0
         self.damage = 5 + dev_lvls
         self.range = 5 + dev_lvls//2
+        self.max_minefields = 3 + dev_lvls//2
     
     def update_current_status(self):
 
@@ -986,7 +988,7 @@ class Arsenal_of_the_Underworld(Skill):
                 data['minefields'] = []
                 for tid in self.minefields:
                     data['minefields'].append([self.gs.map.territories[tid].name, self.minefields[tid]])
-            if len(self.minefields) < 3:
+            if len(self.minefields) < self.max_minefields:
                 data['set_minefields'] = True
             if self.underground_silo:
                 data['silo_usable'] = True
