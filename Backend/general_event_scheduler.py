@@ -369,7 +369,9 @@ class General_Event_Scheduler:
             self.gs.server.emit('async_terminate_button_setup', room=pid)
             skill.finished_launching = False
 
-            options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            # options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            options = self.gs.map.get_reachable_airspace(skill.underground_silo, skill.range)
+
             options = list(set(options) - set(player.territories))
 
             self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
@@ -395,7 +397,8 @@ class General_Event_Scheduler:
             self.gs.server.emit('concurr_terminate_event_setup', {'pid': pid}, room=pid)
             skill.finished_launching = False
 
-            options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            #options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            options = self.gs.map.get_reachable_airspace(skill.underground_silo, skill.range)
             options = list(set(options) - set(player.territories))
 
             self.gs.server.emit('signal_hide_btns', room=pid)

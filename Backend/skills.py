@@ -810,7 +810,7 @@ class Air_Superiority(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"No more paratrooper attacks for this round!"}, room=self.player)
             return
         
-        if t2 not in self.gs.map.get_reachable_airspace(t1):
+        if t2 not in self.gs.map.get_reachable_airspace(t1, 3):
             self.gs.server.emit("display_new_notification", {"msg": f"Invalid attack option!"}, room=self.player)
             return
         

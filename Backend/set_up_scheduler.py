@@ -172,7 +172,7 @@ class setup_event_scheduler:
         gs.reverse_players()
         curr = 0
         for player in gs.players:
-            amount = len(gs.players[player].territories) + (curr*2) + (curr//2)
+            amount = len(gs.players[player].territories) + (curr*3) + (curr//2)
             curr += 1
             gs.players[player].deployable_amt = amount
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)

@@ -817,7 +817,7 @@ def perform_paratrooper_attack(data):
 def get_reachable_airspace(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    socketio.emit('receive_reachable_airspace', {'spaces': gsm.map.get_reachable_airspace(data['origin'])})
+    socketio.emit('receive_reachable_airspace', {'spaces': gsm.map.get_reachable_airspace(data['origin'], 3)})
 
 @socketio.on('send_corrupt_territory')
 def handle_corrupt_territory(data):

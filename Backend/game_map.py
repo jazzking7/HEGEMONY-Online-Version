@@ -1,4 +1,6 @@
 # Author: Jasper Wang      Date: 11/10/2022     Goal: Automated Game Runner
+import collections
+
 class Territory:
 
     def __init__(self, name, neighbors):
@@ -25,24 +27,42 @@ class Territory:
 
 class Map:
 
-    def recursive_get_trty_with_depth(self, curr, curr_list, depth, max_depth=3):
-        if depth == max_depth:
-            return
-        t = self.territories[curr]
-        curr_d = []
-        for n in t.neighbors:
-            if n not in curr_list:
-                curr_list.append(n)
-                curr_d.append(n)
-        for n in curr_d:
-            self.recursive_get_trty_with_depth(n, curr_list, depth + 1, max_depth)
-        return curr_list 
+    def get_reachable_airspace(self, start, max_depth=3):
+        queue = collections.deque([(start, 0)])  # Queue stores (territory, depth)
+        visited = set([start])  # To track visited territories
+        reachable = set()
 
-    def get_reachable_airspace(self, start):
-        t_list = self.recursive_get_trty_with_depth(start, [start], 0)        
-        if t_list and start in t_list:
-            t_list.remove(start)
-        return t_list
+        while queue:
+            curr, depth = queue.popleft()
+
+            if depth >= max_depth:
+                continue  # Stop further exploration beyond max_depth
+
+            for neighbor in self.territories[curr].neighbors:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    reachable.add(neighbor)
+                    queue.append((neighbor, depth + 1))  # Add to queue with updated depth
+
+        return list(reachable)  # Return all reachable territories within max_depth
+
+
+    # def recursive_get_trty_with_depth(self, curr, curr_list, depth, max_depth=3):
+    #     if depth >= max_depth:
+    #         return curr_list
+    #     t = self.territories[curr]
+        
+    #     for n in t.neighbors:
+    #         if n not in curr_list:
+    #             curr_list.append(n)
+    #             self.recursive_get_trty_with_depth(n, curr_list, depth + 1, max_depth)
+    #     return curr_list 
+
+    # def get_reachable_airspace(self, start):
+    #     t_list = self.recursive_get_trty_with_depth(start, [start], 0)        
+    #     if t_list and start in t_list:
+    #         t_list.remove(start)
+    #     return t_list
 
     def recursive_get_trty(self, curr, owned, curr_list):
         t = self.territories[curr]
