@@ -1,0 +1,112 @@
+[
+  {
+    "x": 300, 
+    "y": 235, 
+    "dx": 120,
+    "dy": 60,
+    "cx": 360,
+    "cy": 265, 
+    "message": "ISKANBUL\n+6 TROOPS"
+  },
+  {
+    "x": 250, 
+    "y": 570, 
+    "dx": 150,
+    "dy": 60,
+    "cx": 325, 
+    "cy": 600,  
+    "message": "NORTH ATLANTICA\n+7 TROOPS"
+  },
+  {
+    "x": 300, 
+    "y": 810, 
+    "dx": 150,
+    "dy": 60,
+    "cx": 375, 
+    "cy": 840, 
+    "message": "SOUTH ATLANTICA\n+5 TROOPS"
+  },
+  {
+    "x": 740, 
+    "y": 470, 
+    "dx": 120,
+    "dy": 60,
+    "cx": 800,
+    "cy": 500,
+    "message": "SURAMERICA\n+12 TROOPS"
+  },
+  {
+    "x": 780, 
+    "y": 830, 
+    "dx": 160,
+    "dy": 60,
+    "cx": 860,
+    "cy": 860,
+    "message": "SNOWDEKT ISLANDS\n+9 TROOPS"
+  },
+  {
+    "x": 720,
+    "y": 160,
+    "dx": 120,
+    "dy": 60,
+    "cx": 780,
+    "cy": 190,
+    "message": "SCANDINAVIA\n+4 TROOPS"
+  }
+  ,
+  {
+    "x": 1320,
+    "y": 440,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1380,
+    "cy": 470,
+    "message": "EUROPA\n+14 TROOPS"
+  }
+  ,
+  {
+    "x": 1630,
+    "y": 320,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1690,
+    "cy": 350,
+    "message": "ZHONGYUAN\n+16 TROOPS"
+  },
+  {
+    "x": 1405,
+    "y": 875,
+    "dx": 120,
+    "dy": 60,
+    "cx": 1465,
+    "cy": 905,
+    "message": "BALANDIA\n+4 TROOPS"
+  }  ,
+  {
+    "x": 2055,
+    "y": 260,
+    "dx": 120,
+    "dy": 60,
+    "cx": 2115,
+    "cy": 290,
+    "message": "HAISHENWAI\n+2 TROOPS"
+  }  ,
+  {
+    "x": 1950,
+    "y": 840,
+    "dx": 120,
+    "dy": 60,
+    "cx": 2010,
+    "cy": 870,
+    "message": "HINOMOTO\n+9 TROOPS"
+  } ,
+  {
+    "x": 1280, 
+    "y": 1260, 
+    "dx": 120,
+    "dy": 60,
+    "cx": 1337,
+    "cy": 1289, 
+    "message": "MOSCOVA\n+17 TROOPS"
+  }
+]

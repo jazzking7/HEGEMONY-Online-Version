@@ -1,0 +1,7 @@
+Finnmark,Tromso,Norrbotten
+Finnmark,Norrbotten,Oslo
+Vasterbotten,Norrbotten,Meknes,Nordland
+Bolivar,Vasterbotten,Norrbotten,Jamtland
+Vasterbotten,Nordland,Finnmark,Tromso,Oslo,Jamtland
+Nordland,Norrbotten,Jamtland
+Tromso,Norrbotten,Oslo,Luneburger

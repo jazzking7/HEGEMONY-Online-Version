@@ -1,0 +1,7 @@
+Valka,Roland,Aniva
+Lucana,Akasha,Gastark,Valka,Atis,Aniva
+Lukina,Allova Plain,Aniva,Aragane
+Allova Plain,Roland,Atis,Patagonia
+Lukina,Aniva,Atis,Gastark,Kerguelen
+Allova Plain,Roland,Gastark,Aniva
+Lukina,Roland,Valka,Allova Plain,Atis

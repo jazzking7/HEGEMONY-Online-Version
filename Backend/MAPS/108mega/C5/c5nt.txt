@@ -1,0 +1,9 @@
+Yeja,Bavaria
+Falkland,Objika,Javania
+Silva
+Roland,Okhotsk,Mujik
+Kerguelen
+Kerguelen,Objika,Yeja,Jornik,Formosa
+Mujik,Silva,Jornik,Bryansk
+Lapland,Jornik,Mujik
+Mujik,Objika,Yeja

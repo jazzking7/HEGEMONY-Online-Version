@@ -1,0 +1,12 @@
+Solfia,Veneto,Hesse,Silica
+Lazio,Veneto,Alsace,Qinghai,Guangning
+Qinghai,Guangning,Solfia,Veneto,Luneburger,Heisenberg,Rhineland
+Lazio,Solfia,Alsace,London,Hesse,Saxony,Rhineland
+Jamtland,Qinghai,Alsace,Heisenberg
+Luneburger,Alsace,Rhineland,Normandie
+Altiplano,Heisenberg,Bavaria,London,Saxony,Rhineland
+Normandie,Lapland,London,Hesse
+Bavaria,Hesse,Veneto,Saxony,Normandie
+Bavaria,London,Veneto,Lazio
+London,Veneto,Normandie,Rhineland
+Veneto,Saxony,Alsace,Heisenberg,Normandie
