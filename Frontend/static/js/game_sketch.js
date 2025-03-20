@@ -74,6 +74,7 @@ function setup() {
   backgroundOceanImage = loadImage('/static/Assets/Background/gameBackground1.png', img => {
     backgroundOceanImage.resize(currWinWid, currWinHeight);
   });
+  console.log('LOADED IMAGES')
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
@@ -148,12 +149,14 @@ async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
           "devImg": null,
           "insig": null
       });
+      console.log(territories);
       t_index += 1;
     }
   }
   loadJSON(`/static/MAPS/${mapName}/seaRoutes.json`, (data)=>{for(let sr of data){seaRoutes.push(sr);}});
   loadJSON(`/static/MAPS/${mapName}/contBorders.json`, (data)=>{for(let border of data){contBorders.push(border);}});
   loadJSON(`/static/MAPS/${mapName}/contBonusDisplay.json`, (data)=>{for(let display of data){contBonusBoxes.push(display);}});
+  console.log("MAP LOADED");
 }
 
 function draw() {
