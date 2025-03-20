@@ -175,6 +175,10 @@ class Game_State_Manager:
                         debt = curr_p.skill.loan_list[old_pid]
                         del curr_p.skill.loan_list[old_pid]
                         curr_p.skill.loan_list[new_pid] = debt
+                    if old_pid in curr_p.skill.ransom_history:
+                        round = curr_p.skill.ransom_history[old_pid]
+                        del curr_p.skill.ransom_history[old_pid]
+                        curr_p.skill.ransom_history[new_pid] = round
                 if curr_p.skill.name == 'Robinhood':
                     if old_pid in curr_p.skill.targets:
                         curr_p.skill.targets.remove(old_pid)

@@ -124,6 +124,12 @@ class General_Event_Scheduler:
         self.lock.acquire()
         if not self.interrupt:
             self.interrupt = True
+            curr = False
+            for p in self.gs.players:
+                curr = curr or self.gs.players[p].connected
+            if not curr:
+                print("Lobby Deleted")
+                return
             self.gs.signal_view_clear()
             # PAUSE TO GIVE TIME TO COMPUTE END RESULT
             time.sleep(2)
