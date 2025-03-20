@@ -431,6 +431,7 @@ def get_game_settings():
         return
     lobby = lobbies[lobby_id]
     lobby_map = lobby['gsm'].map
+    print(f"Sent game settings to {sid}")
     # FILL IN MAP CHOSEN
     socketio.emit('game_settings',
      {'map': lobby['map_name'], 

@@ -235,19 +235,24 @@ class Mass_Mobilization(Skill):
         # difference in power
         diff = self.gs.players[self.player].PPI - avg_PPI
 
+        # round
+        round_multiplier = 1
+        if self.gs.GES.round == 0:
+            round_multiplier = 0.6
+        
         # increase reserves
         if diff < -10:
-            self.gs.players[self.player].reserves += math.ceil(0.25*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.25*total_troops*round_multiplier)
         elif diff < -5:
-            self.gs.players[self.player].reserves += math.ceil(0.22*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.22*total_troops*round_multiplier)
         elif diff < 0:
-            self.gs.players[self.player].reserves += math.ceil(0.18*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.18*total_troops*round_multiplier)
         elif diff < 5:
-            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops*round_multiplier)
         elif diff < 10:
-            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
         else:
-            self.gs.players[self.player].reserves += math.ceil(0.1*total_troops)
+            self.gs.players[self.player].reserves += math.ceil(0.1*total_troops*round_multiplier)
 
         # update private view
         self.gs.update_private_status(self.player)

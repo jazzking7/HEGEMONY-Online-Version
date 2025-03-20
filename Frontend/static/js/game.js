@@ -114,6 +114,7 @@ async function get_game_settings() {
       const gameSettings = await new Promise((resolve) => {
         socket.emit('get_game_settings');
         socket.once('game_settings', (settings) => {
+          console.log("Received Data")
           resolve(settings);
         });
       });
