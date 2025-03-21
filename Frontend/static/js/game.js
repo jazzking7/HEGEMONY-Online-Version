@@ -53,7 +53,7 @@ $(document).ready(async function() {
   });
 
   // Load p5.js sketch
-  $.getScript(URL_FRONTEND + 'static/js/game_sketch.js');
+  loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
@@ -92,6 +92,23 @@ $(document).ready(async function() {
 
 });
 
+function loadGameSketch(retries = 10) {
+  let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
+  let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+
+  $.getScript(scriptUrl)
+      .done(() => console.log("✅ game_sketch.js loaded successfully!"))
+      .fail(() => {
+          console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
+
+          if (retries > 0) {
+              setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
+          } else {
+              console.error("🚨 game_sketch.js failed to load after 10 attempts.");
+          }
+      });
+}
+
 // Function to start the timeout countdown animation
 function startTimeout(totalSeconds) {
   var progress = 1;
@@ -115,6 +132,7 @@ async function get_game_settings() {
         socket.emit('get_game_settings');
         socket.once('game_settings', (settings) => {
           console.log("Received Data")
+          console.log(settings);
           resolve(settings);
         });
       });

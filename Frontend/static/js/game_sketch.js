@@ -74,7 +74,7 @@ function setup() {
   backgroundOceanImage = loadImage('/static/Assets/Background/gameBackground1.png', img => {
     backgroundOceanImage.resize(currWinWid, currWinHeight);
   });
-  console.log('LOADED IMAGES')
+  console.log('LOADED IMAGES');
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
