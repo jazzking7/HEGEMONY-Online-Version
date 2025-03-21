@@ -57,14 +57,14 @@ $(document).ready(async function() {
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js')
             .done(() => {
                 console.log("✅ p5.js and p5.sound.min.js loaded successfully!");
-                loadGameSketch();
+                // loadGameSketch();
             })
             .fail(() => console.error("❌ Failed to load p5.sound.min.js!"));
     })
     .fail(() => console.error("❌ Failed to load p5.js!"));
 
   // Load p5.js sketch
-  // loadGameSketch();
+  loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
@@ -103,21 +103,35 @@ $(document).ready(async function() {
 
 });
 
-function loadGameSketch(retries = 10) {
-  let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-  let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+// function loadGameSketch(retries = 10) {
+//   let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
+//   let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
 
-  $.getScript(scriptUrl)
-      .done(() => console.log("✅ game_sketch.js loaded successfully!"))
-      .fail(() => {
-          console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
+//   $.getScript(scriptUrl)
+//       .done(() => console.log("✅ game_sketch.js loaded successfully!"))
+//       .fail(() => {
+//           console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
 
-          if (retries > 0) {
-              setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
-          } else {
-              console.error("🚨 game_sketch.js failed to load after 10 attempts.");
-          }
-      });
+//           if (retries > 0) {
+//               setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
+//           } else {
+//               console.error("🚨 game_sketch.js failed to load after 10 attempts.");
+//           }
+//       });
+// }
+
+async function loadGameSketch() {
+  let cacheBuster = new Date().getTime();
+  let sketchUrl = URL_FRONTEND + 'static/js/game_sketch.js?v=' + cacheBuster;
+
+  console.log("⏳ Attempting to load game_sketch.js from:", sketchUrl);
+
+  try {
+      await $.getScript(sketchUrl);
+      console.log("✅ game_sketch.js loaded and executed!");
+  } catch (err) {
+      console.error("❌ Failed to load game_sketch.js!", err);
+  }
 }
 
 // Function to start the timeout countdown animation
