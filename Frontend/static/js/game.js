@@ -64,7 +64,7 @@ $(document).ready(async function() {
     .fail(() => console.error("❌ Failed to load p5.js!"));
 
   // Load p5.js sketch
-  loadGameSketch();
+ await loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
