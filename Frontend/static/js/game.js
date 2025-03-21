@@ -48,9 +48,19 @@ $(document).ready(async function() {
   game_settings = await get_game_settings();
 
   // Load p5.js libraries
-  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
-    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
-  });
+  // $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
+  //   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
+  // });
+
+  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js')
+    .done(() => {
+        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js')
+            .done(() => {
+                console.log("✅ p5.js and p5.sound.min.js loaded successfully!");
+            })
+            .fail(() => console.error("❌ Failed to load p5.sound.min.js!"));
+    })
+    .fail(() => console.error("❌ Failed to load p5.js!"));
 
   // Load p5.js sketch
   loadGameSketch();
