@@ -168,6 +168,7 @@ function draw() {
   }
   // clear the background
   background(0); // Placeholder background color
+  backgroundOceanImage.resize(currWinWid, currWinHeight);
   if (backgroundOceanImage) {
     let x = (width - backgroundOceanImage.width) / 2;
     let y = (height - backgroundOceanImage.height) / 2;

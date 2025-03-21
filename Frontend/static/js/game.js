@@ -57,14 +57,12 @@ $(document).ready(async function() {
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js')
             .done(() => {
                 console.log("✅ p5.js and p5.sound.min.js loaded successfully!");
-                // loadGameSketch();
+                // Only load game sketch after we're sure the libraries are loaded
+                setTimeout(() => loadGameSketch(), 100); // Small delay to ensure libraries are fully initialized
             })
             .fail(() => console.error("❌ Failed to load p5.sound.min.js!"));
     })
     .fail(() => console.error("❌ Failed to load p5.js!"));
-
-  // Load p5.js sketch
- await loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
@@ -127,13 +125,41 @@ async function loadGameSketch() {
   console.log("⏳ Attempting to load game_sketch.js from:", sketchUrl);
 
   try {
-      await $.getScript(sketchUrl);
-      console.log("✅ game_sketch.js loaded and executed!");
+      // Use a direct script element approach instead of $.getScript
+      const script = document.createElement('script');
+      script.src = sketchUrl;
+      
+      // Create a promise that resolves when the script is loaded
+      const loadPromise = new Promise((resolve, reject) => {
+          script.onload = () => {
+              console.log("✅ game_sketch.js loaded!");
+              resolve();
+          };
+          script.onerror = (err) => {
+              console.error("❌ Error loading game_sketch.js!");
+              reject(err);
+          };
+      });
+      
+      // Add the script to the document
+      document.head.appendChild(script);
+      
+      // Wait for script to load
+      await loadPromise;
+      
+      // Add a check to ensure p5 is ready before initializing
+      if (typeof p5 !== 'undefined') {
+          console.log("🎮 Starting game initialization");
+          // Instead of relying on p5's automatic instance creation,
+          // create a new instance explicitly and pass the sketch functions
+          window.gameInstance = new p5();
+      } else {
+          console.error("⚠️ p5 is not defined!");
+      }
   } catch (err) {
-      console.error("❌ Failed to load game_sketch.js!", err);
+      console.error("❌ Failed to load or initialize game_sketch.js!", err);
   }
 }
-
 // Function to start the timeout countdown animation
 function startTimeout(totalSeconds) {
   var progress = 1;
