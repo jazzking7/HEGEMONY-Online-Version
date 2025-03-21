@@ -49,11 +49,14 @@ $(document).ready(async function() {
 
   // Load p5.js libraries
   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
-    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
+    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js', function() {
+      loadGameSketch();
+    }
+    );
   });
 
   // Load p5.js sketch
-  loadGameSketch();
+ // loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
