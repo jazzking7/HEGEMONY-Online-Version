@@ -57,13 +57,14 @@ $(document).ready(async function() {
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js')
             .done(() => {
                 console.log("✅ p5.js and p5.sound.min.js loaded successfully!");
+                loadGameSketch();
             })
             .fail(() => console.error("❌ Failed to load p5.sound.min.js!"));
     })
     .fail(() => console.error("❌ Failed to load p5.js!"));
 
   // Load p5.js sketch
-  loadGameSketch();
+  // loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
