@@ -60,6 +60,7 @@ let brightness;
 
 function preload() {
   urbanistFont = loadFont('/static/Fonts/Urbanist-SemiBold.ttf');
+  console.log("LOADED FONTS");
 }
 
 function setup() {
