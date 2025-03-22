@@ -172,6 +172,8 @@ class Mass_Mobilization(Skill):
         self.will_cost = 8
         self.will = 0
 
+        self.residual = 0
+
         self.limit = 0
         nump = len(gs.players)
         if nump < 6:
@@ -193,6 +195,10 @@ class Mass_Mobilization(Skill):
             if self.will == self.will_cost:
                 self.limit += 1
                 self.will = 0
+            if self.residual:
+                self.gs.players[self.player].reserves += self.residual
+                self.residual = 0
+                self.gs.update_private_status(self.player)
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -243,16 +249,22 @@ class Mass_Mobilization(Skill):
         # increase reserves
         if diff < -10:
             self.gs.players[self.player].reserves += math.ceil(0.25*total_troops*round_multiplier)
+            self.residual = math.ceil(0.25*total_troops*(1-round_multiplier))
         elif diff < -5:
             self.gs.players[self.player].reserves += math.ceil(0.22*total_troops*round_multiplier)
+            self.residual = math.ceil(0.22*total_troops*(1-round_multiplier))
         elif diff < 0:
             self.gs.players[self.player].reserves += math.ceil(0.18*total_troops*round_multiplier)
+            self.residual = math.ceil(0.18*total_troops*(1-round_multiplier))
         elif diff < 5:
             self.gs.players[self.player].reserves += math.ceil(0.15*total_troops*round_multiplier)
+            self.residual = math.ceil(0.15*total_troops*(1-round_multiplier))
         elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
+            self.residual = math.ceil(0.12*total_troops*(1-round_multiplier))
         else:
             self.gs.players[self.player].reserves += math.ceil(0.1*total_troops*round_multiplier)
+            self.residual = math.ceil(0.1*total_troops*(1-round_multiplier))
 
         # update private view
         self.gs.update_private_status(self.player)
