@@ -48,21 +48,10 @@ $(document).ready(async function() {
   game_settings = await get_game_settings();
 
   // Load p5.js libraries
-  // $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
-  //   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
-  // });
-
-  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js')
-    .done(() => {
-        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js')
-            .done(() => {
-                console.log("✅ p5.js and p5.sound.min.js loaded successfully!");
-                // Only load game sketch after we're sure the libraries are loaded
-                setTimeout(() => loadGameSketch(), 100); // Small delay to ensure libraries are fully initialized
-            })
-            .fail(() => console.error("❌ Failed to load p5.sound.min.js!"));
-    })
-    .fail(() => console.error("❌ Failed to load p5.js!"));
+  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
+    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
+  });
+  loadGameSketch();
 
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
@@ -101,241 +90,22 @@ $(document).ready(async function() {
 
 });
 
-// function loadGameSketch(retries = 10) {
-//   let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-//   let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+function loadGameSketch(retries = 10) {
+  let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
+  let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
 
-//   $.getScript(scriptUrl)
-//       .done(() => console.log("✅ game_sketch.js loaded successfully!"))
-//       .fail(() => {
-//           console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
+  $.getScript(scriptUrl)
+      .done(() => console.log("✅ game_sketch.js loaded successfully!"))
+      .fail(() => {
+          console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
 
-//           if (retries > 0) {
-//               setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
-//           } else {
-//               console.error("🚨 game_sketch.js failed to load after 10 attempts.");
-//           }
-//       });
-// }
-
-async function loadGameSketch(retryCount = 0, maxRetries = 10, baseDelay = 1000) {
-  let cacheBuster = new Date().getTime();
-  let sketchUrl = URL_FRONTEND + 'static/js/game_sketch.js?v=' + cacheBuster;
-
-  console.log(`⏳ Attempt ${retryCount + 1}/${maxRetries + 1}: Loading game_sketch.js from: ${sketchUrl}`);
-
-  // First, ensure p5.js is fully loaded and initialized
-  if (typeof p5 === 'undefined' || !p5.prototype || typeof p5.prototype.addModule === 'undefined') {
-    console.log("⚠️ p5.js not fully initialized, waiting before loading sketch...");
-    
-    // Wait for p5 to be fully loaded
-    try {
-      await waitForP5Initialization(5000); // Wait up to 5 seconds for p5 to initialize
-    } catch (err) {
-      console.error("❌ p5.js initialization timeout:", err.message);
-      
-      // If we've retried enough, fail
-      if (retryCount >= maxRetries) {
-        console.error(`❌ All ${maxRetries + 1} attempts failed. p5.js could not be initialized.`);
-        showLoadingError("Failed to initialize p5.js. Please refresh the page and try again.");
-        return false;
-      }
-      
-      // Otherwise retry loading libraries first
-      console.log("🔄 Reloading p5.js libraries...");
-      await reloadP5Libraries();
-      
-      // Then retry the whole process
-      const delay = baseDelay * Math.pow(1.5, retryCount) + Math.random() * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return loadGameSketch(retryCount + 1, maxRetries, baseDelay);
-    }
-  }
-
-  try {
-    // Use a direct script element approach instead of $.getScript
-    const script = document.createElement('script');
-    script.src = sketchUrl;
-    
-    // Create a promise that resolves when the script is loaded
-    const loadPromise = new Promise((resolve, reject) => {
-      script.onload = () => {
-        console.log("✅ game_sketch.js loaded!");
-        resolve();
-      };
-      script.onerror = (err) => {
-        console.error("❌ Error loading game_sketch.js!");
-        reject(err);
-      };
-      
-      // Add timeout to catch stalled requests
-      setTimeout(() => {
-        reject(new Error("Loading timeout exceeded"));
-      }, 15000); // 15 second timeout for slower connections
-    });
-    
-    // Add the script to the document
-    document.head.appendChild(script);
-    
-    // Wait for script to load
-    await loadPromise;
-    
-    // Verify p5 is ready and initialize if not already initialized
-    try {
-      if (typeof p5 !== 'undefined' && p5.prototype && typeof p5.prototype.addModule !== 'undefined') {
-        console.log("🎮 Starting game initialization");
-        
-        // Ensure we have a new instance for running the sketch
-        if (!window.gameInstance) {
-          // The key part: delay the new p5 instance creation slightly
-          await new Promise(resolve => setTimeout(resolve, 500));
-          window.gameInstance = new p5();
-          console.log("🎮 Game instance created successfully");
-        }
-        return true; // Success
-      } else {
-        throw new Error("p5 is not fully initialized!");
-      }
-    } catch (initErr) {
-      console.error("❌ Game initialization error:", initErr.message);
-      throw initErr; // Propagate to retry logic
-    }
-  } catch (err) {
-    console.error(`❌ Attempt ${retryCount + 1} failed:`, err.message);
-    
-    // Remove the failed script tag
-    const failedScript = document.querySelector(`script[src="${sketchUrl}"]`);
-    if (failedScript) {
-      failedScript.remove();
-    }
-    
-    // Check if we should retry
-    if (retryCount < maxRetries) {
-      // Exponential backoff with jitter
-      const delay = baseDelay * Math.pow(1.5, retryCount) + Math.random() * 1000;
-      console.log(`🔄 Retrying in ${Math.round(delay/1000)} seconds...`);
-      
-      // Show retry message to user if possible
-      updateLoadingMessage(`Loading failed. Retrying in ${Math.round(delay/1000)}s... (${retryCount + 1}/${maxRetries})`);
-      
-      // Wait and retry
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return loadGameSketch(retryCount + 1, maxRetries, baseDelay);
-    } else {
-      console.error(`❌ All ${maxRetries + 1} attempts failed. Please check your connection and refresh the page.`);
-      
-      // Show final error to user if possible
-      showLoadingError("Failed to load game after multiple attempts. Please check your connection and refresh the page.");
-      
-      return false; // Failed after all retries
-    }
-  }
+          if (retries > 0) {
+              setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
+          } else {
+              console.error("🚨 game_sketch.js failed to load after 10 attempts.");
+          }
+      });
 }
-
-// Helper function that waits for p5 to be fully initialized
-function waitForP5Initialization(timeout = 5000) {
-  return new Promise((resolve, reject) => {
-    // If p5 is already initialized, resolve immediately
-    if (typeof p5 !== 'undefined' && p5.prototype && typeof p5.prototype.addModule !== 'undefined') {
-      resolve();
-      return;
-    }
-    
-    // Otherwise, set up a check interval
-    const checkInterval = 100; // Check every 100ms
-    const maxChecks = timeout / checkInterval;
-    let checks = 0;
-    
-    const intervalId = setInterval(() => {
-      checks++;
-      
-      if (typeof p5 !== 'undefined' && p5.prototype && typeof p5.prototype.addModule !== 'undefined') {
-        clearInterval(intervalId);
-        resolve();
-      } else if (checks >= maxChecks) {
-        clearInterval(intervalId);
-        reject(new Error("p5.js initialization timeout"));
-      }
-    }, checkInterval);
-  });
-}
-
-// Function to reload p5 libraries from scratch
-async function reloadP5Libraries() {
-  return new Promise((resolve, reject) => {
-    // Remove existing p5 scripts
-    document.querySelectorAll('script[src*="p5.js"]').forEach(script => script.remove());
-    
-    // Load p5.js
-    const p5Script = document.createElement('script');
-    p5Script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js';
-    
-    p5Script.onload = () => {
-      console.log("✅ p5.js reloaded");
-      
-      // Load p5.sound.min.js
-      const soundScript = document.createElement('script');
-      soundScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js';
-      
-      soundScript.onload = () => {
-        console.log("✅ p5.sound.min.js reloaded");
-        // Wait a bit for everything to initialize
-        setTimeout(resolve, 500);
-      };
-      
-      soundScript.onerror = () => {
-        reject(new Error("Failed to reload p5.sound.min.js"));
-      };
-      
-      document.head.appendChild(soundScript);
-    };
-    
-    p5Script.onerror = () => {
-      reject(new Error("Failed to reload p5.js"));
-    };
-    
-    document.head.appendChild(p5Script);
-  });
-}
-
-// Helper function to display loading messages
-function updateLoadingMessage(message) {
-  const loadingElement = document.getElementById('loadingMessage');
-  if (loadingElement) {
-    loadingElement.textContent = message;
-  } else {
-    console.log(message);
-  }
-}
-
-// Helper function to show loading errors
-function showLoadingError(message) {
-  const errorElement = document.getElementById('errorMessage');
-  if (errorElement) {
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
-    errorElement.style.color = 'red';
-  } else {
-    console.error(message);
-    // Create a simple error message if no error element exists
-    const gameContainer = document.getElementById('canvasContainer');
-    if (gameContainer) {
-      const errorDiv = document.createElement('div');
-      errorDiv.style.color = 'red';
-      errorDiv.style.padding = '20px';
-      errorDiv.style.textAlign = 'center';
-      errorDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
-      errorDiv.style.position = 'absolute';
-      errorDiv.style.top = '50%';
-      errorDiv.style.left = '50%';
-      errorDiv.style.transform = 'translate(-50%, -50%)';
-      errorDiv.style.borderRadius = '5px';
-      errorDiv.textContent = message;
-      gameContainer.appendChild(errorDiv);
-    }
-  }
-}
-
 
 // Function to start the timeout countdown animation
 function startTimeout(totalSeconds) {
