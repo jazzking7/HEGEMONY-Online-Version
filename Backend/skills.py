@@ -1214,6 +1214,8 @@ class Loan_Shark(Skill):
         self.gs.server.emit('show_debt_button', room=player)
 
     def handle_payment(self, player, method):
+        if player not in self.loan_list:
+            return
         debt_amt = self.loan_list[player][0]
         debtor = self.gs.players[player]
         loaner = self.gs.players[self.player]
