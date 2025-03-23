@@ -269,7 +269,6 @@ class Game_State_Manager:
         # Playerlist
         self.send_player_list()
         
-
         self.players[pid].connected = True if not self.players[pid].connected else False
 
     def compute_SD(self, metric, avg, alive):
@@ -852,18 +851,15 @@ class Game_State_Manager:
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
 
-        # Realm of Permafrost ice age buff
-        # if atk_p.skill:
-        #     if atk_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
-        #         if def_p.skill:
-        #             if def_p.skill.name != "Realm_of_Permafrost":
-        #                 def_stats[0] = 5
+        # Reaping of Anubis
+        atk_anu, def_anu = 0, 0
+        if atk_p.skill:
+            if atk_p.skill.name == "Reaping of Anubis" and atk_p.skill.active:
+                def_anu = atk_p.skill.guaranteed_dmg
 
-        # if def_p.skill:
-        #     if def_p.skill.name == "Realm_of_Permafrost" and self.in_ice_age:
-        #         if atk_p.skill:
-        #             if atk_p.skill.name != "Realm_of_Permafrost":
-        #                 atk_stats[0] = 5
+        if def_p.skill:
+            if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active:
+                atk_anu = def_p.skill.guaranteed_dmg
 
         # landmine explosion
         ld = 0
@@ -873,7 +869,7 @@ class Game_State_Manager:
 
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
-        result = self.simulate_attack(atk_amt-ld, def_amt, atk_stats, def_stats)
+        result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats)
 
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt

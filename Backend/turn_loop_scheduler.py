@@ -90,7 +90,7 @@ class turn_loop_scheduler:
             # Air superiority
             if gs.players[curr_p].skill:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
-                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade
+                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade * 2
                     gs.update_private_status(curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()

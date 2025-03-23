@@ -535,7 +535,7 @@ class Zealous_Expansion(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 1 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 2 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
@@ -842,7 +842,7 @@ class Collusion(Skill):
         super().__init__("Collusion", player, gs)
         self.finished_choosing = True
         self.secret_control_list = []
-        self.free_usages = 1
+        self.free_usages = 2
         self.hasRoundEffect = True
 
     def apply_round_effect(self):
@@ -898,7 +898,13 @@ class Collusion(Skill):
                 if self.gs.players[p].skill.name == "Collusion":
                     if choice in self.gs.players[p].skill.secret_control_list:
                         self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+                        self.gs.players[self.player].skill.finished_choosing = True
                         return
+        
+        if choice in self.gs.players[self.player].territories:
+            self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+            self.gs.players[self.player].skill.finished_choosing = True
+            return
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
@@ -1316,7 +1322,7 @@ class Loan_Shark(Skill):
 
     def update_current_status(self):
         # modify this
-        information = "Players on your ransom list each needs to pay you 3★ to regain control of their war art and special authority. Current list"
+        information = "Players on your ransom list each needs to pay you 2★ to regain control of their war art and special authority. Current list"
         if self.loan_list:
             information += ": "
             for debtor in self.loan_list:
@@ -1331,6 +1337,36 @@ class Loan_Shark(Skill):
             'limits': self.max_loan - len(self.loan_list),
             'btn_msg': "Make Ransom"
         }, room=self.player)
+
+class Reaping_of_Anubis(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Reaping of Anubis", player, gs)
+        self.guaranteed_dmg = 1
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += 'Destroying ' + str(self.guaranteed_dmg) + " from enemy troops at the start of every battle."
+        return info
+    
+    def update_current_status(self):
+        limit = self.gs.players[self.player].stars//5 if self.gs.players[self.player].stars >= 5 else 0
+        self.gs.server.emit("update_skill_status", {
+            'name': "Reaping of Anubis",
+            'description': f"Fate marks {self.guaranteed_dmg} foes for death before each battle begins. Sacrifice 5★ to deepen the Toll.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': limit,
+            'btn_msg': "Empower the Reaping"
+        }, room=self.player)
+
+    def activate_effect(self):
+        if self.active:
+            if self.gs.players[self.player].stars >= 5:
+                self.guaranteed_dmg += 1
+                self.gs.players[self.player].stars -= 5
+                if self.gs.players[self.player].stars < 0:
+                    self.gs.players[self.player].stars = 0
+                self.gs.update_private_status(self.player)
 
 class Usurper(Skill):
     def __init__(self, player, gs):
