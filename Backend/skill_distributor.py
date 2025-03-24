@@ -21,7 +21,8 @@ class Skill_Distributor:
             "Laplace's Demon",
             "Arsenal of the Underworld",
             "Loan Shark",
-            "Reaping of Anubis"
+            "Reaping of Anubis",
+            "Pandora's Box"
         ]
 
     def get_options(self, ):
@@ -65,3 +66,5 @@ class Skill_Distributor:
             return Loan_Shark(player, gs)
         elif skill_name == "Reaping of Anubis":
             return Reaping_of_Anubis(player, gs)
+        elif skill_name == "Pandora's Box":
+            return Pandora_Box(player, gs)

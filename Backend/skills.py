@@ -530,6 +530,11 @@ class Zealous_Expansion(Skill):
     def __init__(self, player, gs):
         super().__init__("Zealous_Expansion", player, gs)
         self.give_troop_bonus = True
+        self.intMod = True
+
+    def internalStatsMod(self, battle_stats):
+        if self.active:
+            battle_stats[1] += 1
 
     def update_current_status(self):
 
@@ -1367,6 +1372,111 @@ class Reaping_of_Anubis(Skill):
                 if self.gs.players[self.player].stars < 0:
                     self.gs.players[self.player].stars = 0
                 self.gs.update_private_status(self.player)
+
+class Pandora_Box(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Pandora's Box", player, gs)
+        self.intMod = True
+        self.indus = 0
+        self.nulrate = 0
+        self.multi = 0
+        self.hasRoundEffect = True
+        self.curr_pull = 3
+
+    def apply_round_effect(self):
+        self.curr_pull = 3
+
+    def internalStatsMod(self, battle_stats):
+        if self.active:
+            battle_stats[0] += self.indus
+            battle_stats[3] += self.nulrate
+            battle_stats[4] += self.multi
+    
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += "Anything can be unleashed from it."
+        return info
+    
+    def update_current_status(self):
+        limit = self.gs.players[self.player].stars//2 if self.gs.players[self.player].stars >= 2 else 0
+        self.gs.server.emit("update_skill_status", {
+            'name': "Pandora's Box",
+            'description': f"Pandora's Box is in your hands, peek through it using 2★ and you may unleash blessings... or curses. {self.curr_pull} peeks can be made in the current round.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': limit,
+            'btn_msg': "Lift the Lid"
+        }, room=self.player)
+
+    def activate_effect(self):
+        if self.active:
+            if self.curr_pull:
+                if self.gs.players[self.player].stars >= 2:
+                    self.gs.players[self.player].stars -= 2
+                    if self.gs.players[self.player].stars < 0:
+                        self.gs.players[self.player].stars = 0
+                    self.gs.update_private_status(self.player)
+                    self.get_outcome()
+                    self.curr_pull -= 1
+                    return
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "No more available pulls for this round!"}, room=self.player)
+                return
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "War Art is disabled!"}, room=self.player)
+    
+    def get_outcome(self):
+        # more star, more reserves, stats increase, intel
+        num = random.randint(1, 100)
+        if num < 20: # 20%
+            self.gs.server.emit("display_special_notification", {"msg": "Received nothing.....", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 40: # 20%
+            self.gs.players[self.player].stars += 1
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Received 1★...", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 55: # 15%
+            self.gs.players[self.player].stars += 3
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Received 3★!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 58: # 3%
+            self.gs.players[self.player].stars += 7
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "RECEIVED 7★!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 61: # 3%
+            self.gs.players[self.player].reserves += 30
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "RECEIVED 30 RESERVES!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 64: # 3%
+            self.multi += 1
+            self.gs.server.emit("display_special_notification", {"msg": "DAMAGE MULTIPLIER INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 70: # 6%
+            self.gs.players[self.player].min_roll += 1
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Minimum Roll increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 73: # 3%
+            self.gs.players[self.player].min_roll += 2
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 79: # 6%
+            self.gs.players[self.player].infrastructure_upgrade += 1
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Infrastructure Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 82: # 3%
+            self.gs.players[self.player].infrastructure_upgrade += 2
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "INFRASTRUCTURE LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 88: # 6%
+            self.nulrate += 5
+            self.gs.server.emit("display_special_notification", {"msg": "Nullification Rate increased by 5%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 91: # 3%
+            self.nulrate += 10
+            self.gs.server.emit("display_special_notification", {"msg": "NULLIFICATION RATE INCREASED BY 10%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        elif num < 97: # 6%
+            self.indus += 1
+            self.gs.server.emit("display_special_notification", {"msg": "Industrial Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+        else: # 3%
+            self.indus += 2
+            self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
 
 class Usurper(Skill):
     def __init__(self, player, gs):
