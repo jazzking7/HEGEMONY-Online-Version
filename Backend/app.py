@@ -796,6 +796,17 @@ def handle_skill_usage():
         else:
             socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
 
+@socketio.on('signal_skill_usage_with_data')
+def handle_skill_usage_with_data(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if pid == gsm.pids[gsm.GES.current_player] or gsm.players[pid].skill.out_of_turn_activation:
+            intset = data.get('intset', None)
+            gsm.players[pid].skill.activate_effect(intset)
+        else:
+            socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
+
 @socketio.on('build_free_cities')
 def build_free_cities(data):
     pid = request.sid

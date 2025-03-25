@@ -1478,14 +1478,100 @@ class Pandora_Box(Skill):
             self.indus += 2
             self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
 
+class Loopwalker(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Loopwalker", player, gs)
+        self.aval_loops = (len(self.gs.players)-1)*300
+        self.loop_per_battle = 1
+        self.out_of_turn_activation = True
+    
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f"Currently run {self.loop_per_battle} time loops per battle."
+        return info
+    
+    def update_current_status(self):
+        limit = self.aval_loops if self.aval_loops > 0 else 0
+        self.gs.server.emit("update_skill_status", {
+            'name': "Loopwalker",
+            'description': f"Run all battles through multiple timelines and keep the best result. {limit} time loops available.",
+            'operational': self.active,
+            'intset': self.loop_per_battle,
+            'btn_msg': "Tune Parallel Runs"
+        }, room=self.player)
+
+    def activate_effect(self, number=None):
+        if self.active:
+            if number:
+                if self.aval_loops > 0 and number <= self.aval_loops:
+                    self.loop_per_battle = number
+                else:
+                    self.loop_per_battle = 1
+
+    def get_best_outcome(self, outcomes, defending):
+        if defending:
+            # Defender optimization
+            wins = [o for o in outcomes if o[0] == 0]  # attacker has 0 troops
+            if wins:
+                # Pick the defender win with the most remaining defender troops
+                optimal = max(wins, key=lambda x: x[1])
+            else:
+                # No defender wins; pick loss that caused most damage to attacker
+                losses = [o for o in outcomes if o[1] == 0]
+                optimal = min(losses, key=lambda x: x[0]) if losses else None
+        else:
+            # Attacker optimization
+            wins = [o for o in outcomes if o[1] == 0]  # defender has 0 troops
+            if wins:
+                # Pick the attacker win with the most remaining attacker troops
+                optimal = max(wins, key=lambda x: x[0])
+            else:
+                # No attacker wins; pick loss that caused most damage to defender
+                losses = [o for o in outcomes if o[0] == 0]
+                optimal = min(losses, key=lambda x: x[1]) if losses else None
+
+        return optimal
+
+class Revanchism(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Revanchism", player, gs)
+        self.ragePoints = 0
+        self.intMod = True
+    
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += f"Accumulated {self.ragePoints} rage points."
+        return info
+    
+    def update_current_status(self):
+        self.gs.server.emit("update_skill_status", {
+            'name': "Revanchism",
+            'description': f"What was taken away must be taken back. {self.ragePoints} rage points accumulated.",
+            'operational': self.active,
+        }, room=self.player)
+
+    def internalStatsMod(self, battle_stats):
+        if self.active:
+            battle_stats[0] += self.ragePoints//100
+            battle_stats[1] += self.ragePoints//100
+            battle_stats[2] += self.ragePoints//150
+            battle_stats[3] += self.ragePoints//150
+            battle_stats[4] += self.ragePoints//100 * 10
+
+    def accumulate_rage(self, troop_loss, trty_loss):
+        troop_loss_percentage = math.ceil(troop_loss*100/self.gs.players[self.player].total_troops)
+        if troop_loss_percentage > 10:
+            self.ragePoints += troop_loss_percentage
+        if trty_loss.isCapital:
+            self.ragePoints += 20
+        if trty_loss.isCity:
+            self.ragePoints += 15
+        self.ragePoints += 1
+
 class Usurper(Skill):
     def __init__(self, player, gs):
         super().__init__("Usurper", player, gs)
-        self.finished_choosing = True
-        self.secret_control_list = []
 
 class Handler_of_Wheel_of_Fate(Skill):
     def __init__(self, player, gs):
         super().__init__("Handler_of_Wheel_of_Fate", player, gs)
-        self.finished_choosing = True
-        self.secret_control_list = []

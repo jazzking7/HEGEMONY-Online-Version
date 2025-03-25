@@ -869,8 +869,19 @@ class Game_State_Manager:
 
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
-        result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats)
+        multitime = False
+        if atk_p.skill:
+            if atk_p.skill.name == "Loopwalker" and atk_p.skill.active:
+                multitime = True
+        if def_p.skill:
+            if def_p.skill.name == "Loopwalker" and def_p.skill.active:
+                multitime = True
 
+        if multitime: # time looper
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p)
+        else: # normal
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats)
+        print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
         self.server.emit('update_trty_display', {t1:{'troops': trty_atk.troops}}, room=self.lobby)
@@ -904,6 +915,11 @@ class Game_State_Manager:
                     if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
                         atk_p.reserves += def_amt-result[1]
                         self.update_private_status(a_pid)
+            
+            # Revanchism
+            if def_p.skill:
+                if def_p.skill.name == "Revanchism" and def_p.skill.active:
+                    def_p.skill.accumulate_rage(def_amt-result[1], trty_def)
 
         # defender wins
         else:
@@ -1021,3 +1037,125 @@ class Game_State_Manager:
             print(a_troops, d_troops)
 
         return [a_troops, d_troops]
+
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p):
+
+        # Time loop setting
+        atk_loop, def_loop, run_loop = 1, 1, 1
+        if atk_p.skill:
+            if atk_p.skill.name == "Loopwalker" and atk_p.skill.active:
+                # confirm multi time
+                if atk_p.skill.loop_per_battle > 1:
+                    atk_loop = atk_p.skill.loop_per_battle
+                # prevent overflow
+                if atk_loop > atk_p.skill.aval_loops:
+                    atk_loop = atk_p.skill.aval_loops
+                # prevent negative
+                if atk_loop <= 0:
+                    atk_loop = 1
+                # update aval_loops
+                if atk_p.skill.aval_loops > 0:
+                    atk_p.skill.aval_loops -= (atk_loop-1)
+
+        if def_p.skill:
+            if def_p.skill.name == "Loopwalker" and def_p.skill.active:
+                # confirm multi time
+                if def_p.skill.loop_per_battle > 1:
+                    def_loop = def_p.skill.loop_per_battle
+                # prevent overflow
+                if def_loop > def_p.skill.aval_loops:
+                    def_loop = def_p.skill.aval_loops
+                # prevent negative
+                if def_loop <= 0:
+                    def_loop = 1
+                # update aval_loops
+                if def_p.skill.aval_loops > 0:
+                    def_p.skill.aval_loops -= (def_loop-1)
+
+        atkfav = False
+        deffav = False
+        if def_loop == atk_loop:
+            run_loop = 1
+        elif def_loop > atk_loop:
+            run_loop += def_loop - atk_loop
+            deffav = True
+        elif atk_loop > def_loop:
+            run_loop += atk_loop - def_loop
+            atkfav = True
+
+        # Troop amount
+        a_troops = atk_amt
+        d_troops = def_amt
+
+        # Max stats
+        a_maxv, a_maxt, a_min, a_null, a_mul = atk_stats[0], atk_stats[1], atk_stats[2], atk_stats[3], atk_stats[4]
+        d_maxv, d_maxt, d_min, d_null, d_mul = def_stats[0], def_stats[1] - 1, def_stats[2], def_stats[3], def_stats[4]
+
+        # Adjust stats
+        a_maxt = a_troops if a_troops < a_maxt else a_maxt
+        d_maxt = d_troops if d_troops < d_maxt else d_maxt
+
+        if a_min > a_maxv:
+            a_min = a_maxv
+        
+        if d_min > d_maxv:
+            d_min = d_maxv
+
+        print(a_troops, d_troops)
+        print(f"Running {run_loop} loops.")
+        outcomes = []
+        # Starts simulation
+        while(run_loop):
+
+            while(a_troops > 0 and d_troops > 0):
+
+                a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+                d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
+
+                max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
+
+                for i in range(max_dmg):
+                    if a_rolls[i] > d_rolls[i]:
+                        if random.randint(1, 100) > d_null:
+                            d_troops -= 1*a_mul
+                    else:
+                        a_troops -= 1*d_mul
+                
+                # Adjust dice number
+                a_maxt = a_troops if a_troops < a_maxt else a_maxt
+                d_maxt = d_troops if d_troops < d_maxt else d_maxt
+            
+            # adjust result number
+            if a_troops <= 0 and d_troops <= 0:
+                a_troops = 0
+                d_troops = 1  # Defender wins in tie
+            else:
+                a_troops = max(0, a_troops)
+                d_troops = max(0, d_troops)
+            
+            outcomes.append([a_troops, d_troops])
+            a_troops = atk_amt
+            d_troops = def_amt
+            
+            # Max stats
+            a_maxv, a_maxt, a_min, a_null, a_mul = atk_stats[0], atk_stats[1], atk_stats[2], atk_stats[3], atk_stats[4]
+            d_maxv, d_maxt, d_min, d_null, d_mul = def_stats[0], def_stats[1] - 1, def_stats[2], def_stats[3], def_stats[4]
+
+            # Adjust stats
+            a_maxt = a_troops if a_troops < a_maxt else a_maxt
+            d_maxt = d_troops if d_troops < d_maxt else d_maxt
+
+            if a_min > a_maxv:
+                a_min = a_maxv
+            
+            if d_min > d_maxv:
+                d_min = d_maxv
+
+            run_loop -= 1
+        print(outcomes)
+        # End of battle simulations
+        if deffav:
+            return def_p.skill.get_best_outcome(outcomes, True)
+        if atkfav:
+            return atk_p.skill.get_best_outcome(outcomes, False)
+        return outcomes[0]

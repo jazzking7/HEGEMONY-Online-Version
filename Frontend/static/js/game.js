@@ -1569,17 +1569,37 @@ btn_skill.onclick = function () {
 
     // show targets that have been affected by skill if there are any
     let skill_used_targets = ``
-    if (skillData.forbidden_targets){
-
+    if (skillData.forbidden_targets) {
       if (skillData.forbidden_targets.length) {
-        skill_used_targets += `<div class="p-1 text-center break-words whitespace=normal">${skillData.ft_msg}</div> <div>`;
+        skill_used_targets += `
+          <div style="max-height: 1.5rem; overflow-y: auto;">
+            <div class="p-1 text-center break-words whitespace-normal">${skillData.ft_msg}</div>
+            <div>
+        `;
         for (let target of skillData.forbidden_targets) {
-          skill_used_targets += (`<div style="display: inline-block;
-            padding: 2px; margin: 2px; border-radius: 3px; background-color:#F5B301;" class="text-gray-700">${target}</div>`);
+          skill_used_targets += (`
+            <div style="display: inline-block;
+              padding: 2px; margin: 2px; border-radius: 3px; background-color:#F5B301;"
+              class="text-gray-700">${target}</div>
+          `);
         }
-        skill_used_targets += `</div>`;
+        skill_used_targets += `</div></div>`;
       }
-  
+    }
+
+    let skill_set_integer = ``;
+    let showSepActivateBtn = 'none';
+    // Show integer setting
+    if (skillData.intset) {
+      skill_set_integer += `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>Running </strong>${skillData.intset}</strong> loops per battle, change to:</span>
+          <input type="number" id="skillintdata" min="1" max="100" value="${skillData.intset}" 
+                 style="width: 60px; padding: 2px; border: 1px solid #ccc; border-radius: 3px;">
+        </div>
+      `;
+      showSepActivateBtn = 'flex';
+      showActivateBtn = 'none';
     }
   
     // Show the title
@@ -1612,6 +1632,7 @@ btn_skill.onclick = function () {
     </div>
 
     ${skill_used_targets}
+    ${skill_set_integer}
 
     <div style="display: ${showInUse};" class="flex items-center justify-center p-2">
         <h3  style="border-radius: 3px; padding:2px;" class="text-center text-lg font-bold bg-yellow-500 text-black">
@@ -1624,6 +1645,13 @@ btn_skill.onclick = function () {
             ${skillData.btn_msg}
         </button>
     </div>
+
+    <div style="display: ${showSepActivateBtn};" class="flex items-center justify-center mt-2">
+        <button id='btn-skill-activate-sep' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
+            ${skillData.btn_msg}
+        </button>
+    </div>
+
 
     <div class="flex items-center justify-center mt-2">
         <button id='btn-action-cancel' class="w-9 h-9 bg-red-500 text-white font-bold rounded-lg flex items-center justify-center">
@@ -1643,6 +1671,29 @@ btn_skill.onclick = function () {
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty()
       socket.emit('signal_skill_usage');
+    });
+
+    $('#btn-skill-activate-sep').off('click').on('click', function () {
+
+      // Safely get and validate the integer input
+      let inputEl = document.getElementById('skillintdata');
+      let intValue = skillData.intset; // fallback default
+    
+      if (inputEl) {
+        let parsed = parseInt(inputEl.value, 10);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
+          intValue = parsed;
+        }
+      }
+    
+      // Emit skill usage signal with data
+      socket.emit('signal_skill_usage_with_data', {
+        'intset': intValue
+      });
+      // Hide UI elements
+      $('#control_panel, #middle_display').hide();
+      $('#middle_title, #middle_content').empty();
+
     });
 
   });

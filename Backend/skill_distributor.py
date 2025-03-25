@@ -22,11 +22,13 @@ class Skill_Distributor:
             "Arsenal of the Underworld",
             "Loan Shark",
             "Reaping of Anubis",
-            "Pandora's Box"
+            "Pandora's Box",
+            "Loopwalker",
+            "Revanchism"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=8)
+        return random.sample(self.skill_options, k=19)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -68,3 +70,7 @@ class Skill_Distributor:
             return Reaping_of_Anubis(player, gs)
         elif skill_name == "Pandora's Box":
             return Pandora_Box(player, gs)
+        elif skill_name == "Loopwalker":
+            return Loopwalker(player, gs)
+        elif skill_name == "Revanchism":
+            return Revanchism(player, gs)
