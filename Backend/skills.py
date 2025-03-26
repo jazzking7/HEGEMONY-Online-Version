@@ -1346,7 +1346,8 @@ class Loan_Shark(Skill):
 class Reaping_of_Anubis(Skill):
     def __init__(self, player, gs):
         super().__init__("Reaping of Anubis", player, gs)
-        self.guaranteed_dmg = 1
+        self.guaranteed_dmg = 0
+        self.cost = 3
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
@@ -1354,10 +1355,10 @@ class Reaping_of_Anubis(Skill):
         return info
     
     def update_current_status(self):
-        limit = self.gs.players[self.player].stars//5 if self.gs.players[self.player].stars >= 5 else 0
+        limit = 1 if self.gs.players[self.player].stars >= self.cost else 0
         self.gs.server.emit("update_skill_status", {
             'name': "Reaping of Anubis",
-            'description': f"Fate marks {self.guaranteed_dmg} foes for death before each battle begins. Sacrifice 5★ to deepen the Toll.",
+            'description': f"Fate marks {self.guaranteed_dmg} foes for death before each battle begins. Sacrifice {self.cost}★ to deepen the Toll.",
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
@@ -1366,12 +1367,13 @@ class Reaping_of_Anubis(Skill):
 
     def activate_effect(self):
         if self.active:
-            if self.gs.players[self.player].stars >= 5:
+            if self.gs.players[self.player].stars >= self.cost:
                 self.guaranteed_dmg += 1
-                self.gs.players[self.player].stars -= 5
+                self.gs.players[self.player].stars -= self.cost
                 if self.gs.players[self.player].stars < 0:
                     self.gs.players[self.player].stars = 0
                 self.gs.update_private_status(self.player)
+                self.cost += 2
 
 class Pandora_Box(Skill):
     def __init__(self, player, gs):
@@ -1481,7 +1483,7 @@ class Pandora_Box(Skill):
 class Loopwalker(Skill):
     def __init__(self, player, gs):
         super().__init__("Loopwalker", player, gs)
-        self.aval_loops = (len(self.gs.players)-1)*300
+        self.aval_loops = (len(self.gs.players)-1)*200
         self.loop_per_battle = 1
         self.out_of_turn_activation = True
     
@@ -1555,17 +1557,17 @@ class Revanchism(Skill):
             battle_stats[0] += self.ragePoints//100
             battle_stats[1] += self.ragePoints//100
             battle_stats[2] += self.ragePoints//150
-            battle_stats[3] += self.ragePoints//150
-            battle_stats[4] += self.ragePoints//100 * 10
+            battle_stats[3] += self.ragePoints//100 * 10
+            battle_stats[4] += self.ragePoints//150
 
     def accumulate_rage(self, troop_loss, trty_loss):
         troop_loss_percentage = math.ceil(troop_loss*100/self.gs.players[self.player].total_troops)
         if troop_loss_percentage > 10:
             self.ragePoints += troop_loss_percentage
         if trty_loss.isCapital:
-            self.ragePoints += 20
+            self.ragePoints += 25
         if trty_loss.isCity:
-            self.ragePoints += 15
+            self.ragePoints += 20
         self.ragePoints += 1
 
 class Usurper(Skill):
