@@ -935,7 +935,7 @@ class Punisher(Mission):
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
-            'misProgDesp': 'Bring judgement to the sinners!'
+            'misProgDesp': 'Bring judgement to the sinners! Kill at least 1 non-C class agenda holder.'
         }, room=self.player)
 
     def end_game_checking(self, ):
