@@ -46,24 +46,6 @@ class Map:
 
         return list(reachable)  # Return all reachable territories within max_depth
 
-
-    # def recursive_get_trty_with_depth(self, curr, curr_list, depth, max_depth=3):
-    #     if depth >= max_depth:
-    #         return curr_list
-    #     t = self.territories[curr]
-        
-    #     for n in t.neighbors:
-    #         if n not in curr_list:
-    #             curr_list.append(n)
-    #             self.recursive_get_trty_with_depth(n, curr_list, depth + 1, max_depth)
-    #     return curr_list 
-
-    # def get_reachable_airspace(self, start):
-    #     t_list = self.recursive_get_trty_with_depth(start, [start], 0)        
-    #     if t_list and start in t_list:
-    #         t_list.remove(start)
-    #     return t_list
-
     def recursive_get_trty(self, curr, owned, curr_list):
         t = self.territories[curr]
         for n in t.neighbors:

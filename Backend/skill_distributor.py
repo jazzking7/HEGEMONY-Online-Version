@@ -28,7 +28,7 @@ class Skill_Distributor:
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=10)
+        return random.sample(self.skill_options, k=19)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -67,13 +67,13 @@ class Skill_Distributor:
         elif skill_name == "Loan Shark":
             return "Disable a player's War Art, and they have to pay you Special Authority or troops to reactivate their War Art."
         elif skill_name == "Reaping of Anubis":
-            return "In battles, you are guaranteed to remove a set amount of troops from enemy forces. The set amount starts from 0 and can be upgraded using Special Authority."
+            return "At the start of every battle, you are guaranteed to destroyed a set amount of troops from enemy forces. The set amount starts from 0 and can be upgraded using Special Authority."
         elif skill_name == "Pandora's Box":
-            return "For 2★ you can peek into Pandora's Box, you will get rewards or absolutely nothing."
+            return "For 2★ you can peek into Pandora's Box, you will get rewards or nothing at all."
         elif skill_name == "Loopwalker":
             return f"Time Traveling War Art, you are to run multiple simulations of a battle using time loops and pick the best outcome out of the simulations. You can set how many simulations are run per battle and you have {200*len(gs.players)} time loops available for the whole game."
         elif skill_name == "Revanchism":
-            return "When you get attacked, you will accumulate Rage Points. Bonus stats are received when enough Rage Points is accumulated."
+            return "When you get attacked, you will accumulate Rage Points. Bonus stats are received when enough Rage Points are accumulated."
     
     def initiate_skill(self, skill_name, player, gs):
         if skill_name == 'Iron_Wall':

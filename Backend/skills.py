@@ -1568,6 +1568,20 @@ class Revanchism(Skill):
             self.ragePoints += 25
         if trty_loss.isCity:
             self.ragePoints += 20
+        tid = 0
+        for trty in self.gs.map.territories:
+            if trty.name == trty_loss.name:
+                break
+            tid += 1
+        contlist = None
+        for cont in self.gs.map.conts:
+            if tid in self.gs.map.conts[cont]['trtys']:
+                contlist = self.gs.map.conts[cont]['trtys']
+                break
+        tmp_trty = self.gs.players[self.player].territories[:]
+        tmp_trty.append(tid)
+        if set(contlist).issubset(set(tmp_trty)):
+            self.ragePoints += 60
         self.ragePoints += 1
 
 class Usurper(Skill):
