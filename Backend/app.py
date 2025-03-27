@@ -931,6 +931,13 @@ def handle_debt_payment(data):
                         break
     else:
         socketio.emit('display_new_notification',{'msg': 'Cannot make payment outside your turn!'}, room=pid)
+
+@socketio.on('get_skill_description')
+def handle_skill_description(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    socketio.emit('display_skill_description', {'description': SDIS.get_skill_description(data['name'], gsm) }, room=pid)
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True)

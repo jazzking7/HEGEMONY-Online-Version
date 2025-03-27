@@ -767,8 +767,48 @@ socket.on('choose_skill', function(data){
         });
       }
     }
+
+    btn_skill.addEventListener('mouseenter', function() {
+      socket.emit('get_skill_description', { "name": btn_skill.textContent });
+    });
+
+    btn_skill.addEventListener('mouseleave', function () {
+      let existingDesc = document.getElementById('skill_description_box');
+      if (existingDesc) {
+        existingDesc.remove();
+      }
+    });
+
     skill_options.appendChild(btn_skill);
   }
+});
+
+socket.on('display_skill_description', function (data) {
+  let description = data.description;
+
+  // Remove any existing description box
+  const existingDesc = document.getElementById('skill_description_box');
+  if (existingDesc) {
+    existingDesc.remove();
+  }
+
+  // Create new description box
+  let descBox = document.createElement('div');
+  descBox.id = 'skill_description_box';
+  descBox.textContent = description;
+
+  // Use Tailwind-style classes and centered fixed positioning
+  descBox.className = `
+    bg-yellow-500 text-black
+    p-3 rounded shadow-lg
+    max-w-[40vw] max-h-[20vh] overflow-auto
+    fixed top-[30%] left-1/2 transform -translate-x-1/2
+    z-50
+  `;
+  descBox.style.position = 'absolute';
+  descBox.style.top = '20%';
+
+  document.body.appendChild(descBox);
 });
 
 //======================================================================================================
