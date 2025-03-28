@@ -1612,7 +1612,7 @@ btn_skill.onclick = function () {
     if (skillData.forbidden_targets) {
       if (skillData.forbidden_targets.length) {
         skill_used_targets += `
-          <div style="max-height: 1.5rem; overflow-y: auto;">
+          <div style="max-height: 4rem; overflow-y: auto;">
             <div class="p-1 text-center break-words whitespace-normal">${skillData.ft_msg}</div>
             <div>
         `;

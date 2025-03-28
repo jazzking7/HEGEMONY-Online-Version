@@ -214,7 +214,7 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     max-width: 45vw;
-    max-height: 45vh;
+    max-height: 50vh;
     font-family: 'Rajdhani', sans-serif;
     opacity: 0.95;
 }

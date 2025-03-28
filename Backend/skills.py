@@ -281,7 +281,7 @@ class Industrial_Revolution(Skill):
         
         self.finish_building = True
         self.freeCityTracker = {}
-
+        self.freeCityBuilt = []
         self.hasTurnEffect = True
 
         for cont in self.gs.map.conts:
@@ -301,17 +301,12 @@ class Industrial_Revolution(Skill):
 
     def update_current_status(self):
 
-        ft = []
-        for cont in self.freeCityTracker:
-            if self.freeCityTracker[cont] >= 2:
-                ft.append(cont)
-
         self.gs.server.emit("update_skill_status", {
             'name': "Industrial Revolution",
-            'description': "Can build up to 2 cities for free per continent, +1 industrial power in battles",
+            'description': "Can build up to 2 cities for free per continent, +1 Industrial Level in battles",
             'operational': self.active,
-            'forbidden_targets': ft,
-            'ft_msg': "Free city limit already reached in:",
+            'forbidden_targets': self.freeCityBuilt,
+            'ft_msg': "Free cities built in:",
             'hasLimit': True,
             'limits': 2 * len(self.freeCityTracker) - sum(self.freeCityTracker.values()),
             'btn_msg': "Activate rapid industrialization"
@@ -361,6 +356,7 @@ class Industrial_Revolution(Skill):
         for choice in choices:
             self.gs.map.territories[choice].isCity = True
             self.gs.server.emit('update_trty_display', {choice: {'hasDev': 'city'}}, room=self.gs.lobby)
+            self.freeCityBuilt.append(self.gs.map.territories[choice].name)
             for cont in self.gs.map.conts:
                 # Update free city tracker
                 if choice in self.gs.map.conts[cont]['trtys']:
@@ -987,7 +983,7 @@ class Arsenal_of_the_Underworld(Skill):
         self.silo_used = 0
         self.damage = 5 + dev_lvls
         self.range = 5 + dev_lvls//2
-        self.max_minefields = 3 + dev_lvls//2
+        self.max_minefields = 3 + dev_lvls
         self.shockwaveDamage = 1 + dev_lvls//2
     
     def update_current_status(self):
@@ -1384,6 +1380,7 @@ class Pandora_Box(Skill):
         self.multi = 0
         self.hasRoundEffect = True
         self.curr_pull = 3
+        self.receivedBlessings = []
 
     def apply_round_effect(self):
         self.curr_pull = 3
@@ -1407,6 +1404,8 @@ class Pandora_Box(Skill):
             'operational': self.active,
             'hasLimit': True,
             'limits': limit,
+            'forbidden_targets': self.receivedBlessings,
+            'ft_msg': "Received Blessings:",
             'btn_msg': "Lift the Lid"
         }, room=self.player)
 
@@ -1451,34 +1450,43 @@ class Pandora_Box(Skill):
         elif num < 64: # 3%
             self.multi += 1
             self.gs.server.emit("display_special_notification", {"msg": "DAMAGE MULTIPLIER INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+1 Damage Multiplier')
         elif num < 70: # 6%
             self.gs.players[self.player].min_roll += 1
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "Minimum Roll increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+1 Minimum Roll')
         elif num < 73: # 3%
             self.gs.players[self.player].min_roll += 2
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+2 Minimum Roll')
         elif num < 79: # 6%
             self.gs.players[self.player].infrastructure_upgrade += 1
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "Infrastructure Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+1 Infrastructure Level')
         elif num < 82: # 3%
             self.gs.players[self.player].infrastructure_upgrade += 2
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "INFRASTRUCTURE LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+2 Infrastructure Level')
         elif num < 88: # 6%
             self.nulrate += 5
             self.gs.server.emit("display_special_notification", {"msg": "Nullification Rate increased by 5%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+5% Nullification Rate')
         elif num < 91: # 3%
             self.nulrate += 10
             self.gs.server.emit("display_special_notification", {"msg": "NULLIFICATION RATE INCREASED BY 10%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+10% Nullification Rate')
         elif num < 97: # 6%
             self.indus += 1
             self.gs.server.emit("display_special_notification", {"msg": "Industrial Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+1 Industrial Level')
         else: # 3%
             self.indus += 2
             self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+2 Industrial Level')
 
 class Loopwalker(Skill):
     def __init__(self, player, gs):
