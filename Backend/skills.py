@@ -1582,14 +1582,16 @@ class Revanchism(Skill):
                 break
             tid += 1
         contlist = None
+        contValue = None
         for cont in self.gs.map.conts:
             if tid in self.gs.map.conts[cont]['trtys']:
                 contlist = self.gs.map.conts[cont]['trtys']
+                contValue = self.gs.map.conts[cont]['bonus']
                 break
         tmp_trty = self.gs.players[self.player].territories[:]
         tmp_trty.append(tid)
         if set(contlist).issubset(set(tmp_trty)):
-            self.ragePoints += 25
+            self.ragePoints += contValue * 3
         self.ragePoints += 1
 
 class Usurper(Skill):
