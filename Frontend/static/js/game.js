@@ -759,11 +759,19 @@ socket.on('choose_skill', function(data){
           document.getElementById('control_panel').style.display = 'none';
           socket.emit('send_skill_choice', {'choice': btn_skill.textContent})
           document.getElementById('middle_display').style.display = 'none';
+          let existingDesc = document.getElementById('skill_description_box');
+          if (existingDesc) {
+            existingDesc.remove();
+          }
         });
         $('#control_cancel').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
           disabled = false;
           btn_skill.style.border = "none";
+          let existingDesc = document.getElementById('skill_description_box');
+          if (existingDesc) {
+            existingDesc.remove();
+          }
         });
       }
     }
