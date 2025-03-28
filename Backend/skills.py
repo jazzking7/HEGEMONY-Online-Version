@@ -1589,7 +1589,7 @@ class Revanchism(Skill):
         tmp_trty = self.gs.players[self.player].territories[:]
         tmp_trty.append(tid)
         if set(contlist).issubset(set(tmp_trty)):
-            self.ragePoints += 60
+            self.ragePoints += 25
         self.ragePoints += 1
 
 class Usurper(Skill):
