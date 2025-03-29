@@ -1381,6 +1381,7 @@ class Pandora_Box(Skill):
         self.hasRoundEffect = True
         self.curr_pull = 3
         self.receivedBlessings = []
+        self.gs.players[self.player].stars += 2
 
     def apply_round_effect(self):
         self.curr_pull = 3
