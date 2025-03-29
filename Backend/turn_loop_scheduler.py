@@ -356,8 +356,8 @@ class turn_loop_scheduler:
                             time.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Survivalist":
-                        if ms.round == 6:
+                        if ms.round == 5:
                             time.sleep(2)
-                            gs.server.emit("display_special_notification", {"msg": f"{gs.players[ms.player].name} IS A SURVIVALIST! ELIMINATE THEM!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF SURVIVALIST DETECTED! ELIMINATE THEM!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]
