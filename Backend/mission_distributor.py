@@ -65,7 +65,7 @@ class Mission_Distributor:
             ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur']
         self.missions = [
             'Pac', 
             'War', 'Loy', 'Bon',
@@ -74,11 +74,12 @@ class Mission_Distributor:
             'Exp', 'Pop', 'Dom',
             'Gua',
             'Dec',
-            'Str', 'Due', 'Pun'
+            'Str', 'Due', 'Pun',
+            'Sur'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']
-        self.A_tier = ['Loyalist']
+        self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter']
 
     def validate_mission_set(self, miss_set):

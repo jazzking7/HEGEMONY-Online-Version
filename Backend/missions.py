@@ -77,7 +77,8 @@ class Pacifist(Mission):
         self.round = 0
         self.type = 'r_based'
         self.max_death_count = math.floor(len(gs.pids)/2)
-        self.goal_round = 8
+        #self.goal_round = 8
+        self.goal_round = 7
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -911,7 +912,7 @@ class Duelist(Mission):
 class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
-        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist']
+        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist"]
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -957,3 +958,44 @@ class Punisher(Mission):
                     if self.gs.death_logs[miss.player] == self.player:
                         return True
         return False
+
+class Survivalist(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Survivalist", player, gs)
+        self.round = 0
+        self.type = 'r_based'
+        self.goal_round = 8
+
+    def check_conditions(self,):
+        if not self.gs.players[self.player].alive:
+            self.signal_mission_failure()
+            self.update_tracker_view({
+                'misProgBar': [self.round, self.goal_round],
+                'misProgDesp': f'You are eliminated. Agenda failed.',
+            })
+            return
+    
+    def check_round_condition(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        self.round += 1
+        self.update_tracker_view({
+            'misProgBar': [self.round, self.goal_round],
+            'misProgDesp': f'Stay alive until the very end! Survived {self.round}/{self.goal_round} rounds.',
+            })
+        if self.round == self.goal_round:
+            # signal end
+            self.signal_mission_success("round")
+
+    def set_up_tracker_view(self, ):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgBar': [self.round, self.goal_round],
+            'misProgDesp': f'Stay alive until the very end! Survived {self.round}/{self.goal_round} rounds.',
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        return self.round == self.goal_round and self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        return self.gs.players[self.player].alive
