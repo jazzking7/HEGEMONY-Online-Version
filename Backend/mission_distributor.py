@@ -175,7 +175,7 @@ class Mission_Distributor:
 
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)
