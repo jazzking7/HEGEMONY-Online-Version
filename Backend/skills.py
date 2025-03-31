@@ -981,7 +981,7 @@ class Arsenal_of_the_Underworld(Skill):
         dev_lvls = self.gs.get_player_industrial_level(self.gs.players[self.player]) + self.gs.get_player_infra_level(self.gs.players[self.player])
         self.silo_usage = 1 + dev_lvls
         self.silo_used = 0
-        self.damage = 5 + dev_lvls
+        self.damage = 3 + dev_lvls
         self.range = 5 + dev_lvls//2
         self.max_minefields = 3 + dev_lvls
         self.shockwaveDamage = 1 + dev_lvls//2
@@ -1022,8 +1022,7 @@ class Arsenal_of_the_Underworld(Skill):
                 data['silo_usage'] = self.silo_usage - self.silo_used
                 data['occupied'] = self.underground_silo not in self.gs.players[self.player].territories
             else:
-                if self.gs.players[self.player].stars >= 3:
-                    data['silo_build'] = True
+                data['silo_build'] = True
             data['minefield_limit'] = self.max_minefields
             self.gs.server.emit("arsenal_controls", data, room=self.player)
         else:
@@ -1056,8 +1055,8 @@ class Arsenal_of_the_Underworld(Skill):
     def handle_silo_placement(self, choice):
         self.underground_silo = int(choice)
         self.finished_setting = True
-        self.gs.players[self.player].stars -= 3
-        self.gs.update_private_status(self.player)
+        # self.gs.players[self.player].stars -= 3
+        # self.gs.update_private_status(self.player)
         # set up usage, range and damage
         self.apply_round_effect()
 

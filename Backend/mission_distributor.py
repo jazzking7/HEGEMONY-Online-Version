@@ -85,8 +85,6 @@ class Mission_Distributor:
 
     def validate_mission_set(self, miss_set):
         c = 0
-        if "Sur" not in miss_set or "Pro" not in miss_set:
-            return False
         for m in miss_set:
             if m in self.self_wins:
                 c += 1
