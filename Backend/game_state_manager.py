@@ -206,6 +206,17 @@ class Game_State_Manager:
                     mission.update_tracker_view({
                     'targets': {mission.gs.players[mission.target_player].name: 's'},
                     })
+            if mission.name == 'Protectionist':
+                if mission.target_player == old_pid:
+                    mission.target_player = new_pid
+                if mission.protection == old_pid:
+                    mission.protection = new_pid
+            if mission.name == 'Assassin':
+                if mission.target_player == old_pid:
+                    mission.target_player = new_pid
+                if mission.nemesis == old_pid:
+                    mission.nemesis = new_pid
+                mission.set_up_tracker_view()
             if mission.name == 'Duelist':
                 if mission.target_player == old_pid:
                     mission.target_player = new_pid
