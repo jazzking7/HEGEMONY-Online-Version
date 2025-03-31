@@ -1569,9 +1569,10 @@ class Revanchism(Skill):
             battle_stats[4] += self.ragePoints//150
 
     def accumulate_rage(self, troop_loss, trty_loss):
-        troop_loss_percentage = math.ceil(troop_loss*100/self.gs.players[self.player].total_troops)
-        if troop_loss_percentage > 10:
-            self.ragePoints += troop_loss_percentage
+        if self.gs.players[self.player].total_troops:
+            troop_loss_percentage = math.ceil(troop_loss*100/self.gs.players[self.player].total_troops)
+            if troop_loss_percentage > 10:
+                self.ragePoints += troop_loss_percentage
         if trty_loss.isCapital:
             self.ragePoints += 25
         if trty_loss.isCity:
