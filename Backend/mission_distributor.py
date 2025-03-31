@@ -65,7 +65,7 @@ class Mission_Distributor:
             ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro']
         self.missions = [
             'Pac', 
             'War', 'Loy', 'Bon',
@@ -75,10 +75,11 @@ class Mission_Distributor:
             'Gua',
             'Dec',
             'Str', 'Due', 'Pun',
-            'Sur'
+            'Sur',
+            'Ass', 'Pro'
         ]
 
-        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']
+        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter']
 
@@ -123,6 +124,11 @@ class Mission_Distributor:
                 if (count + 2) <= num_p:
                     miss_set.append(choice)
                     miss_set.append(choice)
+                    count += 2
+            elif choice in ['Pro', 'Ass']:
+                if (count + 2) <= num_p:
+                    miss_set.append('Pro')
+                    miss_set.append('Ass')
                     count += 2
             elif choice == 'Pun':
                 for m in miss_set:
@@ -172,10 +178,16 @@ class Mission_Distributor:
             return Duelist(player, gs)
         elif name == 'Pun':
             return Punisher(player, gs)
-
+        elif name == 'Sur':
+            return Survivalist(player, gs)
+        elif name == 'Ass':
+            return Assassin(player, gs)
+        elif name == 'Pro':
+            return Protectionist(player, gs)
+        
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)

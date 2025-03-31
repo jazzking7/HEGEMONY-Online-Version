@@ -999,3 +999,149 @@ class Survivalist(Mission):
     
     def end_game_global_peace_checking(self, ):
         return self.gs.players[self.player].alive
+    
+class Assassin(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Assassin", player, gs)
+        self.target_player = None
+        self.nemesis = None
+
+    def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        if self.target_player in self.gs.death_logs:
+            if self.player == self.gs.death_logs[self.target_player]:
+                self.update_tracker_view({'targets': {self.gs.players[self.target_player].name: 's'}})
+                self.update_tracker_view({'misProgDesp': 'Target Eliminated!'})
+                self.signal_mission_success()
+            else:
+                self.update_tracker_view({'targets': {self.gs.players[self.target_player].name: 'f'}})
+                self.signal_mission_failure()
+        else:
+            self.update_tracker_view({'targets': {self.gs.players[self.target_player].name: 'f'}})
+
+    def set_up_tracker_view(self, ):
+        targets = {}
+        targets[self.gs.players[self.target_player].name] = 'f'
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'targets': targets,
+            'misProgDesp': f'Your need to eliminate {self.gs.players[self.target_player].name}. Their bodyguard is {self.gs.players[self.nemesis].name}.'
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.target_player in self.gs.death_logs:
+            return self.player == self.gs.death_logs[self.target_player]
+        else:
+            return False
+    
+    def end_game_global_peace_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.target_player in self.gs.death_logs:
+            return self.player == self.gs.death_logs[self.target_player]
+        else:
+            return False
+        
+    def set_targets(self):
+        if self.target_player is not None or self.nemesis is not None:
+            return  # Already assigned
+
+        for m in self.gs.Mset:
+            if m.name == 'Protectionist' and m.target_player is None and m.protection is None:
+                candidates = [
+                    p for p in self.gs.players
+                    if p != self.player and p != m.player and self.gs.players[p].alive
+                ]
+                if not candidates:
+                    return
+
+                random_target = random.choice(candidates)
+
+                # Assign values
+                self.target_player = random_target
+                self.nemesis = m.player
+
+                m.protection = random_target
+                m.target_player = self.player
+                return
+    
+class Protectionist(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Protectionist", player, gs)
+        self.target_player = None
+        self.protection = None
+
+    def check_conditions(self, ):
+        if not self.gs.players[self.player].alive:
+            return
+        if self.protection in self.gs.perm_elims:
+            self.update_tracker_view({'misProgDesp': 'Failed to protect your target!'})
+            self.signal_mission_failure()
+        if self.target_player in self.gs.death_logs:
+            if self.player == self.gs.death_logs[self.target_player]:
+                self.update_tracker_view({'misProgDesp': 'Killer Eliminated!'})
+                self.signal_mission_success()
+            else:
+                self.update_tracker_view({'misProgDesp': 'Failed to kill the assassin!'})
+                self.signal_mission_failure()
+
+    def set_up_tracker_view(self, ):
+        target_mission = None
+        for m in self.gs.Mset:
+            if m.player == self.protection:
+                target_mission = m.name
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': f"Your need to prevent your target from getting eliminated until you personally killed the assassin. Your target's agenda is {target_mission}."
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.protection in self.gs.perm_elims:
+            return False
+        if self.target_player in self.gs.death_logs:
+            if self.player == self.gs.death_logs[self.target_player]:
+                return True
+            else:
+                return False
+        return False
+    
+    def end_game_global_peace_checking(self, ):
+        if not self.gs.players[self.player].alive:
+            return False
+        if self.protection in self.gs.perm_elims:
+            return False
+        if self.target_player in self.gs.death_logs:
+            if self.player == self.gs.death_logs[self.target_player]:
+                return True
+            else:
+                return False
+        return False
+    
+    def set_targets(self):
+        if self.target_player is not None or self.protection is not None:
+            return  # Already assigned
+
+        for m in self.gs.Mset:
+            if m.name == 'Assassin' and m.target_player is None and m.nemesis is None:
+                # Find a random player who is not the assassin or Protectionist mission holders
+                candidates = [
+                    p for p in self.gs.players
+                    if p != self.player and p != m.player and self.gs.players[p].alive
+                ]
+                if not candidates:
+                    return  # No valid players to assign
+
+                random_target = random.choice(candidates)
+
+                # Assign values
+                m.target_player = random_target
+                m.nemesis = self.player
+
+                self.protection = random_target
+                self.target_player = m.player
+                return

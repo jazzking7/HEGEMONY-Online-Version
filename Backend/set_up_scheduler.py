@@ -48,6 +48,10 @@ class setup_event_scheduler:
                 m.set_targets()
             elif m.name == 'Duelist':
                 m.set_nemesis()
+            elif m.name == 'Assassin':
+                m.set_targets()
+            elif m.name == 'Protectionist':
+                m.set_targets()
 
         # Set up user view for mission
         for mission in gs.Mset:
