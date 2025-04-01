@@ -108,6 +108,8 @@ class Game_State_Manager:
         self.Mset = None
         # Mission Trackers that gets triggered at specific call points. See mission_distributor.py for definition
         self.MTrackers = {}
+        # Special mission condition checker
+        self.SMset = []
 
         # Elimination Tracker
         self.et = Elimination_tracker()
@@ -931,6 +933,14 @@ class Game_State_Manager:
             if def_p.skill:
                 if def_p.skill.name == "Revanchism" and def_p.skill.active:
                     def_p.skill.accumulate_rage(def_amt-result[1], trty_def)
+            
+
+            # Mission Checker
+            if self.SMset:
+                for m in self.SMset:
+                    if m.name == "Gambler":
+                        if atk_amt < def_amt:
+                            m.check_conditions(def_amt)
 
         # defender wins
         else:

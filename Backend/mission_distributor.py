@@ -65,7 +65,7 @@ class Mission_Distributor:
             ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam']
         self.missions = [
             'Pac', 
             'War', 'Loy', 'Bon',
@@ -76,12 +76,13 @@ class Mission_Distributor:
             'Dec',
             'Str', 'Due', 'Pun',
             'Sur',
-            'Ass', 'Pro'
+            'Ass', 'Pro',
+            'Gam'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
         self.A_tier = ['Loyalist', 'Survivalist']
-        self.B_tier = ['Warmonger', 'Bounty_Hunter']
+        self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
 
     def validate_mission_set(self, miss_set):
         c = 0
@@ -184,6 +185,8 @@ class Mission_Distributor:
             return Assassin(player, gs)
         elif name == 'Pro':
             return Protectionist(player, gs)
+        elif name == 'Gam':
+            return Gambler(player, gs)
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
@@ -207,6 +210,8 @@ class Mission_Distributor:
                 if 'popu' not in gs.MTrackers:
                     gs.MTrackers['popu'] = Event_Based_Tracker(gs)
                 gs.MTrackers['popu'].add_observer(m)
+            if m.name in ['Gambler']:
+                gs.SMset.append(m)
         
         # start running the trackers
         for t in gs.MTrackers:
