@@ -108,7 +108,7 @@ $(document).ready(async function() {
     });
   }
 
-  async function tryLoadSketch(maxRetries = 20) {
+  async function tryLoadSketch(maxRetries = 30) {
       let retryCount = 0;
 
       while (!sketch_running && retryCount < maxRetries) {
