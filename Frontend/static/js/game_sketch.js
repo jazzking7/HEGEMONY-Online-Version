@@ -76,6 +76,7 @@ function setup() {
     backgroundOceanImage.resize(currWinWid, currWinHeight);
   });
   console.log('LOADED IMAGES');
+  sketch_running = true;
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
@@ -150,7 +151,7 @@ async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
           "devImg": null,
           "insig": null
       });
-      console.log(territories);
+      //console.log(territories);
       t_index += 1;
     }
   }

@@ -10,6 +10,8 @@ let city_amt = 0;
 let player_territories = [];
 // Game settings
 let game_settings;
+// Game_sketch.js started running
+let sketch_running = false;
 
 // Timeout bar
 let timeoutBar;
@@ -47,12 +49,6 @@ $(document).ready(async function() {
   // Get game settings
   game_settings = await get_game_settings();
 
-  // Load p5.js libraries
-  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
-    $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
-  });
-  loadGameSketch();
-
   // Load progress bar
   $.getScript('https://cdn.jsdelivr.net/npm/progressbar.js@1.1.1/dist/progressbar.min.js',
       function(){
@@ -87,6 +83,63 @@ $(document).ready(async function() {
   $('#overlay_sections .circular-button').on('click mousemove', function(event) {
     event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
+
+    // Load p5.js libraries
+  // $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
+  //   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
+  // });
+  
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function removeDynamicScripts() {
+    const scriptSources = [
+        'p5.min.js',
+        'p5.sound.min.js',
+        'game_sketch.js'
+    ];
+
+    document.querySelectorAll('script').forEach(script => {
+        if (script.src && scriptSources.some(src => script.src.includes(src))) {
+            script.remove();
+            console.warn(`🧹 Removed script: ${script.src}`);
+        }
+    });
+  }
+
+  async function tryLoadSketch(maxRetries = 20) {
+      let retryCount = 0;
+
+      while (!sketch_running && retryCount < maxRetries) {
+          let cacheBuster = Date.now();
+
+          // 👇 Your exact script loading logic
+          $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
+              $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
+          });
+          loadGameSketch();
+
+          // ⏱ Wait 0.5s before checking sketch_running
+          await wait(500);
+
+          if (!sketch_running) {
+              console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
+              removeDynamicScripts(); 
+              retryCount++;
+          } else {
+              console.log("✅ sketch_running is true. Sketch loaded successfully!");
+              return;
+          }
+      }
+
+      if (!sketch_running) {
+          console.error("🚨 Sketch failed after maximum retries. Reloading page...");
+          location.reload();
+      }
+  }
+
+  tryLoadSketch();
 
 });
 
