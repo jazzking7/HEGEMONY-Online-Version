@@ -1149,7 +1149,7 @@ class Protectionist(Mission):
 class Gambler(Mission):
     def __init__(self, player, gs):
         super().__init__("Gambler", player, gs)
-        self.target_troops = (len(self.gs.players)-1) * 40
+        self.target_troops = (len(self.gs.players)-1) * 30
         self.curr_troops = 0
     
     def set_up_tracker_view(self, ):
@@ -1166,7 +1166,7 @@ class Gambler(Mission):
         self.update_tracker_view({
             'misProgBar': [self.curr_troops, self.target_troops],
             'misProgDesp': f'Successfully killed {self.curr_troops}/{self.target_troops} troops during offense while sending less troops than opponents.',
-        }, room=self.player)
+        })
         if self.curr_troops >= self.target_troops:
             self.signal_mission_success()
 
