@@ -1149,14 +1149,14 @@ class Protectionist(Mission):
 class Gambler(Mission):
     def __init__(self, player, gs):
         super().__init__("Gambler", player, gs)
-        self.target_troops = (len(self.gs.players)-1) * 30
+        self.target_troops = len(self.gs.map.territories)
         self.curr_troops = 0
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
             'misProgBar': [self.curr_troops, self.target_troops],
-            'misProgDesp': f'Successfully killed {self.curr_troops}/{self.target_troops} troops during offense while sending less troops than opponents.',
+            'misProgDesp': f'Killed {self.curr_troops}/{self.target_troops} troops during successful conquests while sending less troops than the opponents.',
         }, room=self.player)
     
     def check_conditions(self, value=0):
