@@ -71,7 +71,7 @@ class Mission_Distributor:
             'War', 'Loy', 'Bon',
             #'Uni', 'Pol', 'Fan', 
             'Ind',
-            'Exp', 'Pop', 
+            'Exp', 'Pop',
             #'Dom',
             'Gua',
             'Dec',
@@ -142,6 +142,7 @@ class Mission_Distributor:
                 miss_set.append(choice)
                 count += 1
             if count == num_p:
+                print(miss_set)
                 if self.validate_mission_set(miss_set):
                     return miss_set
                 miss_set = []
