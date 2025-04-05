@@ -152,10 +152,11 @@ def joinLobby(data):
         if not gsm.players[pid_to_takeover].alive:
             socketio.emit('error', {'msg': "No available spots!"}, room=sid)
 
+        # THIS WILL TRIGGER RECONNECTION
+        gsm.GES.interturn_connections[sid] = False
         # takeover disconnected player
         if gsm.takeover_disconnected_player(sid, pid_to_takeover, username):
             socketio.emit('join_lobby_game', room=sid)
-            gsm.GES.update_all_views_for_reconnected_player(sid)
 
     else:
         # Update lobby info
@@ -937,6 +938,13 @@ def handle_skill_description(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     socketio.emit('display_skill_description', {'description': SDIS.get_skill_description(data['name'], gsm) }, room=pid)
+
+@socketio.on('confirm_map_loaded')
+def handle_map_loaded_confirmation():
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if pid in gsm.GES.interturn_connections:
+        gsm.GES.interturn_connections[pid] = True
 
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)

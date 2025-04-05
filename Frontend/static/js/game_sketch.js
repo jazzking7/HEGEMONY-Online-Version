@@ -159,6 +159,7 @@ async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
   loadJSON(`/static/MAPS/${mapName}/contBorders.json`, (data)=>{for(let border of data){contBorders.push(border);}});
   loadJSON(`/static/MAPS/${mapName}/contBonusDisplay.json`, (data)=>{for(let display of data){contBonusBoxes.push(display);}});
   console.log("MAP LOADED");
+  socket.emit('confirm_map_loaded');
 }
 
 function draw() {

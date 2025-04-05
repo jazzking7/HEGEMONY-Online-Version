@@ -250,6 +250,7 @@ class turn_loop_scheduler:
 
         gs.server.emit('start_timeout', {'secs': ms.turn_time}, room=gs.lobby)
         print(f"{gs.players[curr_player].name}'s turn started.")
+        print(f"Their pid is {curr_player}")
         gs.server.emit('signal_show_btns', room=curr_player)
         gs.server.emit('signal_turn_start', room=curr_player)
 
@@ -283,6 +284,17 @@ class turn_loop_scheduler:
                 for event in ms.interturn_events:
                     event.execute_interturn()
                 ms.interturn_events = []
+
+            # inter_turn connection event
+            if ms.interturn_events:
+                for pid in ms.interturn_events:
+                    gs.server.emit('set_up_announcement', {'msg': f"{gs.players[pid].name} is reconnecting..."}, room=gs.lobby)
+                    c = 0
+                    while not ms.interturn_events[pid] and ms.interrupt and c <= 60:
+                        time.sleep(1)
+                        c += 1
+                    gs.update_all_views(pid)
+                ms.interturn_events = {}
 
             # inter_turn_summit
             if not ms.interrupt and ms.summit_requested:

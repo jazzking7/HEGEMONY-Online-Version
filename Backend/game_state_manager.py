@@ -206,8 +206,9 @@ class Game_State_Manager:
                 if mission.target_player == old_pid:
                     mission.target_player = new_pid
                     mission.update_tracker_view({
-                    'targets': {mission.gs.players[mission.target_player].name: 's'},
+                    'renewed_targets': {mission.gs.players[mission.target_player].name: 's'},
                     })
+                    mission.check_conditions()
             if mission.name == 'Protectionist':
                 if mission.target_player == old_pid:
                     mission.target_player = new_pid
@@ -218,32 +219,47 @@ class Game_State_Manager:
                     mission.target_player = new_pid
                 if mission.nemesis == old_pid:
                     mission.nemesis = new_pid
-                mission.set_up_tracker_view()
+                    mission.update_tracker_view({
+                        'renewed_targets': {mission.gs.players[mission.target_player].name: 'f'},
+                    })
+                    mission.update_tracker_view({'misProgDesp':  f'Your need to eliminate {mission.gs.players[mission.target_player].name}. Their bodyguard is {mission.gs.players[mission.nemesis].name}.'})
+                    mission.check_conditions()
             if mission.name == 'Duelist':
                 if mission.target_player == old_pid:
                     mission.target_player = new_pid
                     mission.update_tracker_view({
-                    'targets': {mission.gs.players[mission.target_player].name: 'f'},
+                    'renewed_targets': {mission.gs.players[mission.target_player].name: 'f'},
                     })
+                    mission.check_conditions()
             # update target for bounty hunter
             if mission.name == 'Bounty_Hunter':
                 if old_pid in mission.target_players:
                     mission.target_players.remove(old_pid)
                     mission.target_players.append(new_pid)
+                    targets = {}
+                    for t in mission.target_players:
+                        targets[mission.gs.players[t].name] = 'f'
+                    mission.update_tracker_view({
+                    'renewed_targets': targets,
+                    })  
                     mission.check_conditions()
             # update target for decapitator:
             if mission.name == 'Decapitator':
                 if old_pid in mission.target_players:
                     mission.target_players.remove(old_pid)
                     mission.target_players.append(new_pid)
+                    targets = {}
+                    for t in mission.target_players:
+                        targets[mission.gs.players[t].name] = 'f'
+                    mission.update_tracker_view({
+                    'renewed_targets': targets,
+                    })  
                     mission.check_conditions()
-        
+        self.server.emit('display_new_notification', {'msg': f'Player {self.players[new_pid].name} connected back to server!'}, room=self.lobby)
+        self.players[pid].connected = True if not self.players[pid].connected else False
         return True
     
-    def update_all_views(self, pid):
-        
-        time.sleep(10)
-        
+    def update_all_views(self, pid):        
         # Territory
         all_trty_updates = {}
         for tid, trty in enumerate(self.map.territories):
@@ -281,8 +297,6 @@ class Game_State_Manager:
                 mission.check_conditions()
         # Playerlist
         self.send_player_list()
-        
-        self.players[pid].connected = True if not self.players[pid].connected else False
 
     def compute_SD(self, metric, avg, alive):
         total_div = 0

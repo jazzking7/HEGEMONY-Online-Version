@@ -32,6 +32,8 @@ class General_Event_Scheduler:
         self.concurrent_events = {}
         # Inter-turn skill effects
         self.interturn_events = []
+        # Inter-turn connection event
+        self.interturn_connections = {}
         # inner async
         self.stats_set = False # If stats of player already determined
         self.innerInterrupt = False
@@ -249,11 +251,6 @@ class General_Event_Scheduler:
             self.flush_all_concurrent_events()
             self.gs.global_peace_game_over()
             self.gs.GES.interrupt = True
-
-    def update_all_views_for_reconnected_player(self, pid):
-        
-        New_thread = threading.Thread(target=self.gs.update_all_views, args=(pid, ))
-        New_thread.start()
 
     def build_free_cities(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)

@@ -140,7 +140,6 @@ $(document).ready(async function() {
   }
 
   tryLoadSketch();
-
 });
 
 function loadGameSketch(retries = 10) {
@@ -579,13 +578,39 @@ socket.on('initiate_tracker', function(data){
 })
 
 // Update mission tracker
-socket.on('update_tracker', function(data){
-  if (data.targets){
-    for (target in data.targets) {
-      var tarid = target.replace(/ /g, "_");
-      // Add new targets if there is flah
+socket.on('update_tracker', function(data) {
+  const $misTargets = $('#misTargets');
+
+  // 🔁 If there's a fresh list of targets, clear and re-add them
+  if (data.renewed_targets) {
+    $misTargets.empty();
+
+    for (const target of data.renewed_targets) {
+      const tarid = target.replace(/ /g, "_");
+      $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
+      $(`#target_${tarid}`).css({
+        'display': 'inline-block',
+        'padding': '2px',
+        'margin': '2px',
+        'border-radius': '3px',
+        'background-color': '#E34234' // default color
+      });
+    }
+  }
+
+  if (data.targets) {
+    for (const target in data.targets) {
+      const tarid = target.replace(/ /g, "_");
+      const existing = $(`#target_${tarid}`);
+
+      // 🔁 If new_target flag is set and target exists, rename the old one
       if (data.new_target) {
-        $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
+        if (existing.length) {
+          const newId = `target_${tarid}_old_${Date.now()}`;
+          existing.attr('id', newId);
+        }
+
+        $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
         $(`#target_${tarid}`).css({
           'display': 'inline-block',
           'padding': '2px',
@@ -593,22 +618,28 @@ socket.on('update_tracker', function(data){
           'border-radius': '3px'
         });
       }
-      if (data.targets[target] == 's') {
-        $(`#target_${tarid}`).css('background-color', '#50C878');
+
+      // Update target color based on status
+      if (data.targets[target] === 's') {
+        $(`#target_${tarid}`).css('background-color', '#50C878'); // green
       } else {
-        $(`#target_${tarid}`).css('background-color', '#E34234');
+        $(`#target_${tarid}`).css('background-color', '#E34234'); // red
       }
     }
-  } 
-  if (data.misProgBar) {
-    misProgBar.animate(data.misProgBar[0]/data.misProgBar[1]);
   }
+
+  if (data.misProgBar) {
+    misProgBar.animate(data.misProgBar[0] / data.misProgBar[1]);
+  }
+
   if (data.misProgDesp) {
     $('#misProgDesp').text(data.misProgDesp);
   }
+
   if (data.lossProg) {
-    lossProg.animate(data.lossProg[0]/data.lossProg[1]);
+    lossProg.animate(data.lossProg[0] / data.lossProg[1]);
   }
+
   if (data.lossDesp) {
     $('#lossDesp').text(data.lossDesp);
   }
