@@ -585,7 +585,7 @@ socket.on('update_tracker', function(data) {
   if (data.renewed_targets) {
     $misTargets.empty();
 
-    for (const target of data.renewed_targets) {
+    for (const target in data.renewed_targets) {
       const tarid = target.replace(/ /g, "_");
       $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
       $(`#target_${tarid}`).css({

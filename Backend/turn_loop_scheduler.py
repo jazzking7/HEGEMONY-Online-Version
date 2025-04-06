@@ -286,15 +286,15 @@ class turn_loop_scheduler:
                 ms.interturn_events = []
 
             # inter_turn connection event
-            if ms.interturn_events:
-                for pid in ms.interturn_events:
+            if ms.interturn_connections:
+                for pid in ms.interturn_connections:
                     gs.server.emit('set_up_announcement', {'msg': f"{gs.players[pid].name} is reconnecting..."}, room=gs.lobby)
                     c = 0
-                    while not ms.interturn_events[pid] and ms.interrupt and c <= 60:
+                    while not ms.interturn_connections[pid] and ms.interrupt and c <= 60:
                         time.sleep(1)
                         c += 1
                     gs.update_all_views(pid)
-                ms.interturn_events = {}
+                ms.interturn_connections = {}
 
             # inter_turn_summit
             if not ms.interrupt and ms.summit_requested:

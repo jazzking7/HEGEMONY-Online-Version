@@ -153,6 +153,7 @@ class Game_State_Manager:
         
         self.pids[i_to_c] = new_pid
 
+        i_to_c = None
         # change pid in oriplayers
         for index, pid in enumerate(self.oriPlayers):
             if pid == old_pid:
@@ -256,7 +257,7 @@ class Game_State_Manager:
                     })  
                     mission.check_conditions()
         self.server.emit('display_new_notification', {'msg': f'Player {self.players[new_pid].name} connected back to server!'}, room=self.lobby)
-        self.players[pid].connected = True if not self.players[pid].connected else False
+        self.players[new_pid].connected = True if not self.players[new_pid].connected else False
         return True
     
     def update_all_views(self, pid):        
