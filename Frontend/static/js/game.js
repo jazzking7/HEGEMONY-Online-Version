@@ -337,6 +337,9 @@ socket.on('private_overview', function(data){
   $('#curr_special_auth').text(data.curr_SA);
   $('#curr_reserves').text(data.curr_RS);
   $('#curr_infra').text(data.curr_infra);
+  $('#curr_indus').text(data.curr_indus);
+  $('#curr_nul_rate').text(data.curr_nul_rate);
+  $('#curr_dmg_mul').text(data.curr_dmg_mul);
   $('#curr_min_roll').text(data.curr_min_roll)
 });
 
@@ -581,7 +584,6 @@ socket.on('initiate_tracker', function(data){
 socket.on('update_tracker', function(data) {
   const $misTargets = $('#misTargets');
 
-  // 🔁 If there's a fresh list of targets, clear and re-add them
   if (data.renewed_targets) {
     $misTargets.empty();
 

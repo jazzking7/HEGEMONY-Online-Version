@@ -90,38 +90,64 @@
         <img src="/static/Assets/Logo/debt.png">
     </button>
 
-    <div id="global_status" class="p-2 antialiased rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-1.5">
-            <h6 class="text-sm font-semibold" style="color: #F5B301">Round</h6>
-            <h6 id="game_round" class="text-sm font-bold pl-5" style="color: #F5B301">0</h6>
-        </div>
-        <div class="flex justify-between items-center mb-1.5">
-            <h6 class="text-sm font-semibold" style="color: #F5B301">Special Authority</h6>
-            <h6 id="curr_special_auth" class="text-sm font-bold pl-5" style="color: #F5B301">0</h6>
-        </div>
-        <div class="flex justify-between items-center mb-1.5">
-            <h6 class="text-sm font-semibold" style="color: #F5B301">Reserves</h6>
-            <h6 id="curr_reserves" class="text-sm font-bold pl-5" style="color: #F5B301">0</h6>
-        </div>
-        <div class="flex justify-between items-center mb-1.5">
-            <h6 class="text-sm font-semibold" style="color: #F5B301">Infrastructure Level</h6>
-            <h6 id="curr_infra" class="text-sm font-bold pl-5" style="color: #F5B301">3</h6>
-        </div>
-        <div class="flex justify-between items-center mb-1.5">
-            <h6 class="text-sm font-semibold" style="color: #F5B301">Minimum Roll</h6>
-            <h6 id="curr_min_roll" class="text-sm font-bold pl-5" style="color: #F5B301">1</h6>
-        </div>
-        <h6 class="text-sm font-semibold" style="color: #F5B301">Largest Army</h6>
-        <h6 id="LAO" class="text-sm font-bold mb-1.5" style="color: #F5B301">--</h6>
+    <div id="global_status" class="p-2 antialiased rounded-lg shadow-md" style="background-color: rgba(8, 20, 40, 0.75); backdrop-filter: blur(5px); box-shadow: 0 0 25px rgba(0, 162, 255, 0.2), 0 0 5px rgba(0, 162, 255, 0.4) inset; border: 1px solid rgba(0, 162, 255, 0.3);">
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Round</div>
+                <div id="game_round" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Special Authority</div>
+                <div id="curr_special_auth" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Reserves</div>
+                <div id="curr_reserves" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
 
-        <h6 class="text-sm font-semibold" style="color: #F5B301">Most Territory</h6>
-        <h6 id="MTO" class="text-sm font-bold mb-1.5" style="color: #F5B301">--</h6>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Industrial Level</div>
+                <div id="curr_indus" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">6</div>
+            </div>
 
-        <h6 class="text-sm font-semibold" style="color: #F5B301">Most Industrialized</h6>
-        <h6 id="TIP" class="text-sm font-bold mb-1.5" style="color: #F5B301">--</h6>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Infrastructure Level</div>
+                <div id="curr_infra" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">3</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Minimum Roll</div>
+                <div id="curr_min_roll" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">1</div>
+            </div>
 
-        <h6 class="text-sm font-semibold" style="color: #F5B301">Superpower</h6>
-        <h6 id="SUP" class="text-sm font-bold mb-1.5" style="color: #F5B301">--</h6>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Nullification Rate</div>
+                <div id="curr_nul_rate" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Damage Multiplier</div>
+                <div id="curr_dmg_mul" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">1</div>
+            </div>
+            
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Largest Army</div>
+                <div id="LAO" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Most Territory</div>
+                <div id="MTO" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Most Industrialized</div>
+                <div id="TIP" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Superpower</div>
+                <div id="SUP" class="font-bold flex items-center" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #00ff4c; margin-right: 6px; box-shadow: 0 0 8px rgba(0, 255, 76, 0.8);"></span>--
+                </div>
+            </div>
     </div>
 
     <div id="laplace_info_display">
