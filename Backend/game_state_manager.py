@@ -1019,6 +1019,8 @@ class Game_State_Manager:
         if trty_def.isCity or trty_def.isMegacity:
             self.update_TIP(a_pid)
             self.update_TIP(d_pid)
+            self.update_private_status(a_pid)
+            self.update_private_status(d_pid)
 
         if trty_def.isTransportcenter:
             self.update_HIP(a_pid)

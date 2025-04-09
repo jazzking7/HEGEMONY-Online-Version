@@ -364,6 +364,7 @@ class Industrial_Revolution(Skill):
         
         self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
         self.gs.update_TIP(self.player)
+        self.gs.update_private_status(self.player)
         self.gs.get_SUP()
         self.gs.update_global_status()
         self.gs.signal_MTrackers('indus')
@@ -725,6 +726,7 @@ class Divine_Punishment(Skill):
 
                     self.gs.update_LAO(player)
                     self.gs.update_TIP(player)
+                    self.gs.update_private_status(player)
 
                     # Ares' Blessing Rage meter checking
                     if self.gs.players[player].skill:
