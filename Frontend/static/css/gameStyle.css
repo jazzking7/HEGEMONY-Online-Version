@@ -228,6 +228,10 @@ html, body {
     opacity: 0.95;
 }
 
+#middle_title:empty {
+    display: none;
+}
+
 #middle_content{
     text-align: center;
     font-family: 'Rajdhani', sans-serif;
@@ -268,13 +272,21 @@ html, body {
     height: 4vw;
     border-radius: 50%;
     color: darkgrey;
-    border: none;
+    border: 1px solid rgba(0, 200, 255, 0.3);
     outline: none;
     cursor: pointer;
+    background-color: rgba(8, 20, 40, 0.7);
+    box-shadow: 
+    0 0 6px rgba(0, 200, 255, 0.25), 
+    inset 0 0 3px rgba(0, 200, 255, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .circular-button:hover {
-    background-color: grey;
+    background-color: rgba(20, 40, 60, 0.85);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 5px rgba(0, 255, 255, 0.25);
+    transform: scale(1.05);
 }
 
 .circular-button img {
@@ -285,30 +297,41 @@ html, body {
     max-width: 100%;
     max-height: 100%;
     height: 100%;
-  }
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
 
 #btn-diplomatic {
-    background-color: #BEBEBE;
+    background-color: rgba(240, 250, 255, 0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     left: 2%;
 }
 
 #btn-sep-auth {
-    background-color: #BEBEBE;
+    background-color: rgba(240, 250, 255, 0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     left: 8%;
 }
 
 #btn-skill {
-    background-color: #BEBEBE;
+    background-color: rgba(240, 250, 255, 0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     left: 14%;
 }
 
 #btn-reserve {
-    background-color: #BEBEBE;
+    background-color: rgba(240, 250, 255, 0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     left: 20%;
 }
 
 #btn-debt {
-    background-color: #BEBEBE;
+    background-color: rgba(240, 250, 255, 0.45);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     left: 26%;
 }
 
