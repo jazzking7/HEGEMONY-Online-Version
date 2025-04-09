@@ -17,12 +17,12 @@
     <audio id="votingSound2" src="{{url_for('static', filename='Audio/wardrum3.wav')}}"></audio>
     <audio id="gameEndSound" src="{{url_for('static', filename='Audio/gameEnd.wav')}}"></audio>
 
-    <div class="card" id="view_mode_btns">
+    <div class="card rounded-lg shadow-lg" id="view_mode_btns" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset;">
         <div class="card-body flex items-center space-x-2">
-            <h6 class="mt-1">Continent Borders</h6>
-            <button id="btn_show_cont" class="btn btn-info ml-2">Off</button>
+            <h6 class="mb-0" style="color: rgba(0, 195, 255, 0.9); font-size: 0.85rem; font-weight: bold; text-shadow: 0 0 4px rgba(0, 195, 255, 0.6); letter-spacing: 0.4px;">Continent Borders</h6>
+            <button id="btn_show_cont" class="btn btn-info ml-2 pt-2" style="font-size: 0.85rem; font-weight: bold; box-shadow: 0 0 6px rgba(0, 200, 255, 0.3);">Off</button>
         </div>
-    </div>
+    </div>    
 
     <div class="card" id="player_info">
         <div class="card-body p-0">
@@ -66,10 +66,11 @@
     </div>    
     
 
-    <div class="card" id="middle_display">
-        <div class="card-head" id="middle_title"></div>
-        <div class="card-body" id="middle_content"></div>
+    <div class="card rounded-lg shadow-lg" id="middle_display" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset; margin-top: 1rem;">
+        <div class="card-head" id="middle_title" style="padding: 0.4rem 0.75rem; color: rgba(240, 243, 244, 0.9); font-size: 1rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></div>
+        <div class="card-body p-2" id="middle_content" style="color: rgba(220, 240, 255, 0.9); font-size: 0.875rem; line-height: 1.4;"></div>
     </div>
+    
 
     <button class="btn btn-danger" id="proceed_next_stage">
         <div class="text"></div>
