@@ -56,13 +56,15 @@
         </div>
     </div>    
 
-    <div class="card" id="control_panel">
-        <div class="card-head" id="control_mechanism"></div>
-        <div class="card-body" id="confirm_cancel">
-            <button class="btn btn-success" id="control_confirm">Confirm</button>
-            <button class="btn btn-warning" id="control_cancel">Cancel</button>
+    <div class="card rounded-lg shadow-lg" id="control_panel" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset; margin-top: 1rem;">
+        <div class="card-head" id="control_mechanism" style="border-bottom: 1px solid rgba(0, 195, 255, 0.5); padding: 0.4rem 0.75rem; color: rgba(0, 195, 255, 0.9); font-size: 0.9rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></div>
+        
+        <div class="card-body p-2 d-flex justify-content-between gap-2" id="confirm_cancel">
+            <button class="btn btn-success" id="control_confirm" style="flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; box-shadow: 0 0 6px rgba(0, 255, 100, 0.3); font-weight: bold;">Confirm</button>
+            <button class="btn btn-warning" id="control_cancel" style="flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; box-shadow: 0 0 6px rgba(255, 220, 0, 0.3); font-weight: bold;">Cancel</button>
         </div>
-    </div>
+    </div>    
+    
 
     <div class="card" id="middle_display">
         <div class="card-head" id="middle_title"></div>

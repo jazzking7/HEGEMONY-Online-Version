@@ -191,7 +191,7 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     max-width: 40vw;
-    max-height: 20vh;
+    max-height: 25vh;
     display: none;
     align-items: center;
     justify-content: center;
