@@ -905,8 +905,17 @@ socket.on('display_skill_description', function (data) {
     fixed top-[30%] left-1/2 transform -translate-x-1/2
     z-50
   `;
+  // Add glassy + glow + font weight styling
   descBox.style.position = 'absolute';
   descBox.style.top = '20%';
+  descBox.style.backdropFilter = 'blur(6px)';
+  descBox.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+  descBox.style.boxShadow = `
+    0 0 10px rgba(255, 255, 150, 0.3),
+    inset 0 0 4px rgba(255, 255, 100, 0.2)
+  `;
+  descBox.style.fontWeight = '500'; // semi-bold
+  descBox.style.textShadow = '0 0 2px rgba(255, 255, 100, 0.3)';
 
   document.body.appendChild(descBox);
 });
