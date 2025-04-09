@@ -524,6 +524,12 @@ socket.on('get_mission', function(data) {
 
 // Initiate mission tracker
 socket.on('initiate_tracker', function(data){
+  if (data.targets || data.misProgBar || data.misProgDesp) {
+    $('.winning_condition').show();
+  }
+  if (data.lossProg || data.lossDesp) {
+    $('.losing_condition').show();
+  }
   $('#mission_title').text(data.title);
   // Display target, s for green, f for red
   if (data.targets){

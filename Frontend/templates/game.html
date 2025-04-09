@@ -31,29 +31,30 @@
         </div>
     </div>
 
-    <div class="card rounded-lg shadow-lg mb-4" id="event_announcement" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 20px rgba(0, 162, 255, 0.2), 0 0 6px rgba(0, 162, 255, 0.3) inset;">
-        <div class="card-body p-3" id="announcement" style="border-left: 3px solid rgba(0, 195, 255, 0.7);">
+    <div class="card rounded-lg shadow-lg mb-4" id="event_announcement" style="background-color: rgba(8, 20, 40, 0.85); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 20px rgba(0, 162, 255, 0.2), 0 0 6px rgba(0, 162, 255, 0.3) inset;">
+        <div class="card-body p-3" id="announcement">
             <h1 style="color: #ffffff; font-size: 1.2rem; text-shadow: 0 0 10px rgba(0, 225, 255, 1); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: bold;"></h1>
         </div>
     </div>
 
-    <div class="card" id="tracker">
-        <div class="card-body">
-            <div class="mission_title"><span id="mission_title"></span></div>
-
-            <div class="winning_condition">
-                <div id="misTargets"></div>
-                <div id="misProgBar"></div>
-                <div id="misProgDesp"></div>
+    <div class="card rounded-lg shadow-lg" id="tracker" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 20px rgba(0, 162, 255, 0.2), 0 0 6px rgba(0, 162, 255, 0.3) inset;">
+        <div class="card-body p-2">
+            <div class="mission_title" style="border-bottom: 1px solid rgba(0, 195, 255, 0.5); padding-bottom: 0.4rem; margin-bottom: 0.5rem;">
+                <span id="mission_title" style="color: rgba(0, 195, 255, 0.9); font-size: 0.9rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></span>
             </div>
-
-            <div class="losing_condition">
-                <div id="lossProg"></div>
-                <div id="lossDesp"></div>
+    
+            <div class="winning_condition" style="background-color: rgba(0, 80, 130, 0.3); border-radius: 6px; padding: 0.4rem; border-left: 3px solid rgba(0, 220, 255, 0.6); margin-bottom: 0.5rem; display: none;">
+                <div id="misTargets" style="color: #ffffff; font-size: 0.775rem; margin-bottom: 0.4rem; display: none;"></div>
+                <div id="misProgBar" style="height: 8px; background-color: rgba(8, 40, 70, 0.8); border-radius: 4px; margin: 0.4rem 0; overflow: hidden; display: none;"></div>
+                <div id="misProgDesp" style="color: rgba(180, 220, 255, 0.9); font-size: 0.775rem; font-style: italic; display: none;"></div>
             </div>
-
+    
+            <div class="losing_condition" style="background-color: rgba(130, 30, 30, 0.25); border-radius: 6px; padding: 0.4rem; border-left: 3px solid rgba(255, 70, 70, 0.6); display: none;">
+                <div id="lossProg" style="height: 8px; background-color: rgba(70, 20, 20, 0.8); border-radius: 4px; margin: 0.4rem 0; overflow: hidden; display: none;"></div>
+                <div id="lossDesp" style="color: rgba(255, 180, 180, 0.9); font-size: 0.775rem; font-style: italic; display: none;"></div>
+            </div>
         </div>
-    </div>
+    </div>    
 
     <div class="card" id="control_panel">
         <div class="card-head" id="control_mechanism"></div>

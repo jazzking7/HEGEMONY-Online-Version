@@ -517,7 +517,7 @@ class Game_State_Manager:
                 dmg_mul += self.players[pid].min_roll//2
         self.server.emit('private_overview', {'curr_SA': self.players[pid].stars,
                                                'curr_RS': self.players[pid].reserves,
-                                               'curr_indus': self.get_player_industrial_level(pid)+6,
+                                               'curr_indus': self.get_player_industrial_level(self.players[pid])+6,
                                                'curr_infra': self.get_player_infra_level(self.players[pid])+3,
                                                'curr_nul_rate': 0,
                                                'curr_dmg_mul': dmg_mul,
