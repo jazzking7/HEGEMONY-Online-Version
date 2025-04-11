@@ -134,6 +134,8 @@ class Game_State_Manager:
 
         # Round based win
         self.round_based_win = False
+        # Gambler win
+        self.gambler_win = False
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
@@ -960,7 +962,7 @@ class Game_State_Manager:
             # Mission Checker
             if self.SMset:
                 for m in self.SMset:
-                    if m.name == "Gambler":
+                    if m.name == "Gambler" and m.player == a_pid:
                         if atk_amt < def_amt:
                             m.check_conditions(def_amt)
 
@@ -1036,6 +1038,9 @@ class Game_State_Manager:
 
         self.et.determine_elimination(self, a_pid, d_pid)
         self.egt.determine_end_game(self)
+
+        if self.gambler_win:
+            self.gs.GES.halt_events()
         
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
         

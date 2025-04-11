@@ -14,6 +14,8 @@ class Mission:
     def signal_mission_success(self, win_type="solo"):
         if win_type == "solo":
             self.gs.GES.halt_events()
+        elif win_type == "gam":
+            self.gs.gambler_win = True
         else:
             self.gs.round_based_win = True
         return
@@ -1163,12 +1165,14 @@ class Gambler(Mission):
         if not self.gs.players[self.player].alive:
             return
         self.curr_troops += value
+        if self.curr_troops >= self.target_troops:
+            self.curr_troops = self.target_troops
         self.update_tracker_view({
             'misProgBar': [self.curr_troops, self.target_troops],
             'misProgDesp': f'Successfully killed {self.curr_troops}/{self.target_troops} troops during offense while sending less troops than opponents.',
         })
         if self.curr_troops >= self.target_troops:
-            self.signal_mission_success()
+            self.signal_mission_success("gam")
 
     def end_game_checking(self, ):
         return self.curr_troops >= self.target_troops and self.gs.players[self.player].alive
