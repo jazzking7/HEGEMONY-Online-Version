@@ -94,21 +94,27 @@ $(document).ready(async function() {
   }
 
   function removeDynamicScripts() {
-    const scriptSources = [
+    const scriptPatterns = [
+        'p5.js',
         'p5.min.js',
+        'p5.sound.js',
         'p5.sound.min.js',
-        // 'p5.js',
-        // 'p5.sound.js',
-        'game_sketch.js'
+        'game_sketch.js',
+        'cdnjs.cloudflare.com/ajax/libs/p5.js',
+        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js'
     ];
 
     document.querySelectorAll('script').forEach(script => {
-        if (script.src && scriptSources.some(src => script.src.includes(src))) {
+        // Normalize the src to ignore query params and check full or partial matches
+        const baseSrc = script.src.split('?')[0];
+
+        if (script.src && scriptPatterns.some(pattern => baseSrc.includes(pattern))) {
             script.remove();
             console.warn(`🧹 Removed script: ${script.src}`);
         }
     });
   }
+
 
   async function tryLoadSketch(maxRetries = 30) {
       let retryCount = 0;
@@ -116,10 +122,15 @@ $(document).ready(async function() {
       while (!sketch_running && retryCount < maxRetries) {
           let cacheBuster = Date.now();
 
+            // Load p5.js libraries
+            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js?v=${cacheBuster}`, function(){
+              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js?v=${cacheBuster}`);
+            });
+
           // 👇 Your exact script loading logic
-          $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
-              $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
-          });
+          // $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
+          //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
+          // });
         //   $.getScript(`${URL_FRONTEND}static/js/p5.js?v=${cacheBuster}`, function () {
         //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.js?v=${cacheBuster}`);
         // });
