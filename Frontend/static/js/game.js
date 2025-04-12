@@ -95,8 +95,10 @@ $(document).ready(async function() {
 
   function removeDynamicScripts() {
     const scriptSources = [
-        'p5.min.js',
-        'p5.sound.min.js',
+        // 'p5.min.js',
+        // 'p5.sound.min.js',
+        'p5.js',
+        'p5.sound.js',
         'game_sketch.js'
     ];
 
@@ -115,9 +117,12 @@ $(document).ready(async function() {
           let cacheBuster = Date.now();
 
           // 👇 Your exact script loading logic
-          $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
-              $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
-          });
+          // $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
+          //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
+          // });
+          $.getScript(`${URL_FRONTEND}static/js/p5.js?v=${cacheBuster}`, function () {
+            $.getScript(`${URL_FRONTEND}static/js/p5.sound.js?v=${cacheBuster}`);
+        });
           loadGameSketch();
 
           // ⏱ Wait 0.5s before checking sketch_running
