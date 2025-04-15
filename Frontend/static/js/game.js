@@ -124,7 +124,7 @@ $(document).ready(async function() {
           let cacheBuster = Date.now();
 
             // Load p5.js libraries
-            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js?v=${cacheBuster}`, function(){
+            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.min.js?v=${cacheBuster}`, function(){
               $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js?v=${cacheBuster}`);
             });
 
