@@ -95,12 +95,12 @@ $(document).ready(async function() {
 
   function removeDynamicScripts() {
     const scriptPatterns = [
-        'p5.js',
-        'p5.min.js',
-        'p5.sound.js',
-        'p5.sound.min.js',
+        // 'p5.js',
+        // 'p5.min.js',
+        // 'p5.sound.js',
+        // 'p5.sound.min.js',
         'game_sketch.js',
-        'cdnjs.cloudflare.com/ajax/libs/p5.js',
+        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.min.js',
         'cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js'
     ];
 
@@ -113,6 +113,7 @@ $(document).ready(async function() {
             console.warn(`🧹 Removed script: ${script.src}`);
         }
     });
+    document.querySelectorAll('canvas').forEach(c => c.remove());
   }
 
 
