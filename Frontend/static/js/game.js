@@ -100,8 +100,8 @@ $(document).ready(async function() {
         // 'p5.sound.js',
         // 'p5.sound.min.js',
         'game_sketch.js',
-        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.min.js',
-        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js'
+        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js'
     ];
 
     document.querySelectorAll('script').forEach(script => {
@@ -124,8 +124,8 @@ $(document).ready(async function() {
           let cacheBuster = Date.now();
 
             // Load p5.js libraries
-            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.min.js?v=${cacheBuster}`, function(){
-              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js?v=${cacheBuster}`);
+            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js?v=${cacheBuster}`, function(){
+              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js?v=${cacheBuster}`);
             });
 
           // 👇 Your exact script loading logic
