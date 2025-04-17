@@ -121,11 +121,10 @@ $(document).ready(async function() {
       let retryCount = 0;
 
       while (!sketch_running && retryCount < maxRetries) {
-          let cacheBuster = Date.now();
 
             // Load p5.js libraries
-            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js?v=${cacheBuster}`, function(){
-              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js?v=${cacheBuster}`);
+            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js`, function(){
+              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js`);
             });
 
           // 👇 Your exact script loading logic
