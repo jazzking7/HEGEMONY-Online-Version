@@ -90,9 +90,10 @@ $(document).ready(async function() {
       let retryCount = 0;
       initializeLibraries();
       initializeSketch();
-        while (!sketch_running && retryCount < maxRetries) {
+      while (!sketch_running && retryCount < maxRetries) {
           console.log(`Attempt #${retryCount + 1} to load sketch...`);
           removeDynamicScripts();
+          initializeLibraries();
           initializeSketch();
 
           // ⏱ Wait 0.5s before checking sketch_running
