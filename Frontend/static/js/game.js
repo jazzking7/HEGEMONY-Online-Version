@@ -142,13 +142,15 @@ function removeDynamicScripts() {
 }
 
 function loadLibraries() {
-  return new Promise((resolve) => {
-    $.getScript(`${URL_FRONTEND}static/js/p5.min.js`, function() {
-      $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js`, function() {
-        resolve();
-      });
-    });
-  });
+  loadScript(`${URL_FRONTEND}static/js/p5.min.js`);
+  loadScript(`${URL_FRONTEND}static/js/p5.sound.min.js`);
+  // return new Promise((resolve) => {
+  //   $.getScript(`${URL_FRONTEND}static/js/p5.min.js`, function() {
+  //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js`, function() {
+  //       resolve();
+  //     });
+  //   });
+  // });
 }
 
 async function initializeLibraries(){
