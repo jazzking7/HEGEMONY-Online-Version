@@ -1,69 +1,78 @@
 // Display Settings
-let scaleFactor = 1.0; 
+var displayScaleFactor = 1.0; 
 
-let offsetX = 0;
-let offsetY = 0;
-let isDragging = false;
-let previousMouseX;
-let previousMouseY;
+var offsetX = 0;
+var offsetY = 0;
+var isDragging = false;
+var previousMouseX;
+var previousMouseY;
 
 // Speed up clicks
-let tmp_id;
-let hover_over = {'id': 0, 'pts': {}, 'name': null};
+var tmp_id;
+var hover_over = {'id': 0, 'pts': {}, 'name': null};
 
 // images
-let capitalImage;
-let cityImage;
-let insigImage;
+var capitalImage;
+var cityImage;
+var insigImage;
 
 // Components to be displayed
-let territories = [];
-let mapProperties;
+var territories = [];
+var mapProperties;
 
-let seaRoutes = [];
-let contBorders = [];
-let contBonusBoxes = [];
+var seaRoutes = [];
+var contBorders = [];
+var contBonusBoxes = [];
 
 // canvas size
-let currWinWid;
-let currWinHeight;
+var currWinWid;
+var currWinHeight;
 
 // Toggles
-let showContBorders = false;
+var showContBorders = false;
 
 // Highlight
-let toHightlight = [];
-let clickables = [];
-let targetsToCapture = [];
+var toHightlight = [];
+var clickables = [];
+var targetsToCapture = [];
 
 // Other player action
-let otherHighlight = [];
+var otherHighlight = [];
 
-let ani_offset = 0;
-let ani_direction = 1;
+var ani_offset = 0;
+var ani_direction = 1;
 
 // battle casualties display
-let dis_cas = false;
-let cas_count = 60;
-let casualties = [];
+var dis_cas = false;
+var cas_count = 60;
+var casualties = [];
 // troop addition display
-let dis_add = false;
-let add_count = 60;
-let additions = [];
+var dis_add = false;
+var add_count = 60;
+var additions = [];
 
 // Brightness
-let dark = false;
-let r;
-let b;
-let g;
-let brightness;
+var dark = false;
+var r;
+var b;
+var g;
+var brightness;
 
 function preload() {
+  sketch_running = true;
   urbanistFont = loadFont('/static/Fonts/Urbanist-SemiBold.ttf');
   console.log("LOADED FONTS");
 }
 
 function setup() {
+  sketch_running = true;
+  let container = document.getElementById('canvasContainer');
+  if (container) {
+      let existingCanvas = container.querySelector('canvas');
+      if (existingCanvas) {
+          existingCanvas.remove();
+      }
+  }
   var canvas = createCanvas(windowWidth, windowHeight);
   currWinWid = windowWidth;
   currWinHeight = windowHeight;
@@ -76,7 +85,6 @@ function setup() {
     backgroundOceanImage.resize(currWinWid, currWinHeight);
   });
   console.log('LOADED IMAGES');
-  sketch_running = true;
   loadMapComponents(game_settings.map, game_settings.tnames, game_settings.tneighbors, game_settings.landlocked)
 }
 
@@ -163,6 +171,11 @@ async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
 }
 
 function draw() {
+  if (!sketch_running){
+    preload();
+    setup();
+    sketch_running = true;
+  }
   if (currWinHeight != windowHeight || currWinWid != windowWidth){
     resizeCanvas(windowWidth, windowHeight);
     currWinWid = windowWidth;
@@ -183,7 +196,7 @@ function draw() {
 
   // Apply the scaling factor centered at canvas center
   translate(canvasCenterX, canvasCenterY);
-  scale(scaleFactor);
+  scale(displayScaleFactor);
   translate(-canvasCenterX, -canvasCenterY);
   if (isDragging) {
     let dx = mouseX - previousMouseX;
@@ -247,7 +260,7 @@ function draw() {
       }
     }
 
-    if (scaleFactor < 0.4) {
+    if (displayScaleFactor < 0.4) {
       push();
       textFont(urbanistFont);
       if (dark) {
@@ -433,12 +446,12 @@ function pointInPolygon(P, vertices) {
 }
 
 function isMouseInsidePolygon(mouseX, mouseY, polygon) {
-  let resetX = mouseX - offsetX*scaleFactor;
-  let resetY = mouseY - offsetY*scaleFactor;
+  let resetX = mouseX - offsetX*displayScaleFactor;
+  let resetY = mouseY - offsetY*displayScaleFactor;
   let translatedX = resetX - width/2;
   let translatedY = resetY - height/2;
-  let scaledX = translatedX / scaleFactor;
-  let scaledY = translatedY / scaleFactor;
+  let scaledX = translatedX / displayScaleFactor;
+  let scaledY = translatedY / displayScaleFactor;
   let finalX = scaledX + width/2;
   let finalY = scaledY + height/2;
 

@@ -33,9 +33,7 @@ let minefields_amount = 0;
 let US_usages = 0;
 // Loan Shark
 let in_debt = false;
-
 $(document).ready(async function() {
-  
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 
@@ -83,61 +81,21 @@ $(document).ready(async function() {
   $('#overlay_sections .circular-button').on('click mousemove', function(event) {
     event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
-
-    // Load p5.js libraries
-  // $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/p5.js', function(){
-  //   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.8.0/addons/p5.sound.min.js');
-  // });
   
   function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  function removeDynamicScripts() {
-    const scriptPatterns = [
-        // 'p5.js',
-        // 'p5.min.js',
-        // 'p5.sound.js',
-        // 'p5.sound.min.js',
-        'game_sketch.js',
-        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js',
-        'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js'
-    ];
-
-    document.querySelectorAll('script').forEach(script => {
-        // Normalize the src to ignore query params and check full or partial matches
-        const baseSrc = script.src.split('?')[0];
-
-        if (script.src && scriptPatterns.some(pattern => baseSrc.includes(pattern))) {
-            script.remove();
-            console.warn(`🧹 Removed script: ${script.src}`);
-        }
-    });
-    document.querySelectorAll('canvas').forEach(c => c.remove());
-  }
-
-
   async function tryLoadSketch(maxRetries = 30) {
       let retryCount = 0;
-
-      while (!sketch_running && retryCount < maxRetries) {
-
-            // Load p5.js libraries
-            $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js`, function(){
-              $.getScript(`https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js`);
-            });
-
-          // 👇 Your exact script loading logic
-          // $.getScript(`${URL_FRONTEND}static/js/p5.min.js?v=${cacheBuster}`, function () {
-          //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js?v=${cacheBuster}`);
-          // });
-        //   $.getScript(`${URL_FRONTEND}static/js/p5.js?v=${cacheBuster}`, function () {
-        //     $.getScript(`${URL_FRONTEND}static/js/p5.sound.js?v=${cacheBuster}`);
-        // });
-          loadGameSketch();
+      initializeLibraries();
+        while (!sketch_running && retryCount < maxRetries) {
+          console.log(`Attempt #${retryCount + 1} to load sketch...`);
+          removeDynamicScripts();
+          initializeSketch();
 
           // ⏱ Wait 0.5s before checking sketch_running
-          await wait(500);
+          await wait(3000);
 
           if (!sketch_running) {
               console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
@@ -156,23 +114,56 @@ $(document).ready(async function() {
   }
 
   tryLoadSketch();
+
 });
 
-function loadGameSketch(retries = 10) {
+function removeDynamicScripts() {
+  const scriptPatterns = [
+      // 'p5.js',
+      // 'p5.min.js',
+      // 'p5.sound.js',
+      // 'p5.sound.min.js',
+      'game_sketch.js',
+      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js',
+      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js'
+  ];
+
+  document.querySelectorAll('script').forEach(script => {
+      console.log(script.src);
+      // Normalize the src to ignore query params and check full or partial matches
+      var baseSrc = script.src.split('?')[0];
+
+      if (script.src && scriptPatterns.some(pattern => baseSrc.includes(pattern))) {
+          script.remove();
+          console.warn(`🧹 Removed script: ${script.src}`);
+      }
+  });
+  document.querySelectorAll('canvas').forEach(c => c.remove());
+}
+
+function loadLibraries() {
+  return new Promise((resolve) => {
+    $.getScript("https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js", function() {
+      $.getScript("https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js", function() {
+        resolve();
+      });
+    });
+  });
+}
+
+async function initializeLibraries(){
+  await loadLibraries();
+}
+
+function loadGameSketch() {
   let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
   let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+  loadScript(scriptUrl);
+}
 
-  $.getScript(scriptUrl)
-      .done(() => console.log("✅ game_sketch.js loaded successfully!"))
-      .fail(() => {
-          console.error(`❌ Failed to load game_sketch.js (Retries left: ${retries})`);
-
-          if (retries > 0) {
-              setTimeout(() => loadGameSketch(retries - 1), 1000); // Retry after 1 sec
-          } else {
-              console.error("🚨 game_sketch.js failed to load after 10 attempts.");
-          }
-      });
+async function initializeSketch() {
+  // initializeLibraries();
+  loadGameSketch();
 }
 
 // Function to start the timeout countdown animation
@@ -2492,13 +2483,13 @@ function mouseWheel(event) {
       // Adjust the scale factor based on the mouse scroll direction
       if (event.delta > 0) {
         // Zoom out (reduce scale factor)
-        scaleFactor *= 0.9; // You can adjust the zoom speed by changing the multiplier
+        displayScaleFactor *= 0.9; // You can adjust the zoom speed by changing the multiplier
       } else {
         // Zoom in (increase scale factor)
-        scaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
+        displayScaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
       }
       // Limit the scale factor to prevent zooming too far in or out
-      scaleFactor = constrain(scaleFactor, 0.3, 3); // Adjust the range as needed
+      displayScaleFactor = constrain(displayScaleFactor, 0.3, 3); // Adjust the range as needed
     }
   }
   
@@ -2559,7 +2550,7 @@ function mouseClicked() {
   // TO BE UPDATED
 function keyPressed(){
   if (key === 'c'){
-    scaleFactor = 1.0;
+    displayScaleFactor = 1.0;
   }
 
   // shortcut for fast max deployment
