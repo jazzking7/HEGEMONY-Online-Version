@@ -143,8 +143,8 @@ function removeDynamicScripts() {
 
 function loadLibraries() {
   return new Promise((resolve) => {
-    $.getScript("https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js", function() {
-      $.getScript("https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js", function() {
+    $.getScript(`${URL_FRONTEND}static/js/p5.min.js`, function() {
+      $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js`, function() {
         resolve();
       });
     });
