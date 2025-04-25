@@ -1145,6 +1145,10 @@ class Loan_Shark(Skill):
     def __init__(self, player, gs):
         super().__init__("Loan Shark", player, gs)
         self.max_loan = 1
+        if len(self.gs.players) > 5:
+            self.max_loan += 1
+        elif len(self.gs.players) > 7:
+            self.max_loan += 1
         # pid : [due amount, start round]
         self.loan_list = {}
         # pid : last payment round
@@ -1188,7 +1192,7 @@ class Loan_Shark(Skill):
 
     def activate_effect(self):
         if self.active:
-            if not self.loan_list:
+            if len(self.loan_list) < self.max_loan:
                 self.gs.GES.handle_async_event({'name':"M_R"}, self.player)
             else:
                 self.gs.server.emit("display_new_notification", {'msg': "Ransom list is full!"}, room=self.player)
@@ -1227,8 +1231,6 @@ class Loan_Shark(Skill):
         debt_amt = self.loan_list[player][0]
         debtor = self.gs.players[player]
         loaner = self.gs.players[self.player]
-        if player not in self.loan_list:
-            return
         if method == 'sepauth':
             r_amt = math.ceil(debt_amt/5)
             if r_amt <= debtor.stars:
@@ -1380,12 +1382,12 @@ class Pandora_Box(Skill):
         self.nulrate = 0
         self.multi = 0
         self.hasRoundEffect = True
-        self.curr_pull = 3
+        self.curr_pull = 100
         self.receivedBlessings = []
         self.gs.players[self.player].stars += 2
 
     def apply_round_effect(self):
-        self.curr_pull = 3
+        self.curr_pull = 100
 
     def internalStatsMod(self, battle_stats):
         if self.active:
