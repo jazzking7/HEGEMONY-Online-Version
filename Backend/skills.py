@@ -933,7 +933,8 @@ class Laplace_Demon(Skill):
         if len(names) < 16:
             count = 0
             MList = ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher',
-                     'Industrialist', 'Expansionist', 'Dominator', 'Populist', 'Fanatic', 'Unifier', 'Polarizer', 'Guardian']
+                     'Industrialist', 'Expansionist', 'Dominator', 'Populist', 'Fanatic', 'Unifier', 'Polarizer', 'Guardian',
+                     'Gambler', 'Assassin', 'Survivalist', 'Protectionist']
             while len(names) < 16 and count != 2:
                 random_miss = random.choice(MList)
                 if random_miss not in names:
