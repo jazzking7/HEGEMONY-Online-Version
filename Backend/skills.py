@@ -982,7 +982,7 @@ class Arsenal_of_the_Underworld(Skill):
     # at the start of each round, compute the number of usages and range
     def apply_round_effect(self):
         dev_lvls = self.gs.get_player_industrial_level(self.gs.players[self.player]) + self.gs.get_player_infra_level(self.gs.players[self.player])
-        self.silo_usage = 1 + dev_lvls
+        self.silo_usage = 2 + dev_lvls
         self.silo_used = 0
         self.damage = 3 + dev_lvls
         self.range = 5 + dev_lvls//2
