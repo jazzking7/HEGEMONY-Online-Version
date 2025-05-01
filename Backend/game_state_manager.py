@@ -905,7 +905,7 @@ class Game_State_Manager:
                 ld = def_p.skill.get_landmine_damage(t2, atk_amt)
 
         # Simulate battle and get result
-        print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefensing amount: {def_amt} Defender stats: {def_stats}")
+        print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefending amount: {def_amt} Defender stats: {def_stats}")
         multitime = False
         if atk_p.skill:
             if atk_p.skill.name == "Loopwalker" and atk_p.skill.active:
