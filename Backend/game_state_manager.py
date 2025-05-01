@@ -1040,7 +1040,7 @@ class Game_State_Manager:
         self.egt.determine_end_game(self)
 
         if self.gambler_win:
-            self.gs.GES.halt_events()
+            self.GES.halt_events()
         
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
         
