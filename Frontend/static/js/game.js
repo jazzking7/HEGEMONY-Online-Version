@@ -89,12 +89,12 @@ $(document).ready(async function() {
   async function tryLoadSketch(maxRetries = 30) {
       let retryCount = 0;
       initializeLibraries();
-      initializeSketch();
+     // initializeSketch();
       while (!sketch_running && retryCount < maxRetries) {
           console.log(`Attempt #${retryCount + 1} to load sketch...`);
           removeDynamicScripts();
           initializeLibraries();
-          initializeSketch();
+         // initializeSketch();
 
           // ⏱ Wait 0.5s before checking sketch_running
           await wait(3000);
@@ -145,8 +145,8 @@ function removeDynamicScripts() {
 
 function loadLibraries() {
   return new Promise((resolve) => {
-    $.getScript(`${URL_FRONTEND}static/js/p5.min.js`, function() {
-      $.getScript(`${URL_FRONTEND}static/js/p5.sound.min.js`, function() {
+    $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
+      $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
         resolve();
       });
     });
