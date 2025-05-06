@@ -89,30 +89,30 @@ $(document).ready(async function() {
   async function tryLoadSketch(maxRetries = 30) {
       let retryCount = 0;
       initializeLibraries();
-     // initializeSketch();
-      while (!sketch_running && retryCount < maxRetries) {
-          console.log(`Attempt #${retryCount + 1} to load sketch...`);
-          removeDynamicScripts();
-          initializeLibraries();
-         // initializeSketch();
+      initializeSketch();
+      // while (!sketch_running && retryCount < maxRetries) {
+      //     console.log(`Attempt #${retryCount + 1} to load sketch...`);
+      //     removeDynamicScripts();
+      //     initializeLibraries();
+      //     initializeSketch();
 
-          // ⏱ Wait 0.5s before checking sketch_running
-          await wait(3000);
+      //     // ⏱ Wait 0.5s before checking sketch_running
+      //     await wait(3000);
 
-          if (!sketch_running) {
-              console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
-              removeDynamicScripts(); 
-              retryCount++;
-          } else {
-              console.log("✅ sketch_running is true. Sketch loaded successfully!");
-              return;
-          }
-      }
+      //     if (!sketch_running) {
+      //         console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
+      //         removeDynamicScripts(); 
+      //         retryCount++;
+      //     } else {
+      //         console.log("✅ sketch_running is true. Sketch loaded successfully!");
+      //         return;
+      //     }
+      // }
 
-      if (!sketch_running) {
-          console.error("🚨 Sketch failed after maximum retries. Reloading page...");
-          location.reload();
-      }
+      // if (!sketch_running) {
+      //     console.error("🚨 Sketch failed after maximum retries. Reloading page...");
+      //     location.reload();
+      // }
   }
 
   tryLoadSketch();
