@@ -763,13 +763,13 @@ class Air_Superiority(Skill):
 
         self.hasUsageLimit = True
 
-        self.limit = 3
+        self.limit = 100
 
         self.hasTurnEffect = True
         self.energy = 0
 
     def apply_turn_effect(self,):
-        self.limit = 3
+        self.limit = 100
 
     def calculate_bonuses(self, x):
         # Constants for the polynomial function

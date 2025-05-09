@@ -1938,7 +1938,7 @@ function launch_orbital_strike(tid){
 // Air superiority
 socket.on('paratrooper_attack', function(){
   announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY TO LAUNCH SURPRISE ATTACK!</h4>`;
+  announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY FOR AIRDROP ATTACK!</h4>`;
   clickables = [];
   toHightlight = [];
 });
