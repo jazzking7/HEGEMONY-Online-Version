@@ -763,13 +763,13 @@ class Air_Superiority(Skill):
 
         self.hasUsageLimit = True
 
-        self.limit = 100
+        self.limit = 5
 
         self.hasTurnEffect = True
         self.energy = 0
 
     def apply_turn_effect(self,):
-        self.limit = 100
+        self.limit = 5
 
     def calculate_bonuses(self, x):
         # Constants for the polynomial function
@@ -792,12 +792,13 @@ class Air_Superiority(Skill):
 
             bonus = len(distincts)
             self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            self.gs.players[self.player].stars += bonus//5
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Air Superiority",
-            'description': "Able to jump over territory to attack, 3 times per turn, not skipping over more than 3 territories per jump. Long-Arm Jurisdiction give you extra reserves based on how many distinct continents your troops are stationed on.",
+            'description': "Able to jump over territory to attack, 5 jumps per round, cannot skipping over more than 3 territories per jump. Long-Arm Jurisdiction give you extra reserves and special authorities based on how many distinct continents your troops are stationed on.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.limit,
