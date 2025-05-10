@@ -888,6 +888,8 @@ class Collusion(Skill):
         self.free_usages = 1
         if len(self.gs.players) > 4:
             self.free_usages += 1
+        if len(self.gs.players) > 6:
+            self.free_usages += 1
         self.hasRoundEffect = True
 
     def apply_round_effect(self):
