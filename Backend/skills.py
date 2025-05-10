@@ -105,9 +105,13 @@ class Iron_Wall(Skill):
     def __init__(self, player, gs):
         super().__init__("Iron_Wall", player, gs)
         self.reactMod = True
+        self.ironwall = False
+        self.limit = len(self.gs.players) // 2 if len(self.gs.players) > 4 else 1
+        self.cooldown = 0
+        self.hasRoundEffect = True
 
     def reactStatsMod(self, ownStats, enemyStats, attacking):
-        if not attacking:
+        if not attacking and self.active:
 
             ownStats[3] = 30
             ownStats[4] = 2
@@ -127,17 +131,51 @@ class Iron_Wall(Skill):
                 ownStats[3] += 10
             elif disparity == 1:
                 ownStats[3] += 5
+
+            if self.ironwall:
+                ownStats[3] = 90
+                ownStats[4] = 3
+    
+    def turn_off_iron_wall(self):
+        self.ironwall = False
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Iron Wall",
-            'description': "At least 30% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
-            'operational': self.active
+            'description': "At least 30% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense. When activated Iron Wall, Nullification Rate reaches 90% with Damage Multiplier reaching 3.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "ACTIVATE IRON WALL",
+            'cooldown': self.cooldown,
+            'activated': self.ironwall,
+            'inUseMsg': "IRON WALL IN ACTION"
         }, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational\n' if self.active else 'Inactive\n'
+        info += 'Iron wall activating!' if self.ironwall else ''
         return info
+
+    def apply_round_effect(self):
+        if self.cooldown:
+            self.cooldown -= 1
+    
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if self.cooldown:
+            self.gs.server.emit('display_new_notification', {'msg': "In cooldown!"}, room=self.player)
+            return
+        if not self.limit:
+            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            return
+        
+        self.limit -= 1
+        self.cooldown += 2
+        self.ironwall = True
+        
 
 class Dictator(Skill):
 
@@ -617,6 +655,7 @@ class Necromancer(Skill):
             'hasLimit': True,
             'limits': "infinite amount of",
             'btn_msg': "FETCH ME THEIR SOULS!",
+            'activated': self.activated,
             'cooldown': self.cooldown,
             'inUseMsg': "BLOOD HARVEST ACTIVE"
         }, room=self.player) 
@@ -847,6 +886,8 @@ class Collusion(Skill):
         self.finished_choosing = True
         self.secret_control_list = []
         self.free_usages = 1
+        if len(self.gs.players) > 4:
+            self.free_usages += 1
         self.hasRoundEffect = True
 
     def apply_round_effect(self):

@@ -134,6 +134,10 @@ class turn_loop_scheduler:
         # Reset turn based victory
         atk_player.turn_victory = False
         atk_player.con_amt = 0
+        # Iron wall turn off if there is any
+        if atk_player.skill:
+            if atk_player.skill.active and atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
+                atk_player.skill.turn_off_iron_wall()
         # Player temporary battle stats not updated
         ms.stats_set = False
 
