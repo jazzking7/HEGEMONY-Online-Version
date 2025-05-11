@@ -176,12 +176,12 @@ class Iron_Wall(Skill):
         self.cooldown += 2
         self.ironwall = True
         
-
 class Dictator(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Dictator", player, gs)
         self.hasTurnEffect = True
+        self.limit = len(self.gs.players) // 3
 
     def apply_turn_effect(self,):
         if self.active:
@@ -190,9 +190,42 @@ class Dictator(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': self.name,
-            'description': "Gain a minimum of 2★ per turn regardless of successful conquests.",
-            'operational': self.active
+            'description': "Gain a minimum of 2★ per turn regardless of successful conquests. When ",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "I Alone Am Worthy",
         }, room=self.player)
+    
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if not self.limit:
+            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            return
+        
+        self.limit -= 1
+        
+        added_stars = 0
+        max_add = 12
+
+        donors = sorted(
+            [p for p in self.gs.players if p != self.player],
+            key=lambda pid: self.gs.players[pid].stars,
+            reverse=True
+        )
+
+        while added_stars < max_add and any(self.gs.players[p].stars > 0 for p in donors):
+            for pid in donors:
+                other_player = self.gs.players[pid]
+                if other_player.stars > 0 and added_stars < max_add:
+                    other_player.stars -= 1
+                    self.gs.players[self.player].stars += 1
+                    added_stars += 1
+                    self.gs.update_private_status(self.player)
+                    self.gs.update_private_status(pid)
+                
 
     def get_skill_status(self):
         info = 'Operational\n' if self.active else 'Inactive\n'
