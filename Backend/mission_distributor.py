@@ -79,7 +79,8 @@ class Mission_Distributor:
              'Due', 'Pun',
              'Sur',
              'Ass', 'Pro',
-             'Gam'
+             'Gam',
+             'Opp'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
@@ -87,17 +88,18 @@ class Mission_Distributor:
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
 
     def validate_mission_set(self, miss_set):
-        c = 0
-        for m in miss_set:
-            if m in self.self_wins:
-                c += 1
-            if m in self.dup_con and miss_set.count(m) > 1:
+        if miss_set.count('Opp') <= 1:
+            c = 0
+            for m in miss_set:
+                if m in self.self_wins:
+                    c += 1
+                if m in self.dup_con and miss_set.count(m) > 1:
+                    return True
+            if c > 0:
                 return True
-        if c > 0:
-            return True
-        for nc in self.nat_con:
-            if all(m in nc for m in miss_set):
-                return True
+            for nc in self.nat_con:
+                if all(m in nc for m in miss_set):
+                    return True
         return False
 
     # Generate mission set based on number of players
@@ -190,6 +192,8 @@ class Mission_Distributor:
             return Protectionist(player, gs)
         elif name == 'Gam':
             return Gambler(player, gs)
+        elif name == 'Opp':
+            return Opportunist(player, gs)
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
