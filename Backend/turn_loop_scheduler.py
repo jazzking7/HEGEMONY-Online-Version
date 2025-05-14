@@ -341,7 +341,7 @@ class turn_loop_scheduler:
                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:
-                        losses = math.ceil(t.troops/2.5)
+                        losses = math.ceil(t.troops/5)
                         t.troops -= losses
                         for ps in gs.players:
                             if index in gs.players[ps].territories:

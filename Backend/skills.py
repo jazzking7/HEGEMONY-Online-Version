@@ -608,7 +608,7 @@ class Zealous_Expansion(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 2 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 3 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
@@ -785,11 +785,39 @@ class Divine_Punishment(Skill):
         # apply changes
         for choice in choices:
 
-            self.gs.map.territories[choice].isCity = False
-            self.gs.map.territories[choice].isDeadZone += 2
+            chosen_trty = self.gs.map.territories[choice]
 
-            casualties = math.ceil(0.75*self.gs.map.territories[choice].troops)
-            self.gs.map.territories[choice].troops -= casualties
+            if chosen_trty.isDeadZone:
+                for nt in chosen_trty.neighbors:
+                    if nt not in self.gs.players[self.player].territories:
+                        self.gs.map.territories[nt].isDeadZone = 2
+                        shockwave = min(5, self.gs.map.territories[nt].troops)
+                        self.gs.map.territories[nt].troops -= shockwave
+                        for player in self.gs.players:
+                            if nt in self.gs.players[player].territories:
+                                self.gs.players[player].total_troops -= shockwave
+
+                                self.gs.update_LAO(player)
+                                self.gs.update_TIP(player)
+                                self.gs.update_private_status(player)
+
+                                # Ares' Blessing Rage meter checking
+                                if self.gs.players[player].skill:
+                                    if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                        self.gs.players[player].skill.checking_rage_meter()
+
+                                # visual effect
+                                self.gs.server.emit('battle_casualties', {
+                                    f'{nt}': {'tid': nt, 'number': shockwave},
+                                }, room=self.gs.lobby)
+                                break
+                        self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+
+            chosen_trty.isCity = False
+            chosen_trty.isDeadZone = 2
+
+            casualties = math.ceil(0.75*chosen_trty.troops)
+            chosen_trty.troops -= casualties
 
             # update total troop
             for player in self.gs.players:
@@ -811,7 +839,7 @@ class Divine_Punishment(Skill):
                     }, room=self.gs.lobby)
                     break
 
-            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': self.gs.map.territories[choice].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
 
@@ -1467,6 +1495,8 @@ class Pandora_Box(Skill):
             battle_stats[0] += self.indus
             battle_stats[3] += self.nulrate
             battle_stats[4] += self.multi
+            if battle_stats[3] >= 100:
+                battle_stats[3] = 99
     
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
