@@ -105,9 +105,13 @@ class Iron_Wall(Skill):
     def __init__(self, player, gs):
         super().__init__("Iron_Wall", player, gs)
         self.reactMod = True
+        self.ironwall = False
+        self.limit = len(self.gs.players) // 2 if len(self.gs.players) > 4 else 1
+        self.cooldown = 0
+        self.hasRoundEffect = True
 
     def reactStatsMod(self, ownStats, enemyStats, attacking):
-        if not attacking:
+        if not attacking and self.active:
 
             ownStats[3] = 30
             ownStats[4] = 2
@@ -127,23 +131,57 @@ class Iron_Wall(Skill):
                 ownStats[3] += 10
             elif disparity == 1:
                 ownStats[3] += 5
+
+            if self.ironwall:
+                ownStats[3] = 90
+                ownStats[4] = 3
+    
+    def turn_off_iron_wall(self):
+        self.ironwall = False
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Iron Wall",
-            'description': "At least 30% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense.",
-            'operational': self.active
+            'description': "At least 30% nullification rate and x2 damage output in defense. The stronger the opponent, the higher the defense. When activated Iron Wall, Nullification Rate reaches 90% with Damage Multiplier reaching 3.",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "ACTIVATE IRON WALL",
+            'cooldown': self.cooldown,
+            'activated': self.ironwall,
+            'inUseMsg': "IRON WALL IN ACTION"
         }, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational\n' if self.active else 'Inactive\n'
+        info += 'Iron wall activating!' if self.ironwall else ''
         return info
 
+    def apply_round_effect(self):
+        if self.cooldown:
+            self.cooldown -= 1
+    
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if self.cooldown:
+            self.gs.server.emit('display_new_notification', {'msg': "In cooldown!"}, room=self.player)
+            return
+        if not self.limit:
+            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            return
+        
+        self.limit -= 1
+        self.cooldown += 2
+        self.ironwall = True
+        
 class Dictator(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Dictator", player, gs)
         self.hasTurnEffect = True
+        self.limit = len(self.gs.players) // 3
 
     def apply_turn_effect(self,):
         if self.active:
@@ -152,9 +190,42 @@ class Dictator(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': self.name,
-            'description': "Gain a minimum of 2★ per turn regardless of successful conquests.",
-            'operational': self.active
+            'description': "Gain a minimum of 2★ per turn regardless of successful conquests. When ",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.limit,
+            'btn_msg': "I Alone Am Worthy",
         }, room=self.player)
+    
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            return
+        if not self.limit:
+            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            return
+        
+        self.limit -= 1
+        
+        added_stars = 0
+        max_add = 12
+
+        donors = sorted(
+            [p for p in self.gs.players if p != self.player],
+            key=lambda pid: self.gs.players[pid].stars,
+            reverse=True
+        )
+
+        while added_stars < max_add and any(self.gs.players[p].stars > 0 for p in donors):
+            for pid in donors:
+                other_player = self.gs.players[pid]
+                if other_player.stars > 0 and added_stars < max_add:
+                    other_player.stars -= 1
+                    self.gs.players[self.player].stars += 1
+                    added_stars += 1
+                    self.gs.update_private_status(self.player)
+                    self.gs.update_private_status(pid)
+                
 
     def get_skill_status(self):
         info = 'Operational\n' if self.active else 'Inactive\n'
@@ -537,7 +608,7 @@ class Zealous_Expansion(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 2 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 3 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
@@ -617,6 +688,7 @@ class Necromancer(Skill):
             'hasLimit': True,
             'limits': "infinite amount of",
             'btn_msg': "FETCH ME THEIR SOULS!",
+            'activated': self.activated,
             'cooldown': self.cooldown,
             'inUseMsg': "BLOOD HARVEST ACTIVE"
         }, room=self.player) 
@@ -713,11 +785,39 @@ class Divine_Punishment(Skill):
         # apply changes
         for choice in choices:
 
-            self.gs.map.territories[choice].isCity = False
-            self.gs.map.territories[choice].isDeadZone += 2
+            chosen_trty = self.gs.map.territories[choice]
 
-            casualties = math.ceil(0.75*self.gs.map.territories[choice].troops)
-            self.gs.map.territories[choice].troops -= casualties
+            if chosen_trty.isDeadZone:
+                for nt in chosen_trty.neighbors:
+                    if nt not in self.gs.players[self.player].territories:
+                        self.gs.map.territories[nt].isDeadZone = 2
+                        shockwave = min(5, self.gs.map.territories[nt].troops)
+                        self.gs.map.territories[nt].troops -= shockwave
+                        for player in self.gs.players:
+                            if nt in self.gs.players[player].territories:
+                                self.gs.players[player].total_troops -= shockwave
+
+                                self.gs.update_LAO(player)
+                                self.gs.update_TIP(player)
+                                self.gs.update_private_status(player)
+
+                                # Ares' Blessing Rage meter checking
+                                if self.gs.players[player].skill:
+                                    if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                        self.gs.players[player].skill.checking_rage_meter()
+
+                                # visual effect
+                                self.gs.server.emit('battle_casualties', {
+                                    f'{nt}': {'tid': nt, 'number': shockwave},
+                                }, room=self.gs.lobby)
+                                break
+                        self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+
+            chosen_trty.isCity = False
+            chosen_trty.isDeadZone = 2
+
+            casualties = math.ceil(0.75*chosen_trty.troops)
+            chosen_trty.troops -= casualties
 
             # update total troop
             for player in self.gs.players:
@@ -739,7 +839,7 @@ class Divine_Punishment(Skill):
                     }, room=self.gs.lobby)
                     break
 
-            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': self.gs.map.territories[choice].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
 
@@ -763,13 +863,13 @@ class Air_Superiority(Skill):
 
         self.hasUsageLimit = True
 
-        self.limit = 3
+        self.limit = 5
 
         self.hasTurnEffect = True
         self.energy = 0
 
     def apply_turn_effect(self,):
-        self.limit = 3
+        self.limit = 5
 
     def calculate_bonuses(self, x):
         # Constants for the polynomial function
@@ -792,12 +892,13 @@ class Air_Superiority(Skill):
 
             bonus = len(distincts)
             self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            self.gs.players[self.player].stars += bonus//5
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': "Air Superiority",
-            'description': "Able to jump over territory to attack, 3 times per turn, not skipping over more than 3 territories per jump. Long-Arm Jurisdiction give you extra reserves based on how many distinct continents your troops are stationed on.",
+            'description': "Able to jump over territory to attack, 5 jumps per round, cannot skipping over more than 3 territories per jump. Long-Arm Jurisdiction give you extra reserves and special authorities based on how many distinct continents your troops are stationed on.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.limit,
@@ -845,23 +946,25 @@ class Collusion(Skill):
         super().__init__("Collusion", player, gs)
         self.finished_choosing = True
         self.secret_control_list = []
-        self.free_usages = 2
+        self.free_usages = 1
+        if len(self.gs.players) > 4:
+            self.free_usages += 1
+        if len(self.gs.players) > 6:
+            self.free_usages += 1
         self.hasRoundEffect = True
 
     def apply_round_effect(self):
-        if self.gs.GES.round == 3:
-            self.free_usages += 1
+        self.free_usages += 1
 
     def update_current_status(self):
 
-        limit = self.gs.players[self.player].stars//3 if self.gs.players[self.player].stars >= 3 else 0
         controlled_trtys = [self.gs.map.territories[tid].name for tid in self.secret_control_list]
         self.gs.server.emit("update_skill_status", {
             'name': "Collusion",
-            'description': f"Buy over ownership of an enemy territory with 3★ and secretly control it. Currently have {self.free_usages} free usages.",
+            'description': f"Corrupt authority of an enemy territory and secretly control the territory. Currently have {self.free_usages} usages.",
             'operational': self.active,
             'hasLimit': True,
-            'limits': limit+self.free_usages,
+            'limits': self.free_usages,
             'forbidden_targets': controlled_trtys,
             'ft_msg': "Secretly controlling:",
             'btn_msg': "Corrupt a territory"
@@ -878,7 +981,7 @@ class Collusion(Skill):
         if not self.active:
             self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
             return
-        if self.gs.players[self.player].stars < 3 and not self.free_usages:
+        if not self.free_usages:
             self.gs.server.emit('display_new_notification', {'msg': "Not enough usages to corrupt any territory!"}, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
@@ -892,7 +995,7 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
             return
 
-        if self.gs.players[self.player].stars < 3 and not self.free_usages:
+        if not self.free_usages:
             self.gs.server.emit("display_new_notification", {"msg": f"No usages available!"}, room=self.player)
             return
         
@@ -911,10 +1014,7 @@ class Collusion(Skill):
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
-        if self.free_usages:
-            self.free_usages -= 1
-        else:
-            self.gs.players[self.player].stars -= 3
+        self.free_usages -= 1
         self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)
@@ -1395,6 +1495,8 @@ class Pandora_Box(Skill):
             battle_stats[0] += self.indus
             battle_stats[3] += self.nulrate
             battle_stats[4] += self.multi
+            if battle_stats[3] >= 100:
+                battle_stats[3] = 99
     
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '

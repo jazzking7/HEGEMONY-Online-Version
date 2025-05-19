@@ -602,6 +602,9 @@ def get_reachable_trty(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     reachable_trty = gsm.map.get_reachable_trty(data['choice'], gsm.players[pid].territories)
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.active and gsm.players[pid].skill.name == 'Air_Superiority':
+            reachable_trty = gsm.players[pid].territories
     socketio.emit('update_clickables', {'trtys': reachable_trty}, room=pid)
 
 @socketio.on("terminate_preparation_stage")

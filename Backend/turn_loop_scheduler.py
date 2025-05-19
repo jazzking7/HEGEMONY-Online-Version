@@ -90,7 +90,7 @@ class turn_loop_scheduler:
             # Air superiority
             if gs.players[curr_p].skill:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
-                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade * 2
+                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade * 3
                     gs.update_private_status(curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()
@@ -134,6 +134,10 @@ class turn_loop_scheduler:
         # Reset turn based victory
         atk_player.turn_victory = False
         atk_player.con_amt = 0
+        # Iron wall turn off if there is any
+        if atk_player.skill:
+            if atk_player.skill.active and atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
+                atk_player.skill.turn_off_iron_wall()
         # Player temporary battle stats not updated
         ms.stats_set = False
 
@@ -337,7 +341,7 @@ class turn_loop_scheduler:
                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:
-                        losses = math.ceil(t.troops/2.5)
+                        losses = math.ceil(t.troops/5)
                         t.troops -= losses
                         for ps in gs.players:
                             if index in gs.players[ps].territories:
