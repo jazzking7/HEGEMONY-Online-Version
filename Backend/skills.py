@@ -106,7 +106,7 @@ class Iron_Wall(Skill):
         super().__init__("Iron_Wall", player, gs)
         self.reactMod = True
         self.ironwall = False
-        self.limit = len(self.gs.players) // 2 if len(self.gs.players) > 4 else 1
+        self.limit = len(self.gs.players) // 2
         self.cooldown = 0
         self.hasRoundEffect = True
 
