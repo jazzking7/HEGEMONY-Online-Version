@@ -197,7 +197,7 @@ class Mission_Distributor:
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)
@@ -227,46 +227,45 @@ class Mission_Distributor:
     def determine_winners(self, gs):
 
         # Redefine this
-        c = []
-        for p in gs.players:
-            if gs.players[p].alive:
-                c.append(p)
+        c = [p for p in gs.players if gs.players[p].alive]
         # Solo Winner
         if len(c) == 1:
             for mis in gs.Mset:
                 if mis.player == c[0]:
                     return {c[0]: mis.name}
-        Pac = {}
-        S_tier = {}
-        A_tier = {}
-        B_tier = {}
-        C_tier = {}
-        miss_set = gs.Mset
-        for m in miss_set:
+                
+        winners = {}
+        tiers = {
+            "Pac": {},
+            "S": {},
+            "A": {},
+            "B": {},
+            "C": {}
+        }
+        for m in gs.Mset:
             if m.end_game_checking():
-                if m.name in self.S_tier:
+                if m.name == 'Opportunist':
+                    winners[m.player] = m.name
+                elif m.name in self.S_tier:
                     if m.name == 'Pacifist':
-                        Pac[m.player] = m.name
+                        tiers["Pac"][m.player] = m.name
                     else:
-                        S_tier[m.player] = m.name
+                        tiers["S"][m.player] = m.name
                 elif m.name in self.A_tier:
-                    A_tier[m.player] = m.name
+                    tiers["A"][m.player] = m.name
                 elif m.name in self.B_tier:
-                    B_tier[m.player] = m.name
+                    tiers["B"][m.player] = m.name
                 else:
-                    C_tier[m.player] = m.name
+                    tiers["C"][m.player] = m.name
 
-        # Return {} -> key: pid   value: name of mission
-        if len(Pac) > 0:
-            return Pac
-        if len(S_tier) > 0:
-            return S_tier
-        elif len(A_tier) > 0:
-            return A_tier
-        elif len(B_tier) > 0:
-            return B_tier
-        else:
-            return C_tier
+        # Merge winners by priority: Pacifist > S > A > B > C
+        for key in ["Pac", "S", "A", "B", "C"]:
+            if tiers[key]:
+                winners = {**tiers[key], **winners} # Merge dictionaries
+                if key != "C":
+                    break
+
+        return winners
         
     def no_conflicts(self, mission_name_list, mission_list):
         print(mission_name_list)
@@ -346,45 +345,5 @@ class Mission_Distributor:
                 winners[miss.player] = miss.name
             return winners
 
-        # Redefine this
-        c = []
-        for p in gs.players:
-            if gs.players[p].alive:
-                c.append(p)
-        # Solo Winner
-        if len(c) == 1:
-            for mis in gs.Mset:
-                if mis.player == c[0]:
-                    return {c[0]: mis.name}
-        
-        Pac = {}
-        S_tier = {}
-        A_tier = {}
-        B_tier = {}
-        C_tier = {}
-        miss_set = gs.Mset
-        for m in miss_set:
-            if m.end_game_global_peace_checking():
-                if m.name in self.S_tier:
-                    if m.name == 'Pacifist':
-                        Pac[m.player] = m.name
-                    else:
-                        S_tier[m.player] = m.name
-                elif m.name in self.A_tier:
-                    A_tier[m.player] = m.name
-                elif m.name in self.B_tier:
-                    B_tier[m.player] = m.name
-                else:
-                    C_tier[m.player] = m.name
-
-        # Return {} -> key: pid   value: name of mission
-        if len(Pac) > 0:
-            return Pac
-        if len(S_tier) > 0:
-            return S_tier
-        elif len(A_tier) > 0:
-            return A_tier
-        elif len(B_tier) > 0:
-            return B_tier
-        else:
-            return C_tier
+        # If there are conflicts, find winners as usual
+        return self.determine_winners(gs)
