@@ -254,7 +254,7 @@ class Bounty_Hunter(Mission):
         nump = len(gs.pids)
         if nump < 5:
             numt = 1
-        elif nump < 9:
+        elif nump < 8:
             numt = 2
         elif nump < 16:
             numt = 3
@@ -780,9 +780,9 @@ class Starchaser(Mission):
         
         self.chase_completed = 0
         self.target_chases = 7
-        if m > 80:
+        if m > 85:
             self.target_chases += 3
-        elif m > 60:
+        elif m > 65:
             self.target_chases += 2
         elif m > 40:
             self.target_chases += 1
