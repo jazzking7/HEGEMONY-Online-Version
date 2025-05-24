@@ -589,7 +589,7 @@ class Populist(Mission):
         super().__init__("Populist", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 4
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
