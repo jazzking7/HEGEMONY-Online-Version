@@ -13,18 +13,18 @@ class Skill_Distributor:
             "Zealous_Expansion",
             "Elitocracy",
             "Divine_Punishment",
-            "Robinhood",
-            "Realm_of_Permafrost",
-            "Necromancer",
-            "Air_Superiority",
-            "Collusion",
-            "Laplace's Demon",
-            "Arsenal of the Underworld",
-            "Loan Shark",
-            "Reaping of Anubis",
-            "Pandora's Box",
-            "Loopwalker",
-            "Revanchism"
+            # "Robinhood",
+            # "Realm_of_Permafrost",
+            # "Necromancer",
+            # "Air_Superiority",
+            # "Collusion",
+            # "Laplace's Demon",
+            # "Arsenal of the Underworld",
+            # "Loan Shark",
+            # "Reaping of Anubis",
+            # "Pandora's Box",
+            # "Loopwalker",
+            # "Revanchism"
         ]
 
     def get_options(self, ):
