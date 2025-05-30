@@ -28,7 +28,7 @@ class Skill_Distributor:
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=5)
+        return random.sample(self.skill_options, k=8)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -53,7 +53,7 @@ class Skill_Distributor:
         elif skill_name == "Elitocracy":
             return "Able to increase your Minimum Roll by 1 using 3★. Your damage multiplier increases as your Minimum Roll increases."
         elif skill_name == "Necromancer":
-            return "When activated, all enemy troops that you skilled become your reserves. There is a 1 round cooldown between usages."
+            return "When activated, all enemy troops that you killed become your reserves. There is a 1 round cooldown between usages."
         elif skill_name == "Divine_Punishment":
             return "Able to bombard anywhere on the map. You receive (number of players + 1) usages at the start of the game. Every 3 rounds you receive 1 additional usage."
         elif skill_name == "Air_Superiority":
