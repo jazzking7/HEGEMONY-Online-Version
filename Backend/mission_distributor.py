@@ -72,14 +72,14 @@ class Mission_Distributor:
              'Exp', 'Pop',
              'Gua',
              'Dec',
-                          #'Dom',
-                          #'Pac', 
-          #   'Uni', 'Pol', 'Fan', 
-            #  'Str', 
-            #  'Due', 'Pun',
-            #  'Sur',
-            #  'Ass', 'Pro',
-            #  'Gam'
+                          'Dom',
+                          'Pac', 
+            'Uni', 'Pol', 'Fan', 
+             'Str', 
+             'Due', 'Pun',
+             'Sur',
+             'Ass', 'Pro',
+             'Gam'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
