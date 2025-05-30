@@ -13,22 +13,22 @@ class Skill_Distributor:
             "Zealous_Expansion",
             "Elitocracy",
             "Divine_Punishment",
-            "Robinhood",
-            "Realm_of_Permafrost",
-            "Necromancer",
-            "Air_Superiority",
-            "Collusion",
-            "Laplace's Demon",
-            "Arsenal of the Underworld",
-            "Loan Shark",
-            "Reaping of Anubis",
-            "Pandora's Box",
-            "Loopwalker",
-            "Revanchism"
+            # "Robinhood",
+            # "Realm_of_Permafrost",
+            # "Necromancer",
+            # "Air_Superiority",
+            # "Collusion",
+            # "Laplace's Demon",
+            # "Arsenal of the Underworld",
+            # "Loan Shark",
+            # "Reaping of Anubis",
+            # "Pandora's Box",
+            # "Loopwalker",
+            # "Revanchism"
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=8)
+        return random.sample(self.skill_options, k=5)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
