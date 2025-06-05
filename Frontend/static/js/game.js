@@ -2491,7 +2491,7 @@ function mouseWheel(event) {
         displayScaleFactor *= 1.1; // You can adjust the zoom speed by changing the multiplier
       }
       // Limit the scale factor to prevent zooming too far in or out
-      displayScaleFactor = constrain(displayScaleFactor, 0.4, 3); // Adjust the range as needed
+      displayScaleFactor = constrain(displayScaleFactor, 0.3, 3); // Adjust the range as needed
     }
   }
 
