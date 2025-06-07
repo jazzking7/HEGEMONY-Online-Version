@@ -67,14 +67,14 @@ class Mission_Distributor:
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
         self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam']
         self.missions = [
-             'Pac', 
-             'War', 'Loy', 'Bon',
-             'Uni', 'Pol', 'Fan', 
+                          'War', 'Loy', 'Bon',
              'Ind',
              'Exp', 'Pop',
-             'Dom',
              'Gua',
              'Dec',
+                          'Dom',
+                          'Pac', 
+            'Uni', 'Pol', 'Fan', 
              'Str', 
              'Due', 'Pun',
              'Sur',

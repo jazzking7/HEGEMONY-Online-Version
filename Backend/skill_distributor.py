@@ -6,16 +6,16 @@ class Skill_Distributor:
         
         self.skill_options = [
             "Iron_Wall",
-            "Realm_of_Permafrost",
             "Dictator",
             "Mass_Mobilization",
             "Industrial_Revolution",
-            "Robinhood",
             "Ares' Blessing",
             "Zealous_Expansion",
             "Elitocracy",
-            "Necromancer",
             "Divine_Punishment",
+            "Robinhood",
+            "Realm_of_Permafrost",
+            "Necromancer",
             "Air_Superiority",
             "Collusion",
             "Laplace's Demon",
@@ -28,7 +28,7 @@ class Skill_Distributor:
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=10)
+        return random.sample(self.skill_options, k=7)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -49,11 +49,11 @@ class Skill_Distributor:
         elif skill_name == "Ares' Blessing":
             return "Berserker War Art that increase your Industrial and Infrastructure Level by 2 while raising your damage multiplier to 2 when activated. Last for 1 turn and there is a 3 round cooldown between usages."
         elif skill_name == "Zealous_Expansion":
-            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 4★. +1 Infrastructure Level during battles. +2 reserves for every Infrastructure Level increased."
+            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 4★. +1 Infrastructure Level during battles. +3 reserves for every Infrastructure Level increased."
         elif skill_name == "Elitocracy":
             return "Able to increase your Minimum Roll by 1 using 3★. Your damage multiplier increases as your Minimum Roll increases."
         elif skill_name == "Necromancer":
-            return "When activated, all enemy troops that you skilled become your reserves. There is a 1 round cooldown between usages."
+            return "When activated, all enemy troops that you killed become your reserves. There is a 1 round cooldown between usages."
         elif skill_name == "Divine_Punishment":
             return "Able to bombard anywhere on the map. You receive (number of players + 1) usages at the start of the game. Every 3 rounds you receive 1 additional usage."
         elif skill_name == "Air_Superiority":

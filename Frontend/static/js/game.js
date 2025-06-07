@@ -2494,6 +2494,42 @@ function mouseWheel(event) {
       displayScaleFactor = constrain(displayScaleFactor, 0.3, 3); // Adjust the range as needed
     }
   }
+
+// touch pad zoom in and out
+let lastTouchDist = null;
+
+function touchMoved() {
+  // Only consider pinch gesture if there are two or more touches
+  if (touches.length >= 2) {
+    let d = dist(touches[0].x, touches[0].y, touches[1].x, touches[1].y);
+
+    if (lastTouchDist !== null) {
+      let zoomChange = d - lastTouchDist;
+
+      if (abs(zoomChange) > 1) { // threshold to ignore tiny finger jitters
+        if (zoomChange > 0) {
+          // Zoom in
+          displayScaleFactor *= 1.05;
+        } else {
+          // Zoom out
+          displayScaleFactor *= 0.95;
+        }
+
+        // Clamp zoom level
+        displayScaleFactor = constrain(displayScaleFactor, 0.4, 3);
+      }
+    }
+
+    lastTouchDist = d;
+  }
+
+  return false; // prevent default scrolling
+}
+
+function touchEnded() {
+  // Reset distance when touches end
+  lastTouchDist = null;
+}
   
 // Check if the mouse is in the overlay regions
 function isMouseOverOverlay() {
