@@ -146,10 +146,10 @@ class Iron_Wall(Skill):
             'operational': self.active,
             'hasLimit': True,
             'limits': self.limit,
-            'btn_msg': "ACTIVATE IRON WALL",
+            'btn_msg': "ACTIVATE IRON DOME",
             'cooldown': self.cooldown,
             'activated': self.ironwall,
-            'inUseMsg': "IRON WALL IN ACTION"
+            'inUseMsg': "IRON DOME IN ACTION"
         }, room=self.player)
 
     def get_skill_status(self):

@@ -62,6 +62,22 @@ $(document).ready(function() {
             });
         });
 
+        $('#btn_tutorials').click(function() {
+            loadPage('tutorial')
+            .then(() => {
+                return unloadScript('page_script');
+            })
+            .then(() => {
+                return loadScript(URL_FRONTEND + 'static/js/rules_ui.js', 'page_script');
+            })
+            .then(() => {
+                console.log('Entered Tutorial');
+            })
+            .catch((error) => {
+                console.error('Error loading page or script:', error);
+            });
+        });
+
     }
 
 

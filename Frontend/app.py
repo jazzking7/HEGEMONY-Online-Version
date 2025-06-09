@@ -36,6 +36,10 @@ def gameMap():
 def rollSimulator():
     return render_template('roll_simulator.html')
 
+@app.route("/tutorial")
+def tutorial():
+    return render_template('tutorial.html')
+
 if __name__ == "__main__":
     # app.run(host='127.0.0.1', port=8080, debug=True)
     app.run(host='0.0.0.0', port=8080, debug=True)
