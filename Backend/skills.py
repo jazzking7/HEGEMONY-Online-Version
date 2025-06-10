@@ -1263,7 +1263,7 @@ class Loan_Shark(Skill):
                 self.handle_payment(debtor, "troops")
 
     def get_potential_targets(self):
-        potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and player != self.player and player not in self.ransom_history]
+        potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and not self.gs.players[player].hijacked and player != self.player and player not in self.ransom_history]
         invalid_targets = []
         for player in potential_targets:
             curr_p = self.gs.players[player]
@@ -1306,11 +1306,11 @@ class Loan_Shark(Skill):
         if self.gs.GES.round == 0:
             self.loan_list[pid] = [5, self.gs.GES.round]
 
-        curr = self.gs.players[player]
+        curr = self.gs.players[pid]
         curr.hijacked = True
         if curr.skill:
             curr.skill.active = False
-        self.gs.server.emit('show_debt_button', room=player)
+        self.gs.server.emit('show_debt_button', room=pid)
 
     def handle_payment(self, player, method):
         if player not in self.loan_list:
