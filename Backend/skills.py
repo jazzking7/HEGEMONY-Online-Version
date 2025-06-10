@@ -1673,6 +1673,8 @@ class Revanchism(Skill):
             battle_stats[1] += self.ragePoints//100
             battle_stats[2] += self.ragePoints//150
             battle_stats[3] += self.ragePoints//100 * 10
+            if battle_stats[3] >= 100:
+                battle_stats[3] = 90
             battle_stats[4] += self.ragePoints//150
 
     def accumulate_rage(self, troop_loss, trty_loss):
