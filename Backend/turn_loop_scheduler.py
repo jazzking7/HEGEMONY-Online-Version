@@ -84,7 +84,7 @@ class turn_loop_scheduler:
             for p in gs.players:
                 if gs.players[p].skill:
                     if gs.players[p].skill.name == 'Robinhood':
-                        if curr_p in gs.players[p].skill.targets and curr_p != p:
+                        if curr_p in gs.players[p].skill.targets:
                             d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
             # Zealous Expansion Reserve Booster
             # Air superiority
@@ -224,7 +224,7 @@ class turn_loop_scheduler:
                 for pid in gs.players:
                     if gs.players[pid].skill:
                         if gs.players[pid].skill.name == "Robinhood":
-                            if player in gs.players[pid].skill.targets and player != pid:
+                            if player in gs.players[pid].skill.targets:
                                 s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
 
                 p.stars += s_amt
