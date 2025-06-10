@@ -907,6 +907,12 @@ def handle_ransom(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.set_ransom(data['choice'])
 
+@socketio.on('send_gather_target')
+def gather_intel(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.get_intel(data['choice'])
+
 @socketio.on('fetch_debt_info')
 def handle_fetch_debt_info():
     pid = request.sid

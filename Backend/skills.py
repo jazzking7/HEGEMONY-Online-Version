@@ -1012,6 +1012,8 @@ class Laplace_Demon(Skill):
     def __init__(self, player, gs):
         super().__init__("Laplace's Demon", player, gs)
         self.gs.server.emit('laplace_mode', room=self.player)
+        self.known = []
+        self.finished_choosing = False
         names = []
         for miss in self.gs.Mset:
             if miss.name not in names:
@@ -1031,19 +1033,57 @@ class Laplace_Demon(Skill):
 
     def update_current_status(self):
         # modify this
+        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
         information = "You own the top information gathering group, click on player to know their hidden stats. Missions that are most likely in game: "
         for name in self.names:
             information += name + ' '
+        information += "\n"
+        for p in self.known:
+            for pl in self.gs.players:
+                if self.gs.players[pl].name == p:
+                    for miss in self.gs.Mset:
+                        if miss.player == pl:
+                            information += f"{p} has {miss.name} as their secret agenda.\n"
+                            break
+                    break
+        html_info = information.replace('\n', '<br>')
         self.gs.server.emit("update_skill_status", {
             'name': "Laplace's Demon",
-            'description': information,
+            'description': html_info,
             'operational': self.active,
+            'limits': limit,
+            'hasLimit': True,
+            'btn_msg': "Gather Advanced Intel"
         }, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
         info += "Know as much as you do :)"
         return info
+    
+    def get_potential_targets(self):
+        plist = []
+        for p in self.gs.players:
+            if p != self.player:
+                currp = self.gs.players[p]
+                if currp.name not in self.known:
+                    plist.append(currp.name)
+        return plist
+    
+    def get_intel(self, target):
+        self.finished_choosing = True
+        self.known.append(target)
+        self.gs.players[self.player].stars -= 4
+        self.gs.update_private_status(self.player)
+    
+    def activate_effect(self):
+        if self.active and self.gs.players[self.player].stars >= 4:
+            if len(self.known) < (len(self.gs.players)-1):
+                self.gs.GES.handle_async_event({'name':"G_I"}, self.player)
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "No more intel can be gathered"}, room=self.player)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "War art is currently sealed!"}, room=self.player)
 
 class Arsenal_of_the_Underworld(Skill):
     

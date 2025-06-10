@@ -166,6 +166,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
         elif n == 'M_R':
             self.curr_thread = threading.Thread(target=self.make_ransom, args=(pid,))
+        elif n == 'G_I':
+            self.curr_thread = threading.Thread(target=self.gather_intel, args=(pid,))
         
         self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
@@ -312,6 +314,20 @@ class General_Event_Scheduler:
         potential_targets = self.gs.players[pid].skill.get_potential_targets()
         self.gs.players[pid].skill.finished_choosing = False
         self.gs.server.emit('make_ransom', {'targets': potential_targets}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': None}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.finished_choosing
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def gather_intel(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        potential_targets = self.gs.players[pid].skill.get_potential_targets()
+        self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('gather_intel', {'targets': potential_targets}, room=pid)
         self.gs.server.emit('change_click_event', {'event': None}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
         done = False

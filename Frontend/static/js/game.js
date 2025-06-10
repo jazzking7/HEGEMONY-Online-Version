@@ -2360,6 +2360,103 @@ socket.on('arsenal_controls', function(data) {
     }  
 });
 
+// loan shark
+socket.on('gather_intel', function(data) {
+  // Set the announcement message
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h4>Choose a target to uncover their agenda!</h4>`;
+
+  // Ensure required elements are visible
+  let middleDisplay = $('#middle_display');
+  let middleTitle = $('#middle_title');
+  let middleContent = $('#middle_content');
+
+  middleDisplay.show();
+  middleTitle.empty();
+  middleContent.empty();
+
+  // Create container for buttons
+  let buttonContainer = $('<div></div>')
+      .addClass('d-flex flex-wrap justify-content-between')
+      .css({
+          'max-height': '8rem',  // Limit the height to make it scrollable if too many rows
+          'overflow-y': 'auto',  // Enable vertical scrolling
+          'gap': '2px'          // Space between buttons
+      });
+
+  // Variable to track the currently selected button
+  let selectedButton = null;
+
+  // Loop through each target name and create buttons
+  data.targets.forEach(function(name) {
+      let button = $('<button></button>')
+          .addClass('btn m-2')
+          .css({
+              'padding': '2px',
+              'text-align': 'center',
+              'background-color': '#FFC107', // Bootstrap warning color
+              'color': '#333333' // Dark gray text
+          })
+          .text(name)
+          .click(function(){
+              // Remove red border from previously selected button
+              if (selectedButton) {
+                  selectedButton.css('border', 'none');
+              }
+
+              // Highlight the current button with a red border
+              $(this).css({
+                  'border': '2px solid red'
+              });
+
+              // Update the reference to the selected button
+              selectedButton = $(this);
+
+              // Show the control panel
+              document.getElementById('control_mechanism').innerHTML = '';
+              document.getElementById('control_panel').style.display = 'none';
+              document.getElementById('control_panel').style.display = 'flex';
+              $('#proceed_next_stage').hide();
+
+              // Confirm button action
+              $('#control_confirm').off('click').on('click', function(){
+                  document.getElementById('control_panel').style.display = 'none';
+                  socket.emit('send_gather_target', {'choice': name});
+
+                  // Clear middle content and title
+                  middleTitle.empty();
+                  middleContent.empty();
+
+                  // Remove red border from selected button
+                  if (selectedButton) {
+                      selectedButton.css('border', 'none');
+                      selectedButton = null;
+                  }
+              });
+
+              // Cancel button action
+              $('#control_cancel').off('click').on('click', function(){
+                  document.getElementById('control_panel').style.display = 'none';
+                  $('#proceed_next_stage').show();
+
+                  // Remove red border from selected button
+                  if (selectedButton) {
+                      selectedButton.css('border', 'none');
+                      selectedButton = null;
+                  }
+              });
+          });
+
+      buttonContainer.append(button);
+  });
+
+  // Add the button container to middle_content
+  middleContent.append(buttonContainer);
+  if (data.targets.length === 0) {
+    middleContent.append('<p>No target available.</p>');
+  }  
+});
+
 
 socket.on('show_debt_button', function(){
   popup("Your command system is currently restricted by enemy ransomware!", 3000);
