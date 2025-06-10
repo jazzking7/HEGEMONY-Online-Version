@@ -909,7 +909,7 @@ const contentData = {
   <h3 class="font-semibold mb-2">Zealous Expansion</h3>
   <p class="italic mb-2">"The road to success is always under construction."</p>
   <p class="mb-4">
-    Cost to upgrade Infrastructure level is reduced from 4★ to 2★ per level. For every infrastructure level upgraded, you get 3 extra reserves per turn.
+    Cost to upgrade Infrastructure level is reduced from 4★ to 2★ per level. For every infrastructure level upgraded, you get 5 extra reserves per turn.
     In all battles, 1 Infrastructure Level is added on top of your current Infrastructure Level.
   </p>
 </section>
