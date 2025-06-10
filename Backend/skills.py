@@ -1597,7 +1597,7 @@ class Loopwalker(Skill):
         limit = self.aval_loops if self.aval_loops > 0 else 0
         self.gs.server.emit("update_skill_status", {
             'name': "Loopwalker",
-            'description': f"Run all battles through multiple timelines and keep the best result. {limit} time loops available.",
+            'description': f"Run all battles through multiple timelines and keep the best result. {limit} time loops available. Maximum 100 loops can be set per battle",
             'operational': self.active,
             'intset': self.loop_per_battle,
             'btn_msg': "Tune Parallel Runs"
