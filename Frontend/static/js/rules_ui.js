@@ -963,8 +963,7 @@ const contentData = {
   <h3 class="font-semibold mb-2">Necromancer</h3>
   <p class="italic mb-2">"One who controls the dead commands the living."</p>
   <p class="mb-4">
-    Holder of the Staff of Limbo. After activating the staff, the player enters a Blood Moon phase. Under this phase, all enemy casualties from the player’s attacks are turned into reserves.
-    There is a 1 round cooldown each time the staff is activated.
+    Holder of the Staff of Limbo. During the Conquest Stage, the player enters the Blood Moon phase. All enemy casualties from the player’s attacks are turned into reserves.
   </p>
 
   <h4 class="font-semibold mb-1">Submission by Death</h4>

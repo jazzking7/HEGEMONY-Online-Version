@@ -949,7 +949,7 @@ class Game_State_Manager:
             # Necromancer
             if atk_p.skill:
                 if atk_p.skill.active:
-                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
+                    if atk_p.skill.name == "Necromancer":
                         atk_p.reserves += def_amt-result[1]
                         self.update_private_status(a_pid)
             
@@ -985,7 +985,7 @@ class Game_State_Manager:
         
             if atk_p.skill:
                 if atk_p.skill.active:
-                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
+                    if atk_p.skill.name == "Necromancer":
                         atk_p.reserves += def_amt-result[1]
                         self.update_private_status(a_pid)
 

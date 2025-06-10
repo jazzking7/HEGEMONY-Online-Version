@@ -671,31 +671,17 @@ class Elitocracy(Skill):
 class Necromancer(Skill):
     def __init__(self, player, gs):
         super().__init__("Necromancer", player, gs)
-        
-        self.hasCooldown = True
-        self.hasRoundEffect = True
-        self.hasTurnEffect = True
-
-        self.activated = False
-        self.cooldown = 0
 
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Necromancer",
-            'description': "When opponents attack you and fail, their losses become your reserves. Can activate Blood Harvest, where losses from the enemies during your conquest become your reserves.",
+            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves.",
             'operational': self.active,
-            'hasLimit': True,
-            'limits': "infinite amount of",
-            'btn_msg': "FETCH ME THEIR SOULS!",
-            'activated': self.activated,
-            'cooldown': self.cooldown,
-            'inUseMsg': "BLOOD HARVEST ACTIVE"
         }, room=self.player) 
     
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
-        info += f'Number of rounds of cooldown left: {self.cooldown}\n' if self.cooldown else "Ready to activate"
         return info
     
     def apply_round_effect(self,):
