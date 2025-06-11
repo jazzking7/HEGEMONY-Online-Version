@@ -33,6 +33,7 @@ class Player:
         self.stars = 0
         self.reserves = 0
         self.s_city_amt = 0  # city amount to settle in innerAsync actions
+        self.m_city_amt = 0  # megacity amount to settle in innerAsync actions
         # alliance
         self.hasAllies = False
         self.allies = []
@@ -658,7 +659,7 @@ class Game_State_Manager:
             if t.isCity:
                 t_score += 1
             if t.isMegacity:
-                bonus += 1
+                bonus += 5
             if t.isTransportcenter:
                 bonus += 2
             t_score += 1
@@ -675,7 +676,7 @@ class Game_State_Manager:
                     if t.isCity:
                         t_score += 1
                     if t.isMegacity:
-                        bonus += 1
+                        bonus += 5
                     if t.isTransportcenter:
                         bonus += 2
                     t_score += 1

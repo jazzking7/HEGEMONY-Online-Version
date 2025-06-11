@@ -382,6 +382,8 @@ socket.on('update_trty_display', function(data){
       if (field == 'hasDev'){
         if (changes[field] == 'city'){
           territories[tid].devImg = cityImage;
+        } else if (changes[field] == 'megacity'){
+          territories[tid].devImg = megacityImage;
         } else {
           territories[tid].devImg = null;
         }
@@ -417,6 +419,8 @@ socket.on('change_click_event', function(data){
     currEvent = deploy_reserves;
   } else if (data.event == 'build_cities') {
     currEvent = build_cities;
+  } else if (data.event == 'raise_megacities') {
+    currEvent = raise_megacities;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1314,6 +1318,16 @@ socket.on('build_cities', function(data){
   announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
 })
 
+// Set and display the city amount for megacity settlement event
+socket.on('raise_megacities', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Raising new megacities, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.clist;
+})
+
 // Warning during city settlement
 socket.on('update_settle_status', function(data){
   popup(data.msg, 3000);
@@ -1377,6 +1391,31 @@ function build_cities(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function raise_megacities(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_megacities', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1561,30 +1600,44 @@ btn_sep_auth.onclick = function () {
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="d-inline-block text-center">
+    <div class="d-flex flex-column justify-content-between align-items-center" style="max-height: 120px; overflow-y: auto;">
+
+      <div>
+        <div class="d-inline-block text-center">
           <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#3F805E'"
-    onmouseout="this.style.backgroundColor='#58A680'">
-              <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
-              <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
+            onmouseout="this.style.backgroundColor='#58A680'">
+            <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
+            <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
           </button>
-      </div>
+        </div>
 
-      <div class="d-inline-block text-center">
+        <div class="d-inline-block text-center">
           <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#484E80'"
-    onmouseout="this.style.backgroundColor='#6067A1'">
-              <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
-              <span class="small mt-1">BUILD CITIES</span>
+            onmouseout="this.style.backgroundColor='#6067A1'">
+            <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
+            <span class="small mt-1">BUILD CITIES</span>
           </button>
+        </div>
+
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#814B56'"
+            onmouseout="this.style.backgroundColor='#A1606C'">
+            <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
+            <span class="small mt-1">MOBILIZATION</span>
+          </button>
+        </div>
       </div>
 
-      <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#814B56'"
-    onmouseout="this.style.backgroundColor='#A1606C'">
-              <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
-              <span class="small mt-1">MOBILIZATION</span>
+      <div class="mt-2">
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-mega" style="background-color: #FDB13F; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#FDBB4E'"
+            onmouseout="this.style.backgroundColor='#FDB13F'">
+            <img src="/static/Assets/Dev/megacity.png" alt="Megacity" style="max-height: 60px;">
+            <span class="small mt-1">RAISE MEGACITY</span>
           </button>
+        </div>
       </div>
+
     </div>
 
     <div class="flex items-center justify-center mt-2">
@@ -1666,6 +1719,29 @@ btn_sep_auth.onclick = function () {
         $("#convertBtn").on('click', function(){
           socket.emit('upgrade_infrastructure', {'amt': $("#amtSlider").val()});
           //Shutting off
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // RAISE MEGACITY
+    $("#btn-mega").off('click').on('click', function(){
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO RAISE MEGACITY!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Megacities to raise:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Raise</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "R_M", 'amt': $("#amtSlider").val()});
           $('#middle_display').hide()
           $('#middle_title, #middle_content').empty();
         });

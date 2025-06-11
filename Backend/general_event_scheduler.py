@@ -150,6 +150,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
         elif n == 'B_C':
             self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
+        elif n == 'R_M':
+            self.curr_thread = threading.Thread(target=self.raise_megacities, args=(data, pid))
         elif n == 'BFC':
             self.curr_thread = threading.Thread(target=self.build_free_cities, args=(pid,))
         elif n == 'D_P':
@@ -206,6 +208,26 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def raise_megacities(self, data, pid):
+        clist = []
+        for t in self.gs.players[pid].territories:
+            if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity:
+                clist.append(t)
+        if len(clist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough cities that can be upgraded to megacities!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('raise_megacities', {'amount': int(data['amt']), 'clist': clist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "raise_megacities"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].m_city_amt = data['amt']
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].m_city_amt == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -297,7 +319,7 @@ class General_Event_Scheduler:
 
     def corrupt_territory(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
-        corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories]
+        corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories and not self.gs.map.territories[tid].isMegacity]
         self.gs.players[pid].skill.finished_choosing = False
         self.gs.server.emit('corrupt_territory', {'targets': corruptables}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "corrupt_territory"}, room=pid)

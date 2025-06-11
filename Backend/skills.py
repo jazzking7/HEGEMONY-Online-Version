@@ -799,7 +799,11 @@ class Divine_Punishment(Skill):
                                 break
                         self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
 
-            chosen_trty.isCity = False
+            wasMega = chosen_trty.isMegacity
+            if chosen_trty.isMegacity:
+                chosen_trty.isMegacity = False
+            else:
+                chosen_trty.isCity = False
             chosen_trty.isDeadZone = 2
 
             casualties = math.ceil(0.75*chosen_trty.troops)
@@ -824,8 +828,11 @@ class Divine_Punishment(Skill):
                         f'{choice}': {'tid': choice, 'number': casualties},
                     }, room=self.gs.lobby)
                     break
-
-            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            
+            if wasMega:
+                self.gs.server.emit('update_trty_display', {choice: {'hasDev': 'city', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            else:
+                self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
 
@@ -997,6 +1004,10 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
             return
+        
+        if self.gs.map.territories[choice].isMegacity:
+            self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+            self.gs.players[self.player].skill.finished_choosing = True
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)

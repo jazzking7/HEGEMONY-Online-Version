@@ -49,7 +49,7 @@ class Skill_Distributor:
         elif skill_name == "Ares' Blessing":
             return "Berserker War Art that increase your Industrial and Infrastructure Level by 2 while raising your damage multiplier to 2 when activated. Last for 1 turn and there is a 3 round cooldown between usages."
         elif skill_name == "Zealous_Expansion":
-            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 4★. +1 Infrastructure Level during battles. +3 reserves for every Infrastructure Level increased."
+            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 4★. +1 Infrastructure Level during battles. +5 reserves for every Infrastructure Level increased."
         elif skill_name == "Elitocracy":
             return "Able to increase your Minimum Roll by 1 using 3★. Your damage multiplier increases as your Minimum Roll increases."
         elif skill_name == "Necromancer":
