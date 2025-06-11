@@ -1511,7 +1511,9 @@ class Pandora_Box(Skill):
         self.hasRoundEffect = True
         self.curr_pull = 100
         self.receivedBlessings = []
+        self.guarantee = 0
         self.gs.players[self.player].stars += 2
+        self.gs.update_private_status(self.player)
 
     def apply_round_effect(self):
         self.curr_pull = 100
@@ -1562,6 +1564,9 @@ class Pandora_Box(Skill):
     def get_outcome(self):
         # more star, more reserves, stats increase, intel
         num = random.randint(1, 100)
+        if num < 56 and self.guarantee >= 5:
+            num = random.randint(56, 100)
+            self.guarantee = 0
         if num < 20: # 20%
             self.gs.server.emit("display_special_notification", {"msg": "Received nothing.....", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
         elif num < 40: # 20%
@@ -1620,6 +1625,10 @@ class Pandora_Box(Skill):
             self.indus += 2
             self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Industrial Level')
+        if num < 56:
+            self.guarantee += 1
+        else:
+            self.guarantee = 0
 
 class Loopwalker(Skill):
     def __init__(self, player, gs):
