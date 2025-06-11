@@ -158,9 +158,9 @@ async function initializeLibraries(){
 }
 
 function loadGameSketch() {
-  let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-  let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
-  loadScript(scriptUrl);
+  // let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
+  // let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+  // loadScript(scriptUrl);
 }
 
 async function initializeSketch() {
