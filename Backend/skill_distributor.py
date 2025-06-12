@@ -28,7 +28,7 @@ class Skill_Distributor:
         ]
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=7)
+        return random.sample(self.skill_options, k=8)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
