@@ -1806,7 +1806,7 @@ btn_sep_auth.onclick = function () {
         `<p>Select number of forts to set up:</p>
           <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/1)} step="1" value="1">
           <p id="samt">1</p>
-          <button id="convertBtn" class="btn btn-success btn-block">Raise</button>
+          <button id="convertBtn" class="btn btn-success btn-block">Set Up</button>
         `);
         $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
         $("#convertBtn").on('click', function(){
