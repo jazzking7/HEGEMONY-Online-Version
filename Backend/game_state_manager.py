@@ -830,14 +830,14 @@ class Game_State_Manager:
                 def_p.skill.reactStatsMod(def_stats, atk_stats, False)
 
         if atk_p.skill:
-            if "Realm_of_Permafrost" == atk_p.skill.name:
+            if "Realm_of_Permafrost" == atk_p.skill.name and atk_p.skill.active:
                 atk_stats[3] = 0
                 atk_stats[4] = 1
                 def_stats[3] = 0
                 def_stats[4] = 1
 
         if def_p.skill:
-            if "Realm_of_Permafrost" == def_p.skill.name:
+            if "Realm_of_Permafrost" == def_p.skill.name and def_p.skill.active:
                 atk_stats[3] = 0
                 atk_stats[4] = 1
                 def_stats[3] = 0
@@ -874,6 +874,10 @@ class Game_State_Manager:
         # Compute player battle stats
         atk_stats = atk_p.temp_stats[:]
         def_stats = self.get_player_battle_stats(def_p)
+
+        # Fortification
+        if trty_def.isFort:
+            def_stats[3] += 25
 
         # elitocracy territory based stat increase
         if atk_p.skill:
@@ -966,6 +970,10 @@ class Game_State_Manager:
                     if m.name == "Gambler" and m.player == a_pid:
                         if atk_amt < def_amt:
                             m.check_conditions(def_amt)
+
+            if trty_def.isFort:
+                trty_def.isFort = False
+                self.server.emit('update_trty_display', {t2: {'hasEffect': 'gone'}}, room=self.lobby)
 
         # defender wins
         else:

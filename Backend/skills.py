@@ -113,7 +113,7 @@ class Iron_Wall(Skill):
     def reactStatsMod(self, ownStats, enemyStats, attacking):
         if not attacking and self.active:
 
-            ownStats[3] = 30
+            ownStats[3] += 30
             ownStats[4] = 2
 
             disparity = (enemyStats[0] - ownStats[0]) + (enemyStats[1] - ownStats[1])
@@ -133,8 +133,12 @@ class Iron_Wall(Skill):
                 ownStats[3] += 5
 
             if self.ironwall:
-                ownStats[3] = 90
-                ownStats[4] = 3
+                if ownStats[3] <= 60:
+                    ownStats[3] = 90
+                    ownStats[4] = 3
+                else:
+                    ownStats[3] = 95
+                    ownStats[4] = 3
     
     def turn_off_iron_wall(self):
         self.ironwall = False
@@ -805,6 +809,9 @@ class Divine_Punishment(Skill):
             else:
                 chosen_trty.isCity = False
             chosen_trty.isDeadZone = 2
+
+            # Remove Fortification
+            chosen_trty.isFort = False
 
             casualties = math.ceil(0.75*chosen_trty.troops)
             chosen_trty.troops -= casualties

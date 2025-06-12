@@ -391,6 +391,8 @@ socket.on('update_trty_display', function(data){
       } else if (field == 'hasEffect') {
         if (changes[field] == 'nuke') {
           territories[tid].insig = radioImage;
+        } else if (changes[field] == 'fort') {
+          territories[tid].insig = fortImage;
         } else {
           territories[tid].insig = null;
         }
@@ -421,6 +423,8 @@ socket.on('change_click_event', function(data){
     currEvent = build_cities;
   } else if (data.event == 'raise_megacities') {
     currEvent = raise_megacities;
+  } else if (data.event == 'set_forts') {
+    currEvent = set_forts;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1318,6 +1322,15 @@ socket.on('build_cities', function(data){
   announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
 })
 
+socket.on('set_forts', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling new forts, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
   city_amt = data.amount;
@@ -1416,6 +1429,31 @@ function raise_megacities(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_megacities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_forts(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_forts', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1600,7 +1638,7 @@ btn_sep_auth.onclick = function () {
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
-    <div class="d-flex flex-column justify-content-between align-items-center" style="max-height: 120px; overflow-y: auto;">
+    <div class="d-flex flex-column justify-content-between align-items-center" style="max-height: 180px; overflow-y: auto;">
 
       <div>
         <div class="d-inline-block text-center">
@@ -1636,6 +1674,15 @@ btn_sep_auth.onclick = function () {
             <span class="small mt-1">RAISE MEGACITY</span>
           </button>
         </div>
+
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-fort" style="background-color: #878787; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#444444'"
+            onmouseout="this.style.backgroundColor='#878787'">
+            <img src="/static/Assets/Insig/fort.png" alt="Fort" style="max-height: 60px;">
+            <span class="small mt-1">SET UP FORTS</span>
+          </button>
+        </div>
+
       </div>
 
     </div>
@@ -1747,6 +1794,28 @@ btn_sep_auth.onclick = function () {
         });
     });
 
+    // RAISE MEGACITY
+    $("#btn-fort").off('click').on('click', function(){
+      if (sep_auth < 1){
+        popup('MINIMUM 1 STAR TO SET UP FORT!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of forts to set up:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/1)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Raise</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "S_F", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
 
   });
 }

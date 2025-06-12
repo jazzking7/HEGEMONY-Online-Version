@@ -170,6 +170,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.make_ransom, args=(pid,))
         elif n == 'G_I':
             self.curr_thread = threading.Thread(target=self.gather_intel, args=(pid,))
+        elif n == 'S_F':
+            self.curr_thread = threading.Thread(target=self.set_forts, args=(data, pid))
         
         self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
@@ -199,12 +201,32 @@ class General_Event_Scheduler:
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
 
+    def set_forts(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isFort and not self.gs.map.territories[t].isDeadZone:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can be fortified!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_forts', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_forts"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
     def build_cities(self, data, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_cities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
-        self.gs.players[pid].s_city_amt = data['amt']
+        self.gs.players[pid].s_city_amt = int(data['amt'])
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
@@ -224,7 +246,7 @@ class General_Event_Scheduler:
         self.gs.server.emit('raise_megacities', {'amount': int(data['amt']), 'clist': clist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "raise_megacities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
-        self.gs.players[pid].m_city_amt = data['amt']
+        self.gs.players[pid].m_city_amt = int(data['amt'])
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].m_city_amt == 0

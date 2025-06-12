@@ -19,6 +19,7 @@ class Territory:
 
         self.isMegacity = False
         self.isTransportcenter = False
+        self.isFort = False
         # self.isSEZ = False
         
         self.owner = None
