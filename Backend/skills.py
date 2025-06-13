@@ -781,6 +781,7 @@ class Divine_Punishment(Skill):
                 for nt in chosen_trty.neighbors:
                     if nt not in self.gs.players[self.player].territories:
                         self.gs.map.territories[nt].isDeadZone = 2
+                        self.gs.map.territories[nt].isFort = False
                         shockwave = min(5, self.gs.map.territories[nt].troops)
                         self.gs.map.territories[nt].troops -= shockwave
                         for player in self.gs.players:

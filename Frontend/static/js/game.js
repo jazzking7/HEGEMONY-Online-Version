@@ -393,6 +393,8 @@ socket.on('update_trty_display', function(data){
           territories[tid].insig = radioImage;
         } else if (changes[field] == 'fort') {
           territories[tid].insig = fortImage;
+        } else if (changes[field] == 'hall') {
+          territories[tid].hallImg = hallImage;
         } else {
           territories[tid].insig = null;
         }
@@ -425,6 +427,8 @@ socket.on('change_click_event', function(data){
     currEvent = raise_megacities;
   } else if (data.event == 'set_forts') {
     currEvent = set_forts;
+  } else if (data.event == 'set_hall') {
+    currEvent = set_hall;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1331,6 +1335,15 @@ socket.on('set_forts', function(data){
   clickables = data.flist;
 })
 
+socket.on('set_hall', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Intalling Governance Halls, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
   city_amt = data.amount;
@@ -1454,6 +1467,31 @@ function set_forts(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_forts', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_hall(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_hall', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1667,6 +1705,7 @@ btn_sep_auth.onclick = function () {
       </div>
 
       <div class="mt-2">
+
         <div class="d-inline-block text-center">
           <button class="btn d-flex flex-column align-items-center" id="btn-mega" style="background-color: #FDB13F; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#FDBB4E'"
             onmouseout="this.style.backgroundColor='#FDB13F'">
@@ -1680,6 +1719,14 @@ btn_sep_auth.onclick = function () {
             onmouseout="this.style.backgroundColor='#878787'">
             <img src="/static/Assets/Insig/fort.png" alt="Fort" style="max-height: 60px;">
             <span class="small mt-1">SET UP FORTS</span>
+          </button>
+        </div>
+
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-hall" style="background-color: #6C3BAA; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#CC8899'"
+            onmouseout="this.style.backgroundColor='#6C3BAA'">
+            <img src="/static/Assets/Insig/CAD.png" alt="Hall" style="max-height: 60px;">
+            <span class="small mt-1">INSTALL HALL OF GOVERNANCE</span>
           </button>
         </div>
 
@@ -1794,7 +1841,7 @@ btn_sep_auth.onclick = function () {
         });
     });
 
-    // RAISE MEGACITY
+    // Fortified
     $("#btn-fort").off('click').on('click', function(){
       if (sep_auth < 1){
         popup('MINIMUM 1 STAR TO SET UP FORT!', 2000);
@@ -1812,6 +1859,29 @@ btn_sep_auth.onclick = function () {
         $("#convertBtn").on('click', function(){
           hide_async_btns();
           socket.emit('send_async_event', {'name': "S_F", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Hall of Governance
+    $("#btn-hall").off('click').on('click', function(){
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO SET UP FORT!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Halls of Governance to set up:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Install</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "S_H", 'amt': $("#amtSlider").val()});
           $('#middle_display').hide()
           $('#middle_title, #middle_content').empty();
         });

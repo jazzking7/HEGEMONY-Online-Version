@@ -138,6 +138,13 @@ class turn_loop_scheduler:
         if atk_player.skill:
             if atk_player.skill.active and atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
                 atk_player.skill.turn_off_iron_wall()
+
+        # Hall giving authority
+        for t in atk_player.territories:
+            if gs.map.territories[t].isHall:
+                atk_player.stars += 1
+                gs.update_private_status(player)
+
         # Player temporary battle stats not updated
         ms.stats_set = False
 

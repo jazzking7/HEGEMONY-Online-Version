@@ -662,6 +662,8 @@ class Game_State_Manager:
                 bonus += 5
             if t.isTransportcenter:
                 bonus += 2
+            if t.isHall:
+                bonus += 2
             t_score += 1
 
         # Collusion bonus
@@ -717,6 +719,47 @@ class Game_State_Manager:
             self.get_SUP()
             self.update_global_status()
             self.signal_MTrackers('popu')
+
+    def shifted_high_roll(self, a_min, a_maxv, shift_ratio=0.25):
+
+        values = list(range(a_min, a_maxv + 1))
+        n = len(values)
+        base_prob = 1 / n
+        avg = (a_min + a_maxv) / 2
+
+
+        probs = [base_prob for _ in values]
+
+
+        low_idxs = [i for i, v in enumerate(values) if v < avg]
+        high_idxs = [i for i, v in enumerate(values) if v >= avg]
+
+        if not low_idxs or len(high_idxs) < 2:
+            return random.choices(values, weights=probs, k=1)[0]
+
+
+        take_amount = shift_ratio * base_prob
+        for i in low_idxs:
+            probs[i] -= take_amount
+
+        total_taken = take_amount * len(low_idxs)
+        portions = [2] + [1] * (len(low_idxs) - 2)
+        portion_total = sum(portions)
+
+        if portion_total == 0:
+            return random.choices(values, weights=probs, k=1)[0]
+
+        portion_unit = total_taken / portion_total
+
+
+        for i, amount in zip(high_idxs[:-1], portions):
+            probs[i] += amount * portion_unit
+
+
+        total_prob = sum(probs)
+        probs = [p / total_prob for p in probs]
+
+        return probs
 
     def get_player_industrial_level(self, player):
         lvl = 0
@@ -909,6 +952,18 @@ class Game_State_Manager:
             if def_p.skill.name == 'Arsenal of the Underworld':
                 ld = def_p.skill.get_landmine_damage(t2, atk_amt)
 
+        atkh = False
+        defh = False
+        # Central Managed Troop Training
+        for h1 in atk_p.territories:
+            if self.map.territories[h1].isHall:
+                atkh = True
+                break
+        for h2 in def_p.territories:
+            if self.map.territories[h2].isHall:
+                defh = True
+                break
+
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefending amount: {def_amt} Defender stats: {def_stats}")
         multitime = False
@@ -920,9 +975,9 @@ class Game_State_Manager:
                 multitime = True
 
         if multitime: # time looper
-            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p)
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh)
         else: # normal
-            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats)
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh)
         print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
@@ -1051,7 +1106,7 @@ class Game_State_Manager:
         if self.gambler_win:
             self.GES.halt_events()
         
-    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh):
         
         # Troop amount
         a_troops = atk_amt
@@ -1071,13 +1126,37 @@ class Game_State_Manager:
         if d_min > d_maxv:
             d_min = d_maxv
 
+        aprobs = None
+        dprobs = None
+        if atkh:
+            aprobs = self.shifted_high_roll(a_min, a_maxv)
+        if defh:
+            dprobs = self.shifted_high_roll(d_min, d_maxv)
+
+        if not atkh:
+            print(f"Attacker is running on standard distribution")
+        else:
+            print(f"Attacker is running on: {aprobs}")
+
+        if not defh:
+            print(f"Defender is running on standard distribution")
+        else:
+            print(f"Defender is running on: {dprobs}")
+
         print(a_troops, d_troops)
 
         # Starts simulation
         while(a_troops > 0 and d_troops > 0):
 
-            a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
-            d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
+            if atkh:
+                a_rolls = sorted(random.choices(population=list(range(a_min, a_maxv + 1)), weights=aprobs, k=a_maxt),reverse=True)
+            else:
+                a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+
+            if defh:
+                d_rolls = sorted(random.choices(population=list(range(d_min, d_maxv + 1)), weights=dprobs, k=d_maxt),reverse=True)
+            else:
+                d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
             max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
 
@@ -1097,7 +1176,7 @@ class Game_State_Manager:
 
         return [a_troops, d_troops]
 
-    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p):
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh):
 
         # Time loop setting
         atk_loop, def_loop, run_loop = 1, 1, 1
@@ -1160,6 +1239,23 @@ class Game_State_Manager:
         if d_min > d_maxv:
             d_min = d_maxv
 
+        aprobs = None
+        dprobs = None
+        if atkh:
+            aprobs = self.shifted_high_roll(a_min, a_maxv)
+        if defh:
+            dprobs = self.shifted_high_roll(d_min, d_maxv)
+
+        if not atkh:
+            print(f"Attacker is running on standard distribution")
+        else:
+            print(f"Attacker is running on: {aprobs}")
+
+        if not defh:
+            print(f"Defender is running on standard distribution")
+        else:
+            print(f"Defender is running on: {dprobs}")
+
         print(a_troops, d_troops)
         print(f"Running {run_loop} loops.")
         outcomes = []
@@ -1168,8 +1264,15 @@ class Game_State_Manager:
 
             while(a_troops > 0 and d_troops > 0):
 
-                a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
-                d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
+                if atkh:
+                    a_rolls = sorted(random.choices(population=list(range(a_min, a_maxv + 1)), weights=aprobs, k=a_maxt),reverse=True)
+                else:
+                    a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+
+                if defh:
+                    d_rolls = sorted(random.choices(population=list(range(d_min, d_maxv + 1)), weights=dprobs, k=d_maxt),reverse=True)
+                else:
+                    d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
                 max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
 
