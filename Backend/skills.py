@@ -212,7 +212,7 @@ class Dictator(Skill):
         self.limit -= 1
         
         added_stars = 0
-        max_add = 12
+        max_add = 6
 
         donors = sorted(
             [p for p in self.gs.players if p != self.player],

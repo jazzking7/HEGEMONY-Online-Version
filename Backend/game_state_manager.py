@@ -921,6 +921,7 @@ class Game_State_Manager:
         # Fortification
         if trty_def.isFort:
             def_stats[3] += 25
+            def_stats[4] += 1
 
         # elitocracy territory based stat increase
         if atk_p.skill:
