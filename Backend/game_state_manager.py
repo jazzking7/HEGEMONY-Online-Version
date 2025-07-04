@@ -647,6 +647,7 @@ class Game_State_Manager:
         bonus = 0
         t_score = 0
         p = self.players[player]
+        divider = 3
         for trty in p.territories:
 
             # Collusion takeaway
@@ -661,7 +662,7 @@ class Game_State_Manager:
             if t.isMegacity:
                 bonus += 5
             if t.isTransportcenter:
-                bonus += 2
+                divider = 2
             if t.isHall:
                 bonus += 2
             t_score += 1
@@ -679,8 +680,8 @@ class Game_State_Manager:
                         t_score += 1
                     if t.isMegacity:
                         bonus += 5
-                    if t.isTransportcenter:
-                        bonus += 2
+                    # if t.isTransportcenter:
+                    #     bonus += 2
                     t_score += 1
         bonus += self.map.get_continental_bonus(p.territories)
 
@@ -689,14 +690,14 @@ class Game_State_Manager:
             if p.skill.name == "Realm_of_Permafrost" and p.skill.active:
                 if t_score < 9:
                     return bonus + 3
-                return bonus + t_score//3
+                return bonus + t_score//divider
         if self.in_ice_age:
             if t_score < 15:
                 return math.ceil(bonus*0.6) + 2
-            return math.ceil(bonus*0.6) + t_score//5
+            return math.ceil(bonus*0.6) + t_score//(divider+2)
         if t_score < 9:
             return bonus + 3
-        return bonus + t_score//3
+        return bonus + t_score//divider
 
     def clear_deployables(self, player):
         p =  self.players[player]

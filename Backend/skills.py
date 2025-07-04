@@ -809,6 +809,9 @@ class Divine_Punishment(Skill):
                 chosen_trty.isMegacity = False
             else:
                 chosen_trty.isCity = False
+
+            chosen_trty.isTransportcenter = False
+            
             chosen_trty.isDeadZone = 2
 
             # Remove Fortification
@@ -1013,7 +1016,7 @@ class Collusion(Skill):
             self.gs.players[self.player].skill.finished_choosing = True
             return
         
-        if self.gs.map.territories[choice].isMegacity:
+        if self.gs.map.territories[choice].isMegacity or self.gs.map.territories[choice].isTransportcenter:
             self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
 
