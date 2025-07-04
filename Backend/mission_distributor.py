@@ -267,9 +267,9 @@ class Mission_Distributor:
     def no_conflicts(self, mission_name_list, mission_list):
         print(mission_name_list)
         print(mission_list)
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Pro', 'Ass', 'Sur', 'Gam']
         for name in mission_name_list:
-            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']:
+            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin']:
                 return False
             if name in ['Industrialist', 'Expansionist', 'Dominator', 'Populist'] and mission_name_list.count(name) > 1:
                 return False
