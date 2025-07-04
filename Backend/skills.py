@@ -1518,7 +1518,7 @@ class Reaping_of_Anubis(Skill):
                 if self.gs.players[self.player].stars < 0:
                     self.gs.players[self.player].stars = 0
                 self.gs.update_private_status(self.player)
-                self.cost += 2
+                self.cost += 3
 
 class Pandora_Box(Skill):
     def __init__(self, player, gs):
@@ -1583,7 +1583,7 @@ class Pandora_Box(Skill):
     def get_outcome(self):
         # more star, more reserves, stats increase, intel
         num = random.randint(1, 100)
-        if num < 56 and self.guarantee >= 5:
+        if num < 56 and self.guarantee >= 4:
             num = random.randint(56, 100)
             self.guarantee = 0
         if num < 20: # 20%
