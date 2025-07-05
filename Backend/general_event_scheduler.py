@@ -282,7 +282,7 @@ class General_Event_Scheduler:
     def raise_megacities(self, data, pid):
         clist = []
         for t in self.gs.players[pid].territories:
-            if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity:
+            if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity and not self.gs.map.territories[t].isTransportcenter:
                 clist.append(t)
         if len(clist) < int(data['amt']):
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough cities that can be upgraded to megacities!'}, room=pid)
