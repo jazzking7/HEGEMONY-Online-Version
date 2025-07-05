@@ -1153,7 +1153,7 @@ class Protectionist(Mission):
 class Gambler(Mission):
     def __init__(self, player, gs):
         super().__init__("Gambler", player, gs)
-        self.target_troops = len(self.gs.map.territories)
+        self.target_troops = len(self.gs.map.territories) - 20
         self.curr_troops = 0
     
     def set_up_tracker_view(self, ):
