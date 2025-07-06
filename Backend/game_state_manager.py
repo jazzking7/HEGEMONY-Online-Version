@@ -721,6 +721,26 @@ class Game_State_Manager:
             self.update_global_status()
             self.signal_MTrackers('popu')
 
+    def count_connected_forts(self, player, trty, counted=None):
+        if counted is None:
+            counted = []
+
+        # Only proceed if this territory belongs to the player, is a fort, and not yet counted
+        if trty not in player.territories or trty in counted:
+            return 0
+
+        if not self.map.territories[trty].isFort:
+            return 0
+
+        counted.append(trty)
+        count = 1  # This territory is a fort
+
+        # Now, only explore neighbors that are forts
+        for t in self.map.territories[trty].neighbors:
+            count += self.count_connected_forts(player, t, counted)
+
+        return count
+
     def shifted_high_roll(self, a_min, a_maxv, shift_ratio=0.25):
 
         values = list(range(a_min, a_maxv + 1))
@@ -921,8 +941,12 @@ class Game_State_Manager:
 
         # Fortification
         if trty_def.isFort:
-            def_stats[3] += 25
-            def_stats[4] += 1
+            fortCounts = self.count_connected_forts(def_p, t2)
+            if fortCounts:
+                def_stats[3] += 20 + (fortCounts * 5)
+                def_stats[4] += 1 + (fortCounts//4)
+                if def_stats[3] > 60:
+                    def_stats[3] = 60
 
         # elitocracy territory based stat increase
         if atk_p.skill:
