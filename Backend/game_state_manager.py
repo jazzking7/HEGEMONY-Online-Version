@@ -945,8 +945,12 @@ class Game_State_Manager:
                 def_anu = atk_p.skill.guaranteed_dmg
 
         if def_p.skill:
-            if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active:
+            if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active and def_amt > 0:
                 atk_anu = def_p.skill.guaranteed_dmg
+
+        if def_p.skill:
+            if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
+                def_anu = 0
 
         # landmine explosion
         ld = 0

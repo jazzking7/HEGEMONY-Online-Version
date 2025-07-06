@@ -134,10 +134,10 @@ class Iron_Wall(Skill):
 
             if self.ironwall:
                 if ownStats[3] <= 60:
-                    ownStats[3] = 90
+                    ownStats[3] = 95
                     ownStats[4] = 3
                 else:
-                    ownStats[3] = 95
+                    ownStats[3] = 99
                     ownStats[4] = 3
     
     def turn_off_iron_wall(self):
@@ -606,7 +606,8 @@ class Zealous_Expansion(Skill):
 
     def internalStatsMod(self, battle_stats):
         if self.active:
-            battle_stats[1] += 1
+            addi = (battle_stats[0] - 2) - 3
+            battle_stats[1] += addi
 
     def update_current_status(self):
 
@@ -711,13 +712,13 @@ class Divine_Punishment(Skill):
     def __init__(self, player, gs):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
-        self.energy_cost = 3
+        self.energy_cost = 2
         self.limit = len(gs.players) + 1
         self.finished_bombardment = True
 
-        if self.limit > len(gs.map.territories)//len(gs.players):
-            self.limit = len(gs.map.territories)//len(gs.players) - 2
-            self.energy_cost = 2
+        # if self.limit > len(gs.map.territories)//len(gs.players):
+        #     self.limit = len(gs.map.territories)//len(gs.players) - 2
+        #     self.energy_cost = 2
 
         self.hasRoundEffect = True
         self.energy = 0
@@ -896,7 +897,7 @@ class Air_Superiority(Skill):
 
             bonus = len(distincts)
             self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
-            self.gs.players[self.player].stars += bonus//5
+            self.gs.players[self.player].stars += bonus//4
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
@@ -950,7 +951,7 @@ class Collusion(Skill):
         super().__init__("Collusion", player, gs)
         self.finished_choosing = True
         self.secret_control_list = []
-        self.free_usages = 1
+        self.free_usages = 2
         if len(self.gs.players) > 4:
             self.free_usages += 1
         if len(self.gs.players) > 6:
