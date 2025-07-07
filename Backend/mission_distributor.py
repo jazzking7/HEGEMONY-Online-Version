@@ -213,7 +213,7 @@ class Mission_Distributor:
                 if 'popu' not in gs.MTrackers:
                     gs.MTrackers['popu'] = Event_Based_Tracker(gs)
                 gs.MTrackers['popu'].add_observer(m)
-            if m.name in ['Gambler']:
+            if m.name in ['Gambler', 'Guardian']:
                 gs.SMset.append(m)
         
         # start running the trackers

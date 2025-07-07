@@ -14,6 +14,7 @@ class Player:
         self.name = name
         # status
         self.alive = True
+        self.aliveBefore = True
 
         self.connected = True # Keep track if the player is connected
         self.hijacked = False
@@ -949,6 +950,8 @@ class Game_State_Manager:
                 def_p = self.players[player]
                 d_pid = player       
 
+        def_p.aliveBefore = def_p.alive
+
         # Identify territories
         trty_atk = self.map.territories[t1]
         trty_def = self.map.territories[t2]
@@ -1083,6 +1086,8 @@ class Game_State_Manager:
                     if m.name == "Gambler" and m.player == a_pid:
                         if atk_amt < def_amt:
                             m.check_conditions(def_amt)
+                    if m.name == 'Guardian' and m.player == d_pid and trty_def.isCapital and def_p.alive:
+                        m.signal_mission_failure()
 
             if trty_def.isFort:
                 trty_def.isFort = False
@@ -1159,9 +1164,9 @@ class Game_State_Manager:
         self.update_global_status()
 
         # mission
+        self.signal_MTrackers('trty') # Where Guardian signal mission failure
         self.signal_MTrackers('indus')
         self.signal_MTrackers('popu')
-        self.signal_MTrackers('trty')
 
         self.et.determine_elimination(self, a_pid, d_pid)
         self.egt.determine_end_game(self)

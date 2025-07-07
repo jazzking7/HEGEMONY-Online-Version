@@ -62,14 +62,22 @@ class Mission:
                             self.gs.server.emit('debt_off', room=self.player)
             self.gs.GES.flush_concurrent_event(self.player)
             self.gs.perm_elims.append(self.player)
-            self.gs.death_logs[self.player] = 'MF'
-            self.gs.signal_MTrackers('death')
-            self.gs.get_TIP()
-            self.gs.get_HIP()
-            self.gs.get_MTO()
-            self.gs.get_LAO()
-            self.gs.get_SUP()
-            self.gs.egt.determine_end_game(self.gs)
+            if self.name != "Guardian":
+                self.gs.death_logs[self.player] = 'MF'
+                self.gs.signal_MTrackers('death')
+                self.gs.get_TIP()
+                self.gs.get_HIP()
+                self.gs.get_MTO()
+                self.gs.get_LAO()
+                self.gs.get_SUP()
+                self.gs.egt.determine_end_game(self.gs)
+            else:
+                self.gs.get_TIP()
+                self.gs.get_HIP()
+                self.gs.get_MTO()
+                self.gs.get_LAO()
+                self.gs.get_SUP()
+
 
 class Pacifist(Mission):
 
