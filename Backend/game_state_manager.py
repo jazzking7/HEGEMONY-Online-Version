@@ -59,6 +59,8 @@ class Player:
         self.total_troops = 0
         # Player Power Index
         self.PPI = 0
+        # number of leylines controlled by player
+        self.numLeylines = 0
 
         self.con_amt = 0    # keep counts of how many territories the player has conquered during a turn
 
@@ -721,6 +723,26 @@ class Game_State_Manager:
             self.update_global_status()
             self.signal_MTrackers('popu')
 
+    def leyline_probability(self, num_leylines):
+        if num_leylines < 1:
+            return 0  # no leylines means no probability
+
+        prob = 8
+        increment = 3
+
+        for i in range(2, num_leylines + 1):
+            prob += increment
+            increment += 1
+
+        return prob
+
+    def leyline_damage(self, num_leylines):
+        if num_leylines < 1:
+            return 1
+        base_multiplier = 2
+        bonus = num_leylines // 3
+        return base_multiplier + bonus
+
     def count_connected_forts(self, player, trty, counted=None):
         if counted is None:
             counted = []
@@ -944,9 +966,15 @@ class Game_State_Manager:
             fortCounts = self.count_connected_forts(def_p, t2)
             if fortCounts:
                 def_stats[3] += 20 + (fortCounts * 5)
-                def_stats[4] += 1 + (fortCounts//4)
+                def_stats[2] += 1 + (fortCounts//4)
                 if def_stats[3] > 60:
                     def_stats[3] = 60
+
+        # Leyline
+        acrit = self.leyline_probability(atk_p.numLeylines)
+        dcrit = self.leyline_probability(def_p.numLeylines)
+        acdmg = self.leyline_damage(atk_p.numLeylines)
+        dcdmg = self.leyline_damage(def_p.numLeylines)
 
         # elitocracy territory based stat increase
         if atk_p.skill:
@@ -1005,9 +1033,9 @@ class Game_State_Manager:
                 multitime = True
 
         if multitime: # time looper
-            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh)
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg)
         else: # normal
-            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh)
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg)
         print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
@@ -1059,6 +1087,11 @@ class Game_State_Manager:
             if trty_def.isFort:
                 trty_def.isFort = False
                 self.server.emit('update_trty_display', {t2: {'hasEffect': 'gone'}}, room=self.lobby)
+            
+            if trty_def.isLeyline:
+                trty_def.isLeyline = False
+                self.server.emit('update_trty_display', {t2: {'hasEffect': 'leylineGone'}}, room=self.lobby)
+                def_p.numLeylines -= 1
 
         # defender wins
         else:
@@ -1136,7 +1169,7 @@ class Game_State_Manager:
         if self.gambler_win:
             self.GES.halt_events()
         
-    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh):
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg):
         
         # Troop amount
         a_troops = atk_amt
@@ -1189,13 +1222,31 @@ class Game_State_Manager:
                 d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
             max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
+            
+            a_receive = 0
+            d_receive = 0
 
             for i in range(max_dmg):
                 if a_rolls[i] > d_rolls[i]:
-                    if random.randint(1, 100) > d_null:
-                        d_troops -= 1*a_mul
+                    if random.randint(1, 100) > d_null:                        
+                        d_receive += 1
                 else:
-                    a_troops -= 1*d_mul
+                    a_receive += 1
+
+            if a_receive:
+                dcurr = random.randint(1, 100)
+                dc = 1
+                if dcrit >= dcurr:
+                    print("Defender dealt crit damage")
+                    dc = dcdmg
+                a_troops -= a_receive*d_mul*dc
+            if d_receive:
+                acurr = random.randint(1, 100)
+                ac = 1
+                if acrit >= acurr:
+                    print("Attacker dealt crit damage")
+                    ac = acdmg
+                d_troops -= d_receive*a_mul*ac
             
             # Adjust dice number
             a_maxt = a_troops if a_troops < a_maxt else a_maxt
@@ -1206,7 +1257,7 @@ class Game_State_Manager:
 
         return [a_troops, d_troops]
 
-    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh):
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg):
 
         # Time loop setting
         atk_loop, def_loop, run_loop = 1, 1, 1
@@ -1306,12 +1357,30 @@ class Game_State_Manager:
 
                 max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
 
+                a_receive = 0
+                d_receive = 0
+
                 for i in range(max_dmg):
                     if a_rolls[i] > d_rolls[i]:
-                        if random.randint(1, 100) > d_null:
-                            d_troops -= 1*a_mul
+                        if random.randint(1, 100) > d_null:                        
+                            d_receive += 1
                     else:
-                        a_troops -= 1*d_mul
+                        a_receive += 1
+                        
+                if a_receive:
+                    dcurr = random.randint(1, 100)
+                    dc = 1
+                    if dcrit >= dcurr:
+                        print("Defender dealt crit damage")
+                        dc = dcdmg
+                    a_troops -= a_receive*d_mul*dc
+                if d_receive:
+                    acurr = random.randint(1, 100)
+                    ac = 1
+                    if acrit >= acurr:
+                        print("Attacker dealt crit damage")
+                        ac = acdmg
+                    d_troops -= d_receive*a_mul*ac
                 
                 # Adjust dice number
                 a_maxt = a_troops if a_troops < a_maxt else a_maxt

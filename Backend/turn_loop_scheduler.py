@@ -236,6 +236,13 @@ class turn_loop_scheduler:
 
                 p.stars += s_amt
 
+                if (p.numLeylines * 11) > random.randint(1, 100):
+                    print("Leyline Bonus Received.")
+                    if random.randint(1, 100) > 40:
+                        p.reserves += p.numLeylines * 4
+                    else:
+                        p.stars += p.numLeylines
+
             # Dictator receives more stars
             # Ares clear stats boost
             # Zealous and Industrial clear restrictions

@@ -397,6 +397,10 @@ socket.on('update_trty_display', function(data){
           territories[tid].insig = fortImage;
         } else if (changes[field] == 'hall') {
           territories[tid].hallImg = hallImage;
+        } else if (changes[field] == 'leyline') {
+          territories[tid].leylineImg = leylineImage;
+        } else if (changes[field] == 'leylineGone') {
+          territories[tid].leylineImg = null;
         } else {
           territories[tid].insig = null;
         }
@@ -433,6 +437,8 @@ socket.on('change_click_event', function(data){
     currEvent = set_hall;
   } else if (data.event == 'set_nexus') {
     currEvent = set_nexus;
+  } else if (data.event == 'set_leyline') {
+    currEvent = set_leyline;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1357,6 +1363,14 @@ socket.on('set_nexus', function(data){
   clickables = data.flist;
 })
 
+socket.on('set_leyline', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling Leyline Cross, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
 
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
@@ -1531,6 +1545,31 @@ function set_nexus(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_nexus', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_leyline(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_leyline', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1781,6 +1820,14 @@ btn_sep_auth.onclick = function () {
           </button>
         </div>
 
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-leyline" style="background-color: #6987D5; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#BBDFFA'"
+            onmouseout="this.style.backgroundColor='#6987D5'">
+            <img src="/static/Assets/Insig/leyline.png" alt="Leyline" style="max-height: 60px;">
+            <span class="small mt-1">LEYLINE CROSS</span>
+          </button>
+        </div>
+
       </div>
 
     </div>
@@ -1956,6 +2003,29 @@ btn_sep_auth.onclick = function () {
         $("#convertBtn").on('click', function(){
           hide_async_btns();
           socket.emit('send_async_event', {'name': "L_N", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Leyline Cross
+    $("#btn-leyline").off('click').on('click', function(){
+      if (sep_auth < 2){
+        popup('MINIMUM 2 STARS TO BUILD A LEYLINE CROSS!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Leyline Cross:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "L_C", 'amt': $("#amtSlider").val()});
           $('#middle_display').hide()
           $('#middle_title, #middle_content').empty();
         });
