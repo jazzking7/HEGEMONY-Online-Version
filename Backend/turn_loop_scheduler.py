@@ -242,6 +242,7 @@ class turn_loop_scheduler:
                         p.reserves += p.numLeylines * 4
                     else:
                         p.stars += p.numLeylines
+                    gs.server.emit("display_special_notification", {"msg": "YOU HAVE RECEIVED LEYLINE BLESSING", "t_color": "#000000", "b_color": "#6987D5"}, room=player)
 
             # Dictator receives more stars
             # Ares clear stats boost
