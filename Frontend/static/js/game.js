@@ -1040,10 +1040,23 @@ socket.on('conquest', function(){
   $('#proceed_next_stage .text').text('Finish Conquest');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
-    socket.emit("terminate_conquer_stage");
-    currEvent = null;
-    toHightlight = [];
-    clickables = [];
+
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit("terminate_conquer_stage");
+      currEvent = null;
+      toHightlight = [];
+      clickables = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+    });
+
   });
 });
 
@@ -1895,15 +1908,15 @@ btn_sep_auth.onclick = function () {
 
     // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
-      if (sep_auth < 4){
-        popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+      if (sep_auth < 3){
+        popup('MINIMUM 3 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
-         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
          <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);

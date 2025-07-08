@@ -628,7 +628,7 @@ class Game_State_Manager:
                     return
         if not self.players[player].hijacked:
             self.players[player].infrastructure_upgrade += amt
-            self.players[player].stars -= amt*4
+            self.players[player].stars -= amt*3
             self.update_private_status(player)
             self.update_HIP(player)
             self.get_SUP()

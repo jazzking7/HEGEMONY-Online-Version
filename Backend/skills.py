@@ -613,7 +613,7 @@ class Zealous_Expansion(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 5 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 3★ to 2★. Each additional infrastructure level gives 5 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
