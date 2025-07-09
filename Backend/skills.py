@@ -676,12 +676,20 @@ class Elitocracy(Skill):
 class Necromancer(Skill):
     def __init__(self, player, gs):
         super().__init__("Necromancer", player, gs)
+        self.curr_turn_gain = 0
+        self.hasTurnEffect = True
+    
+    def apply_turn_effect(self):
+        self.gs.players[self.player].reserves += self.curr_turn_gain
+        self.gs.players[self.player].stars += self.curr_turn_gain//7
+        self.gs.update_private_status(self.player)
+        self.curr_turn_gain = 0
 
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Necromancer",
-            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves.",
+            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves, you will receive them at the end of your turn. For every 7 troops you've received, you receive 1 star.",
             'operational': self.active,
         }, room=self.player) 
     
