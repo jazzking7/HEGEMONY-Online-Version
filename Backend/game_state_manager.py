@@ -728,8 +728,8 @@ class Game_State_Manager:
         if num_leylines < 1:
             return 0  # no leylines means no probability
 
-        prob = 8
-        increment = 3
+        prob = 17
+        increment = 5
 
         for i in range(2, num_leylines + 1):
             prob += increment
@@ -740,8 +740,8 @@ class Game_State_Manager:
     def leyline_damage(self, num_leylines):
         if num_leylines < 1:
             return 1
-        base_multiplier = 2
-        bonus = num_leylines // 3
+        base_multiplier = 3
+        bonus = num_leylines // 4
         return base_multiplier + bonus
 
     def count_connected_forts(self, player, trty, counted=None):
