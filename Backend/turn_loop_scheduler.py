@@ -140,10 +140,16 @@ class turn_loop_scheduler:
                 atk_player.skill.turn_off_iron_wall()
 
         # Hall giving authority
+        # Bureau recruitement
+        numBureaux = 0
         for t in atk_player.territories:
+            if gs.map.territories[t].isBureau:
+                numBureaux += 1
             if gs.map.territories[t].isHall:
                 atk_player.stars += 1
-                gs.update_private_status(player)
+        
+        atk_player.reserves += round((atk_player.total_troops * numBureaux * 4)/100)
+        gs.update_private_status(player)
 
         # Player temporary battle stats not updated
         ms.stats_set = False
@@ -236,7 +242,7 @@ class turn_loop_scheduler:
 
                 p.stars += s_amt
 
-                if (p.numLeylines * 11) > random.randint(1, 100):
+                if (p.numLeylines * 12) > random.randint(1, 100):
                     print("Leyline Bonus Received.")
                     if random.randint(1, 100) > 40:
                         p.reserves += p.numLeylines * 4

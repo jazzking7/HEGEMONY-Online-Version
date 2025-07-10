@@ -22,6 +22,7 @@ class Territory:
         self.isFort = False
         self.isHall = False
         self.isLeyline = False
+        self.isBureau = False
         # self.isSEZ = False
         
         self.owner = None

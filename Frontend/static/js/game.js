@@ -386,6 +386,8 @@ socket.on('update_trty_display', function(data){
           territories[tid].devImg = megacityImage;
         } else if (changes[field] == 'nexus') {
           territories[tid].devImg = nexusImage;
+        } else if (changes[field] == 'bureau') {
+          territories[tid].devImg = bureauImage;
         } else {
           territories[tid].devImg = null;
         }
@@ -439,6 +441,8 @@ socket.on('change_click_event', function(data){
     currEvent = set_nexus;
   } else if (data.event == 'set_leyline') {
     currEvent = set_leyline;
+  } else if (data.event == 'set_bureau') {
+    currEvent = set_bureau;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1385,6 +1389,15 @@ socket.on('set_leyline', function(data){
   clickables = data.flist;
 })
 
+socket.on('set_bureau', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling Mobilization Bureaux, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
   city_amt = data.amount;
@@ -1583,6 +1596,31 @@ function set_leyline(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_leyline', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_bureau(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_bureau', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1841,6 +1879,14 @@ btn_sep_auth.onclick = function () {
           </button>
         </div>
 
+        <div class="d-inline-block text-center">
+          <button class="btn d-flex flex-column align-items-center" id="btn-bureau" style="background-color: #2C5F34; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#5D6532'"
+            onmouseout="this.style.backgroundColor='#2C5F34'">
+            <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau" style="max-height: 60px;">
+            <span class="small mt-1">MOBILIZATION BUREAU</span>
+          </button>
+        </div>
+
       </div>
 
     </div>
@@ -2039,6 +2085,29 @@ btn_sep_auth.onclick = function () {
         $("#convertBtn").on('click', function(){
           hide_async_btns();
           socket.emit('send_async_event', {'name': "L_C", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Leyline Cross
+    $("#btn-bureau").off('click').on('click', function(){
+      if (sep_auth < 2){
+        popup('MINIMUM 2 STARS TO BUILD A MOBILIZATION BUREAU!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of bureaus:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "M_B", 'amt': $("#amtSlider").val()});
           $('#middle_display').hide()
           $('#middle_title, #middle_content').empty();
         });

@@ -178,6 +178,9 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.logistic_nexus, args=(data, pid))
         elif n == 'L_C':
             self.curr_thread = threading.Thread(target=self.leyline_cross, args=(data, pid))
+        elif n == 'M_B':
+            self.curr_thread = threading.Thread(target=self.mobilization_bureau, args=(data, pid))
+
 
         self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
@@ -203,6 +206,26 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].reserves == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+    
+    def mobilization_bureau(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isBureau and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isTransportcenter:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the bureaus!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_bureau', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_bureau"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)

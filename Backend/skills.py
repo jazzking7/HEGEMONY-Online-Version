@@ -826,6 +826,8 @@ class Divine_Punishment(Skill):
             # Remove Fortification
             chosen_trty.isFort = False
 
+            chosen_trty.isBureau = False
+
             casualties = math.ceil(0.75*chosen_trty.troops)
             chosen_trty.troops -= casualties
 
@@ -836,6 +838,7 @@ class Divine_Punishment(Skill):
 
                     self.gs.update_LAO(player)
                     self.gs.update_TIP(player)
+                    self.gs.update_HIP(player)
                     self.gs.update_private_status(player)
 
                     # Ares' Blessing Rage meter checking
