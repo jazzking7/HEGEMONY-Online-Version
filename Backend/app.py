@@ -512,7 +512,12 @@ def settle_new_cities(data):
         if gsm.map.territories[trty].isDeadZone:
             socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON RADIOACTIVE ZONE!'}, room=pid)
             return
-        
+        if gsm.map.territories[trty].isBureau:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON BUREAU!'}, room=pid)
+            return
+        if gsm.map.territories[trty].isTransportcenter:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON LOGISTIC NEXUS!'}, room=pid)
+            return
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
