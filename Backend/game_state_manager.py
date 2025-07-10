@@ -740,7 +740,7 @@ class Game_State_Manager:
     def leyline_damage(self, num_leylines):
         if num_leylines < 1:
             return 1
-        base_multiplier = 3
+        base_multiplier = 4
         bonus = num_leylines // 4
         return base_multiplier + bonus
 
@@ -1071,7 +1071,9 @@ class Game_State_Manager:
             if atk_p.skill:
                 if atk_p.skill.active:
                     if atk_p.skill.name == "Necromancer":
+                        print(atk_p.skill.curr_turn_gain)
                         atk_p.skill.curr_turn_gain += def_amt-result[1]
+                        print(atk_p.skill.curr_turn_gain)
             
             # Revanchism
             if def_p.skill:
