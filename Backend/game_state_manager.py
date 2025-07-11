@@ -741,7 +741,7 @@ class Game_State_Manager:
         if num_leylines < 1:
             return 1
         base_multiplier = 4
-        bonus = num_leylines // 4
+        bonus = num_leylines // 3
         return base_multiplier + bonus
 
     def count_connected_forts(self, player, trty, counted=None):
@@ -1071,9 +1071,7 @@ class Game_State_Manager:
             if atk_p.skill:
                 if atk_p.skill.active:
                     if atk_p.skill.name == "Necromancer":
-                        print(atk_p.skill.curr_turn_gain)
                         atk_p.skill.curr_turn_gain += def_amt-result[1]
-                        print(atk_p.skill.curr_turn_gain)
             
             # Revanchism
             if def_p.skill:
@@ -1119,8 +1117,7 @@ class Game_State_Manager:
             if atk_p.skill:
                 if atk_p.skill.active:
                     if atk_p.skill.name == "Necromancer":
-                        atk_p.reserves += def_amt-result[1]
-                        self.update_private_status(a_pid)
+                        atk_p.skill.curr_turn_gain += def_amt-result[1]
 
         # Sound effect
         if def_p.total_troops != 0:

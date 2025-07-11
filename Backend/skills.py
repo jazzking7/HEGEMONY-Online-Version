@@ -679,7 +679,7 @@ class Necromancer(Skill):
         self.curr_turn_gain = 0
         self.hasTurnEffect = True
     
-    def apply_turn_effect(self):
+    def apply_turn_effect(self,):
         self.gs.players[self.player].reserves += self.curr_turn_gain
         self.gs.players[self.player].stars += self.curr_turn_gain//7
         self.gs.update_private_status(self.player)
@@ -700,9 +700,6 @@ class Necromancer(Skill):
     def apply_round_effect(self,):
         if self.cooldown:
             self.cooldown -= 1
-    
-    def apply_turn_effect(self,):
-        self.activated = False
 
     def activate_effect(self):
         if not self.active:
