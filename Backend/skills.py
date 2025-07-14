@@ -681,7 +681,7 @@ class Necromancer(Skill):
     
     def apply_turn_effect(self,):
         self.gs.players[self.player].reserves += self.curr_turn_gain
-        self.gs.players[self.player].stars += self.curr_turn_gain//7
+        self.gs.players[self.player].stars += self.curr_turn_gain//9
         self.gs.update_private_status(self.player)
         self.curr_turn_gain = 0
 
