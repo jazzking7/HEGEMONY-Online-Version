@@ -1752,6 +1752,18 @@ class Revanchism(Skill):
             self.ragePoints += 25
         if trty_loss.isCity:
             self.ragePoints += 20
+        if trty_loss.isMegacity:
+            self.ragePoints += 50
+        if trty_loss.isFort:
+            self.ragePoints += 10
+        if trty_loss.isLeyline:
+            self.ragePoints += 15
+        if trty_loss.isTransportcenter:
+            self.ragePoints += 50
+        if trty_loss.isHall:
+            self.ragePoints += 50
+        if trty_loss.isBureau:
+            self.ragePoints += 20
         tid = 0
         for trty in self.gs.map.territories:
             if trty.name == trty_loss.name:

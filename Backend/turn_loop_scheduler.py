@@ -148,7 +148,7 @@ class turn_loop_scheduler:
             if gs.map.territories[t].isHall:
                 atk_player.stars += 1
         
-        atk_player.reserves += round((atk_player.total_troops * numBureaux * 5)/100)
+        atk_player.reserves += round((atk_player.total_troops * numBureaux * 7)/100)
         gs.update_private_status(player)
 
         # Player temporary battle stats not updated
