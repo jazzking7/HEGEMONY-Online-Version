@@ -311,7 +311,7 @@ class Game_State_Manager:
             curr_p = self.players[p]
             if curr_p.alive:
                 if metric == 'indus':
-                    total_div += (self.get_player_industrial_level(curr_p) - avg)**2
+                    total_div += (self.get_dejure_industrial_level(curr_p) - avg)**2
                 elif metric == 'infra':
                     total_div += (curr_p.infrastructure_upgrade + curr_p.infrastructure - avg)**2
                 elif metric == 'trty':
@@ -333,7 +333,7 @@ class Game_State_Manager:
         for p in self.players:
             curr_p = self.players[p]
             if curr_p.alive:
-                total_ind += self.get_player_industrial_level(curr_p)
+                total_ind += self.get_dejure_industrial_level(curr_p)
                 total_inf += curr_p.infrastructure_upgrade + curr_p.infrastructure
                 total_popu += curr_p.total_troops
                 total_trty += self.get_deployable_amt(p)
@@ -359,7 +359,7 @@ class Game_State_Manager:
 
         for p in p_alive:
             curr_p = self.players[p]
-            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_player_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
+            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_dejure_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
             curr_p.PPI = round(self.logistic_function(z_score) * 100, 3)
 
     # Signal the specific mission tracker to check condition
@@ -477,7 +477,7 @@ class Game_State_Manager:
         TIP = None
         h_score = -100
         for p in self.players:
-            curri = self.get_player_industrial_level(self.players[p])
+            curri = self.get_dejure_industrial_level(self.players[p])
             if curri > h_score:
                 h_score = curri
                 TIP = p
@@ -490,8 +490,8 @@ class Game_State_Manager:
             self.get_TIP()
         else:
             if self.TIP != p:
-                pi = self.get_player_industrial_level(self.players[p])
-                hi = self.get_player_industrial_level(self.players[self.TIP])
+                pi = self.get_dejure_industrial_level(self.players[p])
+                hi = self.get_dejure_industrial_level(self.players[self.TIP])
                 if pi > hi:
                     self.TIP = p
                 elif pi == hi:
@@ -518,12 +518,15 @@ class Game_State_Manager:
     # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN FOR SPECIFIC PLAYER
     def update_private_status(self, pid):
         dmg_mul = 1
+        hiddenInd = ""
         if self.players[pid].skill:
             if self.players[pid].skill.name == 'Elitocracy':
                 dmg_mul += self.players[pid].min_roll//2
+            if self.players[pid].skill.name == 'Collusion':
+                hiddenInd = f" ({self.get_player_industrial_level(self.players[pid]) + 6})"
         self.server.emit('private_overview', {'curr_SA': self.players[pid].stars,
                                                'curr_RS': self.players[pid].reserves,
-                                               'curr_indus': self.get_player_industrial_level(self.players[pid])+6,
+                                               'curr_indus': str(self.get_dejure_industrial_level(self.players[pid])+6) + hiddenInd,
                                                'curr_infra': self.get_player_infra_level(self.players[pid])+3,
                                                'curr_nul_rate': 0,
                                                'curr_dmg_mul': dmg_mul,
@@ -804,6 +807,19 @@ class Game_State_Manager:
         probs = [p / total_prob for p in probs]
 
         return probs
+    
+    def get_dejure_industrial_level(self, player):
+        lvl = 0
+        c_amt = self.map.count_cities(player.territories)
+
+        if c_amt == 3:
+            lvl += 1
+        elif c_amt > 3:
+            lvl += 1 + (c_amt-3)//2
+        for trty in player.territories:
+            if self.map.territories[trty].isMegacity:
+                lvl += 1
+        return lvl
 
     def get_player_industrial_level(self, player):
         lvl = 0
