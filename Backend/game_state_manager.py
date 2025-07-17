@@ -1006,7 +1006,20 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
                 def_anu = 0
-
+            if def_p.skill.name == "Air_Superiority":
+                for cont in self.map.conts:
+                    currcont = self.map.conts[cont]['trtys']
+                    if t2 in currcont:
+                        airBonus = True
+                        for trty in currcont:
+                            if trty in def_p.territories and trty != t2:
+                                airBonus = False
+                                break
+                        if airBonus:
+                            def_stats[3] += 25
+                            if def_stats[3] > 85:
+                                def_stats[3] = 85
+                            def_stats[4] += 1
         # landmine explosion
         ld = 0
         if def_p.skill:

@@ -323,16 +323,16 @@ class Mass_Mobilization(Skill):
         
         # increase reserves
         if diff < -10:
-            self.gs.players[self.player].reserves += math.ceil(0.25*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.17*total_troops*round_multiplier)
             self.residual = math.ceil(0.25*total_troops*(1-round_multiplier))
         elif diff < -5:
-            self.gs.players[self.player].reserves += math.ceil(0.22*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.14*total_troops*round_multiplier)
             self.residual = math.ceil(0.22*total_troops*(1-round_multiplier))
         elif diff < 0:
-            self.gs.players[self.player].reserves += math.ceil(0.18*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.18*total_troops*(1-round_multiplier))
         elif diff < 5:
-            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.15*total_troops*(1-round_multiplier))
         elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
