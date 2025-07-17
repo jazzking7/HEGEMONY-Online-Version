@@ -725,7 +725,7 @@ class Divine_Punishment(Skill):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
         self.energy_cost = 2
-        self.limit = len(gs.players) + 1
+        self.limit = len(gs.players)
         self.finished_bombardment = True
 
         # if self.limit > len(gs.map.territories)//len(gs.players):
@@ -790,32 +790,31 @@ class Divine_Punishment(Skill):
 
             chosen_trty = self.gs.map.territories[choice]
 
-            if chosen_trty.isDeadZone:
-                for nt in chosen_trty.neighbors:
-                    if nt not in self.gs.players[self.player].territories:
-                        self.gs.map.territories[nt].isDeadZone = 2
-                        self.gs.map.territories[nt].isFort = False
-                        shockwave = min(5, self.gs.map.territories[nt].troops)
-                        self.gs.map.territories[nt].troops -= shockwave
-                        for player in self.gs.players:
-                            if nt in self.gs.players[player].territories:
-                                self.gs.players[player].total_troops -= shockwave
+            for nt in chosen_trty.neighbors:
+                if nt not in self.gs.players[self.player].territories:
+                    self.gs.map.territories[nt].isDeadZone = 2
+                    self.gs.map.territories[nt].isFort = False
+                    shockwave = min(5, self.gs.map.territories[nt].troops)
+                    self.gs.map.territories[nt].troops -= shockwave
+                    for player in self.gs.players:
+                        if nt in self.gs.players[player].territories:
+                            self.gs.players[player].total_troops -= shockwave
 
-                                self.gs.update_LAO(player)
-                                self.gs.update_TIP(player)
-                                self.gs.update_private_status(player)
+                            self.gs.update_LAO(player)
+                            self.gs.update_TIP(player)
+                            self.gs.update_private_status(player)
 
-                                # Ares' Blessing Rage meter checking
-                                if self.gs.players[player].skill:
-                                    if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
-                                        self.gs.players[player].skill.checking_rage_meter()
+                            # Ares' Blessing Rage meter checking
+                            if self.gs.players[player].skill:
+                                if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                    self.gs.players[player].skill.checking_rage_meter()
 
-                                # visual effect
-                                self.gs.server.emit('battle_casualties', {
-                                    f'{nt}': {'tid': nt, 'number': shockwave},
-                                }, room=self.gs.lobby)
-                                break
-                        self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+                            # visual effect
+                            self.gs.server.emit('battle_casualties', {
+                                f'{nt}': {'tid': nt, 'number': shockwave},
+                            }, room=self.gs.lobby)
+                            break
+                    self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
 
             wasMega = chosen_trty.isMegacity
             if chosen_trty.isMegacity:
