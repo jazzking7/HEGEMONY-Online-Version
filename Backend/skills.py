@@ -640,6 +640,13 @@ class Elitocracy(Skill):
     def __init__(self, player, gs):
         super().__init__("Elitocracy", player, gs)
         self.intMod = True
+        self.hasRoundEffect = True
+    
+    def apply_round_effect(self):
+        curr = self.gs.GES.round
+        if curr > 0 and curr % 3 == 0:
+            self.gs.players[self.player].min_roll += 1
+            self.gs.update_private_status(self.player)
 
     def internalStatsMod(self, battle_stats):
         if self.active:
