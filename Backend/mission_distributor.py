@@ -87,6 +87,8 @@ class Mission_Distributor:
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
 
     def validate_mission_set(self, miss_set):
+        if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+            return False
         if miss_set.count('Ann') > 1:
             return False
         c = 0
