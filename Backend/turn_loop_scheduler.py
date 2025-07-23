@@ -395,6 +395,10 @@ class turn_loop_scheduler:
                         if ms.round == 3:
                             time.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                    if miss.name == "Annilator":
+                        if ms.round == 1:
+                            time.sleep(2)
+                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF ANNILATOR DETECTED! HIGHLY RISKY SITUATION!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
                             time.sleep(2)

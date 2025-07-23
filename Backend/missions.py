@@ -1189,3 +1189,34 @@ class Gambler(Mission):
     
     def end_game_global_peace_checking(self, ):
         return self.curr_troops >= self.target_troops and self.gs.players[self.player].alive
+    
+class Annilator(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Annilator", player, gs)
+        gs.annilator = player
+
+    def check_conditions(self,):
+        if not self.gs.players[self.player].alive:
+            self.signal_mission_failure()
+            self.update_tracker_view({
+                'misProgDesp': f'There are players that are still alive, annilation failed.',
+            })
+            return
+
+    def set_up_tracker_view(self, ):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': f'DESTROY ALL OTHER PLAYERS AND BE THE LAST ONE STANDING!',
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        for p, player in self.gs.players.items():
+            if p != self.player and player.alive:
+                return False
+        return self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        for p, player in self.gs.players.items():
+            if p != self.player and player.alive:
+                return False
+        return self.gs.players[self.player].alive

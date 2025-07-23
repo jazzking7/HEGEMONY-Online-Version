@@ -41,6 +41,7 @@ class Realm_of_Permafrost(Skill):
         self.extMod = True
         self.hasRoundEffect = True
         self.iceAgeCd = 0
+        self.annilator_as_user = player == gs.annilator
 
     def internalStatsMod(self, battle_stats):
 
@@ -58,6 +59,13 @@ class Realm_of_Permafrost(Skill):
         battle_stats[3] = 0
         battle_stats[4] = 1
 
+        if self.annilator_as_user and self.gs.in_ice_age:
+            battle_stats[0] = 5
+            battle_stats[1] = 3
+            battle_stats[2] = 1
+            battle_stats[3] = 0
+            battle_stats[4] = 1
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
@@ -73,7 +81,7 @@ class Realm_of_Permafrost(Skill):
             return
 
         self.gs.set_ice_age = True
-        self.iceAgeCd = 4
+        self.iceAgeCd = 4 if not self.annilator_as_user else 3
         self.gs.players[self.player].stars -= 2
         self.gs.server.emit("display_new_notification", {"msg": "Ice Age Activated!"}, room=self.player)
         self.gs.update_private_status(self.player)
@@ -184,12 +192,15 @@ class Dictator(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Dictator", player, gs)
+        self.annilator_as_user = player == gs.annilator
         self.hasTurnEffect = True
         self.limit = len(self.gs.players) // 3
 
     def apply_turn_effect(self,):
         if self.active:
             self.gs.players[self.player].stars += 2
+            if self.annilator_as_user:
+                self.gs.players[self.player].stars += 1
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -641,10 +652,12 @@ class Elitocracy(Skill):
         super().__init__("Elitocracy", player, gs)
         self.intMod = True
         self.hasRoundEffect = True
+        self.annilator_as_user = player == gs.annilator
+        self.cost_per_autoupgrade = 2 if self.annilator_as_user else 3
     
     def apply_round_effect(self):
         curr = self.gs.GES.round
-        if curr > 0 and curr % 3 == 0:
+        if curr > 0 and curr % self.cost_per_autoupgrade == 0:
             self.gs.players[self.player].min_roll += 1
             self.gs.update_private_status(self.player)
 
@@ -685,10 +698,11 @@ class Necromancer(Skill):
         super().__init__("Necromancer", player, gs)
         self.curr_turn_gain = 0
         self.hasTurnEffect = True
+        self.star_per_troops = 6 if player == gs.annilator else 9
     
     def apply_turn_effect(self,):
         self.gs.players[self.player].reserves += self.curr_turn_gain
-        self.gs.players[self.player].stars += self.curr_turn_gain//9
+        self.gs.players[self.player].stars += self.curr_turn_gain//self.star_per_troops
         self.gs.update_private_status(self.player)
         self.curr_turn_gain = 0
 
@@ -724,8 +738,8 @@ class Divine_Punishment(Skill):
     def __init__(self, player, gs):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
-        self.energy_cost = 2
-        self.limit = len(gs.players)
+        self.energy_cost = 1 if player == gs.annilator else 2
+        self.limit = len(gs.players) + 1 if player == gs.annilator else len(gs.players)
         self.finished_bombardment = True
 
         # if self.limit > len(gs.map.territories)//len(gs.players):
@@ -886,6 +900,7 @@ class Air_Superiority(Skill):
 
         self.hasTurnEffect = True
         self.energy = 0
+        self.annilator_as_user = player == gs.annilator
 
     def apply_turn_effect(self,):
         self.limit = 5
@@ -898,6 +913,8 @@ class Air_Superiority(Skill):
 
         # Calculate the bonus using the quadratic function and round up
         bonus = math.ceil(a * x ** 2 + b * x + c)
+        if self.annilator_as_user:
+            bonus = math.ceil(1.3*bonus)
         return bonus
 
     def long_arm_jurisdiction(self,):
@@ -911,7 +928,10 @@ class Air_Superiority(Skill):
 
             bonus = len(distincts)
             self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
-            self.gs.players[self.player].stars += bonus//4
+            if self.annilator_as_user:
+                self.gs.players[self.player].stars += bonus//3
+            else:
+                self.gs.players[self.player].stars += bonus//4
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
@@ -1510,7 +1530,8 @@ class Reaping_of_Anubis(Skill):
     def __init__(self, player, gs):
         super().__init__("Reaping of Anubis", player, gs)
         self.guaranteed_dmg = 0
-        self.cost = 3
+        self.cost = 3 if player != gs.annilator else 2
+        self.increment = 3 if player != gs.annilator else 2
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
@@ -1536,7 +1557,7 @@ class Reaping_of_Anubis(Skill):
                 if self.gs.players[self.player].stars < 0:
                     self.gs.players[self.player].stars = 0
                 self.gs.update_private_status(self.player)
-                self.cost += 3
+                self.cost += self.increment
 
 class Pandora_Box(Skill):
     def __init__(self, player, gs):

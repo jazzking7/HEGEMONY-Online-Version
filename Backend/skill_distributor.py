@@ -27,6 +27,9 @@ class Skill_Distributor:
             "Revanchism"
         ]
 
+    def get_annilator_options(self, ):
+        return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis']
+
     def get_options(self, ):
         return random.sample(self.skill_options, k=8)
     

@@ -140,6 +140,8 @@ class Game_State_Manager:
         self.round_based_win = False
         # Gambler win
         self.gambler_win = False
+        # Annilator
+        self.annilator = None
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):

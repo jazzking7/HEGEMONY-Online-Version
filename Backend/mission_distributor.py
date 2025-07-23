@@ -78,15 +78,17 @@ class Mission_Distributor:
              'Str', 
              'Due', 'Pun',
              'Sur',
-             'Ass', 'Pro',
+             'Ass', 'Pro', 'Ann'
              'Gam'
         ]
 
-        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
+        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annilator']
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
 
     def validate_mission_set(self, miss_set):
+        if miss_set.count('Ann') > 1:
+            return False
         c = 0
         for m in miss_set:
             if m in self.self_wins:
@@ -188,6 +190,8 @@ class Mission_Distributor:
             return Assassin(player, gs)
         elif name == 'Pro':
             return Protectionist(player, gs)
+        elif name == 'Ann':
+            return Annilator(player, gs)
         elif name == 'Gam':
             return Gambler(player, gs)
         
@@ -267,9 +271,9 @@ class Mission_Distributor:
     def no_conflicts(self, mission_name_list, mission_list):
         print(mission_name_list)
         print(mission_list)
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Pro', 'Ass', 'Sur', 'Gam']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Pro', 'Ass', 'Sur', 'Gam', 'Ann']
         for name in mission_name_list:
-            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin']:
+            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin', 'Annilator']:
                 return False
             if name in ['Industrialist', 'Expansionist', 'Dominator', 'Populist'] and mission_name_list.count(name) > 1:
                 return False
