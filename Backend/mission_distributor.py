@@ -78,7 +78,7 @@ class Mission_Distributor:
              'Str', 
              'Due', 'Pun',
              'Sur',
-             'Ass', 'Pro', 'Ann'
+             'Ass', 'Pro', 'Ann',
              'Gam'
         ]
 
@@ -86,7 +86,9 @@ class Mission_Distributor:
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
 
-    def validate_mission_set(self, miss_set):
+    def validate_mission_set(self, miss_set, hasAnn):
+        if hasAnn and "Ann" not in miss_set:
+            return False
         if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
             return False
         if miss_set.count('Ann') > 1:
@@ -106,6 +108,7 @@ class Mission_Distributor:
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p):
+        hasAnn = random.randint(1,100) > 50
         miss_set = []
         done = False
         count = 0
@@ -148,7 +151,7 @@ class Mission_Distributor:
                 count += 1
             if count == num_p:
                 print(miss_set)
-                if self.validate_mission_set(miss_set):
+                if self.validate_mission_set(miss_set, hasAnn):
                     return miss_set
                 miss_set = []
                 count = 0

@@ -1805,97 +1805,226 @@ btn_sep_auth.onclick = function () {
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
-    <div class="d-flex flex-column justify-content-between align-items-center" style="max-height: 180px; overflow-y: auto;">
+<style>
+  .scroll-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+  }
 
-      <div>
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#3F805E'"
-            onmouseout="this.style.backgroundColor='#58A680'">
-            <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
-            <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
-          </button>
+  .button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px;
+  }
+
+  .action-button {
+    width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    padding: 3px 4px;
+    transition: transform 0.1s ease-in-out;
+    overflow: hidden;
+  }
+
+  .action-button:hover {
+    transform: scale(1.04);
+  }
+
+  .action-button img {
+    max-height: 38px;
+    max-width: 53px;
+  }
+
+  .price-tag {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-left: 4px;
+  }
+
+  .hover-label {
+    display: none;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 100;
+  }
+
+  .action-button:hover .hover-label {
+    display: block;
+  }
+
+  .action-button span.small {
+    margin-top: 2px;
+    font-size: 0.85rem;
+  }
+
+  .cancel-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .cancel-btn {
+    width: 36px;
+    height: 36px;
+    background-color: #B91C1C;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+
+<div class="scroll-wrapper">
+  <div class="button-grid">
+
+    <div class="text-center">
+      <button id="btn-ui" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #58A680; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/transhubimprove.png" alt="Infrastructure">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
         </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#484E80'"
-            onmouseout="this.style.backgroundColor='#6067A1'">
-            <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
-            <span class="small mt-1">BUILD CITIES</span>
-          </button>
-        </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#814B56'"
-            onmouseout="this.style.backgroundColor='#A1606C'">
-            <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
-            <span class="small mt-1">MOBILIZATION</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="mt-2">
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-mega" style="background-color: #FDB13F; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#FDBB4E'"
-            onmouseout="this.style.backgroundColor='#FDB13F'">
-            <img src="/static/Assets/Dev/megacity.png" alt="Megacity" style="max-height: 60px;">
-            <span class="small mt-1">RAISE MEGACITY</span>
-          </button>
-        </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-fort" style="background-color: #878787; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#444444'"
-            onmouseout="this.style.backgroundColor='#878787'">
-            <img src="/static/Assets/Insig/fort.png" alt="Fort" style="max-height: 60px;">
-            <span class="small mt-1">SET UP FORTS</span>
-          </button>
-        </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-hall" style="background-color: #6C3BAA; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#CC8899'"
-            onmouseout="this.style.backgroundColor='#6C3BAA'">
-            <img src="/static/Assets/Insig/CAD.png" alt="Hall" style="max-height: 60px;">
-            <span class="small mt-1">INSTALL HALL OF GOVERNANCE</span>
-          </button>
-        </div>
-
-      </div>
-
-      <div class="mt-2">
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-nexus" style="background-color: #A8DCAB; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#8CB88E'"
-            onmouseout="this.style.backgroundColor='#A8DCAB'">
-            <img src="/static/Assets/Dev/transhub.png" alt="Nexus" style="max-height: 60px;">
-            <span class="small mt-1">LOGISTIC NEXUS</span>
-          </button>
-        </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-leyline" style="background-color: #6987D5; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#BBDFFA'"
-            onmouseout="this.style.backgroundColor='#6987D5'">
-            <img src="/static/Assets/Insig/leyline.png" alt="Leyline" style="max-height: 60px;">
-            <span class="small mt-1">LEYLINE CROSS</span>
-          </button>
-        </div>
-
-        <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-bureau" style="background-color: #2C5F34; color:#000000; margin: 0 2px;" onmouseover="this.style.backgroundColor='#5D6532'"
-            onmouseout="this.style.backgroundColor='#2C5F34'">
-            <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau" style="max-height: 60px;">
-            <span class="small mt-1">MOBILIZATION BUREAU</span>
-          </button>
-        </div>
-
-      </div>
-
+        <span class="small">INFRASTRUCTURE</span>
+        <div class="hover-label">Improve transport hubs</div>
+      </button>
     </div>
 
-    <div class="flex items-center justify-center mt-2">
-        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
-            X
-        </button>
+    <div class="text-center">
+      <button id="btn-bc" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6067A1; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+        </div>
+        <span class="small">BUILD CITIES</span>
+        <div class="hover-label">Expand urban development</div>
+      </button>
     </div>
+
+    <div class="text-center">
+      <button id="btn-mob" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A1606C; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization">
+          <span class="price-tag" style="color: #FFFFFF;">2-15☆</span>
+        </div>
+        <span class="small">MOBILIZATION</span>
+        <div class="hover-label">Recruit reserve forces</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-mega" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #FDB13F; color:#000000;"
+              onmouseover="this.style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/megacity.png" alt="Megacity">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">RAISE MEGACITY</span>
+        <div class="hover-label">Create economic powerhouse</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-fort" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #878787; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#444444'; this.querySelector('.hover-label').style.backgroundColor='#444444'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#878787'; this.querySelector('.hover-label').style.backgroundColor='#878787'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/fort.png" alt="Fort">
+          <span class="price-tag" style="color: #FFFFFF;">1☆</span>
+        </div>
+        <span class="small">SET UP FORTS</span>
+        <div class="hover-label">Establish defense base</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-hall" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6C3BAA; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/CAD.png" alt="Hall of Governance">
+          <span class="price-tag" style="color: #FFFFFF;">5☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">HALL OF GOVERNANCE</span>
+        <div class="hover-label">Extend administrative control</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-nexus" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A8DCAB; color:#000000;"
+              onmouseover="this.style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">LOGISTIC NEXUS</span>
+        <div class="hover-label">Centralize distribution</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-leyline" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6987D5; color:#000000;"
+              onmouseover="this.style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/leyline.png" alt="Leyline">
+          <span class="price-tag" style="color: #000000;">2☆</span>
+        </div>
+        <span class="small">LEYLINE CROSS</span>
+        <div class="hover-label">Channel mystic energies</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-bureau" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #2C5F34; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau">
+          <span class="price-tag" style="color: #FFFFFF;">2☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">MOBILIZATION BUREAU</span>
+        <div class="hover-label">Enable troop call-ups</div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="flex items-center justify-center mt-2">
+  <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
+    X
+  </button>
+</div>
+
     `;
 
     // close window
