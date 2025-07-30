@@ -86,7 +86,9 @@ class Elimination_tracker:
             gs.GES.flush_concurrent_event(d_pid)
             # take away the victim's resources
             attacker.reserves += victim.reserves
-            attacker.stars += victim.stars
+            # check for opportunist bonus        
+            bonus = 15 if any(mission.name == 'Opportunist' and mission.player == d_pid for mission in gs.Mset) else 0
+            attacker.stars += victim.stars + bonus
             victim.stars = 0
             victim.reserves = 0
             gs.update_private_status(a_pid)

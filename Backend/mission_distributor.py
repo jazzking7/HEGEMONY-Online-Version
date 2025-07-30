@@ -65,7 +65,7 @@ class Mission_Distributor:
             ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam', 'Ann']
         self.missions = [
                           'War', 'Loy', 'Bon',
              'Ind',
@@ -79,32 +79,37 @@ class Mission_Distributor:
              'Due', 'Pun',
              'Sur',
              'Ass', 'Pro', 'Ann',
+             'Opp',
              'Gam'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annilator']
         self.A_tier = ['Loyalist', 'Survivalist']
-        self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
+        self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']        
 
     def validate_mission_set(self, miss_set, hasAnn):
-        if hasAnn and "Ann" not in miss_set:
-            return False
-        if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
-            return False
-        if miss_set.count('Ann') > 1:
-            return False
-        c = 0
-        for m in miss_set:
-            if m in self.self_wins:
-                c += 1
-            if m in self.dup_con and miss_set.count(m) > 1:
+        if miss_set.count('Opp') <= 1:
+            if hasAnn and "Ann" not in miss_set:
+                return False
+            if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+                return False
+            if miss_set.count('Ann') > 1:
+                return False
+            c = 0
+            for m in miss_set:
+                if m in self.self_wins:
+                    c += 1
+                if m in self.dup_con and miss_set.count(m) > 1:
+                    return True
+            if c > 0:
                 return True
-        if c > 0:
-            return True
-        for nc in self.nat_con:
-            if all(m in nc for m in miss_set):
-                return True
-        return False
+            for nc in self.nat_con:
+                if all(m in nc for m in miss_set):
+                    return True
+                for nc in self.nat_con:
+                    if all(m in nc for m in miss_set):
+                        return True
+            return False
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p):
@@ -199,10 +204,12 @@ class Mission_Distributor:
             return Annilator(player, gs)
         elif name == 'Gam':
             return Gambler(player, gs)
+        elif name == 'Opp':
+            return Opportunist(player, gs)
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist', 'Annilator']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)
@@ -232,46 +239,45 @@ class Mission_Distributor:
     def determine_winners(self, gs):
 
         # Redefine this
-        c = []
-        for p in gs.players:
-            if gs.players[p].alive:
-                c.append(p)
+        c = [p for p in gs.players if gs.players[p].alive]
         # Solo Winner
         if len(c) == 1:
             for mis in gs.Mset:
                 if mis.player == c[0]:
                     return {c[0]: mis.name}
-        Pac = {}
-        S_tier = {}
-        A_tier = {}
-        B_tier = {}
-        C_tier = {}
-        miss_set = gs.Mset
-        for m in miss_set:
+                
+        winners = {}
+        tiers = {
+            "Pac": {},
+            "S": {},
+            "A": {},
+            "B": {},
+            "C": {}
+        }
+        for m in gs.Mset:
             if m.end_game_checking():
-                if m.name in self.S_tier:
+                if m.name == 'Opportunist':
+                    winners[m.player] = m.name
+                elif m.name in self.S_tier:
                     if m.name == 'Pacifist':
-                        Pac[m.player] = m.name
+                        tiers["Pac"][m.player] = m.name
                     else:
-                        S_tier[m.player] = m.name
+                        tiers["S"][m.player] = m.name
                 elif m.name in self.A_tier:
-                    A_tier[m.player] = m.name
+                    tiers["A"][m.player] = m.name
                 elif m.name in self.B_tier:
-                    B_tier[m.player] = m.name
+                    tiers["B"][m.player] = m.name
                 else:
-                    C_tier[m.player] = m.name
+                    tiers["C"][m.player] = m.name
 
-        # Return {} -> key: pid   value: name of mission
-        if len(Pac) > 0:
-            return Pac
-        if len(S_tier) > 0:
-            return S_tier
-        elif len(A_tier) > 0:
-            return A_tier
-        elif len(B_tier) > 0:
-            return B_tier
-        else:
-            return C_tier
+        # Merge winners by priority: Pacifist > S > A > B > C
+        for key in ["Pac", "S", "A", "B", "C"]:
+            if tiers[key]:
+                winners = {**tiers[key], **winners} # Merge dictionaries
+                if key != "C":
+                    break
+
+        return winners
         
     def no_conflicts(self, mission_name_list, mission_list):
         print(mission_name_list)
@@ -351,45 +357,5 @@ class Mission_Distributor:
                 winners[miss.player] = miss.name
             return winners
 
-        # Redefine this
-        c = []
-        for p in gs.players:
-            if gs.players[p].alive:
-                c.append(p)
-        # Solo Winner
-        if len(c) == 1:
-            for mis in gs.Mset:
-                if mis.player == c[0]:
-                    return {c[0]: mis.name}
-        
-        Pac = {}
-        S_tier = {}
-        A_tier = {}
-        B_tier = {}
-        C_tier = {}
-        miss_set = gs.Mset
-        for m in miss_set:
-            if m.end_game_global_peace_checking():
-                if m.name in self.S_tier:
-                    if m.name == 'Pacifist':
-                        Pac[m.player] = m.name
-                    else:
-                        S_tier[m.player] = m.name
-                elif m.name in self.A_tier:
-                    A_tier[m.player] = m.name
-                elif m.name in self.B_tier:
-                    B_tier[m.player] = m.name
-                else:
-                    C_tier[m.player] = m.name
-
-        # Return {} -> key: pid   value: name of mission
-        if len(Pac) > 0:
-            return Pac
-        if len(S_tier) > 0:
-            return S_tier
-        elif len(A_tier) > 0:
-            return A_tier
-        elif len(B_tier) > 0:
-            return B_tier
-        else:
-            return C_tier
+        # If there are conflicts, find winners as usual
+        return self.determine_winners(gs)

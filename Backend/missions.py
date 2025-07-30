@@ -1190,6 +1190,30 @@ class Gambler(Mission):
     def end_game_global_peace_checking(self, ):
         return self.curr_troops >= self.target_troops and self.gs.players[self.player].alive
     
+class Opportunist(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Opportunist", player, gs)
+        
+    def check_conditions(self):
+        if not self.gs.players[self.player].alive:
+            self.signal_mission_failure()
+            self.update_tracker_view({
+                'misProgDesp': 'You are eliminated. Agenda failed.'
+            })
+            return
+        
+    def set_up_tracker_view(self):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': 'Stay alive until another player wins!'
+        }, room=self.player)
+
+    def end_game_checking(self):
+        return self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self):
+        return self.gs.players[self.player].alive
+    
 class Annilator(Mission):
     def __init__(self, player, gs):
         super().__init__("Annilator", player, gs)
