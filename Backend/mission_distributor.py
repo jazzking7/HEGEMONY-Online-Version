@@ -83,7 +83,7 @@ class Mission_Distributor:
              'Gam'
         ]
 
-        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annilator']
+        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annihilator']
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']        
 
@@ -201,7 +201,7 @@ class Mission_Distributor:
         elif name == 'Pro':
             return Protectionist(player, gs)
         elif name == 'Ann':
-            return Annilator(player, gs)
+            return Annihilator(player, gs)
         elif name == 'Gam':
             return Gambler(player, gs)
         elif name == 'Opp':
@@ -209,7 +209,7 @@ class Mission_Distributor:
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist', 'Annilator']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist', 'Annihilator']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)
@@ -284,7 +284,7 @@ class Mission_Distributor:
         print(mission_list)
         self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Pro', 'Ass', 'Sur', 'Gam', 'Ann']
         for name in mission_name_list:
-            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin', 'Annilator']:
+            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin', 'Annihilator']:
                 return False
             if name in ['Industrialist', 'Expansionist', 'Dominator', 'Populist'] and mission_name_list.count(name) > 1:
                 return False

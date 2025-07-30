@@ -27,7 +27,7 @@ class Skill_Distributor:
             "Revanchism"
         ]
 
-    def get_annilator_options(self, ):
+    def get_Annihilator_options(self, ):
         return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis']
 
     def get_options(self, ):

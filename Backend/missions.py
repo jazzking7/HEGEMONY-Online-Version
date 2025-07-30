@@ -1214,10 +1214,10 @@ class Opportunist(Mission):
     def end_game_global_peace_checking(self):
         return self.gs.players[self.player].alive
     
-class Annilator(Mission):
+class Annihilator(Mission):
     def __init__(self, player, gs):
-        super().__init__("Annilator", player, gs)
-        gs.annilator = player
+        super().__init__("Annihilator", player, gs)
+        gs.Annihilator = player
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:

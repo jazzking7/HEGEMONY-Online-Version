@@ -193,7 +193,7 @@ class setup_event_scheduler:
     def start_skill_selection(self, gs, ms):
         gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
         for player in gs.players:
-            options = gs.SDIS.get_options() if player != gs.annilator else gs.SDIS.get_annilator_options()
+            options = gs.SDIS.get_options() if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
         ms.selection_time_out(ms.power_set_time, len(gs.players))
