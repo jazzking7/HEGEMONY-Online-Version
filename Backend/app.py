@@ -512,7 +512,12 @@ def settle_new_cities(data):
         if gsm.map.territories[trty].isDeadZone:
             socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON RADIOACTIVE ZONE!'}, room=pid)
             return
-        
+        if gsm.map.territories[trty].isBureau:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON BUREAU!'}, room=pid)
+            return
+        if gsm.map.territories[trty].isTransportcenter:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON LOGISTIC NEXUS!'}, room=pid)
+            return
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
@@ -540,6 +545,246 @@ def settle_new_cities(data):
 
     gsm.players[pid].s_city_amt = 0
     gsm.players[pid].stars -= len(choices)*3
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_bureau')
+def settle_bureau(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isBureau:
+            socketio.emit('update_settle_status', {'msg':'EXISTING BUREAUX AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot set bureau during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot set bureau during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isBureau = True
+        socketio.emit('update_trty_display', {trty: {'hasDev': 'bureau'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_HIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*2
+
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_leyline')
+def settle_leyline(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isLeyline:
+            socketio.emit('update_settle_status', {'msg':'EXISTING LEYLINES AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot set leyline during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot set leyline during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isLeyline = True
+        socketio.emit('update_trty_display', {trty: {'hasEffect': 'leyline'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_HIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*2
+    gsm.players[pid].numLeylines += len(choices)
+
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_nexus')
+def settle_nexus(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isTransportcenter:
+            socketio.emit('update_settle_status', {'msg':'EXISTING NEXUS AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot set nexus during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot set nexus during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isTransportcenter = True
+        socketio.emit('update_trty_display', {trty: {'hasDev': 'nexus'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_HIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*5
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_hall')
+def settle_new_halls(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isHall:
+            socketio.emit('update_settle_status', {'msg':'EXISTING HALL AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot set halls during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot set halls during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isHall = True
+        socketio.emit('update_trty_display', {trty: {'hasEffect': 'hall'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_TIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*5
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_forts')
+def settle_new_forts(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isFort:
+            socketio.emit('update_settle_status', {'msg':'EXISTING FORT AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot set forts during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot set forts during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isFort = True
+        socketio.emit('update_trty_display', {trty: {'hasEffect': 'fort'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_TIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*1
+    gsm.update_private_status(pid)
+
+@socketio.on('settle_megacities')
+def settle_new_megacities(data):
+    choices = data.get('choice')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    for trty in choices:
+        if gsm.map.territories[trty].isMegacity:
+            socketio.emit('update_settle_status', {'msg':'EXISTING MEGACITY AMONG CHOSEN TERRITORIES!'}, room=pid)
+            return
+        if gsm.map.territories[trty].isDeadZone:
+            socketio.emit('update_settle_status', {'msg':'CANNOT BUILD ON RADIOACTIVE ZONE!'}, room=pid)
+            return
+        
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('display_new_notification', {'msg': 'Cannot raise megacities during ice age!'}, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('display_new_notification', {'msg': 'Cannot raise megacities during ice age!'}, room=pid)
+                return
+    
+    if gsm.players[pid].hijacked:
+        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        return
+
+    # CM
+    for trty in choices:
+        gsm.map.territories[trty].isMegacity = True
+        socketio.emit('update_trty_display', {trty: {'hasDev': 'megacity'}}, room=gsm.lobby)
+
+    # city building sfx
+    socketio.emit('cityBuildingSFX', room=gsm.lobby)
+    gsm.update_TIP(pid)
+    gsm.get_SUP()
+    gsm.update_global_status()
+    gsm.signal_MTrackers('indus')
+
+    gsm.players[pid].m_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*5
     gsm.update_private_status(pid)
 
 @socketio.on('send_troop_update')
@@ -906,6 +1151,12 @@ def handle_ransom(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.set_ransom(data['choice'])
+
+@socketio.on('send_gather_target')
+def gather_intel(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.get_intel(data['choice'])
 
 @socketio.on('fetch_debt_info')
 def handle_fetch_debt_info():

@@ -150,6 +150,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
         elif n == 'B_C':
             self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
+        elif n == 'R_M':
+            self.curr_thread = threading.Thread(target=self.raise_megacities, args=(data, pid))
         elif n == 'BFC':
             self.curr_thread = threading.Thread(target=self.build_free_cities, args=(pid,))
         elif n == 'D_P':
@@ -166,7 +168,20 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
         elif n == 'M_R':
             self.curr_thread = threading.Thread(target=self.make_ransom, args=(pid,))
-        
+        elif n == 'G_I':
+            self.curr_thread = threading.Thread(target=self.gather_intel, args=(pid,))
+        elif n == 'S_F':
+            self.curr_thread = threading.Thread(target=self.set_forts, args=(data, pid))
+        elif n == 'S_H':
+            self.curr_thread = threading.Thread(target=self.set_hall, args=(data, pid))
+        elif n == 'L_N':
+            self.curr_thread = threading.Thread(target=self.logistic_nexus, args=(data, pid))
+        elif n == 'L_C':
+            self.curr_thread = threading.Thread(target=self.leyline_cross, args=(data, pid))
+        elif n == 'M_B':
+            self.curr_thread = threading.Thread(target=self.mobilization_bureau, args=(data, pid))
+
+
         self.gs.server.emit('signal_hide_btns', room=pid)
         self.curr_thread.start()
         self.curr_thread.join()
@@ -194,16 +209,137 @@ class General_Event_Scheduler:
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
+    
+    def mobilization_bureau(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isBureau and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isTransportcenter:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the bureaus!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_bureau', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_bureau"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def leyline_cross(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the leyline cross!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_leyline', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_leyline"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def logistic_nexus(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isTransportcenter and not self.gs.map.territories[t].isDeadZone:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the nexus!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_nexus', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_nexus"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+
+    def set_hall(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can set hall of governance!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_hall', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_hall"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def set_forts(self, data, pid):
+        flist = []
+        for t in self.gs.players[pid].territories:
+            if not self.gs.map.territories[t].isFort and not self.gs.map.territories[t].isDeadZone:
+                flist.append(t)
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can be fortified!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_forts', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "set_forts"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
 
     def build_cities(self, data, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_cities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
-        self.gs.players[pid].s_city_amt = data['amt']
+        self.gs.players[pid].s_city_amt = int(data['amt'])
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def raise_megacities(self, data, pid):
+        clist = []
+        for t in self.gs.players[pid].territories:
+            if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity and not self.gs.map.territories[t].isTransportcenter:
+                clist.append(t)
+        if len(clist) < int(data['amt']):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough cities that can be upgraded to megacities!'}, room=pid)
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('raise_megacities', {'amount': int(data['amt']), 'clist': clist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "raise_megacities"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].m_city_amt = int(data['amt'])
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].m_city_amt == 0
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -295,7 +431,7 @@ class General_Event_Scheduler:
 
     def corrupt_territory(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
-        corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories]
+        corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories and not self.gs.map.territories[tid].isMegacity]
         self.gs.players[pid].skill.finished_choosing = False
         self.gs.server.emit('corrupt_territory', {'targets': corruptables}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "corrupt_territory"}, room=pid)
@@ -312,6 +448,20 @@ class General_Event_Scheduler:
         potential_targets = self.gs.players[pid].skill.get_potential_targets()
         self.gs.players[pid].skill.finished_choosing = False
         self.gs.server.emit('make_ransom', {'targets': potential_targets}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': None}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.finished_choosing
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def gather_intel(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        potential_targets = self.gs.players[pid].skill.get_potential_targets()
+        self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('gather_intel', {'targets': potential_targets}, room=pid)
         self.gs.server.emit('change_click_event', {'event': None}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
         done = False

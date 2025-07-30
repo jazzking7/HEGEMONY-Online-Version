@@ -14,6 +14,7 @@ class Player:
         self.name = name
         # status
         self.alive = True
+        self.aliveBefore = True
 
         self.connected = True # Keep track if the player is connected
         self.hijacked = False
@@ -33,6 +34,7 @@ class Player:
         self.stars = 0
         self.reserves = 0
         self.s_city_amt = 0  # city amount to settle in innerAsync actions
+        self.m_city_amt = 0  # megacity amount to settle in innerAsync actions
         # alliance
         self.hasAllies = False
         self.allies = []
@@ -58,6 +60,8 @@ class Player:
         self.total_troops = 0
         # Player Power Index
         self.PPI = 0
+        # number of leylines controlled by player
+        self.numLeylines = 0
 
         self.con_amt = 0    # keep counts of how many territories the player has conquered during a turn
 
@@ -136,6 +140,8 @@ class Game_State_Manager:
         self.round_based_win = False
         # Gambler win
         self.gambler_win = False
+        # Annilator
+        self.annilator = None
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
@@ -307,7 +313,7 @@ class Game_State_Manager:
             curr_p = self.players[p]
             if curr_p.alive:
                 if metric == 'indus':
-                    total_div += (self.get_player_industrial_level(curr_p) - avg)**2
+                    total_div += (self.get_dejure_industrial_level(curr_p) - avg)**2
                 elif metric == 'infra':
                     total_div += (curr_p.infrastructure_upgrade + curr_p.infrastructure - avg)**2
                 elif metric == 'trty':
@@ -329,7 +335,7 @@ class Game_State_Manager:
         for p in self.players:
             curr_p = self.players[p]
             if curr_p.alive:
-                total_ind += self.get_player_industrial_level(curr_p)
+                total_ind += self.get_dejure_industrial_level(curr_p)
                 total_inf += curr_p.infrastructure_upgrade + curr_p.infrastructure
                 total_popu += curr_p.total_troops
                 total_trty += self.get_deployable_amt(p)
@@ -355,7 +361,7 @@ class Game_State_Manager:
 
         for p in p_alive:
             curr_p = self.players[p]
-            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_player_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
+            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_dejure_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
             curr_p.PPI = round(self.logistic_function(z_score) * 100, 3)
 
     # Signal the specific mission tracker to check condition
@@ -463,7 +469,7 @@ class Game_State_Manager:
         TIP = None
         h_score = -100
         for p in self.players:
-            curri = self.get_player_industrial_level(self.players[p])
+            curri = self.get_dejure_industrial_level(self.players[p])
             if curri > h_score:
                 h_score = curri
                 TIP = p
@@ -476,8 +482,8 @@ class Game_State_Manager:
             self.get_TIP()
         else:
             if self.TIP != p:
-                pi = self.get_player_industrial_level(self.players[p])
-                hi = self.get_player_industrial_level(self.players[self.TIP])
+                pi = self.get_dejure_industrial_level(self.players[p])
+                hi = self.get_dejure_industrial_level(self.players[self.TIP])
                 if pi > hi:
                     self.TIP = p
                 elif pi == hi:
@@ -504,12 +510,15 @@ class Game_State_Manager:
     # FOR SHOWING SPECIAL AUTHORITY OUTSIDE OF TURN FOR SPECIFIC PLAYER
     def update_private_status(self, pid):
         dmg_mul = 1
+        hiddenInd = ""
         if self.players[pid].skill:
             if self.players[pid].skill.name == 'Elitocracy':
                 dmg_mul += self.players[pid].min_roll//2
+            if self.players[pid].skill.name == 'Collusion':
+                hiddenInd = f" ({self.get_player_industrial_level(self.players[pid]) + 6})"
         self.server.emit('private_overview', {'curr_SA': self.players[pid].stars,
                                                'curr_RS': self.players[pid].reserves,
-                                               'curr_indus': self.get_player_industrial_level(self.players[pid])+6,
+                                               'curr_indus': str(self.get_dejure_industrial_level(self.players[pid])+6) + hiddenInd,
                                                'curr_infra': self.get_player_infra_level(self.players[pid])+3,
                                                'curr_nul_rate': 0,
                                                'curr_dmg_mul': dmg_mul,
@@ -614,7 +623,7 @@ class Game_State_Manager:
                     return
         if not self.players[player].hijacked:
             self.players[player].infrastructure_upgrade += amt
-            self.players[player].stars -= amt*4
+            self.players[player].stars -= amt*3
             self.update_private_status(player)
             self.update_HIP(player)
             self.get_SUP()
@@ -636,6 +645,7 @@ class Game_State_Manager:
         bonus = 0
         t_score = 0
         p = self.players[player]
+        divider = 3
         for trty in p.territories:
 
             # Collusion takeaway
@@ -648,8 +658,10 @@ class Game_State_Manager:
             if t.isCity:
                 t_score += 1
             if t.isMegacity:
-                bonus += 1
+                bonus += 5
             if t.isTransportcenter:
+                divider = 2
+            if t.isHall:
                 bonus += 2
             t_score += 1
 
@@ -665,9 +677,9 @@ class Game_State_Manager:
                     if t.isCity:
                         t_score += 1
                     if t.isMegacity:
-                        bonus += 1
-                    if t.isTransportcenter:
-                        bonus += 2
+                        bonus += 5
+                    # if t.isTransportcenter:
+                    #     bonus += 2
                     t_score += 1
         bonus += self.map.get_continental_bonus(p.territories)
 
@@ -676,14 +688,14 @@ class Game_State_Manager:
             if p.skill.name == "Realm_of_Permafrost" and p.skill.active:
                 if t_score < 9:
                     return bonus + 3
-                return bonus + t_score//3
+                return bonus + t_score//divider
         if self.in_ice_age:
             if t_score < 15:
                 return math.ceil(bonus*0.6) + 2
-            return math.ceil(bonus*0.6) + t_score//5
+            return math.ceil(bonus*0.6) + t_score//(divider+2)
         if t_score < 9:
             return bonus + 3
-        return bonus + t_score//3
+        return bonus + t_score//divider
 
     def clear_deployables(self, player):
         p =  self.players[player]
@@ -706,6 +718,100 @@ class Game_State_Manager:
             self.get_SUP()
             self.update_global_status()
             self.signal_MTrackers('popu')
+
+    def leyline_probability(self, num_leylines):
+        if num_leylines < 1:
+            return 0  # no leylines means no probability
+
+        prob = 17
+        increment = 5
+
+        for i in range(2, num_leylines + 1):
+            prob += increment
+            increment += 1
+
+        return prob
+
+    def leyline_damage(self, num_leylines):
+        if num_leylines < 1:
+            return 1
+        base_multiplier = 4
+        bonus = num_leylines // 3
+        return base_multiplier + bonus
+
+    def count_connected_forts(self, player, trty, counted=None):
+        if counted is None:
+            counted = []
+
+        # Only proceed if this territory belongs to the player, is a fort, and not yet counted
+        if trty not in player.territories or trty in counted:
+            return 0
+
+        if not self.map.territories[trty].isFort:
+            return 0
+
+        counted.append(trty)
+        count = 1  # This territory is a fort
+
+        # Now, only explore neighbors that are forts
+        for t in self.map.territories[trty].neighbors:
+            count += self.count_connected_forts(player, t, counted)
+
+        return count
+
+    def shifted_high_roll(self, a_min, a_maxv, shift_ratio=0.25):
+
+        values = list(range(a_min, a_maxv + 1))
+        n = len(values)
+        base_prob = 1 / n
+        avg = (a_min + a_maxv) / 2
+
+
+        probs = [base_prob for _ in values]
+
+
+        low_idxs = [i for i, v in enumerate(values) if v < avg]
+        high_idxs = [i for i, v in enumerate(values) if v >= avg]
+
+        if not low_idxs or len(high_idxs) < 2:
+            return random.choices(values, weights=probs, k=1)[0]
+
+
+        take_amount = shift_ratio * base_prob
+        for i in low_idxs:
+            probs[i] -= take_amount
+
+        total_taken = take_amount * len(low_idxs)
+        portions = [2] + [1] * (len(low_idxs) - 2)
+        portion_total = sum(portions)
+
+        if portion_total == 0:
+            return random.choices(values, weights=probs, k=1)[0]
+
+        portion_unit = total_taken / portion_total
+
+
+        for i, amount in zip(high_idxs[:-1], portions):
+            probs[i] += amount * portion_unit
+
+
+        total_prob = sum(probs)
+        probs = [p / total_prob for p in probs]
+
+        return probs
+    
+    def get_dejure_industrial_level(self, player):
+        lvl = 0
+        c_amt = self.map.count_cities(player.territories)
+
+        if c_amt == 3:
+            lvl += 1
+        elif c_amt > 3:
+            lvl += 1 + (c_amt-3)//2
+        for trty in player.territories:
+            if self.map.territories[trty].isMegacity:
+                lvl += 1
+        return lvl
 
     def get_player_industrial_level(self, player):
         lvl = 0
@@ -819,14 +925,14 @@ class Game_State_Manager:
                 def_p.skill.reactStatsMod(def_stats, atk_stats, False)
 
         if atk_p.skill:
-            if "Realm_of_Permafrost" == atk_p.skill.name:
+            if "Realm_of_Permafrost" == atk_p.skill.name and atk_p.skill.active:
                 atk_stats[3] = 0
                 atk_stats[4] = 1
                 def_stats[3] = 0
                 def_stats[4] = 1
 
         if def_p.skill:
-            if "Realm_of_Permafrost" == def_p.skill.name:
+            if "Realm_of_Permafrost" == def_p.skill.name and def_p.skill.active:
                 atk_stats[3] = 0
                 atk_stats[4] = 1
                 def_stats[3] = 0
@@ -852,6 +958,8 @@ class Game_State_Manager:
                 def_p = self.players[player]
                 d_pid = player       
 
+        def_p.aliveBefore = def_p.alive
+
         # Identify territories
         trty_atk = self.map.territories[t1]
         trty_def = self.map.territories[t2]
@@ -863,6 +971,21 @@ class Game_State_Manager:
         # Compute player battle stats
         atk_stats = atk_p.temp_stats[:]
         def_stats = self.get_player_battle_stats(def_p)
+
+        # Fortification
+        if trty_def.isFort:
+            fortCounts = self.count_connected_forts(def_p, t2)
+            if fortCounts:
+                def_stats[3] += 20 + (fortCounts * 5)
+                def_stats[2] += 1 + (fortCounts//4)
+                if def_stats[3] > 60:
+                    def_stats[3] = 60
+
+        # Leyline
+        acrit = self.leyline_probability(atk_p.numLeylines)
+        dcrit = self.leyline_probability(def_p.numLeylines)
+        acdmg = self.leyline_damage(atk_p.numLeylines)
+        dcdmg = self.leyline_damage(def_p.numLeylines)
 
         # elitocracy territory based stat increase
         if atk_p.skill:
@@ -885,14 +1008,43 @@ class Game_State_Manager:
                 def_anu = atk_p.skill.guaranteed_dmg
 
         if def_p.skill:
-            if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active:
+            if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active and def_amt > 0:
                 atk_anu = def_p.skill.guaranteed_dmg
 
+        if def_p.skill:
+            if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
+                def_anu = 0
+            if def_p.skill.name == "Air_Superiority":
+                for cont in self.map.conts:
+                    currcont = self.map.conts[cont]['trtys']
+                    if t2 in currcont:
+                        airBonus = True
+                        for trty in currcont:
+                            if trty in def_p.territories and trty != t2:
+                                airBonus = False
+                                break
+                        if airBonus:
+                            def_stats[3] += 25
+                            if def_stats[3] > 85:
+                                def_stats[3] = 85
+                            def_stats[4] += 1
         # landmine explosion
         ld = 0
         if def_p.skill:
             if def_p.skill.name == 'Arsenal of the Underworld':
                 ld = def_p.skill.get_landmine_damage(t2, atk_amt)
+
+        atkh = False
+        defh = False
+        # Central Managed Troop Training
+        for h1 in atk_p.territories:
+            if self.map.territories[h1].isHall:
+                atkh = True
+                break
+        for h2 in def_p.territories:
+            if self.map.territories[h2].isHall:
+                defh = True
+                break
 
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefending amount: {def_amt} Defender stats: {def_stats}")
@@ -905,9 +1057,9 @@ class Game_State_Manager:
                 multitime = True
 
         if multitime: # time looper
-            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p)
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg)
         else: # normal
-            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats)
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg)
         print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
@@ -939,9 +1091,8 @@ class Game_State_Manager:
             # Necromancer
             if atk_p.skill:
                 if atk_p.skill.active:
-                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
-                        atk_p.reserves += def_amt-result[1]
-                        self.update_private_status(a_pid)
+                    if atk_p.skill.name == "Necromancer":
+                        atk_p.skill.curr_turn_gain += def_amt-result[1]
             
             # Revanchism
             if def_p.skill:
@@ -955,6 +1106,17 @@ class Game_State_Manager:
                     if m.name == "Gambler" and m.player == a_pid:
                         if atk_amt < def_amt:
                             m.check_conditions(def_amt)
+                    if m.name == 'Guardian' and m.player == d_pid and trty_def.isCapital and def_p.alive:
+                        m.signal_mission_failure()
+
+            if trty_def.isFort:
+                trty_def.isFort = False
+                self.server.emit('update_trty_display', {t2: {'hasEffect': 'gone'}}, room=self.lobby)
+            
+            if trty_def.isLeyline:
+                trty_def.isLeyline = False
+                self.server.emit('update_trty_display', {t2: {'hasEffect': 'leylineGone'}}, room=self.lobby)
+                def_p.numLeylines -= 1
 
         # defender wins
         else:
@@ -975,9 +1137,8 @@ class Game_State_Manager:
         
             if atk_p.skill:
                 if atk_p.skill.active:
-                    if atk_p.skill.name == "Necromancer" and atk_p.skill.activated:
-                        atk_p.reserves += def_amt-result[1]
-                        self.update_private_status(a_pid)
+                    if atk_p.skill.name == "Necromancer":
+                        atk_p.skill.curr_turn_gain += def_amt-result[1]
 
         # Sound effect
         if def_p.total_troops != 0:
@@ -1022,9 +1183,9 @@ class Game_State_Manager:
         self.update_global_status()
 
         # mission
+        self.signal_MTrackers('trty') # Where Guardian signal mission failure
         self.signal_MTrackers('indus')
         self.signal_MTrackers('popu')
-        self.signal_MTrackers('trty')
 
         self.et.determine_elimination(self, a_pid, d_pid)
         self.egt.determine_end_game(self)
@@ -1032,7 +1193,7 @@ class Game_State_Manager:
         if self.gambler_win:
             self.GES.halt_events()
         
-    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats):
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg):
         
         # Troop amount
         a_troops = atk_amt
@@ -1052,22 +1213,64 @@ class Game_State_Manager:
         if d_min > d_maxv:
             d_min = d_maxv
 
+        aprobs = None
+        dprobs = None
+        if atkh:
+            aprobs = self.shifted_high_roll(a_min, a_maxv)
+        if defh:
+            dprobs = self.shifted_high_roll(d_min, d_maxv)
+
+        if not atkh:
+            print(f"Attacker is running on standard distribution")
+        else:
+            print(f"Attacker is running on: {aprobs}")
+
+        if not defh:
+            print(f"Defender is running on standard distribution")
+        else:
+            print(f"Defender is running on: {dprobs}")
+
         print(a_troops, d_troops)
 
         # Starts simulation
         while(a_troops > 0 and d_troops > 0):
 
-            a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
-            d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
+            if atkh:
+                a_rolls = sorted(random.choices(population=list(range(a_min, a_maxv + 1)), weights=aprobs, k=a_maxt),reverse=True)
+            else:
+                a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+
+            if defh:
+                d_rolls = sorted(random.choices(population=list(range(d_min, d_maxv + 1)), weights=dprobs, k=d_maxt),reverse=True)
+            else:
+                d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
             max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
+            
+            a_receive = 0
+            d_receive = 0
 
             for i in range(max_dmg):
                 if a_rolls[i] > d_rolls[i]:
-                    if random.randint(1, 100) > d_null:
-                        d_troops -= 1*a_mul
+                    if random.randint(1, 100) > d_null:                        
+                        d_receive += 1
                 else:
-                    a_troops -= 1*d_mul
+                    a_receive += 1
+
+            if a_receive:
+                dcurr = random.randint(1, 100)
+                dc = 1
+                if dcrit >= dcurr:
+                    print("Defender dealt crit damage")
+                    dc = dcdmg
+                a_troops -= a_receive*d_mul*dc
+            if d_receive:
+                acurr = random.randint(1, 100)
+                ac = 1
+                if acrit >= acurr:
+                    print("Attacker dealt crit damage")
+                    ac = acdmg
+                d_troops -= d_receive*a_mul*ac
             
             # Adjust dice number
             a_maxt = a_troops if a_troops < a_maxt else a_maxt
@@ -1078,7 +1281,7 @@ class Game_State_Manager:
 
         return [a_troops, d_troops]
 
-    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p):
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg):
 
         # Time loop setting
         atk_loop, def_loop, run_loop = 1, 1, 1
@@ -1141,6 +1344,23 @@ class Game_State_Manager:
         if d_min > d_maxv:
             d_min = d_maxv
 
+        aprobs = None
+        dprobs = None
+        if atkh:
+            aprobs = self.shifted_high_roll(a_min, a_maxv)
+        if defh:
+            dprobs = self.shifted_high_roll(d_min, d_maxv)
+
+        if not atkh:
+            print(f"Attacker is running on standard distribution")
+        else:
+            print(f"Attacker is running on: {aprobs}")
+
+        if not defh:
+            print(f"Defender is running on standard distribution")
+        else:
+            print(f"Defender is running on: {dprobs}")
+
         print(a_troops, d_troops)
         print(f"Running {run_loop} loops.")
         outcomes = []
@@ -1149,17 +1369,42 @@ class Game_State_Manager:
 
             while(a_troops > 0 and d_troops > 0):
 
-                a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
-                d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
+                if atkh:
+                    a_rolls = sorted(random.choices(population=list(range(a_min, a_maxv + 1)), weights=aprobs, k=a_maxt),reverse=True)
+                else:
+                    a_rolls = sorted([random.randint(a_min, a_maxv) for _ in range(a_maxt)], reverse=True)
+
+                if defh:
+                    d_rolls = sorted(random.choices(population=list(range(d_min, d_maxv + 1)), weights=dprobs, k=d_maxt),reverse=True)
+                else:
+                    d_rolls = sorted([random.randint(d_min, d_maxv) for _ in range(d_maxt)], reverse=True)
 
                 max_dmg = len(d_rolls) if len(d_rolls) < len(a_rolls) else len(a_rolls)
 
+                a_receive = 0
+                d_receive = 0
+
                 for i in range(max_dmg):
                     if a_rolls[i] > d_rolls[i]:
-                        if random.randint(1, 100) > d_null:
-                            d_troops -= 1*a_mul
+                        if random.randint(1, 100) > d_null:                        
+                            d_receive += 1
                     else:
-                        a_troops -= 1*d_mul
+                        a_receive += 1
+                        
+                if a_receive:
+                    dcurr = random.randint(1, 100)
+                    dc = 1
+                    if dcrit >= dcurr:
+                        print("Defender dealt crit damage")
+                        dc = dcdmg
+                    a_troops -= a_receive*d_mul*dc
+                if d_receive:
+                    acurr = random.randint(1, 100)
+                    ac = 1
+                    if acrit >= acurr:
+                        print("Attacker dealt crit damage")
+                        ac = acdmg
+                    d_troops -= d_receive*a_mul*ac
                 
                 # Adjust dice number
                 a_maxt = a_troops if a_troops < a_maxt else a_maxt

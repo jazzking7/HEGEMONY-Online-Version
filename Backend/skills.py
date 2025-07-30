@@ -41,6 +41,7 @@ class Realm_of_Permafrost(Skill):
         self.extMod = True
         self.hasRoundEffect = True
         self.iceAgeCd = 0
+        self.annilator_as_user = player == gs.annilator
 
     def internalStatsMod(self, battle_stats):
 
@@ -58,6 +59,13 @@ class Realm_of_Permafrost(Skill):
         battle_stats[3] = 0
         battle_stats[4] = 1
 
+        if self.annilator_as_user and self.gs.in_ice_age:
+            battle_stats[0] = 5
+            battle_stats[1] = 3
+            battle_stats[2] = 1
+            battle_stats[3] = 0
+            battle_stats[4] = 1
+
     def activate_effect(self):
         if not self.active:
             self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
@@ -73,7 +81,7 @@ class Realm_of_Permafrost(Skill):
             return
 
         self.gs.set_ice_age = True
-        self.iceAgeCd = 4
+        self.iceAgeCd = 4 if not self.annilator_as_user else 3
         self.gs.players[self.player].stars -= 2
         self.gs.server.emit("display_new_notification", {"msg": "Ice Age Activated!"}, room=self.player)
         self.gs.update_private_status(self.player)
@@ -113,7 +121,7 @@ class Iron_Wall(Skill):
     def reactStatsMod(self, ownStats, enemyStats, attacking):
         if not attacking and self.active:
 
-            ownStats[3] = 30
+            ownStats[3] += 30
             ownStats[4] = 2
 
             disparity = (enemyStats[0] - ownStats[0]) + (enemyStats[1] - ownStats[1])
@@ -133,8 +141,12 @@ class Iron_Wall(Skill):
                 ownStats[3] += 5
 
             if self.ironwall:
-                ownStats[3] = 90
-                ownStats[4] = 3
+                if ownStats[3] <= 60:
+                    ownStats[3] = 95
+                    ownStats[4] = 3
+                else:
+                    ownStats[3] = 99
+                    ownStats[4] = 3
     
     def turn_off_iron_wall(self):
         self.ironwall = False
@@ -146,10 +158,10 @@ class Iron_Wall(Skill):
             'operational': self.active,
             'hasLimit': True,
             'limits': self.limit,
-            'btn_msg': "ACTIVATE IRON WALL",
+            'btn_msg': "ACTIVATE IRON DOME",
             'cooldown': self.cooldown,
             'activated': self.ironwall,
-            'inUseMsg': "IRON WALL IN ACTION"
+            'inUseMsg': "IRON DOME IN ACTION"
         }, room=self.player)
 
     def get_skill_status(self):
@@ -180,12 +192,15 @@ class Dictator(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Dictator", player, gs)
+        self.annilator_as_user = player == gs.annilator
         self.hasTurnEffect = True
         self.limit = len(self.gs.players) // 3
 
     def apply_turn_effect(self,):
         if self.active:
             self.gs.players[self.player].stars += 2
+            if self.annilator_as_user:
+                self.gs.players[self.player].stars += 1
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -208,7 +223,7 @@ class Dictator(Skill):
         self.limit -= 1
         
         added_stars = 0
-        max_add = 12
+        max_add = 6
 
         donors = sorted(
             [p for p in self.gs.players if p != self.player],
@@ -319,16 +334,16 @@ class Mass_Mobilization(Skill):
         
         # increase reserves
         if diff < -10:
-            self.gs.players[self.player].reserves += math.ceil(0.25*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.17*total_troops*round_multiplier)
             self.residual = math.ceil(0.25*total_troops*(1-round_multiplier))
         elif diff < -5:
-            self.gs.players[self.player].reserves += math.ceil(0.22*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.14*total_troops*round_multiplier)
             self.residual = math.ceil(0.22*total_troops*(1-round_multiplier))
         elif diff < 0:
-            self.gs.players[self.player].reserves += math.ceil(0.18*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.18*total_troops*(1-round_multiplier))
         elif diff < 5:
-            self.gs.players[self.player].reserves += math.ceil(0.15*total_troops*round_multiplier)
+            self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.15*total_troops*(1-round_multiplier))
         elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
@@ -602,13 +617,14 @@ class Zealous_Expansion(Skill):
 
     def internalStatsMod(self, battle_stats):
         if self.active:
-            battle_stats[1] += 1
+            addi = (battle_stats[0] - 2) - 3
+            battle_stats[1] += addi
 
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Zealous Expansion",
-            'description': "Cost of increasing infrastructure level decrease from 4★ to 2★. Each additional infrastructure level gives 3 bonus troop as reserve at your turn.",
+            'description': "Cost of increasing infrastructure level decrease from 3★ to 2★. Each additional infrastructure level gives 5 bonus troop as reserve at your turn.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.gs.players[self.player].stars//2,
@@ -635,6 +651,15 @@ class Elitocracy(Skill):
     def __init__(self, player, gs):
         super().__init__("Elitocracy", player, gs)
         self.intMod = True
+        self.hasRoundEffect = True
+        self.annilator_as_user = player == gs.annilator
+        self.cost_per_autoupgrade = 2 if self.annilator_as_user else 3
+    
+    def apply_round_effect(self):
+        curr = self.gs.GES.round
+        if curr > 0 and curr % self.cost_per_autoupgrade == 0:
+            self.gs.players[self.player].min_roll += 1
+            self.gs.update_private_status(self.player)
 
     def internalStatsMod(self, battle_stats):
         if self.active:
@@ -671,39 +696,31 @@ class Elitocracy(Skill):
 class Necromancer(Skill):
     def __init__(self, player, gs):
         super().__init__("Necromancer", player, gs)
-        
-        self.hasCooldown = True
-        self.hasRoundEffect = True
+        self.curr_turn_gain = 0
         self.hasTurnEffect = True
-
-        self.activated = False
-        self.cooldown = 0
+        self.star_per_troops = 6 if player == gs.annilator else 9
+    
+    def apply_turn_effect(self,):
+        self.gs.players[self.player].reserves += self.curr_turn_gain
+        self.gs.players[self.player].stars += self.curr_turn_gain//self.star_per_troops
+        self.gs.update_private_status(self.player)
+        self.curr_turn_gain = 0
 
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Necromancer",
-            'description': "When opponents attack you and fail, their losses become your reserves. Can activate Blood Harvest, where losses from the enemies during your conquest become your reserves.",
+            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves, you will receive them at the end of your turn. For every 7 troops you've received, you receive 1 star.",
             'operational': self.active,
-            'hasLimit': True,
-            'limits': "infinite amount of",
-            'btn_msg': "FETCH ME THEIR SOULS!",
-            'activated': self.activated,
-            'cooldown': self.cooldown,
-            'inUseMsg': "BLOOD HARVEST ACTIVE"
         }, room=self.player) 
     
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
-        info += f'Number of rounds of cooldown left: {self.cooldown}\n' if self.cooldown else "Ready to activate"
         return info
     
     def apply_round_effect(self,):
         if self.cooldown:
             self.cooldown -= 1
-    
-    def apply_turn_effect(self,):
-        self.activated = False
 
     def activate_effect(self):
         if not self.active:
@@ -721,13 +738,13 @@ class Divine_Punishment(Skill):
     def __init__(self, player, gs):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
-        self.energy_cost = 3
-        self.limit = len(gs.players) + 1
+        self.energy_cost = 1 if player == gs.annilator else 2
+        self.limit = len(gs.players) + 1 if player == gs.annilator else len(gs.players)
         self.finished_bombardment = True
 
-        if self.limit > len(gs.map.territories)//len(gs.players):
-            self.limit = len(gs.map.territories)//len(gs.players) - 2
-            self.energy_cost = 2
+        # if self.limit > len(gs.map.territories)//len(gs.players):
+        #     self.limit = len(gs.map.territories)//len(gs.players) - 2
+        #     self.energy_cost = 2
 
         self.hasRoundEffect = True
         self.energy = 0
@@ -787,34 +804,46 @@ class Divine_Punishment(Skill):
 
             chosen_trty = self.gs.map.territories[choice]
 
-            if chosen_trty.isDeadZone:
-                for nt in chosen_trty.neighbors:
-                    if nt not in self.gs.players[self.player].territories:
-                        self.gs.map.territories[nt].isDeadZone = 2
-                        shockwave = min(5, self.gs.map.territories[nt].troops)
-                        self.gs.map.territories[nt].troops -= shockwave
-                        for player in self.gs.players:
-                            if nt in self.gs.players[player].territories:
-                                self.gs.players[player].total_troops -= shockwave
+            for nt in chosen_trty.neighbors:
+                if nt not in self.gs.players[self.player].territories:
+                    self.gs.map.territories[nt].isDeadZone = 2
+                    self.gs.map.territories[nt].isFort = False
+                    shockwave = min(5, self.gs.map.territories[nt].troops)
+                    self.gs.map.territories[nt].troops -= shockwave
+                    for player in self.gs.players:
+                        if nt in self.gs.players[player].territories:
+                            self.gs.players[player].total_troops -= shockwave
 
-                                self.gs.update_LAO(player)
-                                self.gs.update_TIP(player)
-                                self.gs.update_private_status(player)
+                            self.gs.update_LAO(player)
+                            self.gs.update_TIP(player)
+                            self.gs.update_private_status(player)
 
-                                # Ares' Blessing Rage meter checking
-                                if self.gs.players[player].skill:
-                                    if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
-                                        self.gs.players[player].skill.checking_rage_meter()
+                            # Ares' Blessing Rage meter checking
+                            if self.gs.players[player].skill:
+                                if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                    self.gs.players[player].skill.checking_rage_meter()
 
-                                # visual effect
-                                self.gs.server.emit('battle_casualties', {
-                                    f'{nt}': {'tid': nt, 'number': shockwave},
-                                }, room=self.gs.lobby)
-                                break
-                        self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+                            # visual effect
+                            self.gs.server.emit('battle_casualties', {
+                                f'{nt}': {'tid': nt, 'number': shockwave},
+                            }, room=self.gs.lobby)
+                            break
+                    self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
 
-            chosen_trty.isCity = False
+            wasMega = chosen_trty.isMegacity
+            if chosen_trty.isMegacity:
+                chosen_trty.isMegacity = False
+            else:
+                chosen_trty.isCity = False
+
+            chosen_trty.isTransportcenter = False
+            
             chosen_trty.isDeadZone = 2
+
+            # Remove Fortification
+            chosen_trty.isFort = False
+
+            chosen_trty.isBureau = False
 
             casualties = math.ceil(0.75*chosen_trty.troops)
             chosen_trty.troops -= casualties
@@ -826,6 +855,7 @@ class Divine_Punishment(Skill):
 
                     self.gs.update_LAO(player)
                     self.gs.update_TIP(player)
+                    self.gs.update_HIP(player)
                     self.gs.update_private_status(player)
 
                     # Ares' Blessing Rage meter checking
@@ -838,8 +868,11 @@ class Divine_Punishment(Skill):
                         f'{choice}': {'tid': choice, 'number': casualties},
                     }, room=self.gs.lobby)
                     break
-
-            self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            
+            if wasMega:
+                self.gs.server.emit('update_trty_display', {choice: {'hasDev': 'city', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+            else:
+                self.gs.server.emit('update_trty_display', {choice: {'hasDev': '', 'troops': chosen_trty.troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
         
         self.gs.update_player_stats()
 
@@ -867,6 +900,7 @@ class Air_Superiority(Skill):
 
         self.hasTurnEffect = True
         self.energy = 0
+        self.annilator_as_user = player == gs.annilator
 
     def apply_turn_effect(self,):
         self.limit = 5
@@ -879,6 +913,8 @@ class Air_Superiority(Skill):
 
         # Calculate the bonus using the quadratic function and round up
         bonus = math.ceil(a * x ** 2 + b * x + c)
+        if self.annilator_as_user:
+            bonus = math.ceil(1.3*bonus)
         return bonus
 
     def long_arm_jurisdiction(self,):
@@ -892,7 +928,10 @@ class Air_Superiority(Skill):
 
             bonus = len(distincts)
             self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
-            self.gs.players[self.player].stars += bonus//5
+            if self.annilator_as_user:
+                self.gs.players[self.player].stars += bonus//3
+            else:
+                self.gs.players[self.player].stars += bonus//4
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
@@ -946,7 +985,7 @@ class Collusion(Skill):
         super().__init__("Collusion", player, gs)
         self.finished_choosing = True
         self.secret_control_list = []
-        self.free_usages = 1
+        self.free_usages = 2
         if len(self.gs.players) > 4:
             self.free_usages += 1
         if len(self.gs.players) > 6:
@@ -1011,6 +1050,10 @@ class Collusion(Skill):
             self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
             return
+        
+        if self.gs.map.territories[choice].isMegacity or self.gs.map.territories[choice].isTransportcenter:
+            self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+            self.gs.players[self.player].skill.finished_choosing = True
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
@@ -1026,6 +1069,8 @@ class Laplace_Demon(Skill):
     def __init__(self, player, gs):
         super().__init__("Laplace's Demon", player, gs)
         self.gs.server.emit('laplace_mode', room=self.player)
+        self.known = []
+        self.finished_choosing = False
         names = []
         for miss in self.gs.Mset:
             if miss.name not in names:
@@ -1045,19 +1090,57 @@ class Laplace_Demon(Skill):
 
     def update_current_status(self):
         # modify this
+        limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
         information = "You own the top information gathering group, click on player to know their hidden stats. Missions that are most likely in game: "
         for name in self.names:
             information += name + ' '
+        information += "\n"
+        for p in self.known:
+            for pl in self.gs.players:
+                if self.gs.players[pl].name == p:
+                    for miss in self.gs.Mset:
+                        if miss.player == pl:
+                            information += f"{p} has {miss.name} as their secret agenda.\n"
+                            break
+                    break
+        html_info = information.replace('\n', '<br>')
         self.gs.server.emit("update_skill_status", {
             'name': "Laplace's Demon",
-            'description': information,
+            'description': html_info,
             'operational': self.active,
+            'limits': limit,
+            'hasLimit': True,
+            'btn_msg': "Gather Advanced Intel"
         }, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
         info += "Know as much as you do :)"
         return info
+    
+    def get_potential_targets(self):
+        plist = []
+        for p in self.gs.players:
+            if p != self.player:
+                currp = self.gs.players[p]
+                if currp.name not in self.known:
+                    plist.append(currp.name)
+        return plist
+    
+    def get_intel(self, target):
+        self.finished_choosing = True
+        self.known.append(target)
+        self.gs.players[self.player].stars -= 4
+        self.gs.update_private_status(self.player)
+    
+    def activate_effect(self):
+        if self.active and self.gs.players[self.player].stars >= 4:
+            if len(self.known) < (len(self.gs.players)-1):
+                self.gs.GES.handle_async_event({'name':"G_I"}, self.player)
+            else:
+                self.gs.server.emit("display_new_notification", {'msg': "No more intel can be gathered"}, room=self.player)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "War art is currently sealed!"}, room=self.player)
 
 class Arsenal_of_the_Underworld(Skill):
     
@@ -1277,7 +1360,7 @@ class Loan_Shark(Skill):
                 self.handle_payment(debtor, "troops")
 
     def get_potential_targets(self):
-        potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and player != self.player and player not in self.ransom_history]
+        potential_targets = [player for player in self.gs.players if self.gs.players[player].alive and self.gs.players[player].connected and not self.gs.players[player].hijacked and player != self.player and player not in self.ransom_history]
         invalid_targets = []
         for player in potential_targets:
             curr_p = self.gs.players[player]
@@ -1320,11 +1403,11 @@ class Loan_Shark(Skill):
         if self.gs.GES.round == 0:
             self.loan_list[pid] = [5, self.gs.GES.round]
 
-        curr = self.gs.players[player]
+        curr = self.gs.players[pid]
         curr.hijacked = True
         if curr.skill:
             curr.skill.active = False
-        self.gs.server.emit('show_debt_button', room=player)
+        self.gs.server.emit('show_debt_button', room=pid)
 
     def handle_payment(self, player, method):
         if player not in self.loan_list:
@@ -1447,7 +1530,8 @@ class Reaping_of_Anubis(Skill):
     def __init__(self, player, gs):
         super().__init__("Reaping of Anubis", player, gs)
         self.guaranteed_dmg = 0
-        self.cost = 3
+        self.cost = 3 if player != gs.annilator else 2
+        self.increment = 3 if player != gs.annilator else 2
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
@@ -1473,7 +1557,7 @@ class Reaping_of_Anubis(Skill):
                 if self.gs.players[self.player].stars < 0:
                     self.gs.players[self.player].stars = 0
                 self.gs.update_private_status(self.player)
-                self.cost += 2
+                self.cost += self.increment
 
 class Pandora_Box(Skill):
     def __init__(self, player, gs):
@@ -1485,7 +1569,9 @@ class Pandora_Box(Skill):
         self.hasRoundEffect = True
         self.curr_pull = 100
         self.receivedBlessings = []
+        self.guarantee = 0
         self.gs.players[self.player].stars += 2
+        self.gs.update_private_status(self.player)
 
     def apply_round_effect(self):
         self.curr_pull = 100
@@ -1536,6 +1622,9 @@ class Pandora_Box(Skill):
     def get_outcome(self):
         # more star, more reserves, stats increase, intel
         num = random.randint(1, 100)
+        if num < 56 and self.guarantee >= 4:
+            num = random.randint(56, 100)
+            self.guarantee = 0
         if num < 20: # 20%
             self.gs.server.emit("display_special_notification", {"msg": "Received nothing.....", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
         elif num < 40: # 20%
@@ -1594,6 +1683,10 @@ class Pandora_Box(Skill):
             self.indus += 2
             self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Industrial Level')
+        if num < 56:
+            self.guarantee += 1
+        else:
+            self.guarantee = 0
 
 class Loopwalker(Skill):
     def __init__(self, player, gs):
@@ -1611,7 +1704,7 @@ class Loopwalker(Skill):
         limit = self.aval_loops if self.aval_loops > 0 else 0
         self.gs.server.emit("update_skill_status", {
             'name': "Loopwalker",
-            'description': f"Run all battles through multiple timelines and keep the best result. {limit} time loops available.",
+            'description': f"Run all battles through multiple timelines and keep the best result. {limit} time loops available. Maximum 100 loops can be set per battle",
             'operational': self.active,
             'intset': self.loop_per_battle,
             'btn_msg': "Tune Parallel Runs"
@@ -1673,6 +1766,8 @@ class Revanchism(Skill):
             battle_stats[1] += self.ragePoints//100
             battle_stats[2] += self.ragePoints//150
             battle_stats[3] += self.ragePoints//100 * 10
+            if battle_stats[3] >= 100:
+                battle_stats[3] = 90
             battle_stats[4] += self.ragePoints//150
 
     def accumulate_rage(self, troop_loss, trty_loss):
@@ -1683,6 +1778,18 @@ class Revanchism(Skill):
         if trty_loss.isCapital:
             self.ragePoints += 25
         if trty_loss.isCity:
+            self.ragePoints += 20
+        if trty_loss.isMegacity:
+            self.ragePoints += 50
+        if trty_loss.isFort:
+            self.ragePoints += 10
+        if trty_loss.isLeyline:
+            self.ragePoints += 15
+        if trty_loss.isTransportcenter:
+            self.ragePoints += 50
+        if trty_loss.isHall:
+            self.ragePoints += 50
+        if trty_loss.isBureau:
             self.ragePoints += 20
         tid = 0
         for trty in self.gs.map.territories:

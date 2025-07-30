@@ -65,7 +65,7 @@ class Mission_Distributor:
             ['Uni', 'Pol']
         ]
         self.dup_con = ['Pop', 'Exp', 'Ind', 'Dom']
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 'Gam', 'Ann']
         self.missions = [
                           'War', 'Loy', 'Bon',
              'Ind',
@@ -78,17 +78,23 @@ class Mission_Distributor:
              'Str', 
              'Due', 'Pun',
              'Sur',
-             'Ass', 'Pro',
-             'Gam',
-             'Opp'
+             'Ass', 'Pro', 'Ann',
+             'Opp',
+             'Gam'
         ]
 
-        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist']
+        self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annilator']
         self.A_tier = ['Loyalist', 'Survivalist']
-        self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']
+        self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']        
 
-    def validate_mission_set(self, miss_set):
+    def validate_mission_set(self, miss_set, hasAnn):
         if miss_set.count('Opp') <= 1:
+            if hasAnn and "Ann" not in miss_set:
+                return False
+            if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+                return False
+            if miss_set.count('Ann') > 1:
+                return False
             c = 0
             for m in miss_set:
                 if m in self.self_wins:
@@ -100,10 +106,14 @@ class Mission_Distributor:
             for nc in self.nat_con:
                 if all(m in nc for m in miss_set):
                     return True
-        return False
+                for nc in self.nat_con:
+                    if all(m in nc for m in miss_set):
+                        return True
+            return False
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p):
+        hasAnn = random.randint(1,100) > 50
         miss_set = []
         done = False
         count = 0
@@ -146,7 +156,7 @@ class Mission_Distributor:
                 count += 1
             if count == num_p:
                 print(miss_set)
-                if self.validate_mission_set(miss_set):
+                if self.validate_mission_set(miss_set, hasAnn):
                     return miss_set
                 miss_set = []
                 count = 0
@@ -190,6 +200,8 @@ class Mission_Distributor:
             return Assassin(player, gs)
         elif name == 'Pro':
             return Protectionist(player, gs)
+        elif name == 'Ann':
+            return Annilator(player, gs)
         elif name == 'Gam':
             return Gambler(player, gs)
         elif name == 'Opp':
@@ -197,7 +209,7 @@ class Mission_Distributor:
         
     def set_up_mission_trackers(self, gs, miss_set):
         for m in miss_set:
-            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist']:
+            if m.name in ['Pacifist', 'Warmonger', 'Loyalist', 'Bounty_Hunter', 'Duelist', 'Punisher', 'Survivalist', 'Assassin', 'Protectionist', 'Opportunist', 'Annilator']:
                 if 'death' not in gs.MTrackers:
                     gs.MTrackers['death'] = Event_Based_Tracker(gs)
                 gs.MTrackers['death'].add_observer(m)
@@ -217,7 +229,7 @@ class Mission_Distributor:
                 if 'popu' not in gs.MTrackers:
                     gs.MTrackers['popu'] = Event_Based_Tracker(gs)
                 gs.MTrackers['popu'].add_observer(m)
-            if m.name in ['Gambler']:
+            if m.name in ['Gambler', 'Guardian']:
                 gs.SMset.append(m)
         
         # start running the trackers
@@ -270,9 +282,9 @@ class Mission_Distributor:
     def no_conflicts(self, mission_name_list, mission_list):
         print(mission_name_list)
         print(mission_list)
-        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun']
+        self.self_wins = ['Loy', 'Bon', 'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Pro', 'Ass', 'Sur', 'Gam', 'Ann']
         for name in mission_name_list:
-            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher']:
+            if name in ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Gambler', 'Survivalist', 'Protector', 'Assassin', 'Annilator']:
                 return False
             if name in ['Industrialist', 'Expansionist', 'Dominator', 'Populist'] and mission_name_list.count(name) > 1:
                 return False

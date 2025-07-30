@@ -62,14 +62,22 @@ class Mission:
                             self.gs.server.emit('debt_off', room=self.player)
             self.gs.GES.flush_concurrent_event(self.player)
             self.gs.perm_elims.append(self.player)
-            self.gs.death_logs[self.player] = 'MF'
-            self.gs.signal_MTrackers('death')
-            self.gs.get_TIP()
-            self.gs.get_HIP()
-            self.gs.get_MTO()
-            self.gs.get_LAO()
-            self.gs.get_SUP()
-            self.gs.egt.determine_end_game(self.gs)
+            if self.name != "Guardian":
+                self.gs.death_logs[self.player] = 'MF'
+                self.gs.signal_MTrackers('death')
+                self.gs.get_TIP()
+                self.gs.get_HIP()
+                self.gs.get_MTO()
+                self.gs.get_LAO()
+                self.gs.get_SUP()
+                self.gs.egt.determine_end_game(self.gs)
+            else:
+                self.gs.get_TIP()
+                self.gs.get_HIP()
+                self.gs.get_MTO()
+                self.gs.get_LAO()
+                self.gs.get_SUP()
+
 
 class Pacifist(Mission):
 
@@ -1153,7 +1161,7 @@ class Protectionist(Mission):
 class Gambler(Mission):
     def __init__(self, player, gs):
         super().__init__("Gambler", player, gs)
-        self.target_troops = len(self.gs.map.territories)
+        self.target_troops = len(self.gs.map.territories) - 20
         self.curr_troops = 0
     
     def set_up_tracker_view(self, ):
@@ -1204,4 +1212,35 @@ class Opportunist(Mission):
         return self.gs.players[self.player].alive
     
     def end_game_global_peace_checking(self):
+        return self.gs.players[self.player].alive
+    
+class Annilator(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Annilator", player, gs)
+        gs.annilator = player
+
+    def check_conditions(self,):
+        if not self.gs.players[self.player].alive:
+            self.signal_mission_failure()
+            self.update_tracker_view({
+                'misProgDesp': f'There are players that are still alive, annilation failed.',
+            })
+            return
+
+    def set_up_tracker_view(self, ):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': f'DESTROY ALL OTHER PLAYERS AND BE THE LAST ONE STANDING!',
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        for p, player in self.gs.players.items():
+            if p != self.player and player.alive:
+                return False
+        return self.gs.players[self.player].alive
+    
+    def end_game_global_peace_checking(self, ):
+        for p, player in self.gs.players.items():
+            if p != self.player and player.alive:
+                return False
         return self.gs.players[self.player].alive

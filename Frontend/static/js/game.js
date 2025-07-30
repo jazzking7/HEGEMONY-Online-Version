@@ -158,9 +158,9 @@ async function initializeLibraries(){
 }
 
 function loadGameSketch() {
-  let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-  let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
-  loadScript(scriptUrl);
+  // let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
+  // let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
+  // loadScript(scriptUrl);
 }
 
 async function initializeSketch() {
@@ -382,6 +382,12 @@ socket.on('update_trty_display', function(data){
       if (field == 'hasDev'){
         if (changes[field] == 'city'){
           territories[tid].devImg = cityImage;
+        } else if (changes[field] == 'megacity'){
+          territories[tid].devImg = megacityImage;
+        } else if (changes[field] == 'nexus') {
+          territories[tid].devImg = nexusImage;
+        } else if (changes[field] == 'bureau') {
+          territories[tid].devImg = bureauImage;
         } else {
           territories[tid].devImg = null;
         }
@@ -389,6 +395,14 @@ socket.on('update_trty_display', function(data){
       } else if (field == 'hasEffect') {
         if (changes[field] == 'nuke') {
           territories[tid].insig = radioImage;
+        } else if (changes[field] == 'fort') {
+          territories[tid].insig = fortImage;
+        } else if (changes[field] == 'hall') {
+          territories[tid].hallImg = hallImage;
+        } else if (changes[field] == 'leyline') {
+          territories[tid].leylineImg = leylineImage;
+        } else if (changes[field] == 'leylineGone') {
+          territories[tid].leylineImg = null;
         } else {
           territories[tid].insig = null;
         }
@@ -417,6 +431,18 @@ socket.on('change_click_event', function(data){
     currEvent = deploy_reserves;
   } else if (data.event == 'build_cities') {
     currEvent = build_cities;
+  } else if (data.event == 'raise_megacities') {
+    currEvent = raise_megacities;
+  } else if (data.event == 'set_forts') {
+    currEvent = set_forts;
+  } else if (data.event == 'set_hall') {
+    currEvent = set_hall;
+  } else if (data.event == 'set_nexus') {
+    currEvent = set_nexus;
+  } else if (data.event == 'set_leyline') {
+    currEvent = set_leyline;
+  } else if (data.event == 'set_bureau') {
+    currEvent = set_bureau;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
   } else if (data.event == 'launch_orbital_strike'){
@@ -1018,10 +1044,23 @@ socket.on('conquest', function(){
   $('#proceed_next_stage .text').text('Finish Conquest');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
-    socket.emit("terminate_conquer_stage");
-    currEvent = null;
-    toHightlight = [];
-    clickables = [];
+
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit("terminate_conquer_stage");
+      currEvent = null;
+      toHightlight = [];
+      clickables = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+    });
+
   });
 });
 
@@ -1314,6 +1353,61 @@ socket.on('build_cities', function(data){
   announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
 })
 
+socket.on('set_forts', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling new forts, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
+socket.on('set_hall', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Intalling Governance Halls, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
+socket.on('set_nexus', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Building Logistic Nexus, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
+socket.on('set_leyline', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling Leyline Cross, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
+socket.on('set_bureau', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Settling Mobilization Bureaux, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.flist;
+})
+
+// Set and display the city amount for megacity settlement event
+socket.on('raise_megacities', function(data){
+  city_amt = data.amount;
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Raising new megacities, ${data.amount} under construction</h2>`;
+  clickables = [];
+  toHightlight = [];
+  clickables = data.clist;
+})
+
 // Warning during city settlement
 socket.on('update_settle_status', function(data){
   popup(data.msg, 3000);
@@ -1377,6 +1471,156 @@ function build_cities(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_cities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function raise_megacities(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_megacities', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_forts(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_forts', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_hall(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_hall', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_nexus(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_nexus', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_leyline(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_leyline', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
+}
+
+function set_bureau(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHightlight.length == city_amt){
+      toHightlight.splice(0, 1);
+    }
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == city_amt){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_bureau', {'choice': toHightlight});
           toHightlight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
@@ -1561,37 +1805,226 @@ btn_sep_auth.onclick = function () {
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
     midDis.innerHTML = `
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-ui" style="background-color: #58A680; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#3F805E'"
-    onmouseout="this.style.backgroundColor='#58A680'">
-              <img src="/static/Assets/Logo/transhubimprove.png" alt="Upgrade Infrastructure" style="max-height: 60px;">
-              <span class="small mt-1">UPGRADE INFRASTRUCTURE</span>
-          </button>
-      </div>
+<style>
+  .scroll-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+  }
 
-      <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-bc" style="background-color: #6067A1; color:#FFFFFF; margin: 0 1px;" onmouseover="this.style.backgroundColor='#484E80'"
-    onmouseout="this.style.backgroundColor='#6067A1'">
-              <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities" style="max-height: 60px;">
-              <span class="small mt-1">BUILD CITIES</span>
-          </button>
-      </div>
+  .button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px;
+  }
 
-      <div class="d-inline-block text-center">
-          <button class="btn d-flex flex-column align-items-center" id="btn-mob" style="background-color: #A1606C; color:#FFFFFF; margin: 0 2px;" onmouseover="this.style.backgroundColor='#814B56'"
-    onmouseout="this.style.backgroundColor='#A1606C'">
-              <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization" style="max-height: 60px;">
-              <span class="small mt-1">MOBILIZATION</span>
-          </button>
-      </div>
+  .action-button {
+    width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    padding: 3px 4px;
+    transition: transform 0.1s ease-in-out;
+    overflow: hidden;
+  }
+
+  .action-button:hover {
+    transform: scale(1.04);
+  }
+
+  .action-button img {
+    max-height: 38px;
+    max-width: 53px;
+  }
+
+  .price-tag {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-left: 4px;
+  }
+
+  .hover-label {
+    display: none;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 100;
+  }
+
+  .action-button:hover .hover-label {
+    display: block;
+  }
+
+  .action-button span.small {
+    margin-top: 2px;
+    font-size: 0.85rem;
+  }
+
+  .cancel-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .cancel-btn {
+    width: 36px;
+    height: 36px;
+    background-color: #B91C1C;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+
+<div class="scroll-wrapper">
+  <div class="button-grid">
+
+    <div class="text-center">
+      <button id="btn-ui" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #58A680; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/transhubimprove.png" alt="Infrastructure">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+        </div>
+        <span class="small">INFRASTRUCTURE</span>
+        <div class="hover-label">Improve transport hubs</div>
+      </button>
     </div>
 
-    <div class="flex items-center justify-center mt-2">
-        <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
-            X
-        </button>
+    <div class="text-center">
+      <button id="btn-bc" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6067A1; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+        </div>
+        <span class="small">BUILD CITIES</span>
+        <div class="hover-label">Expand urban development</div>
+      </button>
     </div>
+
+    <div class="text-center">
+      <button id="btn-mob" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A1606C; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization">
+          <span class="price-tag" style="color: #FFFFFF;">2-15☆</span>
+        </div>
+        <span class="small">MOBILIZATION</span>
+        <div class="hover-label">Recruit reserve forces</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-mega" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #FDB13F; color:#000000;"
+              onmouseover="this.style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/megacity.png" alt="Megacity">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">RAISE MEGACITY</span>
+        <div class="hover-label">Create economic powerhouse</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-fort" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #878787; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#444444'; this.querySelector('.hover-label').style.backgroundColor='#444444'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#878787'; this.querySelector('.hover-label').style.backgroundColor='#878787'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/fort.png" alt="Fort">
+          <span class="price-tag" style="color: #FFFFFF;">1☆</span>
+        </div>
+        <span class="small">SET UP FORTS</span>
+        <div class="hover-label">Establish defense base</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-hall" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6C3BAA; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/CAD.png" alt="Hall of Governance">
+          <span class="price-tag" style="color: #FFFFFF;">5☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">HALL OF GOVERNANCE</span>
+        <div class="hover-label">Extend administrative control</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-nexus" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A8DCAB; color:#000000;"
+              onmouseover="this.style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">LOGISTIC NEXUS</span>
+        <div class="hover-label">Centralize distribution</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-leyline" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6987D5; color:#000000;"
+              onmouseover="this.style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/leyline.png" alt="Leyline">
+          <span class="price-tag" style="color: #000000;">2☆</span>
+        </div>
+        <span class="small">LEYLINE CROSS</span>
+        <div class="hover-label">Channel mystic energies</div>
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button id="btn-bureau" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #2C5F34; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau">
+          <span class="price-tag" style="color: #FFFFFF;">2☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">MOBILIZATION BUREAU</span>
+        <div class="hover-label">Enable troop call-ups</div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="flex items-center justify-center mt-2">
+  <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
+    X
+  </button>
+</div>
+
     `;
 
     // close window
@@ -1650,15 +2083,15 @@ btn_sep_auth.onclick = function () {
 
     // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
-      if (sep_auth < 4){
-        popup('MINIMUM 4 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+      if (sep_auth < 3){
+        popup('MINIMUM 3 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
-         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
          <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);
@@ -1671,6 +2104,143 @@ btn_sep_auth.onclick = function () {
         });
     });
 
+    // RAISE MEGACITY
+    $("#btn-mega").off('click').on('click', function(){
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO RAISE MEGACITY!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Megacities to raise:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Raise</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "R_M", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Fortified
+    $("#btn-fort").off('click').on('click', function(){
+      if (sep_auth < 1){
+        popup('MINIMUM 1 STAR TO SET UP FORT!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of forts to set up:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/1)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Set Up</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "S_F", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Hall of Governance
+    $("#btn-hall").off('click').on('click', function(){
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO SET UP HALL!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Halls of Governance to set up:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Install</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "S_H", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Logistic Nexus
+    $("#btn-nexus").off('click').on('click', function(){
+      if (sep_auth < 5){
+        popup('MINIMUM 5 STARS TO BUILD A NEXUS!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Logistic Nexus:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Build</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "L_N", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Leyline Cross
+    $("#btn-leyline").off('click').on('click', function(){
+      if (sep_auth < 2){
+        popup('MINIMUM 2 STARS TO BUILD A LEYLINE CROSS!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of Leyline Cross:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "L_C", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+    // Leyline Cross
+    $("#btn-bureau").off('click').on('click', function(){
+      if (sep_auth < 2){
+        popup('MINIMUM 2 STARS TO BUILD A MOBILIZATION BUREAU!', 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of bureaus:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "M_B", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
 
   });
 }
@@ -2358,6 +2928,103 @@ socket.on('arsenal_controls', function(data) {
     if (data.targets.length === 0) {
       middleContent.append('<p>No target available.</p>');
     }  
+});
+
+// loan shark
+socket.on('gather_intel', function(data) {
+  // Set the announcement message
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h4>Choose a target to uncover their agenda!</h4>`;
+
+  // Ensure required elements are visible
+  let middleDisplay = $('#middle_display');
+  let middleTitle = $('#middle_title');
+  let middleContent = $('#middle_content');
+
+  middleDisplay.show();
+  middleTitle.empty();
+  middleContent.empty();
+
+  // Create container for buttons
+  let buttonContainer = $('<div></div>')
+      .addClass('d-flex flex-wrap justify-content-between')
+      .css({
+          'max-height': '8rem',  // Limit the height to make it scrollable if too many rows
+          'overflow-y': 'auto',  // Enable vertical scrolling
+          'gap': '2px'          // Space between buttons
+      });
+
+  // Variable to track the currently selected button
+  let selectedButton = null;
+
+  // Loop through each target name and create buttons
+  data.targets.forEach(function(name) {
+      let button = $('<button></button>')
+          .addClass('btn m-2')
+          .css({
+              'padding': '2px',
+              'text-align': 'center',
+              'background-color': '#FFC107', // Bootstrap warning color
+              'color': '#333333' // Dark gray text
+          })
+          .text(name)
+          .click(function(){
+              // Remove red border from previously selected button
+              if (selectedButton) {
+                  selectedButton.css('border', 'none');
+              }
+
+              // Highlight the current button with a red border
+              $(this).css({
+                  'border': '2px solid red'
+              });
+
+              // Update the reference to the selected button
+              selectedButton = $(this);
+
+              // Show the control panel
+              document.getElementById('control_mechanism').innerHTML = '';
+              document.getElementById('control_panel').style.display = 'none';
+              document.getElementById('control_panel').style.display = 'flex';
+              $('#proceed_next_stage').hide();
+
+              // Confirm button action
+              $('#control_confirm').off('click').on('click', function(){
+                  document.getElementById('control_panel').style.display = 'none';
+                  socket.emit('send_gather_target', {'choice': name});
+
+                  // Clear middle content and title
+                  middleTitle.empty();
+                  middleContent.empty();
+
+                  // Remove red border from selected button
+                  if (selectedButton) {
+                      selectedButton.css('border', 'none');
+                      selectedButton = null;
+                  }
+              });
+
+              // Cancel button action
+              $('#control_cancel').off('click').on('click', function(){
+                  document.getElementById('control_panel').style.display = 'none';
+                  $('#proceed_next_stage').show();
+
+                  // Remove red border from selected button
+                  if (selectedButton) {
+                      selectedButton.css('border', 'none');
+                      selectedButton = null;
+                  }
+              });
+          });
+
+      buttonContainer.append(button);
+  });
+
+  // Add the button container to middle_content
+  middleContent.append(buttonContainer);
+  if (data.targets.length === 0) {
+    middleContent.append('<p>No target available.</p>');
+  }  
 });
 
 

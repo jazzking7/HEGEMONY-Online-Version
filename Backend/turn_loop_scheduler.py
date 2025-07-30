@@ -84,13 +84,13 @@ class turn_loop_scheduler:
             for p in gs.players:
                 if gs.players[p].skill:
                     if gs.players[p].skill.name == 'Robinhood':
-                        if curr_p in gs.players[p].skill.targets and curr_p != p:
+                        if curr_p in gs.players[p].skill.targets:
                             d_amt = gs.players[p].skill.leech_off_reinforcements(d_amt)
             # Zealous Expansion Reserve Booster
             # Air superiority
             if gs.players[curr_p].skill:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
-                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade * 3
+                    gs.players[curr_p].reserves += gs.players[curr_p].infrastructure_upgrade * 5
                     gs.update_private_status(curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()
@@ -136,8 +136,24 @@ class turn_loop_scheduler:
         atk_player.con_amt = 0
         # Iron wall turn off if there is any
         if atk_player.skill:
-            if atk_player.skill.active and atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
-                atk_player.skill.turn_off_iron_wall()
+            if atk_player.skill.active:
+                if atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
+                    atk_player.skill.turn_off_iron_wall()
+                if atk_player.skill.name == "Mass_Mobilization":
+                    atk_player.reserves += round((atk_player.total_troops * 15)/100)
+
+        # Hall giving authority
+        # Bureau recruitement
+        numBureaux = 0
+        for t in atk_player.territories:
+            if gs.map.territories[t].isBureau:
+                numBureaux += 1
+            if gs.map.territories[t].isHall:
+                atk_player.stars += 1
+        
+        atk_player.reserves += round((atk_player.total_troops * numBureaux * 7)/100)
+        gs.update_private_status(player)
+
         # Player temporary battle stats not updated
         ms.stats_set = False
 
@@ -224,10 +240,18 @@ class turn_loop_scheduler:
                 for pid in gs.players:
                     if gs.players[pid].skill:
                         if gs.players[pid].skill.name == "Robinhood":
-                            if player in gs.players[pid].skill.targets and player != pid:
+                            if player in gs.players[pid].skill.targets:
                                 s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
 
                 p.stars += s_amt
+
+                if (p.numLeylines * 12) > random.randint(1, 100):
+                    print("Leyline Bonus Received.")
+                    if random.randint(1, 100) > 40:
+                        p.reserves += p.numLeylines * 4
+                    else:
+                        p.stars += p.numLeylines
+                    gs.server.emit("display_special_notification", {"msg": "YOU HAVE RECEIVED LEYLINE BLESSING", "t_color": "#000000", "b_color": "#6987D5"}, room=player)
 
             # Dictator receives more stars
             # Ares clear stats boost
@@ -371,6 +395,10 @@ class turn_loop_scheduler:
                         if ms.round == 3:
                             time.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                    if miss.name == "Annilator":
+                        if ms.round == 1:
+                            time.sleep(2)
+                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF ANNILATOR DETECTED! HIGHLY RISKY SITUATION!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
                             time.sleep(2)

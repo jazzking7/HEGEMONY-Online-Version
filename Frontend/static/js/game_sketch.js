@@ -171,11 +171,6 @@ async function loadMapComponents(mapName, tnames, tneighbors, landlocked){
 }
 
 function draw() {
-  if (!sketch_running){
-    preload();
-    setup();
-    sketch_running = true;
-  }
   if (currWinHeight != windowHeight || currWinWid != windowWidth){
     resizeCanvas(windowWidth, windowHeight);
     currWinWid = windowWidth;
