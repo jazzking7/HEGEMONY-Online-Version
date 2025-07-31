@@ -1011,6 +1011,10 @@ class Game_State_Manager:
             if def_p.skill.name == "Reaping of Anubis" and def_p.skill.active and def_amt > 0:
                 atk_anu = def_p.skill.guaranteed_dmg
 
+        if atk_p.skill:
+            if atk_p.skill.name == "Realm_of_Permafrost" and atk_p.skill.active:
+                atk_anu = 0
+
         if def_p.skill:
             if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
                 def_anu = 0
