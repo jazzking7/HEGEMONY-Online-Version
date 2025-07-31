@@ -924,7 +924,7 @@ class Duelist(Mission):
 class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
-        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist"]
+        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist", "Protectionist", "Assassin", "Annihilator"]
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
