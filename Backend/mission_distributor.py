@@ -357,5 +357,43 @@ class Mission_Distributor:
                 winners[miss.player] = miss.name
             return winners
 
-        # If there are conflicts, find winners as usual
-        return self.determine_winners(gs)
+        # If there are conflicts, find winners
+        c = [p for p in gs.players if gs.players[p].alive]
+        # Solo Winner
+        if len(c) == 1:
+            for mis in gs.Mset:
+                if mis.player == c[0]:
+                    return {c[0]: mis.name}
+                
+        winners = {}
+        tiers = {
+            "Pac": {},
+            "S": {},
+            "A": {},
+            "B": {},
+            "C": {}
+        }
+        for m in gs.Mset:
+            if m.end_game_global_peace_checking():
+                if m.name == 'Opportunist':
+                    winners[m.player] = m.name
+                elif m.name in self.S_tier:
+                    if m.name == 'Pacifist':
+                        tiers["Pac"][m.player] = m.name
+                    else:
+                        tiers["S"][m.player] = m.name
+                elif m.name in self.A_tier:
+                    tiers["A"][m.player] = m.name
+                elif m.name in self.B_tier:
+                    tiers["B"][m.player] = m.name
+                else:
+                    tiers["C"][m.player] = m.name
+
+        # Merge winners by priority: Pacifist > S > A > B > C
+        for key in ["Pac", "S", "A", "B", "C"]:
+            if tiers[key]:
+                winners = {**tiers[key], **winners} # Merge dictionaries
+                if key != "C":
+                    break
+
+        return winners
