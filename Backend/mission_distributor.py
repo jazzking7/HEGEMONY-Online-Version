@@ -87,33 +87,58 @@ class Mission_Distributor:
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']        
 
-    def validate_mission_set(self, miss_set, hasAnn):
-        if miss_set.count('Opp') <= 1:
-            if hasAnn and "Ann" not in miss_set:
+    def validate_mission_set(self, miss_set, hasAnn, hasOpp, has2C, allC, allS):
+        if miss_set.count('Opp') > 1:
+            return False
+        if hasOpp and miss_set.count('Opp') == 0:
+            return False
+        if hasAnn and "Ann" not in miss_set:
+            return False
+        if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+            return False
+        if miss_set.count('Ann') > 1:
+            return False
+        c = 0
+        for m in miss_set:
+            if m in self.self_wins:
+                c += 1
+        if has2C:
+            if len(miss_set) - c < 2:
                 return False
-            if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+        if allC:
+            if c:
                 return False
-            if miss_set.count('Ann') > 1:
+        if allS:
+            if c < len(miss_set) - 1:
                 return False
-            c = 0
-            for m in miss_set:
-                if m in self.self_wins:
-                    c += 1
-                if m in self.dup_con and miss_set.count(m) > 1:
-                    return True
-            if c > 0:
+        for m in miss_set:
+            if m in self.dup_con and miss_set.count(m) > 1:
+                return True
+        if c > 0:
+            return True
+        for nc in self.nat_con:
+            if all(m in nc for m in miss_set):
                 return True
             for nc in self.nat_con:
                 if all(m in nc for m in miss_set):
                     return True
-                for nc in self.nat_con:
-                    if all(m in nc for m in miss_set):
-                        return True
-            return False
+        return False
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p):
         hasAnn = random.randint(1,100) > 50
+        hasOpp = random.randint(1,100) > 90
+        has2C = allC = allS = False
+        if num_p > 3:
+            mode = random.randint(1,100)
+            if mode < 50:
+                has2C = True
+            elif mode < 60:
+                allC = True
+                hasAnn = False
+            elif mode < 70:
+                allS = True
+
         miss_set = []
         done = False
         count = 0
@@ -156,7 +181,7 @@ class Mission_Distributor:
                 count += 1
             if count == num_p:
                 print(miss_set)
-                if self.validate_mission_set(miss_set, hasAnn):
+                if self.validate_mission_set(miss_set, hasAnn, hasOpp, has2C, allC, allS):
                     return miss_set
                 miss_set = []
                 count = 0
