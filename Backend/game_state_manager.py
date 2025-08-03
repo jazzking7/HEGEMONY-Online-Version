@@ -1110,7 +1110,7 @@ class Game_State_Manager:
                     if m.name == "Gambler" and m.player == a_pid:
                         if atk_amt < def_amt:
                             m.check_conditions(def_amt)
-                    if m.name == 'Guardian' and m.player == d_pid and trty_def.isCapital and def_p.alive:
+                    if m.name == 'Guardian' and m.player == d_pid and trty_def.isCapital and def_p.alive and def_p.capital == trty_def.name:
                         m.signal_mission_failure()
 
             if trty_def.isFort:
