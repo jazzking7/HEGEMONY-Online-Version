@@ -1,0 +1,7 @@
+Kassyria,Avalon,Zarqa
+Kassyria,Lugnica,Akasha,Parana
+Kylo,Emmett,Lugnica,Avalon,Giza
+Kassyria,Emmett,Avalon,Akasha
+Kylo,Kassyria,Lugnica,Akasha,Lucana,Ibuki
+Lugnica,Avalon,Emmett,Lucana,Allova Plain
+Avalon,Akasha,Allova Plain

@@ -1,0 +1,15 @@
+Corinth,Pompeii
+Carthage,Pompeii,Rome,Tarentum
+Carthage,Corinth,Ephesus,Verona,Gaul,Rome
+Pompeii,Gaul
+Pompeii,Gaul,Rome,Tarsus
+Pompeii,Ephesus,Verona,Tarsus
+Corinth,Pompeii,Verona,Tarentum,Sardis,Tarsus
+Corinth,Rome,Sardis,Lukina
+Rome,Tarentum,Tarsus,Athens,Segovia,Pannotia
+Verona,Gaul,Rome,Sardis,Dacia,Athens
+Tarsus,Athens
+Sardis,Tarsus,Dacia,Pannotia
+Segovia,Pannotia,Kaluga
+Sardis,Trajan,Pannotia,Kerguelen
+Sardis,Athens,Trajan,Segovia
