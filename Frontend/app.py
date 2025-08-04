@@ -40,6 +40,10 @@ def rollSimulator():
 def game_rules():
     return render_template('game_rules.html')
 
+@app.route("/tutorials")
+def tutorials():
+    return render_template('tutorials.html')
+
 if __name__ == "__main__":
     # app.run(host='127.0.0.1', port=8080, debug=True)
     app.run(host='0.0.0.0', port=8080, debug=True)

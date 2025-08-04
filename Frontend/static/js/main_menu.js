@@ -78,6 +78,22 @@ $(document).ready(function() {
             });
         });
 
+        $('#btn_tutorials').click(function() {
+            loadPage('tutorials')
+            .then(() => {
+                return unloadScript('page_script');
+            })
+            .then(() => {
+                return loadScript(URL_FRONTEND + 'static/js/tutorials.js', 'page_script');
+            })
+            .then(() => {
+                console.log('Entered Game Tutorials');
+            })
+            .catch((error) => {
+                console.error('Error loading page or script:', error);
+            });
+        });
+
     }
 
 

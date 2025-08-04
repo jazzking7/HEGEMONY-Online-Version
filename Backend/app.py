@@ -418,6 +418,18 @@ def compute_simulation_result(data):
             'defenderWinAll': round(results['defender_wins_all'] * 100, 2)
         }, room=request.sid)
 
+### Tutorial functions ###
+@socketio.on('get_tutorial_settings')
+def get_tutorial_settings():
+    sid = request.sid
+    tuto_map = Map("8CMAP")
+    print(f"Sent game settings to {sid}")
+    # FILL IN MAP CHOSEN
+    socketio.emit('tutorial_settings',
+     {'map': "8CMAP", 
+    'tnames': tuto_map.tnames, 
+    'tneighbors': tuto_map.tneighbors,
+    'landlocked': tuto_map.landlocked}, room=sid)
 
 ### Game functions ###
 

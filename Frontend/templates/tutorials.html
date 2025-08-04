@@ -1,0 +1,177 @@
+<div id="canvasContainer"></div>
+<div id="overlay_sections">
+
+    <audio id="turn_notification" src="{{url_for('static', filename='Audio/wardrum.wav')}}"></audio>
+    <audio id="smallbattle" src="{{url_for('static', filename='Audio/smallbattle.wav')}}"></audio>
+    <audio id="bigbattle" src="{{url_for('static', filename='Audio/bigbattle.wav')}}"></audio>
+    <audio id="railgun" src="{{url_for('static', filename='Audio/railgun.wav')}}"></audio>
+    <audio id="smolbattle" src="{{url_for('static', filename='Audio/smolbattle.wav')}}"></audio>
+    <audio id="nuclearExplosion" src="{{url_for('static', filename='Audio/nukeExplosion.wav')}}"></audio>
+
+    <audio id="missile1" src="{{url_for('static', filename='Audio/explosion5.wav')}}"></audio>
+    <audio id="missile2" src="{{url_for('static', filename='Audio/explosion6.wav')}}"></audio>
+
+    <audio id="selectionSound" src="{{url_for('static', filename='Audio/selectionSound1.wav')}}"></audio>
+    <audio id="constructionSound" src="{{url_for('static', filename='Audio/construction.wav')}}"></audio>
+    <audio id="votingSound1" src="{{url_for('static', filename='Audio/wardrum2.wav')}}"></audio>
+    <audio id="votingSound2" src="{{url_for('static', filename='Audio/wardrum3.wav')}}"></audio>
+    <audio id="gameEndSound" src="{{url_for('static', filename='Audio/gameEnd.wav')}}"></audio>
+
+    <div class="card rounded-lg shadow-lg" id="view_mode_btns" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset;">
+        <div class="card-body flex items-center space-x-2">
+            <h6 class="mb-0" style="color: rgba(240, 243, 244, 0.9); font-size: 0.85rem; font-weight: bold; text-shadow: 0 0 4px rgba(0, 195, 255, 0.6); letter-spacing: 0.4px;">Continent Borders</h6>
+            <button id="btn_show_cont" class="btn btn-info ml-2 pt-2" style="font-size: 0.85rem; font-weight: bold; box-shadow: 0 0 6px rgba(0, 200, 255, 0.3);">Off</button>
+        </div>
+    </div>    
+
+    <div class="card" id="player_info">
+        <div class="card-body p-0">
+            <div class="stats-list" id="stats-list">
+            </div>
+        </div>
+    </div>
+
+    <div class="card rounded-lg shadow-lg mb-4" id="event_announcement" style="background-color: rgba(8, 20, 40, 0.85); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 20px rgba(0, 162, 255, 0.2), 0 0 6px rgba(0, 162, 255, 0.3) inset;">
+        <div class="card-body p-3" id="announcement">
+            <h1 style="color: #ffffff; font-size: 1.2rem; text-shadow: 0 0 10px rgba(0, 225, 255, 1); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: bold;"></h1>
+        </div>
+    </div>
+
+    <div class="card rounded-lg shadow-lg" id="tracker" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 20px rgba(0, 162, 255, 0.2), 0 0 6px rgba(0, 162, 255, 0.3) inset;">
+        <div class="card-body p-2">
+            <div class="mission_title" style="border-bottom: 1px solid rgba(0, 195, 255, 0.5); padding-bottom: 0.4rem; margin-bottom: 0.5rem;">
+                <span id="mission_title" style="color: #ffffff; font-size: 1.1rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></span>
+            </div>
+    
+            <div class="winning_condition" style="background-color: rgba(0, 80, 130, 0.3); border-radius: 6px; padding: 0.4rem; border-left: 3px solid rgba(0, 220, 255, 0.6); margin-bottom: 0.5rem; display: none;">
+                <div id="misTargets" style="color: #ffffff; font-size: 0.775rem; margin-bottom: 0.4rem; display: none;"></div>
+                <div id="misProgBar" style="height: 8px; background-color: rgba(8, 40, 70, 0.8); border-radius: 4px; margin: 0.4rem 0; overflow: hidden; display: none;"></div>
+                <div id="misProgDesp" style="color: rgba(180, 220, 255, 0.9); font-size: 0.775rem; font-style: italic; display: none;"></div>
+            </div>
+    
+            <div class="losing_condition" style="background-color: rgba(130, 30, 30, 0.25); border-radius: 6px; padding: 0.4rem; border-left: 3px solid rgba(255, 70, 70, 0.6); display: none;">
+                <div id="lossProg" style="height: 8px; background-color: rgba(70, 20, 20, 0.8); border-radius: 4px; margin: 0.4rem 0; overflow: hidden; display: none;"></div>
+                <div id="lossDesp" style="color: rgba(255, 180, 180, 0.9); font-size: 0.775rem; font-style: italic; display: none;"></div>
+            </div>
+        </div>
+    </div>    
+
+    <div class="card rounded-lg shadow-lg" id="control_panel" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset; margin-top: 1rem;">
+        <div class="card-head" id="control_mechanism" style="border-bottom: 1px solid rgba(0, 195, 255, 0.5); padding: 0.4rem 0.75rem; color: rgba(240, 243, 244, 0.9); font-size: 0.9rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></div>
+        
+        <div class="card-body p-2 d-flex justify-content-between gap-2" id="confirm_cancel">
+            <button class="btn btn-success" id="control_confirm" style="flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; box-shadow: 0 0 6px rgba(0, 255, 100, 0.3); font-weight: bold;">Confirm</button>
+            <button class="btn btn-warning" id="control_cancel" style="flex: 1; font-size: 1rem; padding: 0.6rem 0.9rem; box-shadow: 0 0 6px rgba(255, 220, 0, 0.3); font-weight: bold;">Cancel</button>
+        </div>
+    </div>    
+    
+
+    <div class="card rounded-lg shadow-lg" id="middle_display" style="background-color: rgba(8, 20, 40, 0.8); backdrop-filter: blur(5px); border: 1px solid rgba(0, 162, 255, 0.4); box-shadow: 0 0 12px rgba(0, 162, 255, 0.15), 0 0 4px rgba(0, 162, 255, 0.25) inset; margin-top: 0.6rem;">
+        <div class="card-head" id="middle_title" style="padding: 0.2rem 0.55rem; color: rgba(240, 243, 244, 0.9); font-size: 1rem; font-weight: bold; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7); letter-spacing: 0.5px;"></div>
+        <div class="card-body px-2 py-3" id="middle_content" style="color: rgba(220, 240, 255, 0.9); font-size: 0.875rem; line-height: 1.4;"></div>
+    </div>
+    
+
+    <button class="btn btn-danger rounded shadow" id="proceed_next_stage" style="
+        background-color: rgba(120, 0, 0, 0.9);
+        border: 1px solid rgba(255, 100, 100, 0.5);
+        box-shadow: 0 0 8px rgba(255, 100, 100, 0.3), 0 0 4px rgba(255, 50, 50, 0.2) inset;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        font-weight: bold;
+        color: rgba(255, 200, 200, 0.95);
+        text-shadow: 0 0 3px rgba(255, 100, 100, 0.6);
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    ">
+        <div class="text"></div>
+    </button>
+
+    <style>
+        #proceed_next_stage:hover {
+            background-color: rgba(150, 0, 0, 0.95);
+            box-shadow: 0 0 10px rgba(255, 120, 120, 0.4), 0 0 6px rgba(255, 70, 70, 0.3) inset;
+        }
+    </style>
+
+    <div id="timeout-bar"></div>
+
+    <button class="btn circular-button" id="btn-diplomatic">
+        <img src="/static/Assets/Logo/diplomatic.png" >
+    </button>
+    <button class="btn circular-button" id="btn-sep-auth">
+        <img src="/static/Assets/Logo/special_auth.png">
+    </button>
+    <button class="btn circular-button" id="btn-skill">
+        <img src="/static/Assets/Logo/warart.png">
+    </button>
+    <button class="btn circular-button" id="btn-reserve">
+        <img src="/static/Assets/Logo/reserves.png">
+    </button>
+    <button class="btn circular-button" id="btn-debt">
+        <img src="/static/Assets/Logo/debt.png">
+    </button>
+
+    <div id="global_status" class="p-2 antialiased rounded-lg shadow-md" style="background-color: rgba(8, 20, 40, 0.75); backdrop-filter: blur(5px); box-shadow: 0 0 25px rgba(0, 162, 255, 0.2), 0 0 5px rgba(0, 162, 255, 0.4) inset; border: 1px solid rgba(0, 162, 255, 0.3);">
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Round</div>
+                <div id="game_round" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Special Authority</div>
+                <div id="curr_special_auth" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Reserves</div>
+                <div id="curr_reserves" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Industrial Level</div>
+                <div id="curr_indus" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">6</div>
+            </div>
+
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Infrastructure Level</div>
+                <div id="curr_infra" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">3</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Minimum Roll</div>
+                <div id="curr_min_roll" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">1</div>
+            </div>
+
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Nullification Rate</div>
+                <div id="curr_nul_rate" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">0</div>
+            </div>
+            <div class="flex justify-between items-center mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Damage Multiplier</div>
+                <div id="curr_dmg_mul" class="font-bold pl-5" style="color: #ffffff; font-size: 0.8rem;">1</div>
+            </div>
+            
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Largest Army</div>
+                <div id="LAO" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Most Territory</div>
+                <div id="MTO" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Most Industrialized</div>
+                <div id="TIP" class="font-bold" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">--</div>
+            </div>
+        
+            <div class="mb-1.5">
+                <div class="font-semibold" style="color: rgba(0, 195, 255, 0.9); font-size: 0.8rem;">Superpower</div>
+                <div id="SUP" class="font-bold flex items-center" style="color: #ffffff; font-size: 0.8rem; text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #00ff4c; margin-right: 6px; box-shadow: 0 0 8px rgba(0, 255, 76, 0.8);"></span>--
+                </div>
+            </div>
+    </div>
+
+    <div id="laplace_info_display">
+    </div>
+
+</div>
