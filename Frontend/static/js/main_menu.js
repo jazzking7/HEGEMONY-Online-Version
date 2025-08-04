@@ -62,8 +62,8 @@ $(document).ready(function() {
             });
         });
 
-        $('#btn_tutorials').click(function() {
-            loadPage('tutorial')
+        $('#btn_game_rules').click(function() {
+            loadPage('game_rules')
             .then(() => {
                 return unloadScript('page_script');
             })
@@ -71,7 +71,7 @@ $(document).ready(function() {
                 return loadScript(URL_FRONTEND + 'static/js/rules_ui.js', 'page_script');
             })
             .then(() => {
-                console.log('Entered Tutorial');
+                console.log('Entered Game Rules');
             })
             .catch((error) => {
                 console.error('Error loading page or script:', error);
