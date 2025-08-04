@@ -1054,6 +1054,7 @@ class Collusion(Skill):
         if self.gs.map.territories[choice].isMegacity or self.gs.map.territories[choice].isTransportcenter:
             self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
+            return
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
