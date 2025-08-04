@@ -1626,13 +1626,13 @@ class Pandora_Box(Skill):
         if num < 56 and self.guarantee >= 4:
             num = random.randint(56, 100)
             self.guarantee = 0
-        if num < 20: # 20%
+        if num < 10: # 10%
             self.gs.server.emit("display_special_notification", {"msg": "Received nothing.....", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
-        elif num < 40: # 20%
+        elif num < 30: # 20%
             self.gs.players[self.player].stars += 1
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "Received 1★...", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
-        elif num < 55: # 15%
+        elif num < 55: # 25%
             self.gs.players[self.player].stars += 3
             self.gs.update_private_status(self.player)
             self.gs.server.emit("display_special_notification", {"msg": "Received 3★!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
@@ -1684,7 +1684,7 @@ class Pandora_Box(Skill):
             self.indus += 2
             self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Industrial Level')
-        if num < 56:
+        if num < 30:
             self.guarantee += 1
         else:
             self.guarantee = 0
