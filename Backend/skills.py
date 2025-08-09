@@ -1669,13 +1669,13 @@ class Pandora_Box(Skill):
             self.gs.server.emit("display_special_notification", {"msg": "INFRASTRUCTURE LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Infrastructure Level')
         elif num < 88: # 6%
-            self.nulrate += 5
-            self.gs.server.emit("display_special_notification", {"msg": "Nullification Rate increased by 5%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
-            self.receivedBlessings.append('+5% Nullification Rate')
-        elif num < 91: # 3%
             self.nulrate += 10
-            self.gs.server.emit("display_special_notification", {"msg": "NULLIFICATION RATE INCREASED BY 10%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Nullification Rate increased by 10%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+10% Nullification Rate')
+        elif num < 91: # 3%
+            self.nulrate += 20
+            self.gs.server.emit("display_special_notification", {"msg": "NULLIFICATION RATE INCREASED BY 20%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.receivedBlessings.append('+20% Nullification Rate')
         elif num < 97: # 6%
             self.indus += 1
             self.gs.server.emit("display_special_notification", {"msg": "Industrial Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
@@ -1787,7 +1787,7 @@ class Revanchism(Skill):
         if trty_loss.isLeyline:
             self.ragePoints += 15
         if trty_loss.isTransportcenter:
-            self.ragePoints += 50
+            self.ragePoints += 40
         if trty_loss.isHall:
             self.ragePoints += 50
         if trty_loss.isBureau:
