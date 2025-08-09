@@ -153,10 +153,11 @@ class Mission_Distributor:
                 if choice not in miss_set:
                     if miss_set.count('Pol') > 2:
                         continue
-                    elif (count + 2) <= num_p and num_p > 4:
-                        miss_set.append(choice)
-                        miss_set.append(choice)
-                        count += 2
+                    if num_p > 4:
+                        if (count + 2) <= num_p and num_p > 4:
+                            miss_set.append(choice)
+                            miss_set.append(choice)
+                            count += 2
                     else:
                         miss_set.append(choice)
                         count += 1
