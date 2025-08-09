@@ -131,12 +131,12 @@ class Mission_Distributor:
         has2C = allC = allS = False
         if num_p > 3:
             mode = random.randint(1,100)
-            if mode < 60:
+            if mode < 40:
                 has2C = True
-            elif mode < 70:
+            elif mode < 55:
                 allC = True
                 hasAnn = False
-            elif mode < 80:
+            elif mode < 70:
                 allS = True
 
         miss_set = []
