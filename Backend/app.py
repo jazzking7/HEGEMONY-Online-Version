@@ -676,7 +676,7 @@ def settle_nexus(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*5
+    gsm.players[pid].stars -= len(choices)*4
     gsm.update_private_status(pid)
 
 @socketio.on('settle_hall')

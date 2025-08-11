@@ -151,7 +151,7 @@ class turn_loop_scheduler:
             if gs.map.territories[t].isHall:
                 atk_player.stars += 1
         
-        atk_player.reserves += round((atk_player.total_troops * numBureaux * 7)/100)
+        atk_player.reserves += round((atk_player.total_troops * numBureaux * 15)/100)
         gs.update_private_status(player)
 
         # Player temporary battle stats not updated
@@ -245,7 +245,7 @@ class turn_loop_scheduler:
 
                 p.stars += s_amt
 
-                if (p.numLeylines * 12) > random.randint(1, 100):
+                if (p.numLeylines * 11) > random.randint(1, 100):
                     print("Leyline Bonus Received.")
                     if random.randint(1, 100) > 40:
                         p.reserves += p.numLeylines * 4

@@ -729,13 +729,14 @@ class Game_State_Manager:
         for i in range(2, num_leylines + 1):
             prob += increment
             increment += 1
-
+        if prob > 60:
+            prob = 60
         return prob
 
     def leyline_damage(self, num_leylines):
         if num_leylines < 1:
             return 1
-        base_multiplier = 4
+        base_multiplier = 3
         bonus = num_leylines // 3
         return base_multiplier + bonus
 

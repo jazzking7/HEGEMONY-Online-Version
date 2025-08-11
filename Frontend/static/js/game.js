@@ -1981,7 +1981,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
-          <span class="price-tag" style="color: #000000;">5☆</span>
+          <span class="price-tag" style="color: #000000;">4☆</span>
         </div>
         <span class="small">LOGISTIC NEXUS</span>
         <div class="hover-label">Centralize distribution</div>
@@ -2175,15 +2175,15 @@ btn_sep_auth.onclick = function () {
 
     // Logistic Nexus
     $("#btn-nexus").off('click').on('click', function(){
-      if (sep_auth < 5){
-        popup('MINIMUM 5 STARS TO BUILD A NEXUS!', 2000);
+      if (sep_auth < 4){
+        popup('MINIMUM 4 STARS TO BUILD A NEXUS!', 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of Logistic Nexus:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Build</button>
         `);
