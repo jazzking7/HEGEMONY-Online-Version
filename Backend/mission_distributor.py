@@ -87,7 +87,7 @@ class Mission_Distributor:
         self.A_tier = ['Loyalist', 'Survivalist']
         self.B_tier = ['Warmonger', 'Bounty_Hunter', 'Gambler']        
 
-    def validate_mission_set(self, miss_set, hasAnn, hasOpp, has2C, allC, allS):
+    def validate_mission_set(self, miss_set, hasAnn, hasOpp, has2C, allS):
         if miss_set.count('Opp') > 1:
             return False
         if hasOpp and miss_set.count('Opp') == 0:
@@ -104,9 +104,6 @@ class Mission_Distributor:
                 c += 1
         if has2C:
             if len(miss_set) - c < 2:
-                return False
-        if allC:
-            if c:
                 return False
         if allS:
             if c < len(miss_set) - 1:
@@ -128,15 +125,12 @@ class Mission_Distributor:
     def get_mission_set(self, num_p):
         hasAnn = random.randint(1,100) > 50
         hasOpp = random.randint(1,100) > 90
-        has2C = allC = allS = False
+        has2C = allS = False
         if num_p > 3:
             mode = random.randint(1,100)
-            if mode < 40:
+            if mode < 70:
                 has2C = True
-            elif mode < 55:
-                allC = True
-                hasAnn = False
-            elif mode < 70:
+            elif mode < 85:
                 allS = True
 
         miss_set = []
@@ -182,7 +176,7 @@ class Mission_Distributor:
                 count += 1
             if count == num_p:
                 print(miss_set)
-                if self.validate_mission_set(miss_set, hasAnn, hasOpp, has2C, allC, allS):
+                if self.validate_mission_set(miss_set, hasAnn, hasOpp, has2C, allS):
                     return miss_set
                 miss_set = []
                 count = 0
