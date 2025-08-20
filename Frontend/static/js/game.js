@@ -81,67 +81,16 @@ $(document).ready(async function() {
   $('#overlay_sections .circular-button').on('click mousemove', function(event) {
     event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
-  
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
-  async function tryLoadSketch(maxRetries = 30) {
-      let retryCount = 0;
+  async function tryLoadSketch() {
+      // GAME_SKETCH LOGIC IS LOADED HERE WITH p5.js
       initializeLibraries();
-      initializeSketch();
-      // while (!sketch_running && retryCount < maxRetries) {
-      //     console.log(`Attempt #${retryCount + 1} to load sketch...`);
-      //     removeDynamicScripts();
-      //     initializeLibraries();
-      //     initializeSketch();
 
-      //     // ⏱ Wait 0.5s before checking sketch_running
-      //     await wait(3000);
-
-      //     if (!sketch_running) {
-      //         console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
-      //         removeDynamicScripts(); 
-      //         retryCount++;
-      //     } else {
-      //         console.log("✅ sketch_running is true. Sketch loaded successfully!");
-      //         return;
-      //     }
-      // }
-
-      // if (!sketch_running) {
-      //     console.error("🚨 Sketch failed after maximum retries. Reloading page...");
-      //     location.reload();
-      // }
   }
 
   tryLoadSketch();
 
 });
-
-function removeDynamicScripts() {
-  const scriptPatterns = [
-      // 'p5.js',
-      // 'p5.min.js',
-      // 'p5.sound.js',
-      // 'p5.sound.min.js',
-      'game_sketch.js',
-      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js',
-      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js'
-  ];
-
-  document.querySelectorAll('script').forEach(script => {
-      console.log(script.src);
-      // Normalize the src to ignore query params and check full or partial matches
-      var baseSrc = script.src.split('?')[0];
-
-      if (script.src && scriptPatterns.some(pattern => baseSrc.includes(pattern))) {
-          script.remove();
-          console.warn(`🧹 Removed script: ${script.src}`);
-      }
-  });
-  document.querySelectorAll('canvas').forEach(c => c.remove());
-}
 
 function loadLibraries() {
   return new Promise((resolve) => {
@@ -155,17 +104,6 @@ function loadLibraries() {
 
 async function initializeLibraries(){
   await loadLibraries();
-}
-
-function loadGameSketch() {
-  // let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-  // let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
-  // loadScript(scriptUrl);
-}
-
-async function initializeSketch() {
-  // initializeLibraries();
-  loadGameSketch();
 }
 
 // Function to start the timeout countdown animation
