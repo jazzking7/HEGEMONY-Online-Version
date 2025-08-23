@@ -63,6 +63,10 @@ class turn_loop_scheduler:
                 self.set_curr_state(ms, self.events[3])
                 self.rearrange(gs, pid)
 
+                if atk_player.skill:
+                    if atk_player.skill.name == "Necromancer":
+                        atk_player.skill.soul_harvest()
+
                 ms.stage_completed = False
                 while not ms.stage_completed and not ms.innerInterrupt:
                     time.sleep(1)
@@ -191,6 +195,10 @@ class turn_loop_scheduler:
         
         self.set_curr_state(ms, self.events[3])
         self.rearrange(gs, player)
+
+        if atk_player.skill:
+            if atk_player.skill.name == "Necromancer":
+                atk_player.skill.soul_harvest()
 
         ms.stage_completed = False
         while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:

@@ -703,10 +703,16 @@ class Necromancer(Skill):
     def __init__(self, player, gs):
         super().__init__("Necromancer", player, gs)
         self.curr_turn_gain = 0
-        self.hasTurnEffect = True
+        # self.hasTurnEffect = True
         self.star_per_troops = 6 if player == gs.Annihilator else 9
     
-    def apply_turn_effect(self,):
+    # def apply_turn_effect(self,):
+    #     self.gs.players[self.player].reserves += self.curr_turn_gain
+    #     self.gs.players[self.player].stars += self.curr_turn_gain//self.star_per_troops
+    #     self.gs.update_private_status(self.player)
+    #     self.curr_turn_gain = 0
+
+    def soul_harvest(self,):
         self.gs.players[self.player].reserves += self.curr_turn_gain
         self.gs.players[self.player].stars += self.curr_turn_gain//self.star_per_troops
         self.gs.update_private_status(self.player)
