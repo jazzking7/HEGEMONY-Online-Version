@@ -1750,6 +1750,7 @@ btn_sep_auth.onclick = function () {
     </div>`;
 
     discount = sep_auth.discount;
+    sep_auth = sep_auth.amt
 
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
