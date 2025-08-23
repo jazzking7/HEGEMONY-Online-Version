@@ -23,7 +23,6 @@ class Skill:
         self.singleTurnActive = False
         self.hasRoundEffect = False
 
-        self.give_troop_bonus = False
         self.hasTurnEffect = False
         self.out_of_turn_activation = False
 
@@ -618,8 +617,8 @@ class Zealous_Expansion(Skill):
 
     def __init__(self, player, gs):
         super().__init__("Zealous_Expansion", player, gs)
-        self.give_troop_bonus = True
         self.intMod = True
+        self.bonus_level = 0
 
     def internalStatsMod(self, battle_stats):
         if self.active:
@@ -648,6 +647,7 @@ class Zealous_Expansion(Skill):
         
         self.gs.players[self.player].stars -= 2
         self.gs.players[self.player].infrastructure_upgrade += 1
+        self.bonus_level += 1
         self.gs.update_private_status(self.player)
         self.gs.update_HIP(self.player)
         self.gs.get_SUP()
