@@ -4,6 +4,7 @@ from string import ascii_uppercase
 from mission_distributor import *
 from game_state_manager import *
 from skill_distributor import *
+from tutorial_state_manager import Tutorial_Manager
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -15,6 +16,7 @@ SES = setup_event_scheduler()
 MDIS = Mission_Distributor()
 EGT = End_game_tracker()
 SDIS = Skill_Distributor()
+TUTORIAL_RUNNER = Tutorial_Manager("8CMAP", socketio)
 
 def generate_unique_code(length):
     while True:
@@ -422,7 +424,7 @@ def compute_simulation_result(data):
 @socketio.on('get_tutorial_settings')
 def get_tutorial_settings():
     sid = request.sid
-    tuto_map = Map("8CMAP")
+    tuto_map = TUTORIAL_RUNNER.map
     print(f"Sent game settings to {sid}")
     # FILL IN MAP CHOSEN
     socketio.emit('tutorial_settings',
@@ -430,6 +432,12 @@ def get_tutorial_settings():
     'tnames': tuto_map.tnames, 
     'tneighbors': tuto_map.tneighbors,
     'landlocked': tuto_map.landlocked}, room=sid)
+    TUTORIAL_RUNNER.send_welcome(sid)
+
+@socketio.on('next_tutorial_stage')
+def get_to_next_tutorial_stage(data):
+    pid = request.sid
+    TUTORIAL_RUNNER.send_next_stage(pid, int(data['stage']))
 
 ### Game functions ###
 
@@ -1208,6 +1216,8 @@ def handle_skill_description(data):
 @socketio.on('confirm_map_loaded')
 def handle_map_loaded_confirmation():
     pid = request.sid
+    if pid not in players:
+        return
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if pid in gsm.GES.interturn_connections:
         gsm.GES.interturn_connections[pid] = True

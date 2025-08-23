@@ -86,62 +86,12 @@ $(document).ready(async function() {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function tryLoadSketch(maxRetries = 30) {
-      let retryCount = 0;
+  async function tryLoadSketch() {
       initializeLibraries();
-      initializeSketch();
-      // while (!sketch_running && retryCount < maxRetries) {
-      //     console.log(`Attempt #${retryCount + 1} to load sketch...`);
-      //     removeDynamicScripts();
-      //     initializeLibraries();
-      //     initializeSketch();
-
-      //     // ⏱ Wait 0.5s before checking sketch_running
-      //     await wait(3000);
-
-      //     if (!sketch_running) {
-      //         console.warn(`⏳ sketch_running still false. Retry #${retryCount + 1}`);
-      //         removeDynamicScripts(); 
-      //         retryCount++;
-      //     } else {
-      //         console.log("✅ sketch_running is true. Sketch loaded successfully!");
-      //         return;
-      //     }
-      // }
-
-      // if (!sketch_running) {
-      //     console.error("🚨 Sketch failed after maximum retries. Reloading page...");
-      //     location.reload();
-      // }
   }
 
   tryLoadSketch();
-
 });
-
-function removeDynamicScripts() {
-  const scriptPatterns = [
-      // 'p5.js',
-      // 'p5.min.js',
-      // 'p5.sound.js',
-      // 'p5.sound.min.js',
-      'game_sketch.js',
-      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js',
-      // 'cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js'
-  ];
-
-  document.querySelectorAll('script').forEach(script => {
-      console.log(script.src);
-      // Normalize the src to ignore query params and check full or partial matches
-      var baseSrc = script.src.split('?')[0];
-
-      if (script.src && scriptPatterns.some(pattern => baseSrc.includes(pattern))) {
-          script.remove();
-          console.warn(`🧹 Removed script: ${script.src}`);
-      }
-  });
-  document.querySelectorAll('canvas').forEach(c => c.remove());
-}
 
 function loadLibraries() {
   return new Promise((resolve) => {
@@ -155,17 +105,6 @@ function loadLibraries() {
 
 async function initializeLibraries(){
   await loadLibraries();
-}
-
-function loadGameSketch() {
-  // let cacheBuster = new Date().getTime(); // Unique timestamp to force reload
-  // let scriptUrl = `${URL_FRONTEND}static/js/game_sketch.js?v=${cacheBuster}`;
-  // loadScript(scriptUrl);
-}
-
-async function initializeSketch() {
-  // initializeLibraries();
-  loadGameSketch();
 }
 
 // Function to start the timeout countdown animation
@@ -203,6 +142,508 @@ async function get_tutorial_settings() {
 
 //========================= Update Game State ============================
 
+socket.on('send_tutorial_welcome', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Welcome to Hegemony!</h2>`;
+
+  setTimeout(() => {
+    $('#middle_display, #middle_title, #middle_content').show();
+    $('#middle_content').html(`
+      <div style="padding: 8px; line-height: 1.5; font-size: 1.1rem;">
+        <p>Welcome to the <strong>Hegemony Tutorial</strong></p>
+        <p>Here, you'll be introduced to the essentials:</p>
+        <ul style="margin: 5px 0; padding-left: 22px;">
+          <li><strong>Game Goal</strong></li>
+          <li><strong>Game Setup</strong></li>
+          <li><strong>Basic Gameplay</strong></li>
+        </ul>
+      </div>
+    `);
+    $('#proceed_next_stage').show();
+    $('#proceed_next_stage .text').text('Next');
+    $('#proceed_next_stage')
+      .off('click')
+      .on('click', () => {
+        $('#proceed_next_stage').hide();
+        socket.emit("next_tutorial_stage", {'stage': 1});
+      });
+  }, 5000);
+});
+
+socket.on('show_game_goal', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Goal</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p><strong>The Goal of the Game</strong></p>
+      <p>
+        Your ultimate objective is to complete your <strong>Secret Agenda</strong>.
+        No one else knows what yours is, and it may even conflict with another player’s!
+      </p>
+      <p>
+        Secret Agendas come in four classes:
+        <strong>C, B, A,</strong> and <strong>S</strong>.
+        Class <strong>C</strong> is the most peaceful, while the higher classes grow increasingly
+        <em>violent</em> and <em>self-serving</em>.
+      </p>
+      <p>
+        Only players with Agendas from the <strong>same class</strong> can possibly share victory.
+        Will you form alliances, or aim to be a <em>covert solo winner</em>?
+      </p>
+    </div>
+  `);
+
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Next');
+  $('#proceed_next_stage')
+    .off('click')
+    .on('click', () => {
+      $('#proceed_next_stage').hide();
+      socket.emit("next_tutorial_stage", {'stage': 2});
+    });
+
+});
+
+socket.on('show_secret_agenda', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Goal</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        For the purpose of this tutorial, your <strong>Secret Agenda</strong> is set to a C class agenda 
+        <em>Populist</em>. To win, you must maintain the <strong>largest army</strong>
+        for <strong>4 consecutive rounds</strong>.
+      </p>
+      <p>
+        Your mission’s <strong>progression, status,</strong> and <strong>details</strong> are shown
+        on the <strong>Mission Tracker</strong> located in the top-right corner.
+        This is your only way of monitoring mission progress — keep an eye on it!
+      </p>
+    </div>
+  `);
+
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Next');
+  $('#proceed_next_stage')
+    .off('click')
+    .on('click', () => {
+      $('#proceed_next_stage').hide();
+      socket.emit("next_tutorial_stage", {'stage': 3});
+    });
+
+});
+
+socket.on('show_game_set_up', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Set Up</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p><strong>Before the Game Begins</strong></p>
+      <p>Each player must complete the following steps:</p>
+      <ul style="margin: 6px 0; padding-left: 22px;">
+        <li>Select a <strong>color</strong> to represent themselves</li>
+        <li>Claim a set of <strong>territories</strong></li>
+        <li>Designate a <strong>capital</strong></li>
+        <li>Build <strong>two cities</strong></li>
+        <li>Pick a <strong>War Art</strong></li>
+        <li>Deploy initial <strong>troops</strong></li>
+      </ul>
+    </div>
+  `);
+
+
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Next');
+  $('#proceed_next_stage')
+    .off('click')
+    .on('click', () => {
+      $('#proceed_next_stage').hide();
+      socket.emit("next_tutorial_stage", {'stage': 4});
+    });
+
+});
+
+socket.on('pick_color', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Setup</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+
+  // Reworded title
+  $('#middle_title').html(`
+    <h4>
+      Choose your color. For this tutorial, you're locked to <strong>Royal Blue</strong>.
+      Click <em>Confirm</em> to continue.
+    </h4>
+  `);
+
+  // Only these two colors; selection locked to #4169E1
+  const options = ["#4169E1", "#FFDE21"];
+  const lockedColor = "#4169E1";
+
+  const colorBoard = $('#middle_content');
+  colorBoard.empty();
+
+  for (let option of options) {
+    const btn_c = document.createElement("button");
+    btn_c.className = 'btn';
+    btn_c.style.width = '2vw';
+    btn_c.style.height = '2vw';
+    btn_c.style.backgroundColor = option;
+    btn_c.style.border = 'none';
+    btn_c.style.margin = '1px';
+
+    if (option === lockedColor) {
+      // Visually indicate the locked selection
+      btn_c.style.border = '2px solid';
+      btn_c.style.borderColor = 'red';
+      btn_c.title = 'Selected (locked for tutorial)';
+    } else {
+      // Disable the other color entirely
+      btn_c.disabled = true;
+      btn_c.style.opacity = '0.5';
+      btn_c.style.cursor = 'not-allowed';
+      btn_c.title = 'Locked for tutorial';
+    }
+
+    // Prevent changing selection
+    btn_c.onclick = function () { return false; };
+
+    colorBoard.append(btn_c);
+  }
+
+  // Show the control panel so the user can confirm right away
+  const panel = document.getElementById('control_panel');
+  panel.style.display = 'flex';
+
+  $('#control_confirm').off('click').on('click', function () {
+    panel.style.display = 'none';
+    $('#middle_title').empty();
+    // Proceed to next stage; color is locked so no need to pass it unless your backend expects it
+    socket.emit("next_tutorial_stage", { 'stage': 5 });
+  });
+
+  $('#control_cancel').off('click').on('click', function () {
+    // Just hide panel; selection remains locked
+    panel.style.display = 'none';
+  });
+});
+
+socket.on('claim_territories', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Setup</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+
+  // Reworded title + mechanic note
+  $('#middle_title').html(`
+    <h5>
+      Claim a set of territories. For this tutorial, you're locked to
+      <strong>Teal</strong>. Once you choose a color, <strong>all territories with that color
+      become yours</strong> and will be <strong>recolored to your chosen color</strong>. Click
+      <em>Confirm</em> to continue.
+    </h5>
+  `);
+
+  // Only these two colors; selection locked to #3B8686
+  const options = ["#3B8686", "#CFF09E"];
+  const lockedColor = "#3B8686";
+
+  const colorBoard = $('#middle_content');
+  colorBoard.empty();
+
+  for (let option of options) {
+    const btn_c = document.createElement("button");
+    btn_c.className = 'btn';
+    btn_c.style.width = '2vw';
+    btn_c.style.height = '2vw';
+    btn_c.style.backgroundColor = option;
+    btn_c.style.border = 'none';
+    btn_c.style.margin = '1px';
+
+    if (option === lockedColor) {
+      // Visually indicate the locked selection
+      btn_c.style.border = '2px solid';
+      btn_c.style.borderColor = 'red';
+      btn_c.title = 'Selected (locked for tutorial)';
+    } else {
+      // Disable the other color entirely
+      btn_c.disabled = true;
+      btn_c.style.opacity = '0.5';
+      btn_c.style.cursor = 'not-allowed';
+      btn_c.title = 'Locked for tutorial';
+    }
+
+    // Prevent changing selection
+    btn_c.onclick = function () { return false; };
+
+    colorBoard.append(btn_c);
+  }
+
+  // Show control panel so the user can confirm right away
+  const panel = document.getElementById('control_panel');
+  panel.style.display = 'flex';
+
+  $('#control_confirm').off('click').on('click', function () {
+    panel.style.display = 'none';
+    $('#middle_title').empty();
+    socket.emit("next_tutorial_stage", { stage: 6});
+  });
+
+  $('#control_cancel').off('click').on('click', function () {
+    panel.style.display = 'none';
+  });
+});
+
+
+socket.on('choose_capital_tutorial', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Setup</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p><strong>Designate Your Capital</strong></p>
+      <p>Select one of your <strong>own territories</strong> and click <strong>Confirm</strong> to set it as your capital.</p>
+      <p>Your capital gives <strong>+1 troop</strong> at the start of every turn.</p>
+      <p>For this tutorial, simply click the <strong>pointed territory</strong> and then press <em>Confirm</em> to proceed.</p>
+    </div>
+  `);
+  clickables.push(7);
+});
+
+// Set capital
+function settle_capital(tid){
+  if (tid == 7){
+    toHightlight = [7];
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#control_confirm').off('click').on('click', function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit("next_tutorial_stage", { stage: 7});
+      toHightlight = [];
+      clickables = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+    });
+  }
+}
+
+socket.on('choose_city_tutorial', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Setup</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p><strong>Build Your Cities</strong></p>
+      <p>
+        Choose <strong>two of your territories</strong> to designate as <strong>Cities</strong>.
+      </p>
+      <p>
+        Cities provide <strong>extra troops each turn</strong> and boost your battle stats.
+      </p>
+      <p>
+        For this tutorial, simply click on the <strong>pointed territories</strong> and then press
+        <em>Confirm</em> to continue.
+      </p>
+    </div>
+  `);
+
+  clickables.push(8);
+  clickables.push(9);
+});
+
+// Set cities
+function settle_cities(tid){
+  if(clickables.includes(tid)){
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length == 2){
+        document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_panel').style.display = 'flex';
+        $('#control_confirm').off('click').on('click' , function(){
+        document.getElementById('control_panel').style.display = 'none';
+        socket.emit("next_tutorial_stage", { stage: 8 });
+        toHightlight = [];
+        clickables = [];
+        });
+        $('#control_cancel').off('click').on('click' , function(){
+        }); 
+    }
+
+  }
+}
+
+socket.on('initial_deployment_tutorial', function () {
+  const announ = document.getElementById('announcement');
+  announ.innerHTML = `<h2>Game Setup</h2>`;
+
+  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p><strong>Initial Deployment</strong></p>
+      <p>
+        In this phase, the system gives you troops to <strong>reinforce key territories</strong>.
+      </p>
+      <p>
+        For this tutorial, you receive <strong>30 troops</strong>. Click the <strong>pointed territory</strong>
+        and deploy them all, then press <em>Confirm</em>.
+      </p>
+    </div>
+  `);
+
+
+  clickables.push(7);
+});
+
+function troop_deployment(tid){
+  if(clickables.includes(tid)){
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+
+
+  }
+}
+
+
+socket.on('initiate_tracker_for_tutorial', function(data){
+  if (data.targets || data.misProgBar || data.misProgDesp) {
+    $('.winning_condition').show();
+  }
+  if (data.lossProg || data.lossDesp) {
+    $('.losing_condition').show();
+  }
+  $('#mission_title').text(data.title);
+  // Display target, s for green, f for red
+  if (data.targets){
+    $('#misTargets').show();
+    for (target in data.targets) {
+      var tarid = target.replace(/ /g, "_");
+      $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
+      $(`#target_${tarid}`).css({
+        'display': 'inline-block',
+        'padding': '2px',
+        'margin': '2px',
+        'border-radius': '3px'
+      });
+      if (data.targets[target] == 's') {
+        $(`#target_${tarid}`).css('background-color', '#50C878');
+      } else {
+        $(`#target_${tarid}`).css('background-color', '#E34234');
+      }
+    }
+  } 
+  if (data.misProgBar) {
+    $('#misProgBar').show();
+    misProgBar = new ProgressBar.Line('#misProgBar', {
+      strokeWidth: 4,
+      easing: 'easeInOut',
+      duration: 1000,
+      color: '#50C878',
+      trailColor: '#eee',
+      trailWidth: 4,
+      svgStyle: {width: '100%', height: '100%'},
+    });
+    misProgBar.animate(data.misProgBar[0]/data.misProgBar[1]);
+  }
+  if (data.misProgDesp) {
+    $('#misProgDesp').show();
+    $('#misProgDesp').text(data.misProgDesp);
+  }
+  if (data.lossProg) {
+    $('#lossProg').show();
+    lossProg = new ProgressBar.Line('#lossProg', {
+      strokeWidth: 4,
+      easing: 'easeInOut',
+      duration: 1000,
+      color: '#880000',
+      trailColor: '#eee',
+      trailWidth: 4,
+      svgStyle: {width: '100%', height: '100%'},
+    });
+    lossProg.animate(data.lossProg[0]/data.lossProg[1]);
+  }
+  if (data.lossDesp) {
+    $('#lossDesp').show();
+    $('#lossDesp').text(data.lossDesp);
+  }
+})
+
+// Update mission tracker
+socket.on('update_tracker', function(data) {
+  const $misTargets = $('#misTargets');
+
+  if (data.renewed_targets) {
+    $misTargets.empty();
+
+    for (const target in data.renewed_targets) {
+      const tarid = target.replace(/ /g, "_");
+      $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
+      $(`#target_${tarid}`).css({
+        'display': 'inline-block',
+        'padding': '2px',
+        'margin': '2px',
+        'border-radius': '3px',
+        'background-color': '#E34234' // default color
+      });
+    }
+  }
+
+  if (data.targets) {
+    for (const target in data.targets) {
+      const tarid = target.replace(/ /g, "_");
+      const existing = $(`#target_${tarid}`);
+
+      // 🔁 If new_target flag is set and target exists, rename the old one
+      if (data.new_target) {
+        if (existing.length) {
+          const newId = `target_${tarid}_old_${Date.now()}`;
+          existing.attr('id', newId);
+        }
+
+        $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
+        $(`#target_${tarid}`).css({
+          'display': 'inline-block',
+          'padding': '2px',
+          'margin': '2px',
+          'border-radius': '3px'
+        });
+      }
+
+      // Update target color based on status
+      if (data.targets[target] === 's') {
+        $(`#target_${tarid}`).css('background-color', '#50C878'); // green
+      } else {
+        $(`#target_${tarid}`).css('background-color', '#E34234'); // red
+      }
+    }
+  }
+
+  if (data.misProgBar) {
+    misProgBar.animate(data.misProgBar[0] / data.misProgBar[1]);
+  }
+
+  if (data.misProgDesp) {
+    $('#misProgDesp').text(data.misProgDesp);
+  }
+
+  if (data.lossProg) {
+    lossProg.animate(data.lossProg[0] / data.lossProg[1]);
+  }
+
+  if (data.lossDesp) {
+    $('#lossDesp').text(data.lossDesp);
+  }
+});
+
 // Start timer animation
 socket.on('start_timeout', function(data){
   startTimeout(data.secs);
@@ -213,16 +654,6 @@ socket.on('stop_timeout', function(){
   clearInterval(current_interval);
 });
 
-// Laplace setting
-socket.on('laplace_mode', function(){
-  laplace_mode = true;
-});
-
-function laplace_info_fetch(player_id){
-  if (laplace_mode){
-    socket.emit('laplace_info_fetch', {'pid': player_id});
-  }
-}
 
 function isColorDark(hexColor) {
   // Convert hex to RGB
@@ -237,39 +668,11 @@ function isColorDark(hexColor) {
   return brightness < 128;
 }
 
-socket.on('laplace_info', function(data) {
-  var tcolor = 'black';
-  if (isColorDark(data.color)){
-    tcolor = 'rgb(245, 245, 245)'
-  }
-  $('#laplace_info_display').empty();
-  $('#laplace_info_display').css({
-    'display': 'block',
-    'background-color': data.color,
-    'color': tcolor,
-    'overflow-y': 'auto',
-    'max-height': '10em',
-  });
-
-  $.each(data.info, function(fieldName, fieldValue) {
-    $('#laplace_info_display').append(`
-      <div class="text-sm" style="word-wrap: break-word; max-width: 13vw;">
-        <strong>${fieldName}:</strong> ${fieldValue}
-      </div>
-    `);
-  });
-});
-
 // hide the display if clicked outside
 $(document).on('click', function(event) {
   if (!$(event.target).closest('#laplace_info_display').length) {
     $('#laplace_info_display').empty().hide();
   }
-});
-
-// prevent propagation if clicked on it
-$('#laplace_info_display').on('click', function(event) {
-  event.stopPropagation();
 });
 
 // Player stats list initiate
@@ -416,7 +819,7 @@ socket.on('update_trty_display', function(data){
 });
 
 // CHANGING CLICK EVENTS
-socket.on('change_click_event', function(data){
+socket.on('change_click_event_tutorial', function(data){
   if (data.event == 'settle_capital'){
     currEvent = settle_capital;
   } else if (data.event == 'settle_cities'){
@@ -431,34 +834,7 @@ socket.on('change_click_event', function(data){
     currEvent = deploy_reserves;
   } else if (data.event == 'build_cities') {
     currEvent = build_cities;
-  } else if (data.event == 'raise_megacities') {
-    currEvent = raise_megacities;
-  } else if (data.event == 'set_forts') {
-    currEvent = set_forts;
-  } else if (data.event == 'set_hall') {
-    currEvent = set_hall;
-  } else if (data.event == 'set_nexus') {
-    currEvent = set_nexus;
-  } else if (data.event == 'set_leyline') {
-    currEvent = set_leyline;
-  } else if (data.event == 'set_bureau') {
-    currEvent = set_bureau;
-  } else if (data.event == 'build_free_cities') {
-    currEvent = build_free_cities;
-  } else if (data.event == 'launch_orbital_strike'){
-    currEvent = launch_orbital_strike;
-  } else if (data.event == 'paratrooper_attack'){
-    currEvent = paratrooper_attack;
-  } else if (data.event == 'corrupt_territory'){
-    currEvent = corrupt_territory;
-  } else if (data.event == 'set_minefields'){
-    currEvent = set_minefields;
-  } else if (data.event == 'set_underground_silo'){
-    currEvent = set_underground_silo;
-  } else if (data.event == 'underground_silo_launch'){
-    currEvent = underground_silo_launch;
-  }
-  else {
+  } else {
     currEvent = null;
   }
 });
@@ -555,137 +931,6 @@ socket.on('get_mission', function(data) {
   console.log("get_mission")
   $('#announcement').html('<h1>' + data.msg + '</h1>');
   socket.off('get_mission');
-});
-
-// Initiate mission tracker
-socket.on('initiate_tracker', function(data){
-  if (data.targets || data.misProgBar || data.misProgDesp) {
-    $('.winning_condition').show();
-  }
-  if (data.lossProg || data.lossDesp) {
-    $('.losing_condition').show();
-  }
-  $('#mission_title').text(data.title);
-  // Display target, s for green, f for red
-  if (data.targets){
-    $('#misTargets').show();
-    for (target in data.targets) {
-      var tarid = target.replace(/ /g, "_");
-      $('#misTargets').append(`<div id='target_${tarid}'>${target}</div>`)
-      $(`#target_${tarid}`).css({
-        'display': 'inline-block',
-        'padding': '2px',
-        'margin': '2px',
-        'border-radius': '3px'
-      });
-      if (data.targets[target] == 's') {
-        $(`#target_${tarid}`).css('background-color', '#50C878');
-      } else {
-        $(`#target_${tarid}`).css('background-color', '#E34234');
-      }
-    }
-  } 
-  if (data.misProgBar) {
-    $('#misProgBar').show();
-    misProgBar = new ProgressBar.Line('#misProgBar', {
-      strokeWidth: 4,
-      easing: 'easeInOut',
-      duration: 1000,
-      color: '#50C878',
-      trailColor: '#eee',
-      trailWidth: 4,
-      svgStyle: {width: '100%', height: '100%'},
-    });
-    misProgBar.animate(data.misProgBar[0]/data.misProgBar[1]);
-  }
-  if (data.misProgDesp) {
-    $('#misProgDesp').show();
-    $('#misProgDesp').text(data.misProgDesp);
-  }
-  if (data.lossProg) {
-    $('#lossProg').show();
-    lossProg = new ProgressBar.Line('#lossProg', {
-      strokeWidth: 4,
-      easing: 'easeInOut',
-      duration: 1000,
-      color: '#880000',
-      trailColor: '#eee',
-      trailWidth: 4,
-      svgStyle: {width: '100%', height: '100%'},
-    });
-    lossProg.animate(data.lossProg[0]/data.lossProg[1]);
-  }
-  if (data.lossDesp) {
-    $('#lossDesp').show();
-    $('#lossDesp').text(data.lossDesp);
-  }
-})
-
-// Update mission tracker
-socket.on('update_tracker', function(data) {
-  const $misTargets = $('#misTargets');
-
-  if (data.renewed_targets) {
-    $misTargets.empty();
-
-    for (const target in data.renewed_targets) {
-      const tarid = target.replace(/ /g, "_");
-      $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
-      $(`#target_${tarid}`).css({
-        'display': 'inline-block',
-        'padding': '2px',
-        'margin': '2px',
-        'border-radius': '3px',
-        'background-color': '#E34234' // default color
-      });
-    }
-  }
-
-  if (data.targets) {
-    for (const target in data.targets) {
-      const tarid = target.replace(/ /g, "_");
-      const existing = $(`#target_${tarid}`);
-
-      // 🔁 If new_target flag is set and target exists, rename the old one
-      if (data.new_target) {
-        if (existing.length) {
-          const newId = `target_${tarid}_old_${Date.now()}`;
-          existing.attr('id', newId);
-        }
-
-        $misTargets.append(`<div id='target_${tarid}'>${target}</div>`);
-        $(`#target_${tarid}`).css({
-          'display': 'inline-block',
-          'padding': '2px',
-          'margin': '2px',
-          'border-radius': '3px'
-        });
-      }
-
-      // Update target color based on status
-      if (data.targets[target] === 's') {
-        $(`#target_${tarid}`).css('background-color', '#50C878'); // green
-      } else {
-        $(`#target_${tarid}`).css('background-color', '#E34234'); // red
-      }
-    }
-  }
-
-  if (data.misProgBar) {
-    misProgBar.animate(data.misProgBar[0] / data.misProgBar[1]);
-  }
-
-  if (data.misProgDesp) {
-    $('#misProgDesp').text(data.misProgDesp);
-  }
-
-  if (data.lossProg) {
-    lossProg.animate(data.lossProg[0] / data.lossProg[1]);
-  }
-
-  if (data.lossDesp) {
-    $('#lossDesp').text(data.lossDesp);
-  }
 });
 
 //======================================================================================================
@@ -808,51 +1053,6 @@ socket.on('choose_territorial_distribution', function(data){
       dist_choices.appendChild(btn_dist);
   }
 });
-
-// Set capital
-function settle_capital(tid){
-  toHightlight = [];
-  document.getElementById('control_panel').style.display = 'none';
-  if (player_territories.includes(tid)){
-    toHightlight.push(tid);
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    $('#control_confirm').off('click').on('click', function(){
-      document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
-      toHightlight = [];
-    });
-    $('#control_cancel').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      toHightlight = [];
-    });
-  }
-}
-
-// Set cities
-function settle_cities(tid){
-  if(player_territories.includes(tid)){
-    if (toHightlight.length == 2){
-      toHightlight.splice(0, 1);
-    }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
-    }
-    if (toHightlight.length == 2){
-        document.getElementById('control_panel').style.display = 'none';
-        document.getElementById('control_panel').style.display = 'flex';
-        $('#control_confirm').off('click').on('click' , function(){
-        document.getElementById('control_panel').style.display = 'none';
-        socket.emit('send_city_choices', {'choice': toHightlight});
-        toHightlight = [];
-        });
-        $('#control_cancel').off('click').on('click' , function(){
-        document.getElementById('control_panel').style.display = 'none';
-        toHightlight = [];
-        });
-    }
-  }
-}
 
 // Set feedback for capital and city setting events
 socket.on('settle_result', function(data){
@@ -1076,60 +1276,6 @@ socket.on('rearrangement', function(){
     clickables = [];
   });
 });
-
-// Click function that handles troop deployment (for initial and turn-based troop deployment)
-function troop_deployment(tid){
-  toHightlight = [];
-  document.getElementById('control_panel').style.display = 'none';
-  if (player_territories.includes(tid)){
-    toHightlight.push(tid);
-    
-    // Sync clicks
-    socket.emit('add_click_sync', {'tid': tid});
-
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
-
-    // set shortcut id
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
-
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
-
-    troopInput.setAttribute("type", "range");
-    troopInput.setAttribute("min", 1);
-    troopInput.setAttribute("max", deployable);
-    troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
-    $('#control_confirm').off('click').on('click' , function(){
-    document.getElementById('control_panel').style.display = 'none';
-    socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
-    toHightlight = [];
-
-    // Sync clicks
-    socket.emit('remove_click_sync', {'tid': tid});
-
-    });
-    $('#control_cancel').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      toHightlight = [];
-
-      // Sync clicks
-      socket.emit('remove_click_sync', {'tid': tid});
-
-    });
-  }
-}
 
 // Used in initial deployment to show waiting message when done
 socket.on('troop_result', function(data){
@@ -2474,675 +2620,6 @@ function build_free_cities(tid){
   }
 }
 
-// Orbital strike for divine punishment
-socket.on('launch_orbital_strike', function(data){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h3>SELECT ENEMY TERRITORIES TO DESTROY!</h3>`;
-  clickables = [];
-  toHightlight = [];
-  clickables = data.targets;
-});
-
-function launch_orbital_strike(tid){
-  if(!player_territories.includes(tid)){
-    if (!toHightlight.includes(tid) && clickables.includes(tid)){
-      toHightlight.push(tid);
-    }
-    if (toHightlight.length != 0){
-        $('#control_mechanism').empty();
-        $('#control_panel').hide();
-        $('#control_panel').show();
-        $('#control_confirm').off('click').on('click', function(){
-          $('#control_panel').hide();
-          socket.emit('strike_targets', {'choice': toHightlight});
-          toHightlight = [];
-        });
-        $('#control_cancel').off('click').on('click', function(){
-          $('#control_panel').hide();
-          toHightlight = [];
-        });
-    }
-  }
-}
-
-// Air superiority
-socket.on('paratrooper_attack', function(){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY FOR AIRDROP ATTACK!</h4>`;
-  clickables = [];
-  toHightlight = [];
-});
-
-// Function to grab the reserve amt for the user
-async function get_reachable_airspace(tid){
-  let space = await new Promise((resolve) => {
-    socket.emit('get_reachable_airspace', {'origin': tid});
-    socket.once('receive_reachable_airspace', (data) => {resolve(data);});
-  });
-  return space.spaces;
-}
-
-function paratrooper_attack(tid){
-  if(player_territories.includes(tid)){
-    if (toHightlight.length){
-      toHightlight = [];
-      clickables = [];
-    }
-    toHightlight.push(tid);
-    get_reachable_airspace(tid).then(spaces => {
-      clickables = spaces
-    }).catch(error => {
-      console.error("Error getting reserve amount:", error); });
-  } else if (!player_territories.includes(tid)){
-    if (clickables.includes(tid)){
-      if (toHightlight.length != 2){
-        toHightlight.push(tid);
-      }
-      if (toHightlight.length == 2){
-        toHightlight[1] = tid;
-
-        document.getElementById('control_panel').style.display = 'none';
-        document.getElementById('control_panel').style.display = 'flex';
-        $('#proceed_next_stage').hide();
-  
-        let troopValue = document.createElement("p");
-        let troopInput = document.createElement("input");
-  
-        // set shortcut id
-        troopInput.setAttribute("id", "adjust_attack_amt");
-        troopValue.setAttribute("id", "curr_attack_amt");
-  
-        curr_slider = "#adjust_attack_amt";
-        curr_slider_val = "#curr_attack_amt";
-  
-        troopInput.setAttribute("type", "range");
-        troopInput.setAttribute("min", 1);
-        troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
-        troopInput.setAttribute("value", 1);
-        troopInput.setAttribute("step", 1);
-        troopInput.style.display = "inline-block";
-        troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-        troopValue.textContent = 1;
-        let c_m = document.getElementById('control_mechanism');
-        c_m.innerHTML = "";
-        c_m.appendChild(troopInput);
-        c_m.appendChild(troopValue);
-  
-        $('#control_confirm').off('click').on('click' , function(){
-          document.getElementById('control_panel').style.display = 'none';
-          socket.emit('send_battle_stats_AS', {'choice': toHightlight, 'amount': troopInput.value});
-          toHightlight = [];
-          clickables = [];
-          $('#proceed_next_stage').show();
-        });
-        $('#control_cancel').off('click').on('click' , function(){
-          document.getElementById('control_panel').style.display = 'none';
-          toHightlight = [];
-          clickables = [];
-          $('#proceed_next_stage').show();
-        });
-     }
-    }
-  }
-}
-
-// Collusion
-socket.on('corrupt_territory', function(data){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>CHOOSE AN ENEMY TERRITORY TO CORRUPT!</h4>`;
-  clickables = data.targets;
-  toHightlight = [];
-});
-
-function corrupt_territory(tid){
-  toHightlight = [];
-  document.getElementById('control_panel').style.display = 'none';
-  toHightlight.push(tid);
-  document.getElementById('control_mechanism').innerHTML = '';
-  document.getElementById('control_panel').style.display = 'none';
-  document.getElementById('control_panel').style.display = 'flex';
-  $('#proceed_next_stage').hide();
-  $('#control_confirm').off('click').on('click' , function(){
-    document.getElementById('control_panel').style.display = 'none';
-    socket.emit('send_corrupt_territory', {'choice': toHightlight[0]});
-    toHightlight = [];
-  });
-  $('#control_cancel').off('click').on('click' , function(){
-    document.getElementById('control_panel').style.display = 'none';
-    $('#proceed_next_stage').show();
-    toHightlight = [];
-  });
-}
-
-// Arsenal of the Underworld
-socket.on('arsenal_controls', function(data) {
-  // Get the middle_display card and show it
-  let middleDisplay = $('#middle_display');
-  let middleTitle = $('#middle_title');
-  let middleContent = $('#middle_content');
-  middleDisplay.show(); // Ensure the card is visible
-  middleTitle.text('Arsenal Controls'); // Set the title
-  middleContent.empty(); // Clear the content
-
-  // Create container for descriptions and buttons
-  let descriptionsDiv = $('<div></div>')
-      .addClass('mb-3')
-      .addClass('py-1')
-      .css({
-          'max-height': '6rem', // Max height for 3 lines
-          'overflow-y': 'auto', // Enable scrolling if content exceeds max height
-          'line-height': '1.2'  // Compact line spacing
-      });
-
-  let buttonsDiv = $('<div></div>')
-      .addClass('d-flex justify-content-around'); // Buttons inline with spacing
-
-  // Descriptions
-  if (data.minefields && data.minefields.length > 0) {
-      data.minefields.forEach(minefield => {
-          descriptionsDiv.append(
-              `<p style="margin: 0.2rem 0;">${minefield[0]} has ${minefield[1]} mines active.</p>`
-          );
-      });
-  } else {
-      descriptionsDiv.append('<p style="margin: 0.2rem 0;">No active minefields.</p>');
-  }
-
-  let availableMinefields = data.minefield_limit - (data.minefields ? data.minefields.length : 0);
-  if (availableMinefields < 0) {
-    availableMinefields = 0;
-  }
-  descriptionsDiv.append(
-      `<p style="margin: 0.2rem 0;">${availableMinefields} available minefield placement.</p>`
-  );
-
-  if (data.silo_usable) {
-      descriptionsDiv.append(
-          `<p style="margin: 0.2rem 0;">Underground Silo active in ${data.underground_silo_location} | ${data.silo_usage} usages available for this round.</p>`
-      );
-  } else if (data.occupied) {
-      descriptionsDiv.append('<p style="margin: 0.2rem 0;">Underground Silo Occupied by enemy forces.</p>');
-  } else {
-      descriptionsDiv.append('<p style="margin: 0.2rem 0;">No active underground silo.</p>');
-  }
-
-  // Buttons
-  if (data.set_minefields) {
-      let setMinefieldsButton = $('<button></button>')
-          .addClass('btn btn-primary ml-2')
-          .text('Set up minefields')
-          .off('click') // Clear any existing click event handlers
-          .click(function() {
-              socket.emit('send_async_event', {'name': 'S_M'}); 
-              $('#middle_display').hide();
-              $('#middle_title').empty();
-              $('#middle_content').empty(); 
-          });
-      buttonsDiv.append(setMinefieldsButton);
-  }
-
-  if (data.silo_build) {
-      let buildSiloButton = $('<button></button>')
-          .addClass('btn btn-success ml-2')
-          .text('Build Silo')
-          .click(function() {
-              socket.emit('send_async_event', {'name': 'B_S'});
-              $('#middle_display').hide();
-              $('#middle_title').empty();
-              $('#middle_content').empty(); 
-          });
-      buttonsDiv.append(buildSiloButton);
-  }
-
-  if (data.silo_usage && !data.occupied) {
-      let launchSiloButton = $('<button></button>')
-          .addClass('btn btn-danger ml-2')
-          .text('Launch from Silo')
-          .click(function() {
-              socket.emit('launch_silo');
-              $('#middle_display').hide();
-              $('#middle_title').empty();
-              $('#middle_content').empty(); 
-          });
-      buttonsDiv.append(launchSiloButton);
-  }
-
-  middleContent.append(descriptionsDiv);
-  middleContent.append(buttonsDiv);
-  middleContent.append(`
-    <div style="display: flex; justify-content: center; margin-top: 3px;">
-        <button id='btn-action-cancel' 
-                class="w-9 h-9 bg-red-600 text-white font-bold rounded-lg flex items-center justify-center">
-            X
-        </button>
-    </div>
-  `);
-
-  $('#btn-action-cancel').off('click').on('click', function() {
-      $('#control_panel').hide();
-      $('#middle_display').hide();
-      $('#middle_title, #middle_content').empty();
-  });
-});
-
-
-  // Set minefields
-  socket.on('set_minefields', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose territories to set up minefields! ${data.limits} can be set.</h4>`;
-    clickables = data.targets;
-    minefields_amount = data.limits;
-    toHightlight = [];
-  });
-
-  function set_minefields(tid){
-    if (!clickables.includes(tid)){
-      return;
-    }
-    document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
-    if (toHightlight.length > minefields_amount) {
-        toHightlight.shift();
-    }
-    document.getElementById('control_mechanism').innerHTML = '';
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    $('#proceed_next_stage').hide();
-    $('#control_confirm').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_minefield_choices', {'choices': toHightlight});
-      toHightlight = [];
-    });
-    $('#control_cancel').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      $('#proceed_next_stage').show();
-      toHightlight = [];
-    });
-  }
-
-  // set_underground_silo
-  socket.on('set_underground_silo', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose a territory to build underground silo! Only one silo can be built.</h4>`;
-    clickables = data.targets;
-    toHightlight = [];
-  });
-
-  function set_underground_silo(tid){
-    if (!clickables.includes(tid)){
-      return;
-    }
-    toHightlight = [];
-    document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
-    document.getElementById('control_mechanism').innerHTML = '';
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    $('#proceed_next_stage').hide();
-    $('#control_confirm').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_silo_location', {'choice': toHightlight[0]});
-      toHightlight = [];
-    });
-    $('#control_cancel').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      $('#proceed_next_stage').show();
-      toHightlight = [];
-    });
-  }
-
-  // launch from silo
-  socket.on('underground_silo_launch', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Launching missiles from underground silo. Choose up to ${data.usages} targets!</h4>`;
-    clickables = data.targets;
-    US_usages = data.usages;
-    toHightlight = [];
-  });
-
-  // launching from silo
-  function underground_silo_launch(tid){
-    if (!clickables.includes(tid)){
-      return;
-    }
-    document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
-    if (toHightlight.length > US_usages) {
-        toHightlight.shift();
-    }
-    document.getElementById('control_mechanism').innerHTML = '';
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    $('#proceed_next_stage').hide();
-    $('#control_confirm').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_missile_targets', {'choices': toHightlight});
-      toHightlight = [];
-    });
-    $('#control_cancel').off('click').on('click' , function(){
-      document.getElementById('control_panel').style.display = 'none';
-      $('#proceed_next_stage').show();
-      toHightlight = [];
-    });
-  }
-
-  socket.on('play_missile_sound', function(){
-    var battleSFX = [document.getElementById('missile1'), document.getElementById('missile2')];
-    var randomIndex = Math.floor(Math.random() * battleSFX.length);
-    battleSFX[randomIndex].volume = 0.45;
-    battleSFX[randomIndex].play();
-  });
-
-  // loan shark
-  socket.on('make_ransom', function(data) {
-    // Set the announcement message
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose a target to send your ransomware!</h4>`;
-
-    // Ensure required elements are visible
-    let middleDisplay = $('#middle_display');
-    let middleTitle = $('#middle_title');
-    let middleContent = $('#middle_content');
-
-    middleDisplay.show();
-    middleTitle.empty();
-    middleContent.empty();
-
-    // Create container for buttons
-    let buttonContainer = $('<div></div>')
-        .addClass('d-flex flex-wrap justify-content-between')
-        .css({
-            'max-height': '8rem',  // Limit the height to make it scrollable if too many rows
-            'overflow-y': 'auto',  // Enable vertical scrolling
-            'gap': '2px'          // Space between buttons
-        });
-
-    // Variable to track the currently selected button
-    let selectedButton = null;
-
-    // Loop through each target name and create buttons
-    data.targets.forEach(function(name) {
-        let button = $('<button></button>')
-            .addClass('btn m-2')
-            .css({
-                'padding': '2px',
-                'text-align': 'center',
-                'background-color': '#FFC107', // Bootstrap warning color
-                'color': '#333333' // Dark gray text
-            })
-            .text(name)
-            .click(function(){
-                // Remove red border from previously selected button
-                if (selectedButton) {
-                    selectedButton.css('border', 'none');
-                }
-
-                // Highlight the current button with a red border
-                $(this).css({
-                    'border': '2px solid red'
-                });
-
-                // Update the reference to the selected button
-                selectedButton = $(this);
-
-                // Show the control panel
-                document.getElementById('control_mechanism').innerHTML = '';
-                document.getElementById('control_panel').style.display = 'none';
-                document.getElementById('control_panel').style.display = 'flex';
-                $('#proceed_next_stage').hide();
-
-                // Confirm button action
-                $('#control_confirm').off('click').on('click', function(){
-                    document.getElementById('control_panel').style.display = 'none';
-                    socket.emit('send_ransom_target', {'choice': name});
-
-                    // Clear middle content and title
-                    middleTitle.empty();
-                    middleContent.empty();
-
-                    // Remove red border from selected button
-                    if (selectedButton) {
-                        selectedButton.css('border', 'none');
-                        selectedButton = null;
-                    }
-                });
-
-                // Cancel button action
-                $('#control_cancel').off('click').on('click', function(){
-                    document.getElementById('control_panel').style.display = 'none';
-                    $('#proceed_next_stage').show();
-
-                    // Remove red border from selected button
-                    if (selectedButton) {
-                        selectedButton.css('border', 'none');
-                        selectedButton = null;
-                    }
-                });
-            });
-
-        buttonContainer.append(button);
-    });
-
-    // Add the button container to middle_content
-    middleContent.append(buttonContainer);
-    if (data.targets.length === 0) {
-      middleContent.append('<p>No target available.</p>');
-    }  
-});
-
-// loan shark
-socket.on('gather_intel', function(data) {
-  // Set the announcement message
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>Choose a target to uncover their agenda!</h4>`;
-
-  // Ensure required elements are visible
-  let middleDisplay = $('#middle_display');
-  let middleTitle = $('#middle_title');
-  let middleContent = $('#middle_content');
-
-  middleDisplay.show();
-  middleTitle.empty();
-  middleContent.empty();
-
-  // Create container for buttons
-  let buttonContainer = $('<div></div>')
-      .addClass('d-flex flex-wrap justify-content-between')
-      .css({
-          'max-height': '8rem',  // Limit the height to make it scrollable if too many rows
-          'overflow-y': 'auto',  // Enable vertical scrolling
-          'gap': '2px'          // Space between buttons
-      });
-
-  // Variable to track the currently selected button
-  let selectedButton = null;
-
-  // Loop through each target name and create buttons
-  data.targets.forEach(function(name) {
-      let button = $('<button></button>')
-          .addClass('btn m-2')
-          .css({
-              'padding': '2px',
-              'text-align': 'center',
-              'background-color': '#FFC107', // Bootstrap warning color
-              'color': '#333333' // Dark gray text
-          })
-          .text(name)
-          .click(function(){
-              // Remove red border from previously selected button
-              if (selectedButton) {
-                  selectedButton.css('border', 'none');
-              }
-
-              // Highlight the current button with a red border
-              $(this).css({
-                  'border': '2px solid red'
-              });
-
-              // Update the reference to the selected button
-              selectedButton = $(this);
-
-              // Show the control panel
-              document.getElementById('control_mechanism').innerHTML = '';
-              document.getElementById('control_panel').style.display = 'none';
-              document.getElementById('control_panel').style.display = 'flex';
-              $('#proceed_next_stage').hide();
-
-              // Confirm button action
-              $('#control_confirm').off('click').on('click', function(){
-                  document.getElementById('control_panel').style.display = 'none';
-                  socket.emit('send_gather_target', {'choice': name});
-
-                  // Clear middle content and title
-                  middleTitle.empty();
-                  middleContent.empty();
-
-                  // Remove red border from selected button
-                  if (selectedButton) {
-                      selectedButton.css('border', 'none');
-                      selectedButton = null;
-                  }
-              });
-
-              // Cancel button action
-              $('#control_cancel').off('click').on('click', function(){
-                  document.getElementById('control_panel').style.display = 'none';
-                  $('#proceed_next_stage').show();
-
-                  // Remove red border from selected button
-                  if (selectedButton) {
-                      selectedButton.css('border', 'none');
-                      selectedButton = null;
-                  }
-              });
-          });
-
-      buttonContainer.append(button);
-  });
-
-  // Add the button container to middle_content
-  middleContent.append(buttonContainer);
-  if (data.targets.length === 0) {
-    middleContent.append('<p>No target available.</p>');
-  }  
-});
-
-
-socket.on('show_debt_button', function(){
-  popup("Your command system is currently restricted by enemy ransomware!", 3000);
-  in_debt = true;
-  $('#btn-debt').show();
-  $('#btn-debt').off('click').on('click', function() {
-    // Ensure middle_display, middle_title, and middle_content are visible and cleared
-    let middleDisplay = $('#middle_display');
-    let middleTitle = $('#middle_title');
-    let middleContent = $('#middle_content');
-    
-    middleDisplay.show();
-    middleTitle.empty();
-    middleContent.empty();
-
-    // Await for the "debt_info" event from the backend
-    socket.on('debt_info', function(data) {
-        // Clear existing content to avoid duplicate information
-        middleTitle.empty();
-        middleContent.empty();
-
-        // Display debt information in a scrollable div
-        let debtInfoDiv = $('<div></div>')
-            .css({
-                'max-height': '6rem', // Roughly 4 lines of text (6rem = 4 * 1.5rem per line)
-                'overflow-y': 'auto',
-                'margin-bottom': '10px'
-            })
-            .html(`
-                <p>Current debt amount: ${data.debt_amount} troops, which is equivalent to ${Math.ceil(data.debt_amount / 5)} ★</p>
-                <p>Your current reserves: ${data.curr_reserves}</p>
-                <p>Your total troops: ${data.total_troops}</p>
-                <p>Your current special authority: ${data.stars}★</p>
-            `);
-
-        // Create buttons for "Pay with ★" and "Pay with Troops"
-        let payWithStarsButton = $('<button></button>')
-            .addClass('btn btn-warning m-2')
-            .css({
-                'background-color': '#FF8C00', // Dark orange
-                'color': '#333333', // Dark grey text
-                'width': '45%',
-                'text-align': 'center'
-            })
-            .text('Pay with ★')
-            .on('click', function() {
-                socket.emit('make_debt_payment', { 'method': 'sepauth' });
-                middleDisplay.hide();
-                middleTitle.empty();
-                middleContent.empty();
-            });
-
-        let payWithTroopsButton = $('<button></button>')
-            .addClass('btn btn-warning m-2')
-            .css({
-                'background-color': '#FF8C00', // Dark orange
-                'color': '#333333', // Dark grey text
-                'width': '45%',
-                'text-align': 'center'
-            })
-            .text('Pay with troops')
-            .on('click', function() {
-                socket.emit('make_debt_payment', { 'method': 'troops' });
-                middleDisplay.hide();
-                middleTitle.empty();
-                middleContent.empty();
-            });
-
-        // Create a button container to align "Pay with ★" and "Pay with troops" side by side
-        let buttonContainer = $('<div></div>')
-            .addClass('d-flex justify-content-between')
-            .css({
-                'gap': '10px'
-            });
-
-        buttonContainer.append(payWithStarsButton);
-        buttonContainer.append(payWithTroopsButton);
-
-        // Create the close button
-        let closeButton = $('<button></button>')
-            .addClass('btn m-2')
-            .css({
-                'background-color': 'red',
-                'color': 'white',
-                'width': '30%', // Small width to center it properly
-                'margin': '10px auto', // Center horizontally
-                'display': 'block', // Makes the button a block element
-                'text-align': 'center'
-            })
-            .text('X')
-            .on('click', function() {
-                middleDisplay.hide();
-                middleTitle.empty();
-                middleContent.empty();
-            });
-
-        // Append everything to the content
-        middleTitle.text('Debt Information');
-        
-        // Add the debt info, button container, and close button to the middle content
-        middleContent.append(debtInfoDiv);
-        middleContent.append(buttonContainer);
-        middleContent.append(closeButton);
-    });
-
-    // Emit the event to fetch debt info
-    socket.emit('fetch_debt_info');
-  });
-});
-
-socket.on('debt_off', function(){
-  in_debt = false;
-  $('#btn-debt').hide();
-});
-
-//========================================================================================================
 
 //============================================= Mouse events =============================================
 function mouseWheel(event) {
