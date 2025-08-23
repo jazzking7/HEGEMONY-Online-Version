@@ -564,7 +564,7 @@ def settle_new_cities(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*3
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(3, pid)
     gsm.update_private_status(pid)
 
 @socketio.on('settle_bureau')
@@ -603,7 +603,7 @@ def settle_bureau(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*2
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(2, pid)
 
     gsm.update_private_status(pid)
 
@@ -643,7 +643,7 @@ def settle_leyline(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*2
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(2, pid)
     gsm.players[pid].numLeylines += len(choices)
 
     gsm.update_private_status(pid)
@@ -684,7 +684,7 @@ def settle_nexus(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*4
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(4, pid)
     gsm.update_private_status(pid)
 
 @socketio.on('settle_hall')
@@ -723,7 +723,7 @@ def settle_new_halls(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*5
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(5, pid)
     gsm.update_private_status(pid)
 
 @socketio.on('settle_forts')
@@ -804,7 +804,7 @@ def settle_new_megacities(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].m_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*5
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(5, pid)
     gsm.update_private_status(pid)
 
 @socketio.on('send_troop_update')
@@ -910,7 +910,8 @@ def handle_rearrange_data(data):
 def send_sep_auth():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    socketio.emit('receive_sep_auth', {'amt': gsm.players[pid].stars}, room=pid)
+    price_reduction = gsm.players[pid].infrastructure_upgrade//2
+    socketio.emit('receive_sep_auth', {'amt': gsm.players[pid].stars, 'discount':price_reduction}, room=pid)
 
 @socketio.on('get_reserves_amt')
 def send_reserves_amt():

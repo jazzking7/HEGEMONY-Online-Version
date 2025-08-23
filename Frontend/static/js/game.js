@@ -26,6 +26,9 @@ let lossProg;
 let curr_slider = "";
 let curr_slider_val = "";
 
+// DISCOUNT
+let discount = 0;
+
 // Laplace Mode
 let laplace_mode = false;
 // Arsenal of Underworld
@@ -1715,13 +1718,19 @@ socket.on('activate_summit', function(){
   $('#announcement').html(`<h3>Summit in progress...</h3>`)
 });
 
+// Discounted price displayer
+function starPrice(base) {
+  const discounted = base - discount;
+  return discounted > 1 ? discounted : 1;
+}
+
 // Function to get player's authority
 async function get_sep_auth(){
   let amt = await new Promise((resolve) => {
     socket.emit('get_sep_auth');
     socket.once('receive_sep_auth', (data) => {resolve(data);});
   });
-  return amt.amt;
+  return amt;
 }
 
 // SPECIAL AUTHORITY
@@ -1737,8 +1746,10 @@ btn_sep_auth.onclick = function () {
     // Show the title
     document.getElementById('middle_title').innerHTML = `
     <div style="padding: 5px;">
-    <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
+    <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth.amt}</h5>
     </div>`;
+
+    discount = sep_auth.discount;
 
     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
     midDis = document.getElementById('middle_content')
@@ -1835,7 +1846,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.color='#FFFFFF';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Logo/transhubimprove.png" alt="Infrastructure">
-          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(3)}☆</span>
         </div>
         <span class="small">INFRASTRUCTURE</span>
         <div class="hover-label">Improve transport hubs</div>
@@ -1849,7 +1860,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.color='#FFFFFF';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities">
-          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(3)}☆</span>
         </div>
         <span class="small">BUILD CITIES</span>
         <div class="hover-label">Expand urban development</div>
@@ -1877,7 +1888,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.color='#000000';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Dev/megacity.png" alt="Megacity">
-          <span class="price-tag" style="color: #000000;">5☆</span>
+          <span class="price-tag" style="color: #000000;">${starPrice(5)}☆</span>
         </div>
         <span class="small">RAISE MEGACITY</span>
         <div class="hover-label">Create economic powerhouse</div>
@@ -1905,7 +1916,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.color='#FFFFFF';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Insig/CAD.png" alt="Hall of Governance">
-          <span class="price-tag" style="color: #FFFFFF;">5☆</span>
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(5)}☆</span>
         </div>
         <span class="small" style="font-size: 0.7rem;">HALL OF GOVERNANCE</span>
         <div class="hover-label">Extend administrative control</div>
@@ -1919,7 +1930,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
-          <span class="price-tag" style="color: #000000;">4☆</span>
+          <span class="price-tag" style="color: #000000;">${starPrice(4)}☆</span>
         </div>
         <span class="small">LOGISTIC NEXUS</span>
         <div class="hover-label">Centralize distribution</div>
@@ -1933,7 +1944,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.color='#000000';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Insig/leyline.png" alt="Leyline">
-          <span class="price-tag" style="color: #000000;">2☆</span>
+          <span class="price-tag" style="color: #000000;">${starPrice(2)}☆</span>
         </div>
         <span class="small">LEYLINE CROSS</span>
         <div class="hover-label">Channel mystic energies</div>
@@ -1947,7 +1958,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.color='#000000';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau">
-          <span class="price-tag" style="color: #FFFFFF;">2☆</span>
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(2)}☆</span>
         </div>
         <span class="small" style="font-size: 0.7rem;">MOBILIZATION BUREAU</span>
         <div class="hover-label">Enable troop call-ups</div>
@@ -1998,15 +2009,16 @@ btn_sep_auth.onclick = function () {
 
     // BUILD NEW CITY
     $("#btn-bc").off('click').on('click', function() {
-        if (sep_auth < 3)  {
-          popup('MINIMUM 3 STARS TO BUILD CITIES!', 2000);
+        let curr_price = starPrice(3);
+        if (sep_auth < curr_price)  {
+          popup(`MINIMUM ${curr_price} STARS TO BUILD CITIES!`, 2000);
           $("#middle_display").hide()
           $("#middle_title, #middle_content").empty();
           return;
         }
         $("#middle_content").html(
           `<p>Select amount to convert:</p>
-           <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
+           <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
            <p id="samt">1</p>
            <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
           `);
@@ -2021,15 +2033,16 @@ btn_sep_auth.onclick = function () {
 
     // UPGRADE INFRASTRUCTURE
     $("#btn-ui").off('click').on('click', function(){
-      if (sep_auth < 3){
-        popup('MINIMUM 3 STARS TO UPGRADE INFRASTRUCTURE!', 2000);
+      let curr_price = starPrice(3);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO UPGRADE INFRASTRUCTURE!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select amount to convert:</p>
-         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/3)} step="1" value="1">
+         <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
          <p id="samt">1</p>
          <button id="convertBtn" class="btn btn-success btn-block">Convert</button>
         `);
@@ -2044,15 +2057,16 @@ btn_sep_auth.onclick = function () {
 
     // RAISE MEGACITY
     $("#btn-mega").off('click').on('click', function(){
-      if (sep_auth < 5){
-        popup('MINIMUM 5 STARS TO RAISE MEGACITY!', 2000);
+      let curr_price = starPrice(5);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO RAISE MEGACITY!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of Megacities to raise:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Raise</button>
         `);
@@ -2090,15 +2104,16 @@ btn_sep_auth.onclick = function () {
 
     // Hall of Governance
     $("#btn-hall").off('click').on('click', function(){
-      if (sep_auth < 5){
-        popup('MINIMUM 5 STARS TO SET UP HALL!', 2000);
+      let curr_price = starPrice(5);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO SET UP HALL!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of Halls of Governance to set up:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/5)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Install</button>
         `);
@@ -2113,15 +2128,16 @@ btn_sep_auth.onclick = function () {
 
     // Logistic Nexus
     $("#btn-nexus").off('click').on('click', function(){
-      if (sep_auth < 4){
-        popup('MINIMUM 4 STARS TO BUILD A NEXUS!', 2000);
+      let curr_price = starPrice(4);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO BUILD A NEXUS!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of Logistic Nexus:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/4)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Build</button>
         `);
@@ -2136,15 +2152,16 @@ btn_sep_auth.onclick = function () {
 
     // Leyline Cross
     $("#btn-leyline").off('click').on('click', function(){
-      if (sep_auth < 2){
-        popup('MINIMUM 2 STARS TO BUILD A LEYLINE CROSS!', 2000);
+      let curr_price = starPrice(2);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO BUILD A LEYLINE CROSS!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of Leyline Cross:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
         `);
@@ -2157,17 +2174,18 @@ btn_sep_auth.onclick = function () {
         });
     });
 
-    // Leyline Cross
+    // Mobilization Bureau
     $("#btn-bureau").off('click').on('click', function(){
-      if (sep_auth < 2){
-        popup('MINIMUM 2 STARS TO BUILD A MOBILIZATION BUREAU!', 2000);
+      let curr_price = starPrice(2);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STARS TO BUILD A MOBILIZATION BUREAU!`, 2000);
         $("#middle_display").hide()
         $("#middle_title, #middle_content").empty();
         return;
       }
       $("#middle_content").html(
         `<p>Select number of bureaus:</p>
-          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/2)} step="1" value="1">
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
           <p id="samt">1</p>
           <button id="convertBtn" class="btn btn-success btn-block">Settle</button>
         `);

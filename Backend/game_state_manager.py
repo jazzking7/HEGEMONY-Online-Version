@@ -523,6 +523,10 @@ class Game_State_Manager:
                                                'curr_nul_rate': 0,
                                                'curr_dmg_mul': dmg_mul,
                                                'curr_min_roll': self.players[pid].min_roll}, room=pid)
+    
+    def starPrice(self, base, player):
+        price = base - (self.players[player].infrastructure_upgrade//2)
+        return price if price > 1 else 1
 
     def convert_reserves(self, amt, player):
         if self.in_ice_age:
@@ -623,7 +627,7 @@ class Game_State_Manager:
                     return
         if not self.players[player].hijacked:
             self.players[player].infrastructure_upgrade += amt
-            self.players[player].stars -= amt*3
+            self.players[player].stars -= amt*self.starPrice(3,player)
             self.update_private_status(player)
             self.update_HIP(player)
             self.get_SUP()
