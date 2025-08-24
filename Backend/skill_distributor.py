@@ -52,19 +52,19 @@ class Skill_Distributor:
         elif skill_name == "Ares' Blessing":
             return "Berserker War Art that increase your Industrial and Infrastructure Level by 2 while raising your damage multiplier to 2 when activated. Last for 1 turn and there is a 3 round cooldown between usages."
         elif skill_name == "Zealous_Expansion":
-            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 3★. +1 Infrastructure Level during battles. +5 reserves for every Infrastructure Level increased."
+            return "Able to upgrade Infrastructure Level by 1 using 2★ instead of 3★. +1 Infrastructure Level during battles. +5 reserves for every Infrastructure Level increased using this War Art."
         elif skill_name == "Elitocracy":
             return "Able to increase your Minimum Roll by 1 using 3★. Your damage multiplier increases as your Minimum Roll increases."
         elif skill_name == "Necromancer":
-            return "When activated, all enemy troops that you killed become your reserves. There is a 1 round cooldown between usages."
+            return "When activated, all enemy troops that you killed become your reserves."
         elif skill_name == "Divine_Punishment":
-            return "Able to bombard anywhere on the map. You receive (number of players + 1) usages at the start of the game. Every 3 rounds you receive 1 additional usage."
+            return "Able to bombard anywhere on the map. You receive usages equivalent to number of players at the start of the game. Every 2 rounds you receive 1 additional usage."
         elif skill_name == "Air_Superiority":
-            return "Able to jump over territories to attack. The more continents your troops are spreaded out to, the more reserves you will receive per round."
+            return "Able to jump over territories to attack. The more continents your troops are spreaded out to, the more reserves and stars you will receive per round."
         elif skill_name == "Collusion":
-            return "Able to gain secret ownership of enemy territories for 3★. You get 2 free usages at the start of the game."
+            return "Able to gain secret ownership of enemy territories. You get at least 2 usages at the start of the game and 1 additional usage every round."
         elif skill_name == "Laplace's Demon":
-            return "Know all players' War Art. Have a list of Secret Agendas that includes every Agenda in game and 2 extra Agendas that are not in game."
+            return "Know all players' War Art and secret stats, able to use stars to uncover other's Secret Agenda."
         elif skill_name == "Arsenal of the Underworld":
             return "Able to set minefields and build underground missile silo. The higher your battle stats are, the more minefields you can set and the stronger the missiles launched from your silo."
         elif skill_name == "Loan Shark":

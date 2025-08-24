@@ -659,7 +659,7 @@ class Elitocracy(Skill):
         self.intMod = True
         self.hasRoundEffect = True
         self.Annihilator_as_user = player == gs.Annihilator
-        self.cost_per_autoupgrade = 2 if self.Annihilator_as_user else 3
+        self.cost_per_autoupgrade = 3
     
     def apply_round_effect(self):
         curr = self.gs.GES.round
@@ -670,6 +670,8 @@ class Elitocracy(Skill):
     def internalStatsMod(self, battle_stats):
         if self.active:
             battle_stats[4] = battle_stats[2]//2 + 1
+            if self.Annihilator_as_user:
+                battle_stats[4] = battle_stats[2]
 
     def update_current_status(self):
 
@@ -751,7 +753,7 @@ class Divine_Punishment(Skill):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
         self.energy_cost = 1 if player == gs.Annihilator else 2
-        self.limit = len(gs.players) + 1 if player == gs.Annihilator else len(gs.players)
+        self.limit = len(gs.players) + 2 if player == gs.Annihilator else len(gs.players)
         self.finished_bombardment = True
 
         # if self.limit > len(gs.map.territories)//len(gs.players):

@@ -513,7 +513,10 @@ class Game_State_Manager:
         hiddenInd = ""
         if self.players[pid].skill:
             if self.players[pid].skill.name == 'Elitocracy':
-                dmg_mul += self.players[pid].min_roll//2
+                if self.players[pid].skill.Annihilator_as_user:
+                    dmg_mul = self.players[pid].min_roll
+                else:
+                    dmg_mul += self.players[pid].min_roll//2
             if self.players[pid].skill.name == 'Collusion':
                 hiddenInd = f" ({self.get_player_industrial_level(self.players[pid]) + 6})"
         self.server.emit('private_overview', {'curr_SA': self.players[pid].stars,
