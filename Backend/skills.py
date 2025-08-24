@@ -724,7 +724,7 @@ class Necromancer(Skill):
 
         self.gs.server.emit("update_skill_status", {
             'name': "Necromancer",
-            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves, you will receive them at the end of your turn. For every 7 troops you've received, you receive 1 star.",
+            'description': "When opponents attack you and fail, their losses become your reserves. Losses from the enemies during your conquests become your reserves, you will receive them at the end of Conquest Stage. For every 9 troops you've received, you receive 1 star.",
             'operational': self.active,
         }, room=self.player) 
     
