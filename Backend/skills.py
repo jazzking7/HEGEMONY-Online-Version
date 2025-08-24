@@ -1090,17 +1090,17 @@ class Laplace_Demon(Skill):
         for miss in self.gs.Mset:
             if miss.name not in names:
                 names.append(miss.name)
-        if len(names) < 16:
-            count = 0
-            MList = ['Loyalist', 'Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher',
-                     'Industrialist', 'Expansionist', 'Dominator', 'Populist', 'Fanatic', 'Unifier', 'Polarizer', 'Guardian',
-                     'Gambler', 'Assassin', 'Survivalist', 'Protectionist']
-            while len(names) < 16 and count != 2:
-                random_miss = random.choice(MList)
-                if random_miss not in names:
-                    names.append(random_miss)
-                    count += 1
         random.shuffle(names)
+        names.pop()
+        MList = ['Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 'Punisher',
+                     'Industrialist', 'Expansionist', 'Dominator', 'Populist', 'Fanatic', 'Unifier', 'Polarizer', 'Guardian',
+                     'Gambler', 'Survivalist']
+        count = 0
+        while (count < 1):
+            random_miss = random.choice(MList)
+            if random_miss not in names:
+                names.append(random_miss)
+                count += 1
         self.names = names
 
     def update_current_status(self):
