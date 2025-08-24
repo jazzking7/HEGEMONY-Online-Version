@@ -253,7 +253,9 @@ class turn_loop_scheduler:
 
                 p.stars += s_amt
 
-                if (p.numLeylines * 11) > random.randint(1, 100):
+                leyprob = p.numLeylines * 11
+                leyprob = leyprob if leyprob < 66 else 66
+                if leyprob > random.randint(1, 100):
                     print("Leyline Bonus Received.")
                     if random.randint(1, 100) > 40:
                         p.reserves += p.numLeylines * 4
