@@ -60,7 +60,7 @@ class Realm_of_Permafrost(Skill):
 
         if self.Annihilator_as_user and self.gs.in_ice_age:
             battle_stats[0] = 5
-            battle_stats[1] = 3
+            battle_stats[1] = 2
             battle_stats[2] = 1
             battle_stats[3] = 0
             battle_stats[4] = 1
@@ -931,7 +931,7 @@ class Air_Superiority(Skill):
         # Calculate the bonus using the quadratic function and round up
         bonus = math.ceil(a * x ** 2 + b * x + c)
         if self.Annihilator_as_user:
-            bonus = math.ceil(1.3*bonus)
+            bonus = math.ceil(1.4*bonus)
         return bonus
 
     def long_arm_jurisdiction(self,):
