@@ -999,12 +999,12 @@ class Game_State_Manager:
         if atk_p.skill:
             if atk_p.skill.name == "Elitocracy" and atk_p.skill.active:
                 if trty_atk.isCity or trty_atk.isCapital:
-                    atk_stats[2] += 2
+                    atk_stats[2] += atk_p.skill.important_bonus
 
         if def_p.skill:
             if def_p.skill.name == "Elitocracy" and def_p.skill.active:
                 if trty_def.isCity or trty_def.isCapital:
-                    def_stats[2] += 2
+                    def_stats[2] += atk_p.skill.important_bonus
 
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)

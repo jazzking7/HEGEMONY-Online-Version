@@ -58,6 +58,10 @@ class turn_loop_scheduler:
                 while not ms.stage_completed and not ms.innerInterrupt:
                     time.sleep(1)
                 if ms.terminated or ms.innerInterrupt:
+                    if ms.terminated:
+                        if atk_player.skill:
+                            if atk_player.skill.name == "Necromancer":
+                                atk_player.skill.soul_harvest()
                     return
             if event.name == 'rearrangement':
                 self.set_curr_state(ms, self.events[3])
@@ -135,6 +139,7 @@ class turn_loop_scheduler:
         ms.flush_concurrent_event(player)
         # Player executing the turn
         atk_player = gs.players[player]
+        atk_player.deployable_amt = 0
         # Reset turn based victory
         atk_player.turn_victory = False
         atk_player.con_amt = 0
@@ -191,6 +196,10 @@ class turn_loop_scheduler:
         while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
             time.sleep(1)
         if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+            if ms.terminated:
+                if atk_player.skill:
+                    if atk_player.skill.name == "Necromancer":
+                        atk_player.skill.soul_harvest()
             return
         
         self.set_curr_state(ms, self.events[3])

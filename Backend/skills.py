@@ -660,7 +660,10 @@ class Elitocracy(Skill):
         self.hasRoundEffect = True
         self.Annihilator_as_user = player == gs.Annihilator
         self.cost_per_autoupgrade = 3
-    
+        self.important_bonus = 1
+        if self.Annihilator_as_user:
+            self.important_bonus += 1
+        
     def apply_round_effect(self):
         curr = self.gs.GES.round
         if curr > 0 and curr % self.cost_per_autoupgrade == 0:
@@ -670,8 +673,8 @@ class Elitocracy(Skill):
     def internalStatsMod(self, battle_stats):
         if self.active:
             battle_stats[4] = battle_stats[2]//2 + 1
-            if self.Annihilator_as_user:
-                battle_stats[4] = battle_stats[2]
+            # if self.Annihilator_as_user:
+            #     battle_stats[4] = battle_stats[2]
 
     def update_current_status(self):
 
