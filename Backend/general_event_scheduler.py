@@ -82,7 +82,7 @@ class General_Event_Scheduler:
         while not self.terminated and sec < num_secs and not self.interrupt and self.gs.players[curr_player].connected:
             time.sleep(1)
             sec += 1
-        self.stage_completed = True
+       # self.stage_completed = True
         self.terminated = True
         return
 
