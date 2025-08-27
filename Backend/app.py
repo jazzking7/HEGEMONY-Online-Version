@@ -876,19 +876,22 @@ def get_reachable_trty(data):
 def terminate_preparation_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.GES.stage_completed = True
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.GES.stage_completed = True
 
 @socketio.on("terminate_conquer_stage")
 def terminate_conquer_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.GES.stage_completed = True
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.GES.stage_completed = True
 
 @socketio.on("terminate_rearrangement_stage")
 def terminate_rearrangement_stage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    gsm.GES.stage_completed = True
+    if pid == gsm.pids[gsm.GES.current_player]:
+        gsm.GES.stage_completed = True
 
 @socketio.on('send_rearrange_data')
 def handle_rearrange_data(data):
