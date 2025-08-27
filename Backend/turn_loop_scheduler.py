@@ -31,7 +31,10 @@ class turn_loop_scheduler:
                 self.reinforcement(gs, pid)
                 ms.stage_completed = False
                 done = False
-                while not ms.stage_completed and not done and not ms.innerInterrupt:
+                while (not ms.stage_completed 
+       and not done 
+       and not ms.innerInterrupt
+       and not ms.terminated):
                     done = atk_player.deployable_amt < 1
                 if ms.terminated or ms.innerInterrupt:
                     return
@@ -171,7 +174,11 @@ class turn_loop_scheduler:
 
         ms.stage_completed = False
         done = False
-        while not ms.stage_completed and not done and not ms.innerInterrupt and atk_player.connected:
+        while (not ms.stage_completed 
+       and not done 
+       and not ms.innerInterrupt 
+       and atk_player.connected
+       and not ms.terminated): 
             done = atk_player.deployable_amt < 1
         if ms.terminated or ms.innerInterrupt or not atk_player.connected:
             return
