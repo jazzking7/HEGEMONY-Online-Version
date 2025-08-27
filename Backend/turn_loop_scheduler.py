@@ -168,7 +168,7 @@ class turn_loop_scheduler:
 
         # Player temporary battle stats not updated
         ms.stats_set = False
-
+        ms.stage_completed = False
         self.set_curr_state(ms, self.events[0])
         self.reinforcement(gs, player)
 
