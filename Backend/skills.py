@@ -220,9 +220,6 @@ class Dictator(Skill):
             return
         
         self.limit -= 1
-        
-        # added_stars = 0
-        # max_add = 6
 
         donors = sorted(
             [p for p in self.gs.players if p != self.player],
@@ -235,16 +232,19 @@ class Dictator(Skill):
                 self.gs.players[pid].stars -= 1
                 self.gs.update_private_status(pid)
 
+        if self.Annihilator_as_user:
+            added_stars = 0
+            max_add = 3
 
-        # while added_stars < max_add and any(self.gs.players[p].stars > 0 for p in donors):
-        #     for pid in donors:
-        #         other_player = self.gs.players[pid]
-        #         if other_player.stars > 0 and added_stars < max_add:
-        #             other_player.stars -= 1
-        #             self.gs.players[self.player].stars += 1
-        #             added_stars += 1
-        #             self.gs.update_private_status(self.player)
-        #             self.gs.update_private_status(pid)
+            while added_stars < max_add and any(self.gs.players[p].stars > 0 for p in donors):
+                for pid in donors:
+                    other_player = self.gs.players[pid]
+                    if other_player.stars > 0 and added_stars < max_add:
+                        other_player.stars -= 1
+                        self.gs.players[self.player].stars += 1
+                        added_stars += 1
+                        self.gs.update_private_status(self.player)
+                        self.gs.update_private_status(pid)
                 
 
     def get_skill_status(self):
