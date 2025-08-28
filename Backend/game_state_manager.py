@@ -1206,6 +1206,9 @@ class Game_State_Manager:
 
         if self.gambler_win:
             self.GES.halt_events()
+
+        if self.GES.terminated:
+            self.GES.stage_completed = True
         
     def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg):
         

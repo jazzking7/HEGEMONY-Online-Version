@@ -84,6 +84,7 @@ class General_Event_Scheduler:
             sec += 1
        # self.stage_completed = True
         self.terminated = True
+        self.stage_completed = True 
         return
 
     def run_setup_events(self,):
