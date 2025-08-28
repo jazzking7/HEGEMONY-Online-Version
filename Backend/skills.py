@@ -931,7 +931,7 @@ class Air_Superiority(Skill):
         # Calculate the bonus using the quadratic function and round up
         bonus = math.ceil(a * x ** 2 + b * x + c)
         if self.Annihilator_as_user:
-            bonus = math.ceil(1.4*bonus)
+            bonus = math.ceil(1.5*bonus)
         return bonus
 
     def long_arm_jurisdiction(self,):

@@ -1042,6 +1042,11 @@ class Game_State_Manager:
                             if def_stats[3] > 85:
                                 def_stats[3] = 85
                             def_stats[4] += 1
+                            if def_p.skill.Annihilator_as_user:
+                                def_stats[2] += 1
+                                def_stats[3] += 5
+                                if def_stats[3] > 90:
+                                    def_stats[3] = 90
         # landmine explosion
         ld = 0
         if def_p.skill:
