@@ -673,8 +673,8 @@ class Elitocracy(Skill):
     def internalStatsMod(self, battle_stats):
         if self.active:
             battle_stats[4] = battle_stats[2]//2 + 1
-            # if self.Annihilator_as_user:
-            #     battle_stats[4] = battle_stats[2]
+            if self.Annihilator_as_user:
+                battle_stats[4] = battle_stats[2]
 
     def update_current_status(self):
 
