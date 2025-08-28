@@ -709,7 +709,7 @@ class Necromancer(Skill):
         super().__init__("Necromancer", player, gs)
         self.curr_turn_gain = 0
         # self.hasTurnEffect = True
-        self.star_per_troops = 6 if player == gs.Annihilator else 9
+        self.star_per_troops = 5 if player == gs.Annihilator else 9
     
     # def apply_turn_effect(self,):
     #     self.gs.players[self.player].reserves += self.curr_turn_gain
