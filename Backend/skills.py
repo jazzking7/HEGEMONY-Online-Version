@@ -1546,8 +1546,11 @@ class Reaping_of_Anubis(Skill):
     def __init__(self, player, gs):
         super().__init__("Reaping of Anubis", player, gs)
         self.guaranteed_dmg = 0
-        self.cost = 3 if player != gs.Annihilator else 2
+        if player == gs.Annihilator:
+            self.guaranteed_dmg += 1
+        self.cost = 3 # if player != gs.Annihilator else 2
         self.increment = 3 if player != gs.Annihilator else 2
+        
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
