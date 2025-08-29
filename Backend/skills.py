@@ -756,7 +756,7 @@ class Divine_Punishment(Skill):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
         self.energy_cost = 1 if player == gs.Annihilator else 2
-        self.limit = len(gs.players) + 2 if player == gs.Annihilator else len(gs.players)
+        self.limit = (len(gs.players)-1)*2 if player == gs.Annihilator else len(gs.players)
         self.finished_bombardment = True
 
         # if self.limit > len(gs.map.territories)//len(gs.players):
@@ -772,8 +772,6 @@ class Divine_Punishment(Skill):
             if self.energy == self.energy_cost:
                 self.limit += 1
                 self.energy = 0
-                if self.limit > 20:
-                    self.limit = 20
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
