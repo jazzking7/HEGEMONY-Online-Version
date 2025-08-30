@@ -1008,6 +1008,26 @@ class Game_State_Manager:
                 if trty_def.isCity or trty_def.isCapital:
                     def_stats[2] += def_p.skill.important_bonus
 
+            if def_p.skill.name == "Air_Superiority" and def_p.skill.active:
+                for cont in self.map.conts:
+                    currcont = self.map.conts[cont]['trtys']
+                    if t2 in currcont:
+                        airBonus = True
+                        for trty in currcont:
+                            if trty in def_p.territories and trty != t2:
+                                airBonus = False
+                                break
+                        if airBonus:
+                            def_stats[3] += 25
+                            if def_stats[3] > 85:
+                                def_stats[3] = 85
+                            def_stats[4] += 1
+                            if def_p.skill.Annihilator_as_user:
+                                def_stats[2] += 1
+                                def_stats[3] += 5
+                                if def_stats[3] > 90:
+                                    def_stats[3] = 90
+
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
 
@@ -1028,25 +1048,7 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
                 def_anu = 0
-            if def_p.skill.name == "Air_Superiority":
-                for cont in self.map.conts:
-                    currcont = self.map.conts[cont]['trtys']
-                    if t2 in currcont:
-                        airBonus = True
-                        for trty in currcont:
-                            if trty in def_p.territories and trty != t2:
-                                airBonus = False
-                                break
-                        if airBonus:
-                            def_stats[3] += 25
-                            if def_stats[3] > 85:
-                                def_stats[3] = 85
-                            def_stats[4] += 1
-                            if def_p.skill.Annihilator_as_user:
-                                def_stats[2] += 1
-                                def_stats[3] += 5
-                                if def_stats[3] > 90:
-                                    def_stats[3] = 90
+
         # landmine explosion
         ld = 0
         if def_p.skill:
@@ -1071,9 +1073,24 @@ class Game_State_Manager:
         if atk_p.skill:
             if atk_p.skill.name == "Loopwalker" and atk_p.skill.active:
                 multitime = True
+            if atk_p.skill.name == "Realm_of_Permafrost" and atk_p.skill.active:
+                atkh = False
+                defh = False
+                acrit = 0
+                dcrit = 0
+                acdmg = 1
+                dcdmg = 1
+
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
                 multitime = True
+            if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
+                atkh = False
+                defh = False
+                acrit = 0
+                dcrit = 0
+                acdmg = 1
+                dcdmg = 1
 
         if multitime: # time looper
             result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg)
