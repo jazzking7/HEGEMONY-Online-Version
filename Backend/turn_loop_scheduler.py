@@ -270,7 +270,7 @@ class turn_loop_scheduler:
                 p.stars += s_amt
                 moreBlessings = False
                 if p.skill:
-                    if p.skill.active and p.skill.name == "Archsage":
+                    if p.skill.active and p.skill.name == "Archmage":
                         moreBlessings = True
                 leyprob = p.numLeylines * 14 if moreBlessings else p.numLeylines * 11
                 if not moreBlessings:

@@ -1829,10 +1829,10 @@ class Revanchism(Skill):
                 self.ragePoints += round(contValue * 2.5)
         self.ragePoints += 1
 
-class Archsage(Skill):
+class Archmage(Skill):
 
     def __init__(self, player, gs):
-        super().__init__("Archsage", player, gs)
+        super().__init__("Archmage", player, gs)
         self.finish_building = True
     #     self.intMod = True
     #     self.bonus_level = 0
@@ -1845,7 +1845,7 @@ class Archsage(Skill):
     def update_current_status(self):
 
         self.gs.server.emit("update_skill_status", {
-            'name': "Archsage",
+            'name': "Archmage",
             'description': "Cost of building Leyline Crosses decreases from 2★ to 1★. Leyline Crosses provide extra Crit Damage, Crit Rate and Blessings",
             'operational': self.active,
             'hasLimit': True,

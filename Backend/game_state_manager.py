@@ -1006,10 +1006,10 @@ class Game_State_Manager:
         alcb = False
         dlcb = False
         if atk_p.skill:
-            if atk_p.skill.active and atk_p.skill.name == "Archsage":
+            if atk_p.skill.active and atk_p.skill.name == "Archmage":
                 alcb = True
         if def_p.skill:
-            if def_p.skill.active and def_p.skill.name == "Archsage":
+            if def_p.skill.active and def_p.skill.name == "Archmage":
                 dlcb = True
 
         # Leyline
