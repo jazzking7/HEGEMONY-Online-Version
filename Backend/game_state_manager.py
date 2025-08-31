@@ -131,6 +131,7 @@ class Game_State_Manager:
         self.perm_elims = []
         # victim -> killer/mission failure
         self.death_logs = {}
+        self.death_time = {}
 
         # Ice age
         self.set_ice_age = False

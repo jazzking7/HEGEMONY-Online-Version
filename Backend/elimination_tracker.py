@@ -50,6 +50,7 @@ class Elimination_tracker:
             #     gs.perm_elims.append(d_pid)
             # update kill logs if player not dead by mission failure
             gs.death_logs[d_pid] = a_pid
+            gs.death_time[d_pid] = [a_pid, gs.GES.round]
             # check death dependent mission
             gs.signal_MTrackers('death')
             return
@@ -100,6 +101,7 @@ class Elimination_tracker:
             # update kill logs if player not dead by mission failure
             if d_pid not in gs.death_logs:
                 gs.death_logs[d_pid] = a_pid
+                gs.death_time[d_pid] = [a_pid, gs.GES.round]
             # check death dependent mission
             gs.signal_MTrackers('death')
 

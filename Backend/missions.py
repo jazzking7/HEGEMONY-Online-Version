@@ -1244,3 +1244,45 @@ class Annihilator(Mission):
             if p != self.player and player.alive:
                 return False
         return self.gs.players[self.player].alive
+    
+class Spymaster(Mission):
+    def __init__(self, player, gs):
+        super().__init__("Spymaster", player, gs)
+
+    def check_conditions(self,):
+        if not self.gs.players[self.player].alive:
+            self.signal_mission_failure()
+            self.update_tracker_view({
+                'misProgDesp': f'You are eliminated, mission failed.',
+            })
+            return
+        if self.gs.GES.round > 5:
+            for p in self.gs.death_time:
+                if self.gs.death_time[p][0] == self.player:
+                    if self.gs.death_time[p][1] >= 5:
+                        return True
+        
+    def set_up_tracker_view(self, ):
+        self.gs.server.emit('initiate_tracker', {
+            'title': self.name,
+            'misProgDesp': f'Your mission: Vote Global Ceasefire with everyone else, or kill someone after Round 5.',
+        }, room=self.player)
+
+    def end_game_checking(self, ):
+        if self.gs.GES.round < 5:
+            return self.gs.players[self.player].alive
+        
+        for p in self.gs.death_time:
+            if self.gs.death_time[p][0] == self.player:
+                if self.gs.death_time[p][1] >= 5:
+                    return True
+        return False
+    
+    def end_game_global_peace_checking(self, ):
+        if self.gs.GES.round < 5:
+            return self.gs.players[self.player].alive
+        # for p in self.gs.death_time:
+        #     if self.gs.death_time[p][0] == self.player:
+        #         if self.gs.death_time[p][1] >= 5:
+        #             return True
+        return False
