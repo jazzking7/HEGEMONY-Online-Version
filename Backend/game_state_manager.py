@@ -734,7 +734,7 @@ class Game_State_Manager:
         increment = 5
 
         if hasBuff:
-            prob = 19
+            prob = 18
             increment = 6
 
         for i in range(2, num_leylines + 1):

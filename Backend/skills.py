@@ -1894,7 +1894,7 @@ class Archsage(Skill):
             self.gs.players[self.player].numLeylines += 1
         
         if self.gs.players[self.player].stars < 0:
-            self.gs.players[self.player].stars = 1
+            self.gs.players[self.player].stars = 0
         
         self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
         self.gs.update_private_status(self.player)
