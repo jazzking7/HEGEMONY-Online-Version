@@ -1256,7 +1256,7 @@ class Spymaster(Mission):
                 'misProgDesp': f'You are eliminated, mission failed.',
             })
             return
-        if self.gs.GES.round > 5:
+        if self.gs.GES.round > 4:
             for p in self.gs.death_time:
                 if self.gs.death_time[p][0] == self.player:
                     if self.gs.death_time[p][1] >= 5:
@@ -1265,7 +1265,7 @@ class Spymaster(Mission):
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
             'title': self.name,
-            'misProgDesp': f'Your mission: Vote Global Ceasefire with everyone else, or kill someone after Round 5.',
+            'misProgDesp': f'Your mission: Vote Global Ceasefire with everyone else before Round 5, or kill someone after Round 5.',
         }, room=self.player)
 
     def end_game_checking(self, ):
