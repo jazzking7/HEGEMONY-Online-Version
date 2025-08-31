@@ -726,25 +726,38 @@ class Game_State_Manager:
             self.update_global_status()
             self.signal_MTrackers('popu')
 
-    def leyline_probability(self, num_leylines):
+    def leyline_probability(self, num_leylines, hasBuff):
         if num_leylines < 1:
             return 0  # no leylines means no probability
 
         prob = 17
         increment = 5
 
+        if hasBuff:
+            prob = 19
+            increment = 6
+
         for i in range(2, num_leylines + 1):
             prob += increment
             increment += 1
-        if prob > 60:
-            prob = 60
+        
+        if hasBuff:
+            if prob > 80:
+                prob = 80
+        else:
+            if prob > 60:
+                prob = 60
         return prob
 
-    def leyline_damage(self, num_leylines):
+    def leyline_damage(self, num_leylines, hasBuff):
         if num_leylines < 1:
             return 1
-        base_multiplier = 3
-        bonus = num_leylines // 3
+        if not hasBuff:
+            base_multiplier = 3
+            bonus = num_leylines // 3
+        else:
+            base_multiplier = 4
+            bonus = num_leylines // 3
         return base_multiplier + bonus
 
     def count_connected_forts(self, player, trty, counted=None):
@@ -989,11 +1002,20 @@ class Game_State_Manager:
                 if def_stats[3] > 60:
                     def_stats[3] = 60
 
+        alcb = False
+        dlcb = False
+        if atk_p.skill:
+            if atk_p.skill.active and atk_p.skill.name == "Archsage":
+                alcb = True
+        if def_p.skill:
+            if def_p.skill.active and def_p.skill.name == "Archsage":
+                dlcb = True
+
         # Leyline
-        acrit = self.leyline_probability(atk_p.numLeylines)
-        dcrit = self.leyline_probability(def_p.numLeylines)
-        acdmg = self.leyline_damage(atk_p.numLeylines)
-        dcdmg = self.leyline_damage(def_p.numLeylines)
+        acrit = self.leyline_probability(atk_p.numLeylines, alcb)
+        dcrit = self.leyline_probability(def_p.numLeylines, dlcb)
+        acdmg = self.leyline_damage(atk_p.numLeylines, alcb)
+        dcdmg = self.leyline_damage(def_p.numLeylines, dlcb)
 
         # elitocracy territory based stat increase
         if atk_p.skill:

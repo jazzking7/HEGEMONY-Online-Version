@@ -268,15 +268,22 @@ class turn_loop_scheduler:
                                 s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
 
                 p.stars += s_amt
+                moreBlessings = False
+                if p.skill:
+                    if p.skill.active and p.skill.name == "Archsage":
+                        moreBlessings = True
+                leyprob = p.numLeylines * 14 if moreBlessings else p.numLeylines * 11
+                if not moreBlessings:
+                    leyprob = min(leyprob, 66)
+                else:
+                    leyprob = min(leyprob, 84)
 
-                leyprob = p.numLeylines * 11
-                leyprob = leyprob if leyprob < 66 else 66
-                if leyprob > random.randint(1, 100):
+                if random.randint(1, 100) <= leyprob:
                     print("Leyline Bonus Received.")
                     if random.randint(1, 100) > 40:
-                        p.reserves += p.numLeylines * 4
+                        p.reserves += p.numLeylines * 5 if moreBlessings else p.numLeylines * 4
                     else:
-                        p.stars += p.numLeylines
+                        p.stars += p.numLeylines + 1 if moreBlessings else p.numLeylines
                     gs.server.emit("display_special_notification", {"msg": "YOU HAVE RECEIVED LEYLINE BLESSING", "t_color": "#000000", "b_color": "#6987D5"}, room=player)
 
             # Dictator receives more stars

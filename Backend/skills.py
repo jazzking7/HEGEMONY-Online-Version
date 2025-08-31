@@ -1891,6 +1891,7 @@ class Archsage(Skill):
             self.gs.map.territories[choice].isLeyline = True
             self.gs.server.emit('update_trty_display', {choice: {'hasEffect': 'leyline'}}, room=self.gs.lobby)
             self.gs.players[self.player].stars -= 1
+            self.gs.players[self.player].numLeylines += 1
         
         if self.gs.players[self.player].stars < 0:
             self.gs.players[self.player].stars = 1
