@@ -181,6 +181,8 @@ class General_Event_Scheduler:
             self.curr_thread = threading.Thread(target=self.leyline_cross, args=(data, pid))
         elif n == 'M_B':
             self.curr_thread = threading.Thread(target=self.mobilization_bureau, args=(data, pid))
+        elif n == 'BFLC':
+            self.curr_thread = threading.Thread(target=self.build_free_leyline_crosses, args=(data, pid))
 
 
         self.gs.server.emit('signal_hide_btns', room=pid)
@@ -393,6 +395,19 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('build_free_cities', room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_free_cities"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
+        self.gs.players[pid].skill.finish_building = False
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].skill.finish_building
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def build_free_leyline_crosses(self, pid):
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('build_free_leyline_crosses', room=pid)
+        self.gs.server.emit('change_click_event', {'event': "build_free_leyline_crosses"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
         self.gs.players[pid].skill.finish_building = False
         done = False

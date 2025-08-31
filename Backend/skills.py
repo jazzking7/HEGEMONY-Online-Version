@@ -1829,10 +1829,77 @@ class Revanchism(Skill):
                 self.ragePoints += round(contValue * 2.5)
         self.ragePoints += 1
 
-class Usurper(Skill):
-    def __init__(self, player, gs):
-        super().__init__("Usurper", player, gs)
+class Archsage(Skill):
 
-class Handler_of_Wheel_of_Fate(Skill):
     def __init__(self, player, gs):
-        super().__init__("Handler_of_Wheel_of_Fate", player, gs)
+        super().__init__("Archsage", player, gs)
+        self.finish_building = True
+    #     self.intMod = True
+    #     self.bonus_level = 0
+
+    # def internalStatsMod(self, battle_stats):
+    #     if self.active:
+    #         addi = (battle_stats[0] - 2) - 3
+    #         battle_stats[1] += addi
+
+    def update_current_status(self):
+
+        self.gs.server.emit("update_skill_status", {
+            'name': "Archsage",
+            'description': "Cost of building Leyline Crosses decreases from 2★ to 1★. Leyline Crosses provide extra Crit Damage, Crit Rate and Blessings",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': self.gs.players[self.player].stars//1,
+            'btn_msg': "Settle Leylines"
+        }, room=self.player) 
+
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        return info
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        
+        self.gs.GES.handle_async_event({'name': 'BFLC'}, self.player)
+
+    def validate_and_apply_changes(self, data):
+        
+        choices = data['choice']
+
+        if len(choices) > self.gs.players[self.player].stars:
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough stars!'}, room=self.player)
+            return
+
+        # too many leylines
+        flist = []
+        for t in self.gs.players[self.player].territories:
+            if not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
+                flist.append(t)
+        if len(flist) < len(choices):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the leyline cross!'}, room=self.player)
+            return
+
+        for choice in choices:
+            if self.gs.map.territories[choice].isCapital or self.gs.map.territories[choice].isHall or self.gs.map.territories[choice].isDeadZone or self.gs.map.territories[choice].isLeyline:
+                self.gs.server.emit('display_new_notification', {'msg': 'Cannot settle on capitals, Hall of Governance, Radio Death Zone or existing leyline cross!'}, room=self.player)
+                return
+            
+        # apply changes
+        for choice in choices:
+            self.gs.map.territories[choice].isLeyline = True
+            self.gs.server.emit('update_trty_display', {choice: {'hasEffect': 'leyline'}}, room=self.gs.lobby)
+            self.gs.players[self.player].stars -= 1
+        
+        if self.gs.players[self.player].stars < 0:
+            self.gs.players[self.player].stars = 1
+        
+        self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+        self.gs.update_private_status(self.player)
+        self.gs.get_SUP()
+        self.gs.update_global_status()
+        self.gs.signal_MTrackers('indus')
+        
+        # terminate building
+        self.finish_building = True

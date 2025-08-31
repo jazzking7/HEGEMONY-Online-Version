@@ -1086,6 +1086,12 @@ def build_free_cities(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.validate_and_apply_changes(data)
 
+@socketio.on('build_free_leyline_crosses')
+def build_free_leyline_crosses(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.players[pid].skill.validate_and_apply_changes(data)
+
 @socketio.on("strike_targets")
 def strike_targets(data):
     pid = request.sid

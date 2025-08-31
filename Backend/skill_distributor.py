@@ -24,14 +24,15 @@ class Skill_Distributor:
             "Reaping of Anubis",
             "Pandora's Box",
             "Loopwalker",
-            "Revanchism"
+            "Revanchism",
+            "Archsage"
         ]
 
     def get_Annihilator_options(self, ):
         return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis']
 
     def get_options(self, ):
-        return random.sample(self.skill_options, k=8)
+        return random.sample(self.skill_options, k=9)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
@@ -77,7 +78,9 @@ class Skill_Distributor:
             return f"Time Traveling War Art, you are to run multiple simulations of a battle using time loops and pick the best outcome out of the simulations. You can set how many simulations are run per battle and you have {200*len(gs.players)} time loops available for the whole game."
         elif skill_name == "Revanchism":
             return "When you get attacked, you will accumulate Rage Points. Bonus stats are received when enough Rage Points are accumulated."
-    
+        elif skill_name == "Archsage":
+            return "Cost of building Leyline Crosses decrease to 1★. Increased Crit Rate, Crit Damge and Blessings from Leyline Crosses."
+
     def initiate_skill(self, skill_name, player, gs):
         if skill_name == 'Iron_Wall':
             return Iron_Wall(player, gs)
@@ -119,3 +122,5 @@ class Skill_Distributor:
             return Loopwalker(player, gs)
         elif skill_name == "Revanchism":
             return Revanchism(player, gs)
+        elif skill_name == "Archsage":
+            return Archsage(player, gs)

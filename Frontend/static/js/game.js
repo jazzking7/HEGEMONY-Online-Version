@@ -386,6 +386,8 @@ socket.on('change_click_event', function(data){
     currEvent = set_bureau;
   } else if (data.event == 'build_free_cities') {
     currEvent = build_free_cities;
+  } else if (data.event == 'build_free_leyline_crosses') {
+    currEvent = build_free_leyline_crosses;
   } else if (data.event == 'launch_orbital_strike'){
     currEvent = launch_orbital_strike;
   } else if (data.event == 'paratrooper_attack'){
@@ -2400,6 +2402,34 @@ btn_reserves.onclick = function () {
 
   socket.emit('send_async_event', {'name': "R_D"});
 
+}
+
+// Cheaper leylines
+socket.on('build_free_leyline_crosses', function(){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h3>Settling Leyline Crosses</h3>`
+});
+
+function build_free_leyline_crosses(tid){
+  if(player_territories.includes(tid)){
+    if (!toHightlight.includes(tid)){
+      toHightlight.push(tid);
+    }
+    if (toHightlight.length != 0){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('build_free_leyline_crosses', {'choice': toHightlight});
+          toHightlight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHightlight = [];
+        });
+    }
+  }
 }
 
 // Industrial Revolution -> Free city building
