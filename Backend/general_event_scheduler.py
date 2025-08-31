@@ -182,7 +182,7 @@ class General_Event_Scheduler:
         elif n == 'M_B':
             self.curr_thread = threading.Thread(target=self.mobilization_bureau, args=(data, pid))
         elif n == 'BFLC':
-            self.curr_thread = threading.Thread(target=self.build_free_leyline_crosses, args=(data, pid))
+            self.curr_thread = threading.Thread(target=self.build_free_leyline_crosses, args=(pid, ))
 
 
         self.gs.server.emit('signal_hide_btns', room=pid)
