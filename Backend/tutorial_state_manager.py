@@ -154,9 +154,9 @@ class Tutorial_Manager:
             return
         elif stage == 6:
             for trty in range(0, len(self.map.territories)//2):
-                self.server.emit('update_trty_display', {trty:{'color': "#4169E1"}}, room=player) 
+                self.server.emit('update_trty_display', {trty:{'color': "#4169E1", 'troops': 1}}, room=player) 
             for trty in range(len(self.map.territories)//2, len(self.map.territories)):
-                self.server.emit('update_trty_display', {trty:{'color': "#FFDE21"}}, room=player) 
+                self.server.emit('update_trty_display', {trty:{'color': "#FFDE21", 'troops': 1}}, room=player) 
             self.server.emit('choose_capital_tutorial', room=player)
             self.server.emit('change_click_event_tutorial', {'event': 'settle_capital'}, room=player)
             return
@@ -171,7 +171,37 @@ class Tutorial_Manager:
             self.server.emit('initial_deployment_tutorial', room=player)
             self.server.emit('change_click_event_tutorial', {'event': 'troop_deployment'}, room=player)
             return
-
+        elif stage == 9:
+            self.server.emit('update_trty_display', {7:{'troops': "31"}}, room=player)
+            self.server.emit('war_art_tutorial', room=player)
+            return
+        elif stage == 10:
+            self.server.emit('basic_gameplay', room=player)
+            return
+        elif stage == 11:
+            self.server.emit('reinforcement_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'reinforcement_tutorial'}, room=player)
+            return
+        elif stage == 12:
+            self.server.emit('update_trty_display', {7:{'troops': "56"}}, room=player)
+            self.server.emit('preparation_tutorial', room=player)
+            self.server.emit('signal_show_btns', room=player)
+            return
+        elif stage == 13:
+            self.server.emit('conquest_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'conquest_tutorial'}, room=player)
+            return
+        elif stage == 14:
+            self.server.emit('update_trty_display', {7:{'troops': "1"}}, room=player)
+            self.server.emit('update_trty_display', {25:{'troops': "55", 'color': "#4169E1"}}, room=player)
+            self.server.emit('rearrangement_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'rearrangement_tutorial'}, room=player)
+            return
+        elif stage == 15:
+            self.server.emit('update_trty_display', {7:{'troops': "31"}}, room=player)
+            self.server.emit('update_trty_display', {25:{'troops': "25"}}, room=player)
+            self.server.emit('end_of_tutorial', room=player)
+            return
     def start_tutorial_event(self,):
         return
 

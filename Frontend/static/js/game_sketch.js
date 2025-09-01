@@ -32,7 +32,7 @@ var currWinHeight;
 var showContBorders = false;
 
 // Highlight
-var toHightlight = [];
+var toHighLight = [];
 var clickables = [];
 var targetsToCapture = [];
 
@@ -233,7 +233,7 @@ function draw() {
       stroke("black");
       strokeWeight(4);
     }
-    if (toHightlight.includes(tmp_id)){
+    if (toHighLight.includes(tmp_id)){
       stroke("black");
       strokeWeight(4);
     }

@@ -409,7 +409,7 @@ socket.on('change_click_event', function(data){
 // CLEAR SELECTION WINDOWS
 socket.on('clear_view', function(){
   $('#control_panel, #middle_display, #proceed_next_stage').hide();
-  toHightlight = [];
+  toHighLight = [];
   otherHighlight = [];
   clickables = [];
 });
@@ -728,7 +728,7 @@ socket.on('choose_territorial_distribution', function(data){
           let tmptid = 0;
           for (terri of territories) {
             if (terri.color == trty_dist){
-              toHightlight.push(tmptid);
+              toHighLight.push(tmptid);
             }
             tmptid ++;
           }
@@ -738,13 +738,13 @@ socket.on('choose_territorial_distribution', function(data){
             document.getElementById('control_panel').style.display = 'none';
             socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
             document.getElementById('middle_display').style.display = 'none';
-            toHightlight = []; 
+            toHighLight = []; 
           });
           $('#control_cancel').off('click').on('click' , function(){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_dist.style.border = "none";
-            toHightlight = [];
+            toHighLight = [];
           });
         }
       };
@@ -754,20 +754,20 @@ socket.on('choose_territorial_distribution', function(data){
 
 // Set capital
 function settle_capital(tid){
-  toHightlight = [];
+  toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
   if (player_territories.includes(tid)){
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#control_confirm').off('click').on('click', function(){
       document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_capital_choice', {'choice': toHightlight[0], 'tid': tid});
-      toHightlight = [];
+      socket.emit('send_capital_choice', {'choice': toHighLight[0], 'tid': tid});
+      toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      toHightlight = [];
+      toHighLight = [];
     });
   }
 }
@@ -775,23 +775,23 @@ function settle_capital(tid){
 // Set cities
 function settle_cities(tid){
   if(player_territories.includes(tid)){
-    if (toHightlight.length == 2){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == 2){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == 2){
+    if (toHighLight.length == 2){
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
         $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        socket.emit('send_city_choices', {'choice': toHightlight});
-        toHightlight = [];
+        socket.emit('send_city_choices', {'choice': toHighLight});
+        toHighLight = [];
         });
         $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        toHightlight = [];
+        toHighLight = [];
         });
     }
   }
@@ -801,7 +801,7 @@ function settle_cities(tid){
 socket.on('settle_result', function(data){
   if (data.resp){
     currEvent = null;
-    toHightlight = [];
+    toHighLight = [];
   } else {
     popup("NOT YOUR TERRITORY!", 1000);
   }
@@ -976,7 +976,7 @@ socket.on('preparation', function(){
     $('#proceed_next_stage').hide();
     socket.emit("terminate_preparation_stage");
     currEvent = null;
-    toHightlight = [];
+    toHighLight = [];
     clickables = [];
   });
 });
@@ -996,7 +996,7 @@ socket.on('conquest', function(){
       document.getElementById('control_panel').style.display = 'none';
       socket.emit("terminate_conquer_stage");
       currEvent = null;
-      toHightlight = [];
+      toHighLight = [];
       clickables = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
@@ -1015,17 +1015,17 @@ socket.on('rearrangement', function(){
     $('#proceed_next_stage').hide();
     socket.emit("terminate_rearrangement_stage");
     currEvent = null;
-    toHightlight = [];
+    toHighLight = [];
     clickables = [];
   });
 });
 
 // Click function that handles troop deployment (for initial and turn-based troop deployment)
 function troop_deployment(tid){
-  toHightlight = [];
+  toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
   if (player_territories.includes(tid)){
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     
     // Sync clicks
     socket.emit('add_click_sync', {'tid': tid});
@@ -1056,8 +1056,8 @@ function troop_deployment(tid){
     c_m.appendChild(troopValue);
     $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
-    socket.emit('send_troop_update', {'choice': toHightlight[0], 'amount': troopInput.value});
-    toHightlight = [];
+    socket.emit('send_troop_update', {'choice': toHighLight[0], 'amount': troopInput.value});
+    toHighLight = [];
 
     // Sync clicks
     socket.emit('remove_click_sync', {'tid': tid});
@@ -1065,7 +1065,7 @@ function troop_deployment(tid){
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      toHightlight = [];
+      toHighLight = [];
 
       // Sync clicks
       socket.emit('remove_click_sync', {'tid': tid});
@@ -1079,7 +1079,7 @@ socket.on('troop_result', function(data){
   if (!data.resp){
     popup("NOT YOUR TERRITORY!", 1000);
   } else {
-    toHightlight = [];
+    toHighLight = [];
     document.getElementById('control_mechanism').innerHTML = '';
     deployable = 0;
     document.getElementById('announcement').innerHTML = `<h2>Completed, waiting for others...`;
@@ -1093,8 +1093,8 @@ function conquest(tid){
     document.getElementById('control_panel').style.display = 'none';
     $('#proceed_next_stage').show();
     clickables = [];
-    if (toHightlight.length){
-      toHightlight = [];
+    if (toHighLight.length){
+      toHighLight = [];
       // clear sync clicks
       socket.emit('clear_otherHighlights');
     }
@@ -1102,23 +1102,23 @@ function conquest(tid){
       popup("NOT ENOUGH TROOPS FOR BATTLE!", 1000);
       return
     }
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     // Sync clicks
     socket.emit('add_click_sync', {'tid': tid});
 
     clickables = territories[tid].neighbors.filter(tmp_id => territories[tid].color !== territories[tmp_id].color);
     
   } else if (clickables.includes(tid)){
-    if (toHightlight.length != 2){
-      toHightlight.push(tid);
+    if (toHighLight.length != 2){
+      toHighLight.push(tid);
       // Sync clicks
       socket.emit('add_click_sync', {'tid': tid});
     }
-    if (toHightlight.length == 2){
-      toHightlight[1] = tid;
+    if (toHighLight.length == 2){
+      toHighLight[1] = tid;
       // Sync clicks
       socket.emit('clear_otherHighlights');
-      for (trty of toHightlight){
+      for (trty of toHighLight){
         socket.emit('add_click_sync', {'tid': trty});
       }
       
@@ -1138,7 +1138,7 @@ function conquest(tid){
 
       troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
-      troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+      troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
       troopInput.setAttribute("value", 1);
       troopInput.setAttribute("step", 1);
       troopInput.style.display = "inline-block";
@@ -1151,8 +1151,8 @@ function conquest(tid){
 
       $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        socket.emit('send_battle_data', {'choice': toHightlight, 'amount': troopInput.value});
-        toHightlight = [];
+        socket.emit('send_battle_data', {'choice': toHighLight, 'amount': troopInput.value});
+        toHighLight = [];
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
@@ -1160,7 +1160,7 @@ function conquest(tid){
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        toHightlight = [];
+        toHighLight = [];
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
@@ -1177,17 +1177,17 @@ socket.on('update_clickables', function(data){
 
 // Click function that handles rearrangement
 function rearrange(tid){
-  if (clickables.includes(tid) && tid != toHightlight[0]){
-    if (toHightlight.length != 2){
-      toHightlight.push(tid);
+  if (clickables.includes(tid) && tid != toHighLight[0]){
+    if (toHighLight.length != 2){
+      toHighLight.push(tid);
       // Sync clicks
       socket.emit('add_click_sync', {'tid': tid});
     }
-    if (toHightlight.length == 2){
-      toHightlight[1] = tid;
+    if (toHighLight.length == 2){
+      toHighLight[1] = tid;
       // Sync clicks
       socket.emit('clear_otherHighlights');
-      for (trty of toHightlight){
+      for (trty of toHighLight){
         socket.emit('add_click_sync', {'tid': trty});
       }
       document.getElementById('control_panel').style.display = 'none';
@@ -1208,7 +1208,7 @@ function rearrange(tid){
 
       troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
-      troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+      troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
       troopInput.setAttribute("value", 1);
       troopInput.setAttribute("step", 1);
       troopInput.style.display = "inline-block";
@@ -1220,15 +1220,15 @@ function rearrange(tid){
 
       $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        socket.emit('send_rearrange_data', {'choice': toHightlight, 'amount': troopInput.value});
-        toHightlight = [];
+        socket.emit('send_rearrange_data', {'choice': toHighLight, 'amount': troopInput.value});
+        toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
-        toHightlight = [];
+        toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
         $('#proceed_next_stage').show();
@@ -1243,11 +1243,11 @@ function rearrange(tid){
       popup("NOT ENOUGH TROOPS TO TRANSFER!", 1000);
       return;
     }
-    if (toHightlight.length){
-      toHightlight = [];
+    if (toHighLight.length){
+      toHighLight = [];
       socket.emit('clear_otherHighlights');
     }
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     socket.emit('add_click_sync', {'tid': tid});
     socket.emit("get_reachable_trty", {'choice': tid})
   }  
@@ -1261,7 +1261,7 @@ socket.on('concurr_terminate_event_setup', function(data){
     socket.emit('signal_concurr_end', {'pid': data.pid});
     $("#proceed_next_stage").hide(); 
     currEvent = null;
-    toHightlight = [];
+    toHighLight = [];
     clickables = [];
   });
 });
@@ -1277,7 +1277,7 @@ socket.on('async_terminate_button_setup', function(){
       socket.emit('signal_async_end');
       $("#proceed_next_stage").hide(); 
       currEvent = null;
-      toHightlight = [];
+      toHighLight = [];
       clickables = [];
     });
 });
@@ -1301,7 +1301,7 @@ socket.on('set_forts', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Settling new forts, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.flist;
 })
 
@@ -1310,7 +1310,7 @@ socket.on('set_hall', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Intalling Governance Halls, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.flist;
 })
 
@@ -1319,7 +1319,7 @@ socket.on('set_nexus', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Building Logistic Nexus, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.flist;
 })
 
@@ -1328,7 +1328,7 @@ socket.on('set_leyline', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Settling Leyline Cross, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.flist;
 })
 
@@ -1337,7 +1337,7 @@ socket.on('set_bureau', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Settling Mobilization Bureaux, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.flist;
 })
 
@@ -1347,7 +1347,7 @@ socket.on('raise_megacities', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h2>Raising new megacities, ${data.amount} under construction</h2>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.clist;
 })
 
@@ -1358,10 +1358,10 @@ socket.on('update_settle_status', function(data){
 
 // Click function for reserve deployment
 function deploy_reserves(tid){
-  toHightlight = [];
+  toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
   if (player_territories.includes(tid)){
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     let troopValue = document.createElement("p");
@@ -1388,12 +1388,12 @@ function deploy_reserves(tid){
     c_m.appendChild(troopValue);
     $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
-    socket.emit('send_reserves_deployed', {'choice': toHightlight[0], 'amount': troopInput.value});
-    toHightlight = [];
+    socket.emit('send_reserves_deployed', {'choice': toHighLight[0], 'amount': troopInput.value});
+    toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      toHightlight = [];
+      toHighLight = [];
     });
   }
 }
@@ -1401,24 +1401,24 @@ function deploy_reserves(tid){
 // Click function to handle async city settlement
 function build_cities(tid){
   if(player_territories.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_cities', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_cities', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1426,24 +1426,24 @@ function build_cities(tid){
 
 function raise_megacities(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_megacities', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_megacities', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1451,24 +1451,24 @@ function raise_megacities(tid){
 
 function set_forts(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_forts', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_forts', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1476,24 +1476,24 @@ function set_forts(tid){
 
 function set_hall(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_hall', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_hall', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1501,24 +1501,24 @@ function set_hall(tid){
 
 function set_nexus(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_nexus', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_nexus', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1526,24 +1526,24 @@ function set_nexus(tid){
 
 function set_leyline(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_leyline', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_leyline', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -1551,24 +1551,24 @@ function set_leyline(tid){
 
 function set_bureau(tid){
   if(clickables.includes(tid) && city_amt >= 1){
-    if (toHightlight.length == city_amt){
-      toHightlight.splice(0, 1);
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
     }
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length == city_amt){
+    if (toHighLight.length == city_amt){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('settle_bureau', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('settle_bureau', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -2412,21 +2412,21 @@ socket.on('build_free_leyline_crosses', function(){
 
 function build_free_leyline_crosses(tid){
   if(player_territories.includes(tid)){
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length != 0){
+    if (toHighLight.length != 0){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('build_free_leyline_crosses', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('build_free_leyline_crosses', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -2441,21 +2441,21 @@ socket.on('build_free_cities', function(){
 // Free city building for industrial revolution
 function build_free_cities(tid){
   if(player_territories.includes(tid)){
-    if (!toHightlight.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length != 0){
+    if (toHighLight.length != 0){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('build_free_cities', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('build_free_cities', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -2466,27 +2466,27 @@ socket.on('launch_orbital_strike', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h3>SELECT ENEMY TERRITORIES TO DESTROY!</h3>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
   clickables = data.targets;
 });
 
 function launch_orbital_strike(tid){
   if(!player_territories.includes(tid)){
-    if (!toHightlight.includes(tid) && clickables.includes(tid)){
-      toHightlight.push(tid);
+    if (!toHighLight.includes(tid) && clickables.includes(tid)){
+      toHighLight.push(tid);
     }
-    if (toHightlight.length != 0){
+    if (toHighLight.length != 0){
         $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
-          socket.emit('strike_targets', {'choice': toHightlight});
-          toHightlight = [];
+          socket.emit('strike_targets', {'choice': toHighLight});
+          toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){
           $('#control_panel').hide();
-          toHightlight = [];
+          toHighLight = [];
         });
     }
   }
@@ -2497,7 +2497,7 @@ socket.on('paratrooper_attack', function(){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY FOR AIRDROP ATTACK!</h4>`;
   clickables = [];
-  toHightlight = [];
+  toHighLight = [];
 });
 
 // Function to grab the reserve amt for the user
@@ -2511,22 +2511,22 @@ async function get_reachable_airspace(tid){
 
 function paratrooper_attack(tid){
   if(player_territories.includes(tid)){
-    if (toHightlight.length){
-      toHightlight = [];
+    if (toHighLight.length){
+      toHighLight = [];
       clickables = [];
     }
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     get_reachable_airspace(tid).then(spaces => {
       clickables = spaces
     }).catch(error => {
       console.error("Error getting reserve amount:", error); });
   } else if (!player_territories.includes(tid)){
     if (clickables.includes(tid)){
-      if (toHightlight.length != 2){
-        toHightlight.push(tid);
+      if (toHighLight.length != 2){
+        toHighLight.push(tid);
       }
-      if (toHightlight.length == 2){
-        toHightlight[1] = tid;
+      if (toHighLight.length == 2){
+        toHighLight[1] = tid;
 
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
@@ -2544,7 +2544,7 @@ function paratrooper_attack(tid){
   
         troopInput.setAttribute("type", "range");
         troopInput.setAttribute("min", 1);
-        troopInput.setAttribute("max", territories[toHightlight[0]].troops-1);
+        troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
         troopInput.setAttribute("value", 1);
         troopInput.setAttribute("step", 1);
         troopInput.style.display = "inline-block";
@@ -2557,14 +2557,14 @@ function paratrooper_attack(tid){
   
         $('#control_confirm').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
-          socket.emit('send_battle_stats_AS', {'choice': toHightlight, 'amount': troopInput.value});
-          toHightlight = [];
+          socket.emit('send_battle_stats_AS', {'choice': toHighLight, 'amount': troopInput.value});
+          toHighLight = [];
           clickables = [];
           $('#proceed_next_stage').show();
         });
         $('#control_cancel').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
-          toHightlight = [];
+          toHighLight = [];
           clickables = [];
           $('#proceed_next_stage').show();
         });
@@ -2578,26 +2578,26 @@ socket.on('corrupt_territory', function(data){
   announ = document.getElementById('announcement');
   announ.innerHTML = `<h4>CHOOSE AN ENEMY TERRITORY TO CORRUPT!</h4>`;
   clickables = data.targets;
-  toHightlight = [];
+  toHighLight = [];
 });
 
 function corrupt_territory(tid){
-  toHightlight = [];
+  toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
-  toHightlight.push(tid);
+  toHighLight.push(tid);
   document.getElementById('control_mechanism').innerHTML = '';
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('control_panel').style.display = 'flex';
   $('#proceed_next_stage').hide();
   $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
-    socket.emit('send_corrupt_territory', {'choice': toHightlight[0]});
-    toHightlight = [];
+    socket.emit('send_corrupt_territory', {'choice': toHighLight[0]});
+    toHighLight = [];
   });
   $('#control_cancel').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
     $('#proceed_next_stage').show();
-    toHightlight = [];
+    toHighLight = [];
   });
 }
 
@@ -2719,7 +2719,7 @@ socket.on('arsenal_controls', function(data) {
     announ.innerHTML = `<h4>Choose territories to set up minefields! ${data.limits} can be set.</h4>`;
     clickables = data.targets;
     minefields_amount = data.limits;
-    toHightlight = [];
+    toHighLight = [];
   });
 
   function set_minefields(tid){
@@ -2727,9 +2727,9 @@ socket.on('arsenal_controls', function(data) {
       return;
     }
     document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
-    if (toHightlight.length > minefields_amount) {
-        toHightlight.shift();
+    toHighLight.push(tid);
+    if (toHighLight.length > minefields_amount) {
+        toHighLight.shift();
     }
     document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
@@ -2737,13 +2737,13 @@ socket.on('arsenal_controls', function(data) {
     $('#proceed_next_stage').hide();
     $('#control_confirm').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_minefield_choices', {'choices': toHightlight});
-      toHightlight = [];
+      socket.emit('send_minefield_choices', {'choices': toHighLight});
+      toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
-      toHightlight = [];
+      toHighLight = [];
     });
   }
 
@@ -2752,29 +2752,29 @@ socket.on('arsenal_controls', function(data) {
     announ = document.getElementById('announcement');
     announ.innerHTML = `<h4>Choose a territory to build underground silo! Only one silo can be built.</h4>`;
     clickables = data.targets;
-    toHightlight = [];
+    toHighLight = [];
   });
 
   function set_underground_silo(tid){
     if (!clickables.includes(tid)){
       return;
     }
-    toHightlight = [];
+    toHighLight = [];
     document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
+    toHighLight.push(tid);
     document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
     $('#control_confirm').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_silo_location', {'choice': toHightlight[0]});
-      toHightlight = [];
+      socket.emit('send_silo_location', {'choice': toHighLight[0]});
+      toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
-      toHightlight = [];
+      toHighLight = [];
     });
   }
 
@@ -2784,7 +2784,7 @@ socket.on('arsenal_controls', function(data) {
     announ.innerHTML = `<h4>Launching missiles from underground silo. Choose up to ${data.usages} targets!</h4>`;
     clickables = data.targets;
     US_usages = data.usages;
-    toHightlight = [];
+    toHighLight = [];
   });
 
   // launching from silo
@@ -2793,9 +2793,9 @@ socket.on('arsenal_controls', function(data) {
       return;
     }
     document.getElementById('control_panel').style.display = 'none';
-    toHightlight.push(tid);
-    if (toHightlight.length > US_usages) {
-        toHightlight.shift();
+    toHighLight.push(tid);
+    if (toHighLight.length > US_usages) {
+        toHighLight.shift();
     }
     document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
@@ -2803,13 +2803,13 @@ socket.on('arsenal_controls', function(data) {
     $('#proceed_next_stage').hide();
     $('#control_confirm').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
-      socket.emit('send_missile_targets', {'choices': toHightlight});
-      toHightlight = [];
+      socket.emit('send_missile_targets', {'choices': toHighLight});
+      toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
-      toHightlight = [];
+      toHighLight = [];
     });
   }
 
