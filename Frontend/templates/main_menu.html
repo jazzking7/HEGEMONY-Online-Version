@@ -1,61 +1,62 @@
-<div style="display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-width: 100%;">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
 
-    <div class="text-center" style="margin: 10vh 0">
-        <h1>HEGEMONY</h1>
-    </div>
-    
-    <div class="container" style="margin: 0 w">
+  <div class="text-center" style="margin: 10vh 0">
+    <h1>HEGEMONY</h1>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <!-- Play Game stays on left -->
+      <div class="col">
+        <div class="card text-center">
+          <h4 class="card-header">Play Game</h4>
+          <div class="card-body">
+            <div class="input-group space">
+              <span class="input-group-text">Nickname</span>
+              <input id="nickname" class="form-control" type="text" placeholder="Enter a nickname..." />
+            </div>
+            <div class="input-group space">
+              <input id="joinLobbyCode" class="form-control" type="text" placeholder="Lobby ID" />
+              <button id="btn_joinLobby" class="btn btn-primary">Join Lobby</button>
+            </div>
+            <button id="btn_createLobby" class="space btn btn-primary">Create Lobby</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: Roll Simulator (top), then Game Rules + Tutorials (bottom row) -->
+      <div class="col">
+        <!-- Roll Simulator full width -->
+        <div class="card text-center mb-3">
+          <h4 class="card-header">Roll Simulator</h4>
+          <div class="card-body">
+            <div>Use this to get a win rate approximation</div>
+            <button id="btn_roll_simulator" class="space btn btn-primary">Enter Simulator</button>
+          </div>
+        </div>
+
+        <!-- Game Rules + Tutorials side by side -->
         <div class="row">
-    
-    
-            <div class="col">
-                <div class="card text-center">
-                    <h4 class="card-header">Play Game</h4>
-                        <div class="card-body">
-                            <div class="input-group space">
-                                <span class="input-group-text">Nickname</span>
-                                <input id="nickname" class="form-control" type="text" placeholder="Enter a nickname..." />
-                            </div>
-                            <div class="input-group space">
-                                <input id="joinLobbyCode" class="form-control" type="text" placeholder="Lobby ID" />
-                                <button id="btn_joinLobby" class="btn btn-primary">Join Lobby</button>
-                            </div>
-                            <button id="btn_createLobby" class="space btn btn-primary">Create Lobby</button>
-                        </div>
-                </div>
+          <div class="col">
+            <div class="card text-center">
+              <h4 class="card-header">Game Rules</h4>
+              <div class="card-body">
+                <button id="btn_game_rules" class="space btn btn-primary">Enter Game Rules</button>
+              </div>
             </div>
-
-            <div class="col">
-                <div class="card text-center">
-                    <h4 class="card-header">Roll Simulator</h4>
-                        <div class="card-body">
-                            <div>Use this to get a win rate approximation</div>
-                            <button id="btn_roll_simulator" class="space btn btn-primary">Enter Simulator</button>
-                        </div>
-                </div>
-                <div class="card text-center">
-                    <h4 class="card-header">Game Rules</h4>
-                        <div class="card-body">
-                            <button id="btn_game_rules" class="space btn btn-primary">Enter Game Rules</button>
-                        </div>
-                </div>
-                <div class="card text-center">
-                    <h4 class="card-header">Tutorials</h4>
-                        <div class="card-body">
-                            <button id="btn_tutorials" class="space btn btn-primary">Enter Tutorials</button>
-                        </div>
-                </div>
+          </div>
+          <div class="col">
+            <div class="card text-center">
+              <h4 class="card-header">Tutorials</h4>
+              <div class="card-body">
+                <button id="btn_tutorials" class="space btn btn-primary">Enter Tutorials</button>
+              </div>
             </div>
-    
+          </div>
         </div>
-
-
-        </div>
+      </div>
     </div>
+  </div>
 
 </div>
 
