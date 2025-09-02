@@ -626,7 +626,7 @@ socket.on('reinforcement_tutorial', function () {
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
       <strong>Reinforcement</strong>
       <p>
-        You receive troops based on how many territories you've controlled. You get 1 troop for every 3 territories under your control.
+        In this stage, you receive troops based on how many territories you've controlled. You get 1 troop for every 3 territories under your control.
       </p>
       <p>
         Cities and Capitals give extra troops. Controlling an entire continent gives you extra bonus. You can click "Continent Borders" on top-left corner to see the troop bonus by continent.
@@ -739,7 +739,7 @@ socket.on('conquest_tutorial', function () {
       <p>
         <strong>Conquest</strong>
       </p>
-      <p>Here you can attack and capture enemy territories.</p>
+      <p>In this stage, you can attack and capture enemy territories.</p>
       <p>Click one of your territories to see attack options. Pick a target, choose how many troops to send, then press <em>Confirm</em>.</p>
       <p>For this tutorial, click on the pointed territory and attack the indicated territory with 55 troops to continue.</p>
       <p>Capturing enemy territory earns you <strong>Stars</strong> at the end of your turn. Use Stars to upgrade your stats.</p>
@@ -823,7 +823,7 @@ socket.on('rearrangement_tutorial', function () {
       <p>
         <strong>Rearrangement</strong>
       </p>
-      <p>Here you can redistribute your troops among your territories.</p>
+      <p>In this stage, you can redistribute your troops among your territories.</p>
       <p>Click one of your territories to see rearrange options. Pick a target, choose how many troops to move, then press <em>Confirm</em>.</p>
       <p>For this tutorial, click on the pointed territory and move 30 troops to the indicated territory to continue.</p>
     </div>
