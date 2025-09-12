@@ -25,7 +25,8 @@ class Skill_Distributor:
             "Pandora's Box",
             "Loopwalker",
             "Revanchism",
-            "Archmage"
+            "Archmage",
+            "Pillar of Immortality"
         ]
 
     def get_Annihilator_options(self, ):
@@ -80,7 +81,8 @@ class Skill_Distributor:
             return "When you get attacked, you will accumulate Rage Points. Bonus stats are received when enough Rage Points are accumulated."
         elif skill_name == "Archmage":
             return "Cost of building Leyline Crosses decrease to 1★. Increased Crit Rate, Crit Damge and Blessings from Leyline Crosses."
-
+        elif skill_name == "Pillar of Immortality":
+            return "Able to install Pillars of Immortatlity. When a pillar is stationed on a territory, each troop stationed on that territory counts as 10 troops during battles."
     def initiate_skill(self, skill_name, player, gs):
         if skill_name == 'Iron_Wall':
             return Iron_Wall(player, gs)
@@ -124,3 +126,5 @@ class Skill_Distributor:
             return Revanchism(player, gs)
         elif skill_name == "Archmage":
             return Archmage(player, gs)
+        elif skill_name == "Pillar of Immortality":
+            return Pillar_of_Immortality(player, gs)

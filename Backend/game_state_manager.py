@@ -1090,6 +1090,8 @@ class Game_State_Manager:
                 defh = True
                 break
 
+        atroopmul, dtroopmul = 1, 1
+
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefending amount: {def_amt} Defender stats: {def_stats}")
         multitime = False
@@ -1103,6 +1105,9 @@ class Game_State_Manager:
                 dcrit = 0
                 acdmg = 1
                 dcdmg = 1
+            if atk_p.skill.name == "Pillar of Immortality" and atk_p.skill.active:
+                if t1 in atk_p.skill.pillars:
+                    atroopmul = 10
 
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
@@ -1114,11 +1119,14 @@ class Game_State_Manager:
                 dcrit = 0
                 acdmg = 1
                 dcdmg = 1
+            if def_p.skill.name == "Pillar of Immortality" and def_p.skill.active:
+                if t2 in def_p.skill.pillars:
+                    dtroopmul = 10
 
         if multitime: # time looper
-            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg)
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul)
         else: # normal
-            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg)
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul)
         print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
@@ -1157,6 +1165,9 @@ class Game_State_Manager:
             if def_p.skill:
                 if def_p.skill.name == "Revanchism" and def_p.skill.active:
                     def_p.skill.accumulate_rage(def_amt-result[1], trty_def)
+                if def_p.skill.name == "Pillar of Immortality":
+                    if t2 in def_p.skill.pillars:
+                        def_p.skill.pillars.remove(t2)
             
 
             # Mission Checker
@@ -1255,11 +1266,15 @@ class Game_State_Manager:
         if self.GES.terminated:
             self.GES.stage_completed = True
         
-    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg):
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul):
         
         # Troop amount
         a_troops = atk_amt
         d_troops = def_amt
+
+        # Troop multiplier
+        a_troops *= atroopmul
+        d_troops *= dtroopmul
 
         # Max stats
         a_maxv, a_maxt, a_min, a_null, a_mul = atk_stats[0], atk_stats[1], atk_stats[2], atk_stats[3], atk_stats[4]
@@ -1340,10 +1355,11 @@ class Game_State_Manager:
 
             print(a_rolls, d_rolls)
             print(a_troops, d_troops)
-
+        a_troops = math.ceil(a_troops/atroopmul)
+        d_troops = math.ceil(d_troops/dtroopmul)
         return [a_troops, d_troops]
 
-    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg):
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul):
 
         # Time loop setting
         atk_loop, def_loop, run_loop = 1, 1, 1
@@ -1423,6 +1439,9 @@ class Game_State_Manager:
         else:
             print(f"Defender is running on: {dprobs}")
 
+        a_troops *= atroopmul
+        d_troops *= dtroopmul
+
         print(a_troops, d_troops)
         print(f"Running {run_loop} loops.")
         outcomes = []
@@ -1472,6 +1491,9 @@ class Game_State_Manager:
                 a_maxt = a_troops if a_troops < a_maxt else a_maxt
                 d_maxt = d_troops if d_troops < d_maxt else d_maxt
             
+            a_troops = math.ceil(a_troops/atroopmul)
+            d_troops = math.ceil(d_troops/dtroopmul)
+
             # adjust result number
             if a_troops <= 0 and d_troops <= 0:
                 a_troops = 0
@@ -1481,8 +1503,8 @@ class Game_State_Manager:
                 d_troops = max(0, d_troops)
             
             outcomes.append([a_troops, d_troops])
-            a_troops = atk_amt
-            d_troops = def_amt
+            a_troops = atk_amt * atroopmul
+            d_troops = def_amt * dtroopmul
             
             # Max stats
             a_maxv, a_maxt, a_min, a_null, a_mul = atk_stats[0], atk_stats[1], atk_stats[2], atk_stats[3], atk_stats[4]

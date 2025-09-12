@@ -1581,6 +1581,7 @@ class Pandora_Box(Skill):
         super().__init__("Pandora's Box", player, gs)
         self.intMod = True
         self.indus = 0
+        self.infra = 0
         self.nulrate = 0
         self.multi = 0
         self.hasRoundEffect = True
@@ -1591,11 +1592,12 @@ class Pandora_Box(Skill):
         self.gs.update_private_status(self.player)
 
     def apply_round_effect(self):
-        self.curr_pull = 100
+        self.curr_pull = 8
 
     def internalStatsMod(self, battle_stats):
         if self.active:
             battle_stats[0] += self.indus
+            battle_stats[1] += self.infra
             battle_stats[3] += self.nulrate
             battle_stats[4] += self.multi
             if battle_stats[3] >= 100:
@@ -1603,7 +1605,9 @@ class Pandora_Box(Skill):
     
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
-        info += "Anything can be unleashed from it."
+        info += "Received Battle Blessings: "
+        for item in self.receivedBlessings:
+            info += item + " "
         return info
     
     def update_current_status(self):
@@ -1675,13 +1679,11 @@ class Pandora_Box(Skill):
             self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Minimum Roll')
         elif num < 79: # 6%
-            self.gs.players[self.player].infrastructure_upgrade += 1
-            self.gs.update_private_status(self.player)
+            self.infra += 1
             self.gs.server.emit("display_special_notification", {"msg": "Infrastructure Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+1 Infrastructure Level')
         elif num < 82: # 3%
-            self.gs.players[self.player].infrastructure_upgrade += 2
-            self.gs.update_private_status(self.player)
+            self.infra += 2
             self.gs.server.emit("display_special_notification", {"msg": "INFRASTRUCTURE LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Infrastructure Level')
         elif num < 88: # 6%
@@ -1901,6 +1903,96 @@ class Archmage(Skill):
         self.gs.get_SUP()
         self.gs.update_global_status()
         self.gs.signal_MTrackers('indus')
+        
+        # terminate building
+        self.finish_building = True
+
+class Pillar_of_Immortality(Skill):
+
+    def __init__(self, player, gs):
+        super().__init__("Pillar of Immortality", player, gs)
+        self.finish_building = True
+        self.pillars = []
+        self.hasRoundEffect = True
+    #     self.intMod = True
+    #     self.bonus_level = 0
+
+
+    def apply_round_effect(self,):
+        cost = len(self.pillars) - 2 if len(self.pillars) > 2 else 0
+        owner = self.gs.players[self.player]
+        if owner.stars >= cost:
+            owner.stars -= cost
+            self.gs.update_private_status(self.player)
+            return
+        else:
+            cost -= owner.stars
+            owner.stars = 0
+            self.gs.update_private_status(self.player)
+        if cost > 0:
+            troop_removal = cost*10
+            while (troop_removal > 0 and owner.total_troops > 0):
+                curr_tid = random.choice(owner.territories)
+                if self.gs.map.territories[curr_tid].troops:
+                    self.gs.map.territories[curr_tid].troops -= 1
+                    owner.total_troops -= 1
+                    self.gs.update_LAO(self.player)
+                    self.gs.server.emit('battle_casualties', {
+                    f'{curr_tid}': {'tid': curr_tid, 'number': 1},
+                    }, room=self.gs.lobby)
+                    self.gs.server.emit('update_trty_display', {curr_tid: {'troops': self.gs.map.territories[curr_tid].troops}}, room=self.gs.lobby)
+                    troop_removal -= 1
+            self.gs.update_player_stats()
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.signal_MTrackers('popu')
+
+    def update_current_status(self):
+        limits = len(self.gs.players[self.player].territories) - len(self.pillars)
+        cost = len(self.pillars) - 2 if len(self.pillars) > 2 else 0
+        self.gs.server.emit("update_skill_status", {
+            'name': "Pillar of Immortality",
+            'description': f"""Able to build Pillars of Immortality. When a Pillar is stationed on a territory,
+              each troop inside that territory counts for 10 troop in battles. Current costs {cost} stars each round to maintain the pillars.""",
+            'operational': self.active,
+            'hasLimit': True,
+            'limits': limits,
+            'btn_msg': "Establish Pillars"
+        }, room=self.player) 
+
+    def get_skill_status(self):
+        info = 'Operational\n' if self.active else 'Inactive\n'
+        if self.pillars:
+            info += "Pillars active in: "
+            for p in self.pillars:
+                info += f"{self.gs.map.territories[p].name} "
+        return info
+
+    def activate_effect(self):
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            return
+        
+        self.gs.GES.handle_async_event({'name': 'EP'}, self.player)
+
+    def validate_and_apply_changes(self, data):
+        
+        choices = data['choice']
+
+        if len(choices) > (len(self.gs.players[self.player].territories)-len(self.pillars)):
+            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build that many pillars!'}, room=self.player)
+            return
+            
+        # apply changes
+        for choice in choices:
+            if choice in self.pillars:
+                self.gs.server.emit("display_new_notification", {"msg": "Existing Pillar among chosen territories!"}, room=self.player)
+                return
+        
+        for choice in choices:
+            self.pillars.append(choice)
+        
+        self.gs.server.emit('cityBuildingSFX', room=self.player)
         
         # terminate building
         self.finish_building = True

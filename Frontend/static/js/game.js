@@ -388,6 +388,8 @@ socket.on('change_click_event', function(data){
     currEvent = build_free_cities;
   } else if (data.event == 'build_free_leyline_crosses') {
     currEvent = build_free_leyline_crosses;
+  } else if (data.event == 'establish_pillars') {
+    currEvent = establish_pillars;
   } else if (data.event == 'launch_orbital_strike'){
     currEvent = launch_orbital_strike;
   } else if (data.event == 'paratrooper_attack'){
@@ -2402,6 +2404,33 @@ btn_reserves.onclick = function () {
 
   socket.emit('send_async_event', {'name': "R_D"});
 
+}
+
+socket.on('establish_pillars', function(){
+  announ = document.getElementById('announcement');
+  announ.innerHTML = `<h3>Establishing Pillars</h3>`
+});
+
+function establish_pillars(tid){
+  if(player_territories.includes(tid)){
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
+    }
+    if (toHighLight.length != 0){
+        $('#control_mechanism').empty();
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('settle_pillars', {'choice': toHighLight});
+          toHighLight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){
+          $('#control_panel').hide();
+          toHighLight = [];
+        });
+    }
+  }
 }
 
 // Cheaper leylines
