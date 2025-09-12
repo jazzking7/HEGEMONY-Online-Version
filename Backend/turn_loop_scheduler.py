@@ -148,9 +148,9 @@ class turn_loop_scheduler:
         atk_player.con_amt = 0
         # Iron wall turn off if there is any
         if atk_player.skill:
+            if atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
+                atk_player.skill.turn_off_iron_wall()
             if atk_player.skill.active:
-                if atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
-                    atk_player.skill.turn_off_iron_wall()
                 if atk_player.skill.name == "Mass_Mobilization":
                     atk_player.reserves += round((atk_player.total_troops * 15)/100)
 
