@@ -2011,7 +2011,7 @@ class Babylon(Skill):
             3: "Gathering of the Elites -> +1 Minimum Roll and +1 Damage Multiplier in all cities and capitals.",
             4: "Elitocracy -> +1 Minimum Roll every 3 rounds.",
             5: "Laplace's Apprentice -> Click on player to know their War Art and hidden stats.",
-            6: "Iron Shield -> Reactive Armour with 15 percent base Nullification Rate and base Damage Multiplier of 1 which increases with disparity.",
+            6: "Iron Shield -> Reactive Armour with 15 percent base Nullification Rate and base Damage Multiplier of 1 which increase with disparity.",
             7: "Little King -> +1★ every round regardless of successful conquests.",
             8: "Air Dominance -> Long Arm Jurisdiction.",
             9: "Industrial Leap -> +1 Industrial Power during battle.",
