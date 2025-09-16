@@ -26,7 +26,8 @@ class Skill_Distributor:
             "Loopwalker",
             "Revanchism",
             "Archmage",
-            "Pillar of Immortality"
+            "Pillar of Immortality",
+            "Babylon"
         ]
 
     def get_Annihilator_options(self, ):
@@ -83,6 +84,8 @@ class Skill_Distributor:
             return "Cost of building Leyline Crosses decrease to 1★. Increased Crit Rate, Crit Damge and Blessings from Leyline Crosses."
         elif skill_name == "Pillar of Immortality":
             return "Able to install Pillars of Immortatlity. When a pillar is stationed on a territory, each troop stationed on that territory counts as 10 troops during battles."
+        elif skill_name == "Babylon":
+            return "Benefit from multiple randomly selected passives."
     def initiate_skill(self, skill_name, player, gs):
         if skill_name == 'Iron_Wall':
             return Iron_Wall(player, gs)
@@ -128,3 +131,5 @@ class Skill_Distributor:
             return Archmage(player, gs)
         elif skill_name == "Pillar of Immortality":
             return Pillar_of_Immortality(player, gs)
+        elif skill_name == 'Babylon':
+            return Babylon(player, gs)

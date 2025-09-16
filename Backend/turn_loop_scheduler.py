@@ -105,6 +105,9 @@ class turn_loop_scheduler:
                     gs.update_private_status(curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()
+                if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Babylon":
+                    if 8 in gs.players[curr_p].skill.passives:
+                        gs.players[curr_p].skill.long_arm_jurisdiction()
 
             # Fanatic receive troop booster
             for miss in gs.Mset:
@@ -153,6 +156,9 @@ class turn_loop_scheduler:
             if atk_player.skill.active:
                 if atk_player.skill.name == "Mass_Mobilization":
                     atk_player.reserves += round((atk_player.total_troops * 15)/100)
+                if atk_player.skill.name == "Babylon":
+                    if 1 in atk_player.skill.passives:
+                        atk_player.reserves += round((atk_player.total_troops * 10)/100)
 
         # Hall giving authority
         # Bureau recruitement

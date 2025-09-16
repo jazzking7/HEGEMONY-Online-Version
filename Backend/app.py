@@ -1140,6 +1140,19 @@ def handle_laplace_fetching(data):
                 secret_data['Skill'] = info_player.skill.name
                 secret_data['Skill Status'] = info_player.skill.get_skill_status()
             socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
+        
+        if gsm.players[pid].skill.name == "Babylon":
+            if gsm.players[pid].skill.active and 5 in gsm.players[pid].skill.passives:
+                info_player = gsm.players[player_id]
+                secret_data = {}
+                secret_data['Reserves'] = info_player.reserves
+                secret_data['Special Authority'] = info_player.stars
+                secret_data['Infrastructure Level'] = gsm.get_player_infra_level(info_player) + 3
+                secret_data['Min Roll'] = info_player.min_roll
+                if info_player.skill:
+                    secret_data['Skill'] = info_player.skill.name
+                    secret_data['Skill Status'] = info_player.skill.get_skill_status()
+                socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
 
 @socketio.on('launch_silo')
 def handle_silo_launching():

@@ -1996,3 +1996,148 @@ class Pillar_of_Immortality(Skill):
         
         # terminate building
         self.finish_building = True
+
+class Babylon(Skill):
+    def __init__(self, player, gs):
+        super().__init__("Babylon", player, gs)
+        N = math.ceil(len(self.gs.players)/3)
+        self.passive_options = [1,2,3,4,5,6,7,8,9,10,11]
+        self.passives = random.sample(self.passive_options, N)
+        self.passive_mapping = {
+            1: "Mass Mobilization -> +10 percent of total troops as reserves each turn.",
+            2: "Loopwalker -> always running 2 loops per battle.",
+            3: "Gathering of the Elites -> +1 Minimum Roll and +1 Damage Multiplier in all cities and capitals.",
+            4: "Elitocracy -> +1 Minimum Roll every 3 rounds.",
+            5: "Laplace Demon -> Click on player to know their War Art and hidden stats.",
+            6: "Iron Wall -> Reactive Armour with 15 percent base Nullification Rate and base Damage Multiplier of 1 which increases with disparity.",
+            7: "Dictator -> +1★ every round regardless of successful conquests.",
+            8: "Air Superiority -> Long Arm Jurisdiction.",
+            9: "Industrial Revolution -> +1 Industrial Power during battle.",
+            10: "Zealous Expansion -> +2 Infrastructure Levels during battle.",
+            11: "Revanchism -> Receive Rage Points when losing built structure/upgrades and capitals."
+        }
+        self.reactMod = True
+        self.intMod = True
+        self.hasRoundEffect = True
+        self.hasTurnEffect = True
+        self.points = 0
+        if 5 in self.passives:
+            self.gs.server.emit('laplace_mode', room=self.player)
+
+    
+    def accumulate_rage(self, trty_loss):
+        if trty_loss.isCapital:
+            self.points += 25
+        if trty_loss.isCity:
+            self.points += 20
+        if trty_loss.isMegacity:
+            self.points += 50
+        if trty_loss.isFort:
+            self.points += 10
+        if trty_loss.isLeyline:
+            self.points += 15
+        if trty_loss.isTransportcenter:
+            self.points += 40
+        if trty_loss.isHall:
+            self.points += 50
+        if trty_loss.isBureau:
+            self.points += 20
+    
+    def apply_turn_effect(self,):
+        if 7 in self.passives:
+            if self.active:
+                self.gs.players[self.player].stars += 1
+
+    def apply_round_effect(self,):
+        if 4 in self.passives:
+            curr = self.gs.GES.round
+            if curr > 0 and curr % 3 == 0:
+                self.gs.players[self.player].min_roll += 1
+                self.gs.update_private_status(self.player)
+
+    def internalStatsMod(self, battle_stats):
+        if self.active:
+            if 10 in self.passives:
+                battle_stats[1] += 2
+            if 9 in self.passives:
+                battle_stats[0] += 1
+            if 11 in self.passives:
+                battle_stats[0] += self.points//100
+                battle_stats[1] += self.points//100
+                battle_stats[2] += self.points//150
+                battle_stats[3] += self.points//100 * 10
+                if battle_stats[3] >= 100:
+                    battle_stats[3] = 90
+                battle_stats[4] += self.points//150
+
+
+    def reactStatsMod(self, ownStats, enemyStats, attacking):
+        if not attacking and self.active:
+
+            ownStats[3] += 15
+
+            disparity = (enemyStats[0] - ownStats[0]) + (enemyStats[1] - ownStats[1])
+
+            if disparity > 4:
+                ownStats[3] += 30
+                ownStats[4] += 1
+            elif disparity == 4:
+                ownStats[3] += 20
+                ownStats[4] += 1
+            elif disparity == 3:
+                ownStats[3] += 15
+                ownStats[4] += 1    
+            elif disparity == 2:
+                ownStats[3] += 10
+            elif disparity == 1:
+                ownStats[3] += 5
+            
+            if ownStats[3] >= 90:
+                ownStats[3] = 90
+
+    def calculate_bonuses(self, x):
+        # Constants for the polynomial function
+        a = 0.1
+        b = 0.6
+        c = 0.5
+
+        # Calculate the bonus using the quadratic function and round up
+        bonus = math.ceil(a * x ** 2 + b * x + c)
+        return bonus
+
+    def long_arm_jurisdiction(self,):
+        if self.active:
+            distincts = []
+            for t in self.gs.players[self.player].territories:
+                for cont in self.gs.map.conts:
+                    if t in self.gs.map.conts[cont]['trtys']:
+                        if cont not in distincts:
+                            distincts.append(cont)
+
+            bonus = len(distincts)
+            self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            self.gs.players[self.player].stars += bonus//4
+            self.gs.update_private_status(self.player)
+
+    def update_current_status(self):
+        information = "Benefit from multiple randomly assigned passives. List of passives:\n"
+        for passive in self.passives:
+            information += self.passive_mapping[passive] + "\n"
+        if 11 in self.passives:
+            information += f"Accumulated {self.points} rage points."
+        html_info = information.replace('\n', '<br>')
+        self.gs.server.emit("update_skill_status", {
+            'name': "Babylon",
+            'description': html_info,
+            'operational': self.active,
+        }, room=self.player)
+
+    def get_skill_status(self):
+        info = 'Operational | ' if self.active else 'Inactive | '
+        info += " Benefitting from: "
+        for passive in self.passives:      
+            info += self.passive_mapping[passive] + " | "
+        return info
+    
+    def activate_effect(self):
+        return

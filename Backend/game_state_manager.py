@@ -1025,11 +1025,21 @@ class Game_State_Manager:
                     atk_stats[2] += atk_p.skill.important_bonus
             if atk_p.skill.name == "Mass_Mobilization" and atk_p.skill.active:
                 atk_stats[4] += atk_amt//20
+            if atk_p.skill.name == "Babylon" and atk_p.skill.active:
+                if 3 in atk_p.skill.passives:
+                    atk_stats[2] += 1
+                    atk_stats[4] += 1
+
 
         if def_p.skill:
             if def_p.skill.name == "Elitocracy" and def_p.skill.active:
                 if trty_def.isCity or trty_def.isCapital:
                     def_stats[2] += def_p.skill.important_bonus
+            
+            if def_p.skill.name == "Babylon" and def_p.skill.active:
+                if 3 in def_p.skill.passives:
+                    atk_stats[2] += 1
+                    atk_stats[4] += 1
 
             if def_p.skill.name == "Air_Superiority" and def_p.skill.active:
                 for cont in self.map.conts:
@@ -1098,6 +1108,9 @@ class Game_State_Manager:
         if atk_p.skill:
             if atk_p.skill.name == "Loopwalker" and atk_p.skill.active:
                 multitime = True
+            if atk_p.skill.name == "Babylon":
+                if atk_p.skill.active and 2 in atk_p.skill.passives:
+                    multitime = True
             if atk_p.skill.name == "Realm_of_Permafrost" and atk_p.skill.active:
                 atkh = False
                 defh = False
@@ -1112,6 +1125,9 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
                 multitime = True
+            if def_p.skill.name == "Babylon":
+                if def_p.skill.active and 2 in def_p.skill.passives:
+                    multitime = True
             if def_p.skill.name == "Realm_of_Permafrost" and def_p.skill.active:
                 atkh = False
                 defh = False
@@ -1168,7 +1184,9 @@ class Game_State_Manager:
                 if def_p.skill.name == "Pillar of Immortality":
                     if t2 in def_p.skill.pillars:
                         def_p.skill.pillars.remove(t2)
-            
+                if def_p.skill.name == "Babylon" and def_p.skill.active:
+                    if 11 in def_p.skill.passives:
+                        def_p.skill.accumulate_rage(trty_def)
 
             # Mission Checker
             if self.SMset:
@@ -1377,6 +1395,9 @@ class Game_State_Manager:
                 # update aval_loops
                 if atk_p.skill.aval_loops > 0:
                     atk_p.skill.aval_loops -= (atk_loop-1)
+            if atk_p.skill.name == "Babylon":
+                if atk_p.skill.active and 2 in atk_p.skill.passives:
+                    atk_loop = 2
 
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
@@ -1392,6 +1413,9 @@ class Game_State_Manager:
                 # update aval_loops
                 if def_p.skill.aval_loops > 0:
                     def_p.skill.aval_loops -= (def_loop-1)
+            if def_p.skill.name == "Babylon":
+                if def_p.skill.active and 2 in def_p.skill.passives:
+                    def_loop = 2
 
         atkfav = False
         deffav = False
