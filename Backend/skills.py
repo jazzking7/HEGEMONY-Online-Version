@@ -2006,17 +2006,17 @@ class Babylon(Skill):
         self.passive_options = [1,2,3,4,5,6,7,8,9,10,11]
         self.passives = random.sample(self.passive_options, N)
         self.passive_mapping = {
-            1: "Mass Mobilization -> +10 percent of total troops as reserves each turn.",
+            1: "Grand Mobilization -> +10 percent of total troops as reserves each turn.",
             2: "Loopwalker -> always running 2 loops per battle.",
             3: "Gathering of the Elites -> +1 Minimum Roll and +1 Damage Multiplier in all cities and capitals.",
             4: "Elitocracy -> +1 Minimum Roll every 3 rounds.",
-            5: "Laplace Demon -> Click on player to know their War Art and hidden stats.",
-            6: "Iron Wall -> Reactive Armour with 15 percent base Nullification Rate and base Damage Multiplier of 1 which increases with disparity.",
-            7: "Dictator -> +1★ every round regardless of successful conquests.",
-            8: "Air Superiority -> Long Arm Jurisdiction.",
-            9: "Industrial Revolution -> +1 Industrial Power during battle.",
+            5: "Laplace's Apprentice -> Click on player to know their War Art and hidden stats.",
+            6: "Iron Shield -> Reactive Armour with 15 percent base Nullification Rate and base Damage Multiplier of 1 which increases with disparity.",
+            7: "Little King -> +1★ every round regardless of successful conquests.",
+            8: "Air Dominance -> Long Arm Jurisdiction.",
+            9: "Industrial Leap -> +1 Industrial Power during battle.",
             10: "Zealous Expansion -> +2 Infrastructure Levels during battle.",
-            11: "Revanchism -> Receive Rage Points when losing built structure/upgrades and capitals."
+            11: "Avenger -> Receive Rage Points when losing built structure/upgrades and capitals."
         }
         self.reactMod = True
         self.intMod = True
