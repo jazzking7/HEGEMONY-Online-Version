@@ -31,7 +31,7 @@ class Skill_Distributor:
         ]
 
     def get_Annihilator_options(self, ):
-        return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis']
+        return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis', 'Babylon']
 
     def get_options(self, ):
         return random.sample(self.skill_options, k=9)

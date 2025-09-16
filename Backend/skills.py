@@ -2000,7 +2000,9 @@ class Pillar_of_Immortality(Skill):
 class Babylon(Skill):
     def __init__(self, player, gs):
         super().__init__("Babylon", player, gs)
-        N = math.ceil(len(self.gs.players)/3)
+        N = math.floor(len(self.gs.players)/2)
+        if player == gs.Annihilator:
+            N += 1
         self.passive_options = [1,2,3,4,5,6,7,8,9,10,11]
         self.passives = random.sample(self.passive_options, N)
         self.passive_mapping = {
