@@ -2026,7 +2026,6 @@ class Babylon(Skill):
         if 5 in self.passives:
             self.gs.server.emit('laplace_mode', room=self.player)
 
-    
     def accumulate_rage(self, trty_loss):
         if trty_loss.isCapital:
             self.points += 25
@@ -2071,7 +2070,6 @@ class Babylon(Skill):
                 if battle_stats[3] >= 100:
                     battle_stats[3] = 90
                 battle_stats[4] += self.points//150
-
 
     def reactStatsMod(self, ownStats, enemyStats, attacking):
         if not attacking and self.active:
@@ -2137,8 +2135,30 @@ class Babylon(Skill):
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
         info += " Benefitting from: "
-        for passive in self.passives:      
-            info += self.passive_mapping[passive] + " | "
+        for passive in self.passives:
+            if passive == 1:
+                info += "Grand Mobilization | "
+            elif passive == 2:
+                info += "Loopwalker | "
+            elif passive == 3:
+                info += "Gathering of the Elites | "
+            elif passive == 4:
+                info += "Elitocracy | "
+            elif passive == 5:
+                info += "Laplace's Apprentice | "
+            elif passive == 6:
+                info += "Iron Shield | "
+            elif passive == 7:
+                info += "Little King | "
+            elif passive == 8:
+                info += "Air Dominance | "
+            elif passive == 9:
+                info += "Industrial Leap | "
+            elif passive == 10:
+                info += "Zealous Expansion | "
+            elif passive == 11:
+                info += "Avenger | "
+
         return info
     
     def activate_effect(self):

@@ -1151,7 +1151,6 @@ def handle_laplace_fetching(data):
                 secret_data['Min Roll'] = info_player.min_roll
                 if info_player.skill:
                     secret_data['Skill'] = info_player.skill.name
-                    secret_data['Skill Status'] = info_player.skill.get_skill_status()
                 socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
 
 @socketio.on('launch_silo')
