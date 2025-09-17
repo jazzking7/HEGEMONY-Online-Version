@@ -1914,8 +1914,6 @@ class Pillar_of_Immortality(Skill):
         self.finish_building = True
         self.pillars = []
         self.hasRoundEffect = True
-    #     self.intMod = True
-    #     self.bonus_level = 0
 
 
     def apply_round_effect(self,):

@@ -1101,6 +1101,7 @@ class Game_State_Manager:
                 break
 
         atroopmul, dtroopmul = 1, 1
+        AIA, DIA = 0, 0
 
         # Simulate battle and get result
         print(f"Attacker: {atk_p.name}\nAttacking amount: {atk_amt} Attacker stats: {atk_stats}\nDefender: {def_p.name}\nDefending amount: {def_amt} Defender stats: {def_stats}")
@@ -1121,6 +1122,7 @@ class Game_State_Manager:
             if atk_p.skill.name == "Pillar of Immortality" and atk_p.skill.active:
                 if t1 in atk_p.skill.pillars:
                     atroopmul = 10
+                AIA = len(atk_p.skill.pillars)
 
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
@@ -1138,11 +1140,12 @@ class Game_State_Manager:
             if def_p.skill.name == "Pillar of Immortality" and def_p.skill.active:
                 if t2 in def_p.skill.pillars:
                     dtroopmul = 10
+                DIA = len(def_p.skill.pillars)
 
         if multitime: # time looper
-            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul)
+            result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA)
         else: # normal
-            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul)
+            result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA)
         print(result)
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
@@ -1284,7 +1287,7 @@ class Game_State_Manager:
         if self.GES.terminated:
             self.GES.stage_completed = True
         
-    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul):
+    def simulate_attack(self, atk_amt, def_amt, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA):
         
         # Troop amount
         a_troops = atk_amt
@@ -1351,6 +1354,15 @@ class Game_State_Manager:
                         d_receive += 1
                 else:
                     a_receive += 1
+            
+            if AIA:
+                for i in range(AIA):
+                    if random.randint(1,100) > 99:
+                        d_troops -= 1
+            if DIA:
+                for i in range(DIA):
+                    if random.randint(1,100) > 99:
+                        a_troops -= 1
 
             if a_receive:
                 dcurr = random.randint(1, 100)
@@ -1377,7 +1389,7 @@ class Game_State_Manager:
         d_troops = math.ceil(d_troops/dtroopmul)
         return [a_troops, d_troops]
 
-    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul):
+    def simulate_multi_attack(self, atk_amt, def_amt, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA):
 
         # Time loop setting
         atk_loop, def_loop, run_loop = 1, 1, 1
@@ -1495,6 +1507,15 @@ class Game_State_Manager:
                             d_receive += 1
                     else:
                         a_receive += 1
+
+                if AIA:
+                    for i in range(AIA):
+                        if random.randint(1,100) > 99:
+                            d_troops -= 1
+                if DIA:
+                    for i in range(DIA):
+                        if random.randint(1,100) > 99:
+                            a_troops -= 1
                         
                 if a_receive:
                     dcurr = random.randint(1, 100)
