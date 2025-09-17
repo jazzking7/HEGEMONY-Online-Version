@@ -1914,10 +1914,10 @@ class Pillar_of_Immortality(Skill):
         self.finish_building = True
         self.pillars = []
         self.hasRoundEffect = True
-
+        self.free = math.ceil(len(gs.players)/2)
 
     def apply_round_effect(self,):
-        cost = len(self.pillars) - 2 if len(self.pillars) > 2 else 0
+        cost = len(self.pillars) - self.free if len(self.pillars) > self.free else 0
         owner = self.gs.players[self.player]
         if owner.stars >= cost:
             owner.stars -= cost
@@ -1946,8 +1946,10 @@ class Pillar_of_Immortality(Skill):
             self.gs.signal_MTrackers('popu')
 
     def update_current_status(self):
-        limits = len(self.gs.players[self.player].territories) - len(self.pillars)
-        cost = len(self.pillars) - 2 if len(self.pillars) > 2 else 0
+        ply = self.gs.players[self.player]
+        limits = len(ply.territories) - len(self.pillars)
+        cost = len(self.pillars) - self.free if len(self.pillars) > self.free else 0
+        limits = min(limits, ((ply.total_troops//10 + ply.stars)-cost))
         self.gs.server.emit("update_skill_status", {
             'name': "Pillar of Immortality",
             'description': f"""Able to build Pillars of Immortality. When a Pillar is stationed on a territory,

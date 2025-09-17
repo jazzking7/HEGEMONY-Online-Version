@@ -1122,7 +1122,7 @@ class Game_State_Manager:
             if atk_p.skill.name == "Pillar of Immortality" and atk_p.skill.active:
                 if t1 in atk_p.skill.pillars:
                     atroopmul = 10
-                AIA = len(atk_p.skill.pillars)
+                AIA = len(atk_p.skill.pillars)*3
 
         if def_p.skill:
             if def_p.skill.name == "Loopwalker" and def_p.skill.active:
@@ -1140,7 +1140,7 @@ class Game_State_Manager:
             if def_p.skill.name == "Pillar of Immortality" and def_p.skill.active:
                 if t2 in def_p.skill.pillars:
                     dtroopmul = 10
-                DIA = len(def_p.skill.pillars)
+                DIA = len(def_p.skill.pillars)*3
 
         if multitime: # time looper
             result = self.simulate_multi_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atk_p, def_p, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA)
