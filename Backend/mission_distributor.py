@@ -73,14 +73,14 @@ class Mission_Distributor:
              'Ind',
              'Exp', 'Pop',
              'Gua',
-           #  'Dec',
+             'Dec',
                           'Dom',
                           'Pac', 
             'Uni', 'Pol', 'Fan', 
              'Str', 
              'Due', 'Pun',
              'Sur',
-             #'Ass', 'Pro', 
+             'Ass', 'Pro', 
              'Ann',
              'Opp',
              'Gam',
@@ -129,6 +129,7 @@ class Mission_Distributor:
     def get_mission_set(self, num_p):
         hasAnn = random.randint(1,100) > 50
         hasOpp = random.randint(1,100) > 90
+        noProAss = random.randint(1,100) > 50
         has2C = allS = False
         if num_p > 3:
             mode = random.randint(1,100)
@@ -166,9 +167,10 @@ class Mission_Distributor:
                     count += 2
             elif choice in ['Pro', 'Ass']:
                 if (count + 2) <= num_p:
-                    miss_set.append('Pro')
-                    miss_set.append('Ass')
-                    count += 2
+                    if not noProAss:
+                        miss_set.append('Pro')
+                        miss_set.append('Ass')
+                        count += 2
             elif choice == 'Pun':
                 for m in miss_set:
                     if m in self.self_wins:
