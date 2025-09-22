@@ -2163,3 +2163,27 @@ class Babylon(Skill):
     
     def activate_effect(self):
         return
+    
+    def get_best_outcome(self, outcomes, defending):
+        if defending:
+            # Defender optimization
+            wins = [o for o in outcomes if o[0] == 0]  # attacker has 0 troops
+            if wins:
+                # Pick the defender win with the most remaining defender troops
+                optimal = max(wins, key=lambda x: x[1])
+            else:
+                # No defender wins; pick loss that caused most damage to attacker
+                losses = [o for o in outcomes if o[1] == 0]
+                optimal = min(losses, key=lambda x: x[0]) if losses else None
+        else:
+            # Attacker optimization
+            wins = [o for o in outcomes if o[1] == 0]  # defender has 0 troops
+            if wins:
+                # Pick the attacker win with the most remaining attacker troops
+                optimal = max(wins, key=lambda x: x[0])
+            else:
+                # No attacker wins; pick loss that caused most damage to defender
+                losses = [o for o in outcomes if o[0] == 0]
+                optimal = min(losses, key=lambda x: x[1]) if losses else None
+
+        return optimal
