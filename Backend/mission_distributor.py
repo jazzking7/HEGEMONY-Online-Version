@@ -127,7 +127,7 @@ class Mission_Distributor:
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p):
-        hasAnn = random.randint(1,100) > 50
+        hasAnn = random.randint(1,100) > 80
         hasOpp = random.randint(1,100) > 90
         noProAss = random.randint(1,100) > 50
         has2C = allS = False
