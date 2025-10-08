@@ -1949,11 +1949,15 @@ class Pillar_of_Immortality(Skill):
         ply = self.gs.players[self.player]
         limits = len(ply.territories) - len(self.pillars)
         cost = len(self.pillars) - self.free if len(self.pillars) > self.free else 0
-        limits = min(limits, ((ply.total_troops//10 + ply.stars)-cost))
+        free_left = self.free - len(self.pillars) if len(self.pillars) < self.free else 0
+        limits = min(limits, ((ply.total_troops//10 + ply.stars)-cost+free_left))
+        info += "Pillars active in: "
+        for p in self.pillars:
+            info += f"{self.gs.map.territories[p].name} "
         self.gs.server.emit("update_skill_status", {
             'name': "Pillar of Immortality",
             'description': f"""Able to build Pillars of Immortality. When a Pillar is stationed on a territory,
-              each troop inside that territory counts for 10 troop in battles. Current costs {cost} stars each round to maintain the pillars.""",
+              each troop inside that territory counts for 10 troop in battles. Current costs {cost} stars each round to maintain the pillars. {info}""",
             'operational': self.active,
             'hasLimit': True,
             'limits': limits,
