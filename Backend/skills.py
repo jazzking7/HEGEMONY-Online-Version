@@ -759,7 +759,7 @@ class Divine_Punishment(Skill):
         self.limit = (len(gs.players)-1)*2 if player == gs.Annihilator else len(gs.players)
         self.finished_bombardment = True
         self.out_of_turn_activation = True
-        self.OS_waitlist = None
+        self.OS_waitlist = []
         self.offturn_used = 0
         # if self.limit > len(gs.map.territories)//len(gs.players):
         #     self.limit = len(gs.map.territories)//len(gs.players) - 2
@@ -811,13 +811,13 @@ class Divine_Punishment(Skill):
         if self.player == self.gs.pids[self.gs.GES.current_player]:
             self.validate_and_apply_changes({"choice": choices})
         else:
-            self.OS_waitlist = {"choice": choices}
+            self.OS_waitlist += choices
             self.gs.GES.interturn_events.append(self)
             self.offturn_used += len(choices)
     
     def execute_interturn(self):
-        self.validate_and_apply_changes(self.OS_waitlist)
-        self.OS_waitlist = None
+        self.validate_and_apply_changes({"choice": self.OS_waitlist})
+        self.OS_waitlist = []
 
     def validate_and_apply_changes(self, data):
         self.offturn_used = 0
@@ -844,6 +844,8 @@ class Divine_Punishment(Skill):
 
             chosen_trty = self.gs.map.territories[choice]
 
+            secondary_shockwave = self.gs.map.get_reachable_airspace(choice, 2)
+
             for nt in chosen_trty.neighbors:
                 if nt not in self.gs.players[self.player].territories:
                     self.gs.map.territories[nt].isDeadZone = 2
@@ -869,6 +871,33 @@ class Divine_Punishment(Skill):
                             }, room=self.gs.lobby)
                             break
                     self.gs.server.emit('update_trty_display', {nt: {'troops': self.gs.map.territories[nt].troops, 'hasEffect': 'nuke'}}, room=self.gs.lobby)
+
+            # secondary shockwave
+            for second in secondary_shockwave:
+                if second == choice or second in chosen_trty.neighbors:
+                    continue
+                if second not in self.gs.players[self.player].territories:
+                    second_shock = min(3, self.gs.map.territories[second].troops)
+                    self.gs.map.territories[second].troops -= second_shock
+                    for player in self.gs.players:
+                        if second in self.gs.players[player].territories:
+                            self.gs.players[player].total_troops -= second_shock
+
+                            self.gs.update_LAO(player)
+                            self.gs.update_TIP(player)
+                            self.gs.update_private_status(player)
+
+                            # Ares' Blessing Rage meter checking
+                            if self.gs.players[player].skill:
+                                if self.gs.players[player].skill.name == "Ares' Blessing" and self.gs.players[player].skill.active:
+                                    self.gs.players[player].skill.checking_rage_meter()
+
+                            # visual effect
+                            self.gs.server.emit('battle_casualties', {
+                                f'{second}': {'tid': second, 'number': second_shock},
+                            }, room=self.gs.lobby)
+                            break
+                    self.gs.server.emit('update_trty_display', {second: {'troops': self.gs.map.territories[second].troops}}, room=self.gs.lobby)
 
             wasMega = chosen_trty.isMegacity
             if chosen_trty.isMegacity:
