@@ -166,7 +166,7 @@ class Mission_Distributor:
                     miss_set.append(choice)
                     count += 2
             elif choice in ['Pro', 'Ass']:
-                if (count + 2) <= num_p:
+                if (count + 2) <= num_p and num_p > 2:
                     if not noProAss:
                         miss_set.append('Pro')
                         miss_set.append('Ass')

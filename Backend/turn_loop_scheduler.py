@@ -17,71 +17,30 @@ class turn_loop_scheduler:
         ms.current_event = event
         return
 
-    def resume_loop(self, ms, gs, pid):
-        curr_event = ms.current_event
-        c = 0
-        for i, event in enumerate(self.events):
-            if event == curr_event:
-                c = i
-                break
-        atk_player = gs.players[pid]
-        for event in self.events[c:]:
-            if event.name == 'reinforcement':
-                self.set_curr_state(ms, self.events[0])
-                self.reinforcement(gs, pid)
-                ms.stage_completed = False
-                done = False
-                while (not ms.stage_completed 
-       and not done 
-       and not ms.innerInterrupt
-       and not ms.terminated):
-                    done = atk_player.deployable_amt < 1
-                if ms.terminated or ms.innerInterrupt:
-                    return
-                
-            if event.name == 'preparation':
-                self.set_curr_state(ms, self.events[1])
-                self.preparation(gs, pid)
+    def resume_loop(self, ms, gs, pid, token):
+        # Guard: only the active turn + active player may re-arm
+        if token != ms.turn_token:
+            return
+        if ms.terminated or ms.interrupt or ms.current_event is None:
+            return
+        if pid != gs.pids[ms.current_player]:
+            return
 
-                ms.stage_completed = False
-                while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
-                    time.sleep(1)
-                if ms.terminated or ms.innerInterrupt or not atk_player.connected:
-                    return
+        ev = ms.current_event.name
 
-            if event.name == 'conquer':
-                # prevent immediate growth
-                if not ms.stats_set:
-                    atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
-                    ms.stats_set = True
-                self.set_curr_state(ms, self.events[2])
-                self.conquer(gs, pid)
+        # IMPORTANT: do NOT call set_curr_state here, do NOT iterate remaining events.
+        # Just re-emit the CURRENT stage's UI so the client sees controls again.
+        if ev == 'reinforcement':
+            self.reinforcement(gs, pid)   # emits troop_deployment + click event
+        elif ev == 'preparation':
+            self.preparation(gs, pid)     # emits preparation + clears click event
+        elif ev == 'conquer':
+            self.conquer(gs, pid)         # emits conquest + click event 'conquest'
+        elif ev == 'rearrangement':
+            self.rearrange(gs, pid)       # emits rearrangement + click event 'rearrange'
 
-                ms.stage_completed = False
-                while not ms.stage_completed and not ms.innerInterrupt:
-                    time.sleep(1)
-                if ms.terminated or ms.innerInterrupt:
-                    if ms.terminated:
-                        if atk_player.skill:
-                            if atk_player.skill.name == "Necromancer":
-                                atk_player.skill.soul_harvest()
-                    return
-            if event.name == 'rearrangement':
-                self.set_curr_state(ms, self.events[3])
-                self.rearrange(gs, pid)
-
-                if atk_player.skill:
-                    if atk_player.skill.name == "Necromancer":
-                        atk_player.skill.soul_harvest()
-
-                ms.stage_completed = False
-                while not ms.stage_completed and not ms.innerInterrupt:
-                    time.sleep(1)
-                if ms.terminated or ms.innerInterrupt:
-                    return
-        # stop timer
-        ms.terminated = True
         return
+
 
     def reinforcement(self, gs, curr_p):
         for player in gs.pids:
@@ -141,7 +100,7 @@ class turn_loop_scheduler:
         gs.server.emit("rearrangement", room=curr_player)
         return
 
-    def execute_turn_events(self, gs, ms, player):
+    def execute_turn_events(self, gs, ms, player, token):
         ms.flush_concurrent_event(player)
         # Player executing the turn
         atk_player = gs.players[player]
@@ -179,53 +138,76 @@ class turn_loop_scheduler:
         self.reinforcement(gs, player)
 
         ms.stage_completed = False
+        
         done = False
-        while (not ms.stage_completed 
-       and not done 
-       and not ms.innerInterrupt 
-       and atk_player.connected
-       and not ms.terminated): 
+        while (not ms.stage_completed
+            and not ms.terminated
+            and atk_player.connected
+            and token == ms.turn_token):
+            if ms.innerInterrupt:
+                gs.server.sleep(0.05)  # park during inner async
+                continue
+            # your “auto-finish” condition:
             done = atk_player.deployable_amt < 1
-        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+            if done:
+                ms.stage_completed = True
+                break
+            gs.server.sleep(0.05)
+        if ms.terminated or not atk_player.connected or token != ms.turn_token:
             return
 
+        ms.stage_completed = False
         self.set_curr_state(ms, self.events[1])
         self.preparation(gs, player)
 
-        ms.stage_completed = False
-        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
-            time.sleep(1)
-        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+        while (not ms.stage_completed
+            and not ms.terminated
+            and atk_player.connected
+            and token == ms.turn_token):
+            if ms.innerInterrupt:
+                gs.server.sleep(0.05)
+                continue
+            gs.server.sleep(1)
+        if ms.terminated or not atk_player.connected or token != ms.turn_token:
             return
 
         # prevent immediate growth
         atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
-        # Set stats_set to True to prevent innerAsync actions from giving battle stats growth
         ms.stats_set = True
+        ms.stage_completed = False
         self.set_curr_state(ms, self.events[2])
         self.conquer(gs, player)
 
-        ms.stage_completed = False
-        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
-            time.sleep(1)
-        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
-            if ms.terminated:
-                if atk_player.skill:
-                    if atk_player.skill.name == "Necromancer":
-                        atk_player.skill.soul_harvest()
+        while (not ms.stage_completed
+            and not ms.terminated
+            and atk_player.connected
+            and token == ms.turn_token):
+            if ms.innerInterrupt:
+                gs.server.sleep(0.05)
+                continue
+            gs.server.sleep(1)
+        if ms.terminated or not atk_player.connected or token != ms.turn_token:
+            if ms.terminated and atk_player.skill and atk_player.skill.name == "Necromancer":
+                atk_player.skill.soul_harvest()
             return
         
+        ms.stage_completed = False
         self.set_curr_state(ms, self.events[3])
         self.rearrange(gs, player)
 
-        if atk_player.skill:
-            if atk_player.skill.name == "Necromancer":
-                atk_player.skill.soul_harvest()
+        # (Necromancer soul harvest after rearrange if you had it)
+        if atk_player.skill and atk_player.skill.name == "Necromancer":
+            atk_player.skill.soul_harvest()
 
-        ms.stage_completed = False
-        while not ms.stage_completed and not ms.innerInterrupt and atk_player.connected:
-            time.sleep(1)
-        if ms.terminated or ms.innerInterrupt or not atk_player.connected:
+        while (not ms.stage_completed
+            and not ms.terminated
+            and atk_player.connected
+            and token == ms.turn_token):
+            if ms.innerInterrupt:
+                gs.server.sleep(0.05)
+                continue
+            gs.server.sleep(1)
+        if ms.terminated or not atk_player.connected or token != ms.turn_token:
             return
         
         # stop timer
@@ -306,27 +288,26 @@ class turn_loop_scheduler:
 
     def execute_turn(self, gs, ms, curr_player):
         # gs -> game states    ms -> master scheduler/gs.GES
-
-        # Thread for turn
-        ms.curr_thread = threading.Thread(target=self.execute_turn_events, args=(gs, ms, curr_player))
-        # Timer for turn
-        ms.timer = threading.Thread(target=ms.activate_timer, args=(ms.turn_time, curr_player))
+        ms.turn_token += 1
+        token = ms.turn_token
 
         ms.terminated = False
-        ms.curr_thread.start()
+        ms.stage_completed = False
+        ms.innerInterrupt = False
 
+        gs.server.start_background_task(self.execute_turn_events, gs, ms, curr_player, token)
+        gs.server.start_background_task(ms.activate_timer, ms.turn_time, curr_player, token)
+        
         gs.server.emit('start_timeout', {'secs': ms.turn_time}, room=gs.lobby)
         print(f"{gs.players[curr_player].name}'s turn started.")
         print(f"Their pid is {curr_player}")
         gs.server.emit('signal_show_btns', room=curr_player)
         gs.server.emit('signal_turn_start', room=curr_player)
 
-        # Timer and curr_thread both depends on self.terminate for counting or executing event
-        # When one of them terminates, the other also terminates
-        ms.timer.start()
-        ms.timer.join()
+        while not ms.terminated and not ms.interrupt and token == ms.turn_token:
+            gs.server.sleep(0.1)
+
         gs.server.emit('stop_timeout', room=gs.lobby)
-        ms.curr_thread.join()
         
         # Handle end of turn
         self.handle_end_turn(ms, gs, curr_player)
@@ -357,8 +338,8 @@ class turn_loop_scheduler:
                 for pid in ms.interturn_connections:
                     gs.server.emit('set_up_announcement', {'msg': f"{gs.players[pid].name} is reconnecting..."}, room=gs.lobby)
                     c = 0
-                    while not ms.interturn_connections[pid] and ms.interrupt and c <= 60:
-                        time.sleep(1)
+                    while not ms.interturn_connections[pid] and not ms.interrupt and c <= 60:
+                        gs.server.sleep(1)
                         c += 1
                     gs.update_all_views(pid)
                 ms.interturn_connections = {}
@@ -435,15 +416,15 @@ class turn_loop_scheduler:
                 for miss in gs.Mset:
                     if miss.name == "Loyalist":
                         if ms.round == 3:
-                            time.sleep(2)
+                            gs.server.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Annihilator":
                         if ms.round == 2:
-                            time.sleep(2)
+                            gs.server.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF Annihilator DETECTED! HIGHLY RISKY SITUATION!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
-                            time.sleep(2)
+                            gs.server.sleep(2)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF SURVIVALIST DETECTED! ELIMINATE THEM!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

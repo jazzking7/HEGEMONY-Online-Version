@@ -186,7 +186,7 @@ class setup_event_scheduler:
         gs.signal_view_clear()
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
         gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
-        time.sleep(3)
+        gs.server.sleep(3)
         for player in gs.players:
             gs.clear_deployables(player)
     

@@ -1,5 +1,27 @@
 from turn_loop_scheduler import *
 
+EVENT_HANDLERS = {
+    'R_D': ('reserve_deployment', False),
+    'B_C': ('build_cities', True),
+    'R_M': ('raise_megacities', True),
+    'BFC': ('build_free_cities', False),
+    'D_P': ('launch_orbital_strike', False),
+    'A_S': ('paratrooper_attack', False),
+    'C_T': ('corrupt_territory', False),
+    'S_M': ('set_minefields', False),
+    'B_S': ('build_silo', False),
+    'LUS': ('launch_from_silo_inner', False),
+    'M_R': ('make_ransom', False),
+    'G_I': ('gather_intel', False),
+    'S_F': ('set_forts', True),
+    'S_H': ('set_hall', True),
+    'L_N': ('logistic_nexus', True),
+    'L_C': ('leyline_cross', True),
+    'M_B': ('mobilization_bureau', True),
+    'BFLC': ('build_free_leyline_crosses', False),
+    'EP' : ('establish_pillars', False),
+}
+
 class General_Event_Scheduler:
 
     def __init__(self, gs, setup_events, time_settings):
@@ -44,6 +66,8 @@ class General_Event_Scheduler:
         # locking mechanism
         self.lock = threading.Lock()
 
+        self.turn_token = 0
+
         # Main thread
         self.main_flow = threading.Thread(target=self.execute_game_events)
 
@@ -70,29 +94,31 @@ class General_Event_Scheduler:
     def selection_time_out(self, num_secs, count):
         self.selected = 0
         self.gs.server.emit('start_timeout',{'secs': num_secs}, room=self.gs.lobby)
-        c = 0
-        while self.selected != count and c < num_secs:
-            time.sleep(1)
-            c += 1
+        for _ in range(num_secs):
+            if self.selected == count:
+                break
+            self.gs.server.sleep(1)
         self.gs.server.emit('stop_timeout', room=self.gs.lobby)
 
     # Timer for turn
-    def activate_timer(self, num_secs, curr_player):
+    def activate_timer(self, num_secs, curr_player, token):
         sec = 0
-        while not self.terminated and sec < num_secs and not self.interrupt and self.gs.players[curr_player].connected:
-            time.sleep(1)
+        while (not self.terminated 
+            and sec < num_secs 
+            and not self.interrupt 
+            and self.turn_token == token
+            and self.gs.players[curr_player].connected):
+            self.gs.server.sleep(1)  # non-blocking
             sec += 1
-       # self.stage_completed = True
-        self.terminated = True
-        self.stage_completed = True 
+        if not self.interrupt and self.turn_token == token:
+            self.terminated = True
         return
 
     def run_setup_events(self,):
-        time.sleep(15)
+        self.gs.server.sleep(15)
         self.gs.server.emit('set_up_announcement', {'msg': "Loading resources..."}, room=self.gs.lobby)
-        time.sleep(2)
+        self.gs.server.sleep(2)
         for event in self.SES:
-            print("Event Executed", event)
             event.executable(self.gs, self)
             if self.interrupt:
                 return
@@ -127,15 +153,14 @@ class General_Event_Scheduler:
         self.lock.acquire()
         if not self.interrupt:
             self.interrupt = True
-            curr = False
-            for p in self.gs.players:
-                curr = curr or self.gs.players[p].connected
+            curr = any(self.gs.players[p].connected for p in self.gs.players)
             if not curr:
+                self.lock.release()
                 print("Lobby Deleted")
                 return
             self.gs.signal_view_clear()
             # PAUSE TO GIVE TIME TO COMPUTE END RESULT
-            time.sleep(2)
+            self.gs.server.sleep(2) 
             self.flush_all_concurrent_events()
             self.gs.game_over()
         self.lock.release()
@@ -146,60 +171,30 @@ class General_Event_Scheduler:
         n = data['name']
         self.innerInterrupt = True  # Break current stage of the player's turn
 
-        # Change current thread to handle the async event
-        if n == 'R_D':
-            self.curr_thread = threading.Thread(target=self.reserve_deployment, args=(pid,))
-        elif n == 'B_C':
-            self.curr_thread = threading.Thread(target=self.build_cities, args=(data, pid))
-        elif n == 'R_M':
-            self.curr_thread = threading.Thread(target=self.raise_megacities, args=(data, pid))
-        elif n == 'BFC':
-            self.curr_thread = threading.Thread(target=self.build_free_cities, args=(pid,))
-        elif n == 'D_P':
-            self.curr_thread = threading.Thread(target=self.launch_orbital_strike, args=(pid,))
-        elif n == 'A_S':
-            self.curr_thread = threading.Thread(target=self.paratrooper_attack, args=(pid,))
-        elif n == 'C_T':
-            self.curr_thread = threading.Thread(target=self.corrupt_territory, args=(pid,))
-        elif n == 'S_M':
-            self.curr_thread = threading.Thread(target=self.set_minefields, args=(pid, ))
-        elif n == 'B_S':
-            self.curr_thread = threading.Thread(target=self.build_silo, args=(pid, ))
-        elif n == 'LUS':
-            self.curr_thread = threading.Thread(target=self.launch_from_silo_inner, args=(pid, ))
-        elif n == 'M_R':
-            self.curr_thread = threading.Thread(target=self.make_ransom, args=(pid,))
-        elif n == 'G_I':
-            self.curr_thread = threading.Thread(target=self.gather_intel, args=(pid,))
-        elif n == 'S_F':
-            self.curr_thread = threading.Thread(target=self.set_forts, args=(data, pid))
-        elif n == 'S_H':
-            self.curr_thread = threading.Thread(target=self.set_hall, args=(data, pid))
-        elif n == 'L_N':
-            self.curr_thread = threading.Thread(target=self.logistic_nexus, args=(data, pid))
-        elif n == 'L_C':
-            self.curr_thread = threading.Thread(target=self.leyline_cross, args=(data, pid))
-        elif n == 'M_B':
-            self.curr_thread = threading.Thread(target=self.mobilization_bureau, args=(data, pid))
-        elif n == 'BFLC':
-            self.curr_thread = threading.Thread(target=self.build_free_leyline_crosses, args=(pid, ))
-        elif n == 'EP':
-            self.curr_thread = threading.Thread(target=self.establish_pillars, args=(pid, ))
+        try:
+            fn_name, needs_data = EVENT_HANDLERS[n]
+        except KeyError:
+            self.gs.server.emit('display_new_notification', {'msg': f'Unknown async event: {n}'}, room=pid)
+            return
 
+        handler = getattr(self, fn_name)
 
         self.gs.server.emit('signal_hide_btns', room=pid)
-        self.curr_thread.start()
-        self.curr_thread.join()
+
+        if needs_data:
+            handler(data, pid)
+        else:
+            handler(pid)
+
         self.gs.server.emit('signal_show_btns', room=pid)
         print(f"{self.gs.players[pid].name}'s async action thread completed.")
         self.innerInterrupt = False
 
         # resume loop event if not terminated | timer didn't stop
-        if not self.terminated:
+        if not self.terminated and not self.interrupt:
             self.gs.server.emit('signal_show_btns', room=pid)
+            self.TLS.resume_loop(self, self.gs, pid, self.turn_token)
             print(f"{self.gs.players[pid].name}'s async action completed.")
-            self.curr_thread = threading.Thread(target=self.TLS.resume_loop, args=(self, self.gs, pid))
-            self.curr_thread.start()
         print("Exit async thread")
 
     def reserve_deployment(self, pid):
@@ -211,6 +206,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].reserves == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -231,6 +227,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -251,6 +248,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -271,6 +269,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -292,6 +291,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -312,6 +312,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -325,6 +326,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -345,6 +347,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].m_city_amt == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -402,6 +405,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finish_building
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -415,6 +419,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finish_building
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -428,6 +433,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finish_building
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -444,6 +450,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finished_bombardment
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -456,6 +463,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.limit == 0
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -470,6 +478,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finished_choosing
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -484,6 +493,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finished_choosing
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -498,6 +508,7 @@ class General_Event_Scheduler:
         done = False
         while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
             done = self.gs.players[pid].skill.finished_choosing
+            self.gs.server.sleep(0.05)
         print(f"{self.gs.players[pid].name}'s async action exited loop.")
         self.gs.server.emit("change_click_event", {'event': None}, room=pid)
         self.gs.server.emit("clear_view", room=pid)
@@ -517,6 +528,7 @@ class General_Event_Scheduler:
                 done = False
                 while not done and self.innerInterrupt and not self.terminated and player.connected:
                     done = player.skill.finished_setting
+                    self.gs.server.sleep(0.05)
                 print(f"{player.name}'s async action exited loop.")
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
@@ -538,6 +550,7 @@ class General_Event_Scheduler:
                 done = False
                 while not done and self.innerInterrupt and not self.terminated and player.connected:
                     done = player.skill.finished_setting
+                    self.gs.server.sleep(0.05)
                 print(f"{player.name}'s async action exited loop.")
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
@@ -565,6 +578,7 @@ class General_Event_Scheduler:
             done = False
             while not done and self.innerInterrupt and not self.terminated and player.connected:
                 done = skill.finished_launching
+                self.gs.server.sleep(0.05)
 
             print(f"{player.name}'s async event exited loop.")
             self.gs.server.emit("change_click_event", {'event': None}, room=pid)
