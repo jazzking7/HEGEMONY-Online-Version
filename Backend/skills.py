@@ -1345,7 +1345,7 @@ class Loan_Shark(Skill):
     def __init__(self, player, gs):
         super().__init__("Loan Shark", player, gs)
         self.max_loan = 1
-        if len(self.gs.players) > 5:
+        if len(self.gs.players) > 4:
             self.max_loan += 1
         elif len(self.gs.players) > 7:
             self.max_loan += 1
