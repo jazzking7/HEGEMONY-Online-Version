@@ -82,6 +82,15 @@ class General_Event_Scheduler:
                 'flag': False
             }
             event_thread.start()
+        elif event_name == 'D_P':
+            def event_function():
+                self.launch_divine_strike(pid)
+            event_thread = threading.Thread(target=event_function)
+            self.concurrent_events[pid] = {
+                'thread': event_thread,
+                'flag': False
+            }
+            event_thread.start()
 
     def flush_concurrent_event(self, pid):
         if pid in self.concurrent_events:
@@ -616,6 +625,41 @@ class General_Event_Scheduler:
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_launching:
                 self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
+            else:
+                self.gs.server.emit("set_up_announcement", {'msg': "Launching operation cancelled..."}, room=pid)
+        else:
+            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
+    
+    def launch_divine_strike(self, pid):
+        player = self.gs.players[pid]
+        skill = player.skill
+        if skill.active:
+
+            self.gs.server.emit('concurr_terminate_event_setup', {'pid': pid}, room=pid)
+            skill.finished_bombardment = False
+
+            #options = self.gs.map.recursive_get_trty_with_depth(skill.underground_silo, [skill.underground_silo], 0, skill.range)
+            strikables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories]
+
+
+            self.gs.server.emit('signal_hide_btns', room=pid)
+            
+            self.gs.server.emit('launch_orbital_strike_offturn', {'targets': strikables, 'usages': skill.limit-skill.offturn_used}, room=pid)
+            self.gs.server.emit('change_click_event', {'event': "launch_orbital_strike_offturn"}, room=pid)
+
+            print(f"{player.name}'s war art triggered a concurrent event.")
+            done = self.concurrent_events[pid]['flag']
+            while not skill.finished_bombardment and not done and player.connected:
+                done = self.concurrent_events[pid]['flag']
+            del self.concurrent_events[pid]
+            print(f"{player.name}'s concurrent event exited loop.")
+            self.gs.server.emit('signal_show_btns', room=pid)
+            self.gs.server.emit("clear_view", room=pid)
+            # not the player's turn, clear click event
+            if not (pid == self.gs.pids[self.current_player]):
+                self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+            if skill.finished_bombardment:
+                self.gs.server.emit("set_up_announcement", {'msg': "Orbital Strike launched..."}, room=pid)
             else:
                 self.gs.server.emit("set_up_announcement", {'msg': "Launching operation cancelled..."}, room=pid)
         else:

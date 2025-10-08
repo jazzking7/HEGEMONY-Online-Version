@@ -390,6 +390,8 @@ socket.on('change_click_event', function(data){
     currEvent = build_free_leyline_crosses;
   } else if (data.event == 'establish_pillars') {
     currEvent = establish_pillars;
+  } else if (data.event == 'launch_orbital_strike_offturn') {
+    currEvent = launch_orbital_strike_offturn;
   } else if (data.event == 'launch_orbital_strike'){
     currEvent = launch_orbital_strike;
   } else if (data.event == 'paratrooper_attack'){
@@ -2833,6 +2835,41 @@ socket.on('arsenal_controls', function(data) {
     $('#control_confirm').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_missile_targets', {'choices': toHighLight});
+      toHighLight = [];
+    });
+    $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      $('#proceed_next_stage').show();
+      toHighLight = [];
+    });
+  }
+
+  // orbital strike
+  socket.on('launch_orbital_strike_offturn', function(data){
+    announ = document.getElementById('announcement');
+    announ.innerHTML = `<h4>Orbital Strike ready. Choose up to ${data.usages} targets!</h4>`;
+    clickables = data.targets;
+    US_usages = data.usages;
+    toHighLight = [];
+  });
+
+  // orbital strike
+  function launch_orbital_strike_offturn(tid){
+    if (!clickables.includes(tid)){
+      return;
+    }
+    document.getElementById('control_panel').style.display = 'none';
+    toHighLight.push(tid);
+    if (toHighLight.length > US_usages) {
+        toHighLight.shift();
+    }
+    document.getElementById('control_mechanism').innerHTML = '';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+    $('#proceed_next_stage').hide();
+    $('#control_confirm').off('click').on('click' , function(){
+      document.getElementById('control_panel').style.display = 'none';
+      socket.emit('send_orbital_targets', {'choices': toHighLight});
       toHighLight = [];
     });
     $('#control_cancel').off('click').on('click' , function(){

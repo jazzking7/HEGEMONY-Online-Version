@@ -1188,6 +1188,14 @@ def handle_underground_strike(data):
         if gsm.players[pid].skill.name == "Arsenal of the Underworld":
             gsm.players[pid].skill.handle_US_strike(data['choices'])
 
+@socketio.on("send_orbital_targets")
+def handle_offturn_orbital_strike(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name == "Divine_Punishment":
+            gsm.players[pid].skill.handle_orbital_strike(data['choices'])
+
 @socketio.on('signal_concurr_end')
 def handle_concurr_end(data):
     pid = request.sid

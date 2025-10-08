@@ -758,7 +758,9 @@ class Divine_Punishment(Skill):
         self.energy_cost = 1 if player == gs.Annihilator else 2
         self.limit = (len(gs.players)-1)*2 if player == gs.Annihilator else len(gs.players)
         self.finished_bombardment = True
-
+        self.out_of_turn_activation = True
+        self.OS_waitlist = None
+        self.offturn_used = 0
         # if self.limit > len(gs.map.territories)//len(gs.players):
         #     self.limit = len(gs.map.territories)//len(gs.players) - 2
         #     self.energy_cost = 2
@@ -779,7 +781,7 @@ class Divine_Punishment(Skill):
             'description': "Operating an orbital strike station, you can launch bombardment and turn any enemy territory on the map into dead zone.",
             'operational': self.active,
             'hasLimit': True,
-            'limits': self.limit,
+            'limits': self.limit-self.offturn_used,
             'btn_msg': "LAUNCH ATTACK",
         }, room=self.player)
 
@@ -792,10 +794,33 @@ class Divine_Punishment(Skill):
         if not self.active:
             self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
             return
-        self.gs.GES.handle_async_event({'name': 'D_P'}, self.player)
+        if self.player == self.gs.pids[self.gs.GES.current_player]:
+            self.gs.GES.handle_async_event({'name': 'D_P'}, self.player)
+        else:
+            self.gs.GES.add_concurrent_event('D_P', self.player)
+    
+    def handle_orbital_strike(self, choices):
+        self.finished_bombardment = True
+        if not self.active:
+            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+            return
+        # too many targets
+        if len(choices) > self.limit:
+            self.gs.server.emit("display_new_notification", {"msg": f"Number of targets exceeding your usage limit!"}, room=self.player)
+            return
+        if self.player == self.gs.pids[self.gs.GES.current_player]:
+            self.validate_and_apply_changes({"choice": choices})
+        else:
+            self.OS_waitlist = {"choice": choices}
+            self.gs.GES.interturn_events.append(self)
+            self.offturn_used += len(choices)
+    
+    def execute_interturn(self):
+        self.validate_and_apply_changes(self.OS_waitlist)
+        self.OS_waitlist = None
 
     def validate_and_apply_changes(self, data):
-        
+        self.offturn_used = 0
         choices = data['choice']
 
         # Interruption
@@ -804,7 +829,7 @@ class Divine_Punishment(Skill):
             return
 
         # too many targets
-        if len(choices) > self.limit:
+        if len(choices) > self.limit-self.offturn_used:
             self.gs.server.emit("display_new_notification", {"msg": f"Number of targets exceeding your usage limit!"}, room=self.player)
             return
 
@@ -1951,6 +1976,9 @@ class Pillar_of_Immortality(Skill):
         cost = len(self.pillars) - self.free if len(self.pillars) > self.free else 0
         free_left = self.free - len(self.pillars) if len(self.pillars) < self.free else 0
         limits = min(limits, ((ply.total_troops//10 + ply.stars)-cost+free_left))
+        if limits < 0:
+            limits = 0
+        info = ""
         info += "Pillars active in: "
         for p in self.pillars:
             info += f"{self.gs.map.territories[p].name} "
