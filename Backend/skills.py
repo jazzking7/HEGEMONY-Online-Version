@@ -756,7 +756,7 @@ class Divine_Punishment(Skill):
         super().__init__("Divine_Punishment", player, gs)
         self.hasUsageLimit = True
         self.energy_cost = 1 if player == gs.Annihilator else 2
-        self.limit = (len(gs.players)-1)*2 if player == gs.Annihilator else len(gs.players)
+        self.limit = math.ceil((len(gs.players)-1)/3)
         self.finished_bombardment = True
         self.out_of_turn_activation = True
         self.OS_waitlist = []
