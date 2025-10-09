@@ -1409,6 +1409,7 @@ class Loan_Shark(Skill):
         self.ransom_history = {}
         self.hasRoundEffect = True
         self.finished_choosing = True
+        self.out_of_turn_activation = True
 
     def apply_round_effect(self):
         not_safe = []
@@ -1447,7 +1448,10 @@ class Loan_Shark(Skill):
     def activate_effect(self):
         if self.active:
             if len(self.loan_list) < self.max_loan:
-                self.gs.GES.handle_async_event({'name':"M_R"}, self.player)
+                if self.player == self.gs.pids[self.gs.GES.current_player]:
+                    self.gs.GES.handle_async_event({'name':"M_R"}, self.player)
+                else:
+                    self.gs.GES.add_concurrent_event('M_R', self.player)
             else:
                 self.gs.server.emit("display_new_notification", {'msg': "Ransom list is full!"}, room=self.player)
         else:
