@@ -1023,7 +1023,7 @@ class Game_State_Manager:
             if atk_p.skill.name == "Elitocracy" and atk_p.skill.active:
                 if trty_atk.isCity or trty_atk.isCapital:
                     atk_stats[2] += atk_p.skill.important_bonus
-            if atk_p.skill.name == "Mass_Mobilization" and atk_p.skill.active:
+            if atk_p.skill.name == "Mass Mobilization" and atk_p.skill.active:
                 atk_stats[4] += atk_amt//20
             if atk_p.skill.name == "Babylon" and atk_p.skill.active:
                 if 3 in atk_p.skill.passives:

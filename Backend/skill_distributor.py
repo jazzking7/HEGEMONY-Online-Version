@@ -7,7 +7,7 @@ class Skill_Distributor:
         self.skill_options = [
             "Iron_Wall",
             "Dictator",
-            "Mass_Mobilization",
+            "Mass Mobilization",
             "Industrial_Revolution",
             "Ares' Blessing",
             "Zealous_Expansion",
@@ -46,7 +46,7 @@ class Skill_Distributor:
             return "Ignore all stats during battles. Able to launch Ice Age that lasts 2 rounds using 2★. Ice Age significantly reduces enemy reinforcement and make them unable to gain Special Authority."
         elif skill_name == 'Dictator':
             return "Every round, you are guaranteed to earn 2★."
-        elif skill_name == 'Mass_Mobilization':
+        elif skill_name == 'Mass Mobilization':
             return "Able to summon a large amount of reserves. The weaker you are the more troops will you receive."
         elif skill_name == 'Industrial_Revolution':
             return "Able to build 2 free cities per continent. Get +1 Industrial Level during battles."
@@ -93,7 +93,7 @@ class Skill_Distributor:
             return Realm_of_Permafrost(player, gs)
         elif skill_name == 'Dictator':
             return Dictator(player, gs)
-        elif skill_name == 'Mass_Mobilization':
+        elif skill_name == 'Mass Mobilization':
             return Mass_Mobilization(player, gs)
         elif skill_name == 'Industrial_Revolution':
             return Industrial_Revolution(player, gs)

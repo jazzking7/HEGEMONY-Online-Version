@@ -254,7 +254,7 @@ class Dictator(Skill):
 class Mass_Mobilization(Skill):
 
     def __init__(self, player, gs):
-        super().__init__("Mass_Mobilization", player, gs)
+        super().__init__("Mass Mobilization", player, gs)
         self.hasUsageLimit = True
         self.hasCooldown = True
         self.hasRoundEffect = True
