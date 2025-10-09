@@ -710,7 +710,8 @@ class Decapitator(Mission):
         self.target_players = None
         numt = 0
         nump = len(gs.pids)
-        numt = nump - 1
+        numt = 3 if nump > 3 else 2
+        numt = nump//(2) + 1 if nump > 7 else numt
         while self.target_players is None:
             self.target_players = random.sample(gs.pids, numt)
             if player in self.target_players:
