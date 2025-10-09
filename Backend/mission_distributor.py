@@ -68,23 +68,31 @@ class Mission_Distributor:
         self.self_wins = ['Loy', 'Bon', 
                           'Dec', 'War', 'Pac', 'Str', 'Due', 'Pun', 'Sur', 'Ass', 'Pro', 
                           'Gam', 'Ann', 'Spy']
+        self.beginner = [
+            'War', 'Bon', 'Gua', 'Pop', 'Ind', 'Exp', 'Loy', 'Dec'
+        ]
+        self.intermediate = [
+            'War', 'Bon', 'Gua', 'Pop', 'Ind', 'Exp', 'Loy', 'Dec',
+            'Uni', 'Pol', 'Str', 'Pac'
+        ]
+        self.pro = [
+            'War', 'Bon', 'Gua', 'Pop', 'Ind', 'Exp', 'Loy', 'Dec',
+            'Uni', 'Pol', 'Str', 'Pac', 'Dom', 'Fan', 'Due', 'Gam'
+        ]
+        self.master = [
+            'War', 'Bon', 'Gua', 'Pop', 'Ind', 'Exp', 'Loy', 'Dec',
+            'Uni', 'Pol', 'Str', 'Pac', 'Dom', 'Fan', 'Due', 'Gam',
+            'Sur', 'Ass', 'Pro', 'Pun'
+        ]
+
         self.missions = [
-                          'War', 'Loy', 'Bon',
-             'Ind',
-             'Exp', 'Pop',
-             'Gua',
-             'Dec',
-                          'Dom',
-                          'Pac', 
-            'Uni', 'Pol', 'Fan', 
-             'Str', 
-             'Due', 'Pun',
-             'Sur',
-             'Ass', 'Pro', 
-             'Ann',
-             'Opp',
-             'Gam',
-             'Spy'
+            'War', 'Loy', 'Bon',
+             'Ind','Exp', 'Pop',
+             'Gua', 'Dec','Dom',
+            'Pac', 'Uni', 'Pol', 'Fan', 
+             'Str',  'Due', 'Pun',
+             'Sur', 'Ass', 'Pro', 
+             'Ann',  'Opp',  'Gam', 'Spy'
         ]
 
         self.S_tier = ['Decapitator', 'Pacifist', 'Starchaser', 'Duelist', 'Punisher', 'Assassin', 'Protectionist', 'Annihilator', 'Spymaster']
@@ -126,10 +134,19 @@ class Mission_Distributor:
         return False
 
     # Generate mission set based on number of players
-    def get_mission_set(self, num_p):
-        hasAnn = random.randint(1,100) > 80
-        hasOpp = random.randint(1,100) > 90
-        noProAss = random.randint(1,100) > 50
+    def get_mission_set(self, num_p, complexity="pioneer"):
+        mission_pool = self.missions
+        if complexity == 'beginner':
+            mission_pool = self.beginner
+        elif complexity == 'intermediate':
+            mission_pool = self.intermediate
+        elif complexity == 'pro':
+            mission_pool = self.pro
+        elif complexity == 'master':
+            mission_pool = self.master
+        hasAnn = random.randint(1,100) > 80 and complexity == 'pioneer'
+        hasOpp = random.randint(1,100) > 90 and complexity == 'pioneer'
+        noProAss = random.randint(1,100) > 50 and complexity in ['pioneer', 'master']
         has2C = allS = False
         if num_p > 3:
             mode = random.randint(1,100)
@@ -141,8 +158,9 @@ class Mission_Distributor:
         miss_set = []
         done = False
         count = 0
+        print(mission_pool)
         while not done:
-            choice = random.choice(self.missions)
+            choice = random.choice(mission_pool)
             if choice == 'Loy':
                 if (count + 2) <= num_p and num_p > 4:
                     miss_set.append(choice)

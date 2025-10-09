@@ -115,6 +115,8 @@ class Game_State_Manager:
         # Special mission condition checker
         self.SMset = []
 
+        self.complexity = None
+
         # Elimination Tracker
         self.et = Elimination_tracker()
         # End game tracker

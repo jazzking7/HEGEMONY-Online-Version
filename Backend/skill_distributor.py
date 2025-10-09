@@ -30,11 +30,49 @@ class Skill_Distributor:
             "Babylon"
         ]
 
+        self.beginner = [ 
+            "Iron_Wall", "Dictator", "Mass Mobilization", "Industrial_Revolution", 
+            "Ares' Blessing", "Zealous_Expansion", "Elitocracy", "Divine_Punishment"
+            ]
+        self.intermediate = [ 
+            "Iron_Wall", "Dictator", "Mass Mobilization", "Industrial_Revolution", 
+            "Ares' Blessing", "Zealous_Expansion", "Elitocracy", "Divine_Punishment",
+            "Robinhood", "Realm_of_Permafrost", "Necromancer", "Air_Superiority"
+            ]
+        self.pro = [ 
+            "Iron_Wall", "Dictator", "Mass Mobilization", "Industrial_Revolution", 
+            "Ares' Blessing", "Zealous_Expansion", "Elitocracy", "Divine_Punishment",
+            "Robinhood", "Realm_of_Permafrost", "Necromancer", "Air_Superiority",
+            "Collusion", "Laplace's Demon", "Arsenal of the Underworld", "Loan Shark"
+            ]
+        self.master = [ 
+            "Iron_Wall", "Dictator", "Mass Mobilization", "Industrial_Revolution", 
+            "Ares' Blessing", "Zealous_Expansion", "Elitocracy", "Divine_Punishment",
+            "Robinhood", "Realm_of_Permafrost", "Necromancer", "Air_Superiority",
+            "Collusion", "Laplace's Demon", "Arsenal of the Underworld", "Loan Shark", 
+            "Reaping of Anubis", "Pandora's Box", "Loopwalker", "Revanchism"
+            ]
+
     def get_Annihilator_options(self, ):
         return ['Elitocracy', 'Air_Superiority', 'Dictator', 'Divine_Punishment', 'Necromancer', 'Realm_of_Permafrost', 'Reaping of Anubis', 'Babylon']
 
-    def get_options(self, ):
-        return random.sample(self.skill_options, k=9)
+    def get_options(self, complexity="pioneer"):
+        skill_pool = self.skill_options
+        N = 9
+        if complexity == 'beginner':
+            skill_pool = self.beginner
+            N = 5
+        elif complexity == 'intermediate':
+            skill_pool = self.intermediate
+            N = 6
+        elif complexity == 'pro':
+            skill_pool = self.pro
+            N = 7
+        elif complexity == 'master':
+            skill_pool = self.master
+            N = 8
+        print(skill_pool)
+        return random.sample(skill_pool, k=N)
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)

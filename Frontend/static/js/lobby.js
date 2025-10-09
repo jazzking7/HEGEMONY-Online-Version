@@ -9,6 +9,7 @@ $(document).ready(function() {
         $('#trty_set_time').prop("disabled", false);
         $('#power_set_time').prop("disabled", false);
         $("#turn_time").prop("disabled", false);
+        $("#complexity").prop("disabled", false);
 
         // Share updates on settings
         $("#map_selection").change(function () {
@@ -43,6 +44,14 @@ $(document).ready(function() {
             });
         });
 
+        $("#complexity").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'complexity',
+                complexity: selectedMap
+            });
+        });
+
         // Display start game button
         $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
 
@@ -53,7 +62,8 @@ $(document).ready(function() {
                 'trty_set_time': $("#trty_set_time").val(),
                 'power_set_time': $('#power_set_time').val(),
                 'turn_time': $('#turn_time').val(),
-                'map_selected': $('#map_selection').val()
+                'map_selected': $('#map_selection').val(),
+                'complexity': $('#complexity').val()
             };
             socket.emit('start_game', data);
         });
@@ -118,6 +128,9 @@ $(document).ready(function() {
                 break;
             case 'power_set_time':
                 $('#power_set_time').val(data.power_set_time)
+                break;
+            case 'complexity':
+                $('#complexity').val(data.complexity)
                 break;
         }
     });

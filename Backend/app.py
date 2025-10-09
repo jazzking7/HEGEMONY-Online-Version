@@ -225,6 +225,7 @@ def startGame(data):
     lobby['gsm'].Mdist = MDIS
     lobby['gsm'].egt = EGT
     lobby['gsm'].SDIS = SDIS
+    lobby['gsm'].complexity = data.get('complexity')
 
     socketio.emit('game_started', room=lobby_id)
 

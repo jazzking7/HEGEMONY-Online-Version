@@ -32,7 +32,7 @@ class setup_event_scheduler:
     # MISSION DISTRIBUTION
     def distribute_missions(self, gs, ms):
         # CM
-        miss_set = gs.Mdist.get_mission_set(len(gs.pids))
+        miss_set = gs.Mdist.get_mission_set(len(gs.pids), gs.complexity)
         for index, player in enumerate(gs.pids):
             miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
 
@@ -193,7 +193,7 @@ class setup_event_scheduler:
     def start_skill_selection(self, gs, ms):
         gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
         for player in gs.players:
-            options = gs.SDIS.get_options() if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
+            options = gs.SDIS.get_options(gs.complexity) if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
         ms.selection_time_out(ms.power_set_time, len(gs.players))
