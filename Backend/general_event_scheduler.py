@@ -626,6 +626,7 @@ class General_Event_Scheduler:
             done = self.concurrent_events[pid]['flag']
             while not skill.finished_launching and not done and player.connected:
                 done = self.concurrent_events[pid]['flag']
+                self.gs.server.sleep(0.05)
             del self.concurrent_events[pid]
             print(f"{player.name}'s concurrent event exited loop.")
             self.gs.server.emit('signal_show_btns', room=pid)
@@ -661,6 +662,7 @@ class General_Event_Scheduler:
             done = self.concurrent_events[pid]['flag']
             while not skill.finished_bombardment and not done and player.connected:
                 done = self.concurrent_events[pid]['flag']
+                self.gs.server.sleep(0.05)
             del self.concurrent_events[pid]
             print(f"{player.name}'s concurrent event exited loop.")
             self.gs.server.emit('signal_show_btns', room=pid)
@@ -694,6 +696,7 @@ class General_Event_Scheduler:
             done = self.concurrent_events[pid]['flag']
             while not skill.finished_choosing and not done and player.connected:
                 done = self.concurrent_events[pid]['flag']
+                self.gs.server.sleep(0.05)
             del self.concurrent_events[pid]
             print(f"{player.name}'s concurrent event exited loop.")
             self.gs.server.emit('signal_show_btns', room=pid)
