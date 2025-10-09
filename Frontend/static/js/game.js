@@ -36,6 +36,9 @@ let minefields_amount = 0;
 let US_usages = 0;
 // Loan Shark
 let in_debt = false;
+
+let playCountdown = false;
+
 $(document).ready(async function() {
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
@@ -118,6 +121,16 @@ function startTimeout(totalSeconds) {
   current_interval = setInterval(function() {
     progress -= 1 / totalSeconds; 
     timeoutBar.animate(progress); // Animate the progress bar
+
+    if (playCountdown) {
+      var remaining = Math.round(progress * totalSeconds);
+      if (remaining === 18 || remaining === 12 || remaining === 6) {
+        var tmpCountdown = document.getElementById('countdown');
+        tmpCountdown.volume = 0.55;
+        tmpCountdown.play();
+      }
+    }
+
     if (progress <= 0) {
       clearInterval(current_interval);
       timeoutBar.set(0);
@@ -149,9 +162,14 @@ socket.on('start_timeout', function(data){
   startTimeout(data.secs);
 });
 
+socket.on('set_countdown', function(){
+  playCountdown = true;
+});
+
 // Stop timer animation
 socket.on('stop_timeout', function(){
   clearInterval(current_interval);
+  playCountdown = false;
 });
 
 // Laplace setting

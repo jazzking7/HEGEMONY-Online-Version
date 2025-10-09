@@ -299,6 +299,7 @@ class turn_loop_scheduler:
         gs.server.start_background_task(ms.activate_timer, ms.turn_time, curr_player, token)
         
         gs.server.emit('start_timeout', {'secs': ms.turn_time}, room=gs.lobby)
+        gs.server.emit('set_countdown', room=self.gs.lobby)
         print(f"{gs.players[curr_player].name}'s turn started.")
         print(f"Their pid is {curr_player}")
         gs.server.emit('signal_show_btns', room=curr_player)

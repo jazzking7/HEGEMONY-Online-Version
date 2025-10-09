@@ -113,6 +113,8 @@ class General_Event_Scheduler:
     def selection_time_out(self, num_secs, count):
         self.selected = 0
         self.gs.server.emit('start_timeout',{'secs': num_secs}, room=self.gs.lobby)
+        if num_secs > 50:
+            self.gs.server.emit('set_countdown', room=self.gs.lobby)
         for _ in range(num_secs):
             if self.selected == count:
                 break
