@@ -78,7 +78,6 @@ class Mission:
                 self.gs.get_LAO()
                 self.gs.get_SUP()
 
-
 class Pacifist(Mission):
 
     def __init__(self, player, gs):
