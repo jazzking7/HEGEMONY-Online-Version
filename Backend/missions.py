@@ -921,7 +921,7 @@ class Duelist(Mission):
 class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
-        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist", "Protectionist", "Assassin", "Annihilator"]
+        self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist", "Protectionist", "Assassin", "Annihilator", "Spymaster"]
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -1256,7 +1256,7 @@ class Spymaster(Mission):
         if self.gs.GES.round > 4:
             for p in self.gs.death_time:
                 if self.gs.death_time[p][0] == self.player:
-                    if self.gs.death_time[p][1] >= 5:
+                    if self.gs.death_time[p][1] > 4:
                         return True
         
     def set_up_tracker_view(self, ):
@@ -1271,7 +1271,7 @@ class Spymaster(Mission):
         
         for p in self.gs.death_time:
             if self.gs.death_time[p][0] == self.player:
-                if self.gs.death_time[p][1] >= 5:
+                if self.gs.death_time[p][1] > 4:
                     return True
         return False
     

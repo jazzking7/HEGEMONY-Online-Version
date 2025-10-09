@@ -102,6 +102,7 @@ class Elimination_tracker:
             if d_pid not in gs.death_logs:
                 gs.death_logs[d_pid] = a_pid
                 gs.death_time[d_pid] = [a_pid, gs.GES.round]
+                print(f"The kill is executed at round {gs.GES.round}")
             # check death dependent mission
             gs.signal_MTrackers('death')
 
