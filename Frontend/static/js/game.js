@@ -513,6 +513,36 @@ socket.on('display_special_notification', function(data){
   special_popup(data.msg, 3000, data.t_color, data.b_color);
 })
 
+function playTap(){
+  $('#tap').prop('volume', 0.5).trigger('play');
+}
+
+function playRefuse(){
+  $('#refuse').prop('volume', 0.5).trigger('play');
+}
+
+// SFX
+socket.on('playSFX', function(data){
+  if (data.sfx == "alarm") {
+        var alarm = document.getElementById('alarm');
+        alarm.volume = 0.35;
+        alarm.play();
+  } else if (data.sfx == "blessing") {
+        var blessing = document.getElementById('blessing');
+        blessing.volume = 0.35;
+        blessing.play();
+  } else if (data.sfx == "sanction") {
+        var sanction = document.getElementById('sanction');
+        sanction.volume = 0.35;
+        sanction.play();
+  }
+})
+
+// Explosion
+socket.on('explosion_animation', function(data){
+    explodeAtTerritory(data.tid, { power: 320, sparks: 56, smoke: 20, withRing: true });
+});
+
 //===============================Mission Related Display=============================================
 
 // Receive Mission + Display info on Mission Tracker
@@ -686,6 +716,7 @@ socket.on('choose_color', function(data){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_c.style.border = "none";
+            playRefuse();
           });
         }
       };
@@ -767,6 +798,7 @@ socket.on('choose_territorial_distribution', function(data){
             disabled = false;
             btn_dist.style.border = "none";
             toHighLight = [];
+            playRefuse();
           });
         }
       };
@@ -790,6 +822,7 @@ function settle_capital(tid){
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
+      playRefuse();
     });
   }
 }
@@ -814,6 +847,7 @@ function settle_cities(tid){
         $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHighLight = [];
+        playRefuse();
         });
     }
   }
@@ -858,6 +892,7 @@ socket.on('choose_skill', function(data){
         });
         $('#control_cancel').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
+          playRefuse();
           disabled = false;
           btn_skill.style.border = "none";
           let existingDesc = document.getElementById('skill_description_box');
@@ -1024,6 +1059,7 @@ socket.on('conquest', function(){
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
+      playRefuse();
     });
 
   });
@@ -1088,7 +1124,7 @@ function troop_deployment(tid){
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
-
+      playRefuse();
       // Sync clicks
       socket.emit('remove_click_sync', {'tid': tid});
 
@@ -1181,6 +1217,7 @@ function conquest(tid){
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
+        playRefuse();
         document.getElementById('control_panel').style.display = 'none';
         toHighLight = [];
         // Sync clicks
@@ -1248,7 +1285,7 @@ function rearrange(tid){
         clickables = [];
         $('#proceed_next_stage').show();
       });
-      $('#control_cancel').off('click').on('click' , function(){
+      $('#control_cancel').off('click').on('click' , function(){playRefuse();
         document.getElementById('control_panel').style.display = 'none';
         toHighLight = [];
         socket.emit('clear_otherHighlights');
@@ -1413,7 +1450,7 @@ function deploy_reserves(tid){
     socket.emit('send_reserves_deployed', {'choice': toHighLight[0], 'amount': troopInput.value});
     toHighLight = [];
     });
-    $('#control_cancel').off('click').on('click' , function(){
+    $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
     });
@@ -1438,7 +1475,7 @@ function build_cities(tid){
           socket.emit('settle_cities', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1463,7 +1500,7 @@ function raise_megacities(tid){
           socket.emit('settle_megacities', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1488,7 +1525,7 @@ function set_forts(tid){
           socket.emit('settle_forts', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1513,7 +1550,7 @@ function set_hall(tid){
           socket.emit('settle_hall', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1538,7 +1575,7 @@ function set_nexus(tid){
           socket.emit('settle_nexus', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1563,7 +1600,7 @@ function set_leyline(tid){
           socket.emit('settle_leyline', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -1588,7 +1625,7 @@ function set_bureau(tid){
           socket.emit('settle_bureau', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -2445,7 +2482,7 @@ function establish_pillars(tid){
           socket.emit('settle_pillars', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -2473,7 +2510,7 @@ function build_free_leyline_crosses(tid){
           socket.emit('build_free_leyline_crosses', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -2502,7 +2539,7 @@ function build_free_cities(tid){
           socket.emit('build_free_cities', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -2533,7 +2570,7 @@ function launch_orbital_strike(tid){
           socket.emit('strike_targets', {'choice': toHighLight});
           toHighLight = [];
         });
-        $('#control_cancel').off('click').on('click', function(){
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
         });
@@ -2611,7 +2648,7 @@ function paratrooper_attack(tid){
           clickables = [];
           $('#proceed_next_stage').show();
         });
-        $('#control_cancel').off('click').on('click' , function(){
+        $('#control_cancel').off('click').on('click' , function(){playRefuse();
           document.getElementById('control_panel').style.display = 'none';
           toHighLight = [];
           clickables = [];
@@ -2643,7 +2680,7 @@ function corrupt_territory(tid){
     socket.emit('send_corrupt_territory', {'choice': toHighLight[0]});
     toHighLight = [];
   });
-  $('#control_cancel').off('click').on('click' , function(){
+  $('#control_cancel').off('click').on('click' , function(){playRefuse();
     document.getElementById('control_panel').style.display = 'none';
     $('#proceed_next_stage').show();
     toHighLight = [];
@@ -2789,7 +2826,7 @@ socket.on('arsenal_controls', function(data) {
       socket.emit('send_minefield_choices', {'choices': toHighLight});
       toHighLight = [];
     });
-    $('#control_cancel').off('click').on('click' , function(){
+    $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
@@ -2820,7 +2857,7 @@ socket.on('arsenal_controls', function(data) {
       socket.emit('send_silo_location', {'choice': toHighLight[0]});
       toHighLight = [];
     });
-    $('#control_cancel').off('click').on('click' , function(){
+    $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
@@ -2855,7 +2892,7 @@ socket.on('arsenal_controls', function(data) {
       socket.emit('send_missile_targets', {'choices': toHighLight});
       toHighLight = [];
     });
-    $('#control_cancel').off('click').on('click' , function(){
+    $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
@@ -2890,7 +2927,7 @@ socket.on('arsenal_controls', function(data) {
       socket.emit('send_orbital_targets', {'choices': toHighLight});
       toHighLight = [];
     });
-    $('#control_cancel').off('click').on('click' , function(){
+    $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
@@ -2979,7 +3016,7 @@ socket.on('arsenal_controls', function(data) {
                 });
 
                 // Cancel button action
-                $('#control_cancel').off('click').on('click', function(){
+                $('#control_cancel').off('click').on('click', function(){playRefuse();
                     document.getElementById('control_panel').style.display = 'none';
                     $('#proceed_next_stage').show();
 
@@ -3076,7 +3113,7 @@ socket.on('gather_intel', function(data) {
               });
 
               // Cancel button action
-              $('#control_cancel').off('click').on('click', function(){
+              $('#control_cancel').off('click').on('click', function(){playRefuse();
                   document.getElementById('control_panel').style.display = 'none';
                   $('#proceed_next_stage').show();
 
@@ -3317,6 +3354,7 @@ function mouseClicked() {
     if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
       let tid = hover_over.id;
       if (currEvent){
+        playTap();
         currEvent(tid);
       } 
     }

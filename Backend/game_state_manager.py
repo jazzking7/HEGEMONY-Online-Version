@@ -1158,6 +1158,7 @@ class Game_State_Manager:
         # attacker wins
         # CM
         if result[0] > 0:
+            self.server.emit('explosion_animation', {'tid': t2}, room=self.lobby)
             # Counter multiplier overkill
             if result[1] < 0:
                 result[1] = 0
@@ -1213,6 +1214,7 @@ class Game_State_Manager:
 
         # defender wins
         else:
+            self.server.emit('explosion_animation', {'tid': t1}, room=self.lobby)
             # Counter multiplier overkill
             if result[1] <= 0:
                 result[1] = 1

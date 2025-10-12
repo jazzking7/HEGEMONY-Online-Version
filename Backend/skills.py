@@ -1481,6 +1481,7 @@ class Loan_Shark(Skill):
         curr.hijacked = True
         if curr.skill:
             curr.skill.active = False
+        self.gs.server.emit('playSFX', {"sfx": "sanction"}, room=pid)
         self.gs.server.emit('show_debt_button', room=pid)
 
     def handle_payment(self, player, method):

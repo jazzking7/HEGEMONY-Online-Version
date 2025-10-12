@@ -272,6 +272,7 @@ class turn_loop_scheduler:
                         p.reserves += p.numLeylines * 5 if moreBlessings else p.numLeylines * 4
                     else:
                         p.stars += p.numLeylines + 1 if moreBlessings else p.numLeylines
+                    gs.server.emit("playSFX", {"sfx": "blessing"}, room=player)
                     gs.server.emit("display_special_notification", {"msg": "YOU HAVE RECEIVED LEYLINE BLESSING", "t_color": "#000000", "b_color": "#6987D5"}, room=player)
 
             # Dictator receives more stars
@@ -418,14 +419,17 @@ class turn_loop_scheduler:
                     if miss.name == "Loyalist":
                         if ms.round == 3:
                             gs.server.sleep(2)
+                            gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Annihilator":
                         if ms.round == 2:
                             gs.server.sleep(2)
+                            gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF Annihilator DETECTED! HIGHLY RISKY SITUATION!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
                             gs.server.sleep(2)
+                            gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF SURVIVALIST DETECTED! ELIMINATE THEM!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]
