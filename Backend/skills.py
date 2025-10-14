@@ -933,7 +933,7 @@ class Divine_Punishment(Skill):
                             self.gs.players[player].skill.checking_rage_meter()
 
                     # visual effect
-                    self.gs.server.emit('explosion_animation', {'tid': choice}, room=self.lobby)
+                    self.gs.server.emit('nuke_animation', {'tid': choice}, room=self.gs.lobby)
                     self.gs.server.emit('battle_casualties', {
                         f'{choice}': {'tid': choice, 'number': casualties},
                     }, room=self.gs.lobby)
@@ -1345,7 +1345,7 @@ class Arsenal_of_the_Underworld(Skill):
                     }, room=self.gs.lobby)
                     break
             self.gs.server.emit('update_trty_display', {choice: {'troops': curr_territory.troops}}, room=self.gs.lobby)
-            self.gs.server.emit('explosion_animation', {'tid': choice}, room=self.lobby)
+            self.gs.server.emit('arsenal_animation', {'tid': choice}, room=self.gs.lobby)
             # neighboring territory shockwave damage
             for nt in curr_territory.neighbors:
                 if nt in self.gs.players[self.player].territories:

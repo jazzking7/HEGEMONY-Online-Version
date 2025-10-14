@@ -543,6 +543,23 @@ socket.on('explosion_animation', function(data){
     explodeAtTerritory(data.tid, { power: 320, sparks: 56, smoke: 20, withRing: true });
 });
 
+// Nuke
+socket.on('nuke_animation', function(data){
+    var tid = data.tid;
+    if (tid == null || tid < 0 || tid >= territories.length) return;
+    const c = territories[tid].cps;   // world coords
+    spawnMegaNuke(c.x, c.y);
+});
+
+// Missile
+socket.on('arsenal_animation', function(data){
+    var tid = data.tid;
+    if (tid == null || tid < 0 || tid >= territories.length) return;
+    const c = territories[tid].cps; 
+    spawnCluster(c.x, c.y, 5, 100);
+});
+
+
 //===============================Mission Related Display=============================================
 
 // Receive Mission + Display info on Mission Tracker
@@ -3326,6 +3343,18 @@ function mousePressed() {
     previousMouseX = mouseX;
     previousMouseY = mouseY;
   }
+
+  // if (mouseButton === LEFT && hover_over.id != null){
+  //   explodeAtTerritory(hover_over.id, { power: 300, sparks: 60, smoke: 20, withRing: true });
+  //   addShake(12, 250);
+  //   triggerFlash(200, 120);
+  // } 
+  // else 
+  //   if (mouseButton === LEFT && hover_over.id != null){
+  //   const c = territories[hover_over.id].cps;
+  //   spawnMegaNuke(width/2 - offsetX, height/2 - offsetY);
+  //   //spawnLineBlast(0,0,width/2,height/2);
+  // }
 }
 
 // Stop dragging
