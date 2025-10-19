@@ -824,9 +824,9 @@ class Divine_Punishment(Skill):
         choices = data['choice']
 
         # Interruption
-        if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
-            return
+        # if not self.active:
+        #     self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+        #     return
 
         # too many targets
         if len(choices) > self.limit-self.offturn_used:
