@@ -146,6 +146,16 @@ class Game_State_Manager:
         # Annihilator
         self.Annihilator = None
 
+        self.colorSets = {
+            1 : ["#00BBC9"],
+            2 : ["#FBC78D","#00BBC9"],
+            3 : ["#333333",  "#7DF9FF",   "#00BBC9"],
+            4 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21"],
+            5 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF"],
+            6 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF",  "#F06060"],
+            7 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF",  "#F06060", "#4169E1"]
+        }
+
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
 

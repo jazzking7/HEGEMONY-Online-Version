@@ -13,7 +13,7 @@ class setup_event_scheduler:
     def __init__(self, ):
         self.events = [
             Event("give_mission", self.distribute_missions),
-            Event("choose_color", self.start_color_distribution),
+            # Event("choose_color", self.start_color_distribution),
             Event("choose_distribution", self.start_territorial_distribution),
             Event("choose_capital", self.start_capital_settlement),
             Event("set_cities", self.start_city_settlement),
@@ -87,7 +87,8 @@ class setup_event_scheduler:
     # TURN-BASED
     def start_territorial_distribution(self,gs, ms):
         gs.aval_choices = {}
-        choices = random.sample(gs.color_options, k=len(gs.players))
+        # choices = random.sample(gs.color_options, k=len(gs.players))
+        choices = gs.colorSets[len(gs.players)]
         gs.shuffle_players()
         # RANDOM TRTY DISTRIBUTION
         avg_num_trty = math.floor(len(gs.map.tnames)/len(gs.players))
@@ -127,6 +128,7 @@ class setup_event_scheduler:
                 # CM
                 print("Did not choose a distribution!")
                 random_key, random_dist = random.choice(list(gs.aval_choices.items()))
+                gs.players[player].color = random_key
                 gs.players[player].territories = random_dist
                 gs.server.emit('update_player_territories', {'list': gs.players[player].territories}, room=player)
                 del gs.aval_choices[random_key]
@@ -134,6 +136,7 @@ class setup_event_scheduler:
                     gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby) 
                 gs.server.emit('clear_view', room=player)
         gs.aval_choices = []
+        gs.send_player_list()
     
     def start_capital_settlement(self, gs, ms):
         gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)

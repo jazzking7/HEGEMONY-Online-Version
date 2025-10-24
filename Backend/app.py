@@ -483,6 +483,7 @@ def update_dist_choice(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].territories = gsm.aval_choices[dist]
     del gsm.aval_choices[dist]
+    gsm.players[pid].color = dist
     # CM
     socketio.emit('update_player_territories', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
