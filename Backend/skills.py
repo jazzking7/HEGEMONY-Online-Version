@@ -1416,7 +1416,7 @@ class Loan_Shark(Skill):
     def apply_round_effect(self):
         not_safe = []
         for player in self.ransom_history:
-            if self.gs.GES.round - self.ransom_history[player] == 3:
+            if self.gs.GES.round - self.ransom_history[player] == 2:
                 if player not in not_safe:
                     not_safe.append(player)
         for p in not_safe:
