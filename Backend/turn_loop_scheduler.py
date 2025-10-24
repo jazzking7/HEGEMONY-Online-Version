@@ -323,6 +323,10 @@ class turn_loop_scheduler:
 
         while not ms.interrupt:
 
+            if ms.round == 0:
+                gs.players[curr_player].stars += 0 if (ms.current_player <= 2) else math.floor(ms.current_player / 2)
+                gs.update_private_status(curr_player)
+
             # checking if player is alive | permitting entry
             if gs.players[curr_player].alive:
                 self.execute_turn(gs, ms, curr_player)
