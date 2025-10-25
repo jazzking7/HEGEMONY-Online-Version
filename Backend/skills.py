@@ -619,11 +619,12 @@ class Zealous_Expansion(Skill):
         super().__init__("Zealous_Expansion", player, gs)
         self.intMod = True
         self.bonus_level = 0
+        self.gs.players[player].infrastructure_upgrade += 1
 
     def internalStatsMod(self, battle_stats):
         if self.active:
-            addi = (battle_stats[0] - 2) - 3
-            battle_stats[1] += addi
+            # addi = (battle_stats[0] - 2) - 3
+            battle_stats[1] += 1
 
     def update_current_status(self):
 
