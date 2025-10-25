@@ -228,36 +228,51 @@ class turn_loop_scheduler:
             p = gs.players[player]
             # Get stars probability based on territory conquered
             if p.turn_victory:
+                bonus = max(min(gs.get_player_infra_level(p),9),0)
+                infraticks = [3,3,2,2,1,1,1,1,1]
+                ticks = sum(infraticks[:bonus])
+                cap = min(0.03*ticks, 0.45)
+                print(f"4 star cap: {cap*100}%")
+                     
                 advance = False
                 for trty in p.territories:
                     if gs.map.territories[trty].isTransportcenter:
                         advance = True
                         break
+
                 s_amt = 0
                 if not advance:
-                    s1, s2, s3 = 0.45, 0.3, 0.25
+                    s1, s2, s3, s4 = 0.45, 0.3, 0.25, 0.0
                     p.con_amt = min(p.con_amt, 9)
+                    per4 = cap / 9.0 if cap > 0 else 0.0
                     for _ in range(p.con_amt):
                         d = min(0.05, s1)
                         s1 -= d
-                        s2 += d * 0.5
-                        s3 += d * 0.5
-
-                    s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+                        add4 = min(per4, cap - s4, d)
+                        s4 += add4
+                        rem = d - add4
+                        s2 += rem * 0.5
+                        s3 += rem * 0.5
+                    s1 = max(0, s1)
+                    s_amt = random.choices([1,2,3,4],[s1, s2, s3, s4],k=1)[0]
                 else:
                     s1, s2, s3, s4 = 0.45, 0.3, 0.25, 0
                     p.con_amt = min(p.con_amt, 9)
+                    per4 = cap / 6.0 if cap > 0 else 0.0
                     for i in range(p.con_amt):
                         if i < 6:
                             d = min(0.075, s1)
                             s1 -= d
-                            s2 += d * 0.5
-                            s3 += d * 0.5
+                            add4 = min(per4, cap - s4, d)
+                            s4 += add4
+                            rem = d - add4
+                            s2 += rem * 0.5
+                            s3 += rem * 0.5
                         else:
                             s2 -= 0.1
                             s3 += 0.05
                             s4 += 0.05
-
+                    s1 = max(0, s1)
                     s_amt = random.choices([1,2,3,4],[s1,s2,s3,s4],k=1)[0]
 
                 # Ice Age!
