@@ -1074,6 +1074,24 @@ class Game_State_Manager:
                                 def_stats[3] += 5
                                 if def_stats[3] > 90:
                                     def_stats[3] = 90
+        
+        atkh = False
+        defh = False
+        # Central Managed Troop Training + Integrated Theater Command
+        for h1 in atk_p.territories:
+            if self.map.territories[h1].isHall:
+                reachable_trty = self.map.get_reachable_trty(h1, atk_p.territories)
+                if t1 in reachable_trty:
+                    atk_stats[4] += 1
+                atkh = True
+                break
+        for h2 in def_p.territories:
+            if self.map.territories[h2].isHall:
+                reachable_trty = self.map.get_reachable_trty(h2, def_p.territories)
+                if t2 in reachable_trty:
+                    def_stats[4] += 1
+                defh = True
+                break
 
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)
@@ -1101,18 +1119,6 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.name == 'Arsenal of the Underworld':
                 ld = def_p.skill.get_landmine_damage(t2, atk_amt)
-
-        atkh = False
-        defh = False
-        # Central Managed Troop Training
-        for h1 in atk_p.territories:
-            if self.map.territories[h1].isHall:
-                atkh = True
-                break
-        for h2 in def_p.territories:
-            if self.map.territories[h2].isHall:
-                defh = True
-                break
 
         atroopmul, dtroopmul = 1, 1
         AIA, DIA = 0, 0
