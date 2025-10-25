@@ -915,7 +915,8 @@ def handle_rearrange_data(data):
 def send_sep_auth():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    price_reduction = gsm.players[pid].infrastructure_upgrade//2
+    discountFactor = gsm.get_player_infra_level(gsm.players[pid])
+    price_reduction = discountFactor//2
     socketio.emit('receive_sep_auth', {'amt': gsm.players[pid].stars, 'discount':price_reduction}, room=pid)
 
 @socketio.on('get_reserves_amt')

@@ -328,7 +328,7 @@ class Game_State_Manager:
                 if metric == 'indus':
                     total_div += (self.get_dejure_industrial_level(curr_p) - avg)**2
                 elif metric == 'infra':
-                    total_div += (curr_p.infrastructure_upgrade + curr_p.infrastructure - avg)**2
+                    total_div += (self.get_player_infra_level(curr_p) + curr_p.infrastructure - avg)**2
                 elif metric == 'trty':
                     total_div += (self.get_deployable_amt(p) - avg)**2
                 elif metric == 'popu':
@@ -349,7 +349,7 @@ class Game_State_Manager:
             curr_p = self.players[p]
             if curr_p.alive:
                 total_ind += self.get_dejure_industrial_level(curr_p)
-                total_inf += curr_p.infrastructure_upgrade + curr_p.infrastructure
+                total_inf += self.get_player_infra_level(curr_p) + curr_p.infrastructure
                 total_popu += curr_p.total_troops
                 total_trty += self.get_deployable_amt(p)
                 p_alive.append(p)
@@ -374,7 +374,7 @@ class Game_State_Manager:
 
         for p in p_alive:
             curr_p = self.players[p]
-            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_dejure_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((curr_p.infrastructure_upgrade + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
+            z_score = 0.15*((self.get_deployable_amt(p)-avg_trty)/trtysd) + 0.35*((self.get_dejure_industrial_level(curr_p)-avg_ind)/indsd) + 0.15*((self.get_player_infra_level(curr_p) + curr_p.infrastructure-avg_inf)/infsd) + 0.35*((curr_p.total_troops-avg_popu)/popusd)
             curr_p.PPI = round(self.logistic_function(z_score) * 100, 3)
 
     # Signal the specific mission tracker to check condition
@@ -541,7 +541,9 @@ class Game_State_Manager:
                                                'curr_min_roll': self.players[pid].min_roll}, room=pid)
     
     def starPrice(self, base, player):
-        price = base - (self.players[player].infrastructure_upgrade//2)
+        discountFactor = self.get_player_infra_level(self.players[player])
+        price_reduction = discountFactor//2
+        price = base - price_reduction
         return price if price > 1 else 1
 
     def convert_reserves(self, amt, player):
