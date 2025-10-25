@@ -426,6 +426,8 @@ class Mission_Distributor:
                 elif m.name in self.S_tier:
                     if m.name == 'Pacifist':
                         tiers["Pac"][m.player] = m.name
+                    elif m.name == 'Spymaster':
+                        winners[m.player] = m.name
                     else:
                         tiers["S"][m.player] = m.name
                 elif m.name in self.A_tier:
