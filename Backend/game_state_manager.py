@@ -1041,8 +1041,9 @@ class Game_State_Manager:
                 atk_stats[4] += atk_amt//20
             if atk_p.skill.name == "Babylon" and atk_p.skill.active:
                 if 3 in atk_p.skill.passives:
-                    atk_stats[2] += 1
-                    atk_stats[4] += 1
+                    if trty_atk.isCity or trty_atk.isCapital:
+                        atk_stats[2] += 1
+                        atk_stats[4] += 1
 
 
         if def_p.skill:
@@ -1052,8 +1053,9 @@ class Game_State_Manager:
             
             if def_p.skill.name == "Babylon" and def_p.skill.active:
                 if 3 in def_p.skill.passives:
-                    atk_stats[2] += 1
-                    atk_stats[4] += 1
+                    if trty_atk.isCity or trty_atk.isCapital:
+                        def_stats[2] += 1
+                        def_stats[4] += 1
 
             if def_p.skill.name == "Air_Superiority" and def_p.skill.active:
                 for cont in self.map.conts:

@@ -2149,15 +2149,16 @@ class Babylon(Skill):
 
             if disparity > 4:
                 ownStats[3] += 30
-                ownStats[4] += 1
+                ownStats[4] += 2
             elif disparity == 4:
                 ownStats[3] += 20
-                ownStats[4] += 1
+                ownStats[4] += 2
             elif disparity == 3:
                 ownStats[3] += 15
                 ownStats[4] += 1    
             elif disparity == 2:
                 ownStats[3] += 10
+                ownStats[4] += 1
             elif disparity == 1:
                 ownStats[3] += 5
             
