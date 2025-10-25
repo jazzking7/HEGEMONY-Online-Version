@@ -228,14 +228,37 @@ class turn_loop_scheduler:
             p = gs.players[player]
             # Get stars probability based on territory conquered
             if p.turn_victory:
-                s1, s2, s3 = 0.45, 0.3, 0.25
-                p.con_amt = 9 if p.con_amt > 9 else p.con_amt
-                for _ in range(p.con_amt):
-                    s1 -= 0.05
-                    s2 += 0.025
-                    s3 += 0.025
+                advance = False
+                for trty in p.territories:
+                    if gs.map.territories[trty].isTransportcenter:
+                        advance = True
+                        break
+                s_amt = 0
+                if not advance:
+                    s1, s2, s3 = 0.45, 0.3, 0.25
+                    p.con_amt = min(p.con_amt, 9)
+                    for _ in range(p.con_amt):
+                        d = min(0.05, s1)
+                        s1 -= d
+                        s2 += d * 0.5
+                        s3 += d * 0.5
 
-                s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+                    s_amt = random.choices([1,2,3],[s1, s2, s3],k=1)[0]
+                else:
+                    s1, s2, s3, s4 = 0.45, 0.3, 0.25, 0
+                    p.con_amt = min(p.con_amt, 9)
+                    for i in range(p.con_amt):
+                        if i < 6:
+                            d = min(0.075, s1)
+                            s1 -= d
+                            s2 += d * 0.5
+                            s3 += d * 0.5
+                        else:
+                            s2 -= 0.1
+                            s3 += 0.05
+                            s4 += 0.05
+
+                    s_amt = random.choices([1,2,3,4],[s1,s2,s3,s4],k=1)[0]
 
                 # Ice Age!
                 if gs.in_ice_age:
