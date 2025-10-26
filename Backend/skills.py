@@ -549,6 +549,7 @@ class Ares_Blessing(Skill):
 
         self.current_max = 0
         self.rage_not_activated = True
+        self.reset_rage_meter = False
 
     # checking only when being attacked
     def checking_rage_meter(self,):
@@ -560,6 +561,7 @@ class Ares_Blessing(Skill):
             self.cooldown = 0
             self.limit += 1
             self.rage_not_activated = False
+            self.reset_rage_meter = True
     
     def internalStatsMod(self, battle_stats):
 
@@ -571,6 +573,10 @@ class Ares_Blessing(Skill):
     def apply_turn_effect(self, ):
         self.activated = False
         self.changed_stats = True
+        if self.reset_rage_meter:
+            self.reset_rage_meter = False
+            self.rage_not_activated = True
+            self.current_max = self.gs.players[self.player].total_troops
 
     def apply_round_effect(self,):
         if self.cooldown:
