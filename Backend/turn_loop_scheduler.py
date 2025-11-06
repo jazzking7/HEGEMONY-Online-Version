@@ -86,7 +86,7 @@ class turn_loop_scheduler:
     def preparation(self, gs, curr_player):
         for player in gs.players:
             if player != curr_player:
-                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: preparation"}, room=player)
+                gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"{gs.players[curr_player].name}'s turn: preparation"}, room=player)
         gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'PREPARE', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': None}, room=curr_player)
         gs.server.emit("preparation", room=curr_player)
@@ -95,7 +95,7 @@ class turn_loop_scheduler:
     def conquer(self, gs, curr_player):
         for player in gs.players:
             if player != curr_player:
-                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=player)
+                gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=player)
         gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'ATTACK', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': 'conquest'}, room=curr_player)
         gs.server.emit("conquest", room=curr_player)
@@ -104,7 +104,7 @@ class turn_loop_scheduler:
     def rearrange(self, gs, curr_player):
         for player in gs.players:
             if player != curr_player:
-                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=player)
+                gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=player)
         gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'REARRANGE', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': 'rearrange'}, room=curr_player)
         gs.server.emit("rearrangement", room=curr_player)
