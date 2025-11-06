@@ -148,13 +148,15 @@ class Game_State_Manager:
 
         self.colorSets = {
             1 : ["#00BBC9"],
-            2 : ["#FBC78D","#00BBC9"],
-            3 : ["#333333",  "#7DF9FF",   "#00BBC9"],
-            4 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21"],
-            5 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF"],
-            6 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF",  "#F06060"],
+            2 : ["#B399D4","#F9E076"],
+            3 : ["#FF7E5F",  "#F0D7A3",   "#A6D1E6"], #["#FF7E5F",  "#F0D7A3",   "#A6D1E6"]
+            4 : ["#FBCBB8", "#FFD073","#82A133","#7DAFD2"],#["#744C27", "#919A5E", "#FFDC70", "#FFF6CD"], #["#FBCBB8", "#FFD073","#82A133","#7DAFD2"], #["#FF7E5F",  "#F0D7A3",   "#A6D1E6", "#5F8D4E"], #["#FFD3D4", "#D5EBE4", "#F8F4E8", "#775C56"] ["#FF7E5F",  "#F0D7A3",   "#A6D1E6", "#DCD0FF"],#["#FF7E5F",  "#F0D7A3",   "#A6D1E6", "#465C47"],#["#04266F", "#3C85D1", "#D460A7", "#E77960"], #["#FFA7A6", "#FFE9C9", "#A0D2F9", "#8DD9C0"], #["#666666",  "#7DF9FF",   "#00BBC9",   "#FFDE21"],
+            5 : ["#425D5F",  "#BACACB",   "#F8F7F2", "#FDE7A2", "#FAA943"], #["#FF7E5F",  "#F0D7A3",   "#A6D1E6", "#5F8D4E", "#6B8CFF"], # ["#FCE997", "#FFC52D", "#6C9EB3", "#183282", "#27091A"], #["#5F69C3", "#8FB8E0", "#F3B640", "#DCB2D6", "#EB6780"], #["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF"],
+            6 : ["#575876",  "#E7C58A",   "#86B05D",   "#C77947",  "#F7E6D4",  "#4B3535"],#["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF",  "#F06060"],
             7 : ["#333333",  "#7DF9FF",   "#00BBC9",   "#FFDE21",  "#DFE2FF",  "#F06060", "#4169E1"]
         }
+
+        self.inGameLoop = False
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
@@ -395,6 +397,7 @@ class Game_State_Manager:
         ]
         self.signal_view_clear()
         time.sleep(1)
+        self.server.emit('set_new_announcement', {'async': True, 'msg': "GAME OVER"}, room=self.lobby)
         self.server.emit('GAME_OVER', {
             'winners': winners,
             'player_overview': player_overview,
@@ -617,6 +620,7 @@ class Game_State_Manager:
                 'name': self.players[p].name,
                 'troops': self.players[p].total_troops,
                 'trtys': len(self.players[p].territories),
+                'color': self.players[p].color,
                 'PPI': self.players[p].PPI
             }
             self.server.emit('update_players_stats', data, room=self.lobby)

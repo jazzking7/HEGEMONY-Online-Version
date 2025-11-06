@@ -624,7 +624,7 @@ class Zealous_Expansion(Skill):
     def __init__(self, player, gs):
         super().__init__("Zealous_Expansion", player, gs)
         self.intMod = True
-        self.bonus_level = 0
+        self.bonus_level = 1
         self.gs.players[player].infrastructure_upgrade += 1
 
     def internalStatsMod(self, battle_stats):
@@ -2147,6 +2147,8 @@ class Babylon(Skill):
                 battle_stats[4] += self.points//150
 
     def reactStatsMod(self, ownStats, enemyStats, attacking):
+        if 6 not in self.passives:
+            return
         if not attacking and self.active:
 
             ownStats[3] += 15

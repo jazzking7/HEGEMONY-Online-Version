@@ -39,6 +39,13 @@ let in_debt = false;
 
 let playCountdown = false;
 
+const phaseMap = {
+    'DEPLOY': { index: 1, class: 'phase-deploy', label: 'REINFORCEMENT' },
+    'PREPARE': { index: 2, class: 'phase-prepare', label: 'PREPARATION' },
+    'ATTACK': { index: 3, class: 'phase-attack', label: 'CONQUEST' },
+    'REARRANGE': { index: 4, class: 'phase-rearrange', label: 'REARRANGEMENT' }
+};
+
 $(document).ready(async function() {
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
@@ -76,7 +83,11 @@ $(document).ready(async function() {
   // Show continent border toggle
   $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
-      $(this).text(showContBorders ? 'On' : 'Off');
+      if (showContBorders) {
+        $(this).addClass('active');
+      } else {
+        $(this).removeClass('active');
+      }
   });
 
   // Click propagation prevention
@@ -84,9 +95,34 @@ $(document).ready(async function() {
       event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
 
-  $('#overlay_sections .circular-button').on('click mousemove', function(event) {
+  $('#overlay_sections .bottom-action-button').on('click mousemove', function(event) {
     event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
+
+  $('#proceed_next_stage').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#control_panel').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#control_mechanism').on('click mousemove', function(event) {
+      event.stopPropagation();
+  });
+
+  $('#your_stats, #global_overview').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#tracker').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#event_announcement').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
 
   async function tryLoadSketch() {
       // GAME_SKETCH LOGIC IS LOADED HERE WITH p5.js
@@ -196,24 +232,25 @@ function isColorDark(hexColor) {
   return brightness < 128;
 }
 
+
+// Prevent click and scroll propagation for laplace display
+$('#laplace_info_display').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+});
+
 socket.on('laplace_info', function(data) {
-  var tcolor = 'black';
-  if (isColorDark(data.color)){
-    tcolor = 'rgb(245, 245, 245)'
-  }
-  $('#laplace_info_display').empty();
+  var tcolor = 'rgb(245, 245, 245)';
+  
+  $('#laplace-content').empty();
   $('#laplace_info_display').css({
-    'display': 'block',
-    'background-color': data.color,
-    'color': tcolor,
-    'overflow-y': 'auto',
-    'max-height': '10em',
+    'display': 'block'
   });
 
   $.each(data.info, function(fieldName, fieldValue) {
-    $('#laplace_info_display').append(`
-      <div class="text-sm" style="word-wrap: break-word; max-width: 13vw;">
-        <strong>${fieldName}:</strong> ${fieldValue}
+    $('#laplace-content').append(`
+      <div class="laplace-info-item">
+        <div class="laplace-field-name">${fieldName}</div>
+        <div class="laplace-field-value">${fieldValue}</div>
       </div>
     `);
   });
@@ -222,7 +259,8 @@ socket.on('laplace_info', function(data) {
 // hide the display if clicked outside
 $(document).on('click', function(event) {
   if (!$(event.target).closest('#laplace_info_display').length) {
-    $('#laplace_info_display').empty().hide();
+    $('#laplace_info_display').hide();
+    $('#laplace-content').empty();
   }
 });
 
@@ -231,40 +269,90 @@ $('#laplace_info_display').on('click', function(event) {
   event.stopPropagation();
 });
 
+
+
+// Prevent click and scroll propagation
+$('#player_info').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+});
+
+// Scroll functionality
+let scrollInterval = null;
+
+$('#scroll-up').on('mousedown touchstart', function(e) {
+    e.preventDefault();
+    const statsList = $('#stats-list');
+    scrollInterval = setInterval(() => {
+        statsList.scrollTop(statsList.scrollTop() - 15);
+    }, 20);
+});
+
+$('#scroll-down').on('mousedown touchstart', function(e) {
+    e.preventDefault();
+    const statsList = $('#stats-list');
+    scrollInterval = setInterval(() => {
+        statsList.scrollTop(statsList.scrollTop() + 15);
+    }, 20);
+});
+
+$(document).on('mouseup touchend', function() {
+    if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+    }
+});
+
 // Player stats list initiate
 socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
   pList.empty();
+  
   $.each(data, function(p, p_info) {
-    var tcolor = 'black';
-    if (isColorDark(p_info.color)){
-      tcolor = 'rgb(245, 245, 245)'
-    }
+    var tcolor = 'rgb(245, 245, 245)';
+    // if (isColorDark(p_info.color)){
+    //   tcolor = 'rgb(245, 245, 245)';
+    // }
+    
     var pBtn = $('<button></button>')
       .attr('id', p)
-      .addClass('btn game_btn mb-1')
+      .addClass('player-stat-btn')
       .css({
-        'color': tcolor,
-        'background-color': p_info.color,
-        'width': '100%',
+        'color': tcolor
       })
       .html(`
-        <div style="text-align: left;">
-          ${p}<br>
-          <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
-            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"> <span>${p_info.troops}</span>
+        <div class="player-name-row">
+          <div class="player-color-square" style="background-color: ${p_info.color};"></div>
+          <div class="player-name">${p}</div>
+        </div>
+        <div class="player-stats-row">
+          <div class="stat-item">
+            <div class="stat-label">TERR</div>
+            <div class="stat-value territory">
+              <img src="/static/Assets/Logo/territory.svg" alt="Territory">
+              <span>${p_info.trtys}</span>
+            </div>
           </div>
-          <div style="display: inline-block; vertical-align: middle;">
-            <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">  <span>${p_info.trtys}</span>
+          <div class="stat-item">
+            <div class="stat-label">ARMY</div>
+            <div class="stat-value troops">
+              <img src="/static/Assets/Logo/soldier.svg" alt="Troops">
+              <span>${p_info.troops}</span>
+            </div>
           </div>
-          <br>
-          <div style="display: inline-block; vertical-align: middle; direction: ltr;">
-            <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"> <span>${p_info.PPI}</span>
+          <div class="stat-item">
+            <div class="stat-label">PPI</div>
+            <div class="stat-value power">
+              <img src="/static/Assets/Logo/PPI.svg" alt="Power">
+              <span>${p_info.PPI}</span>
+            </div>
           </div>
         </div>
       `);
+    
     pList.append(pBtn);
-    pBtn.on('click', function() {
+    
+    pBtn.on('click', function(e) {
+      e.stopPropagation();
       laplace_info_fetch(p_info.player_id);
     });
   });
@@ -273,20 +361,41 @@ socket.on('get_players_stats', function(data){
 // Player stats list update
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
+  
+  var tcolor = 'rgb(245, 245, 245)';
+  // if (isColorDark(data.color)){
+  //   tcolor = 'rgb(245, 245, 245)';
+  // }
+  
+  btn.css('color', tcolor);
   btn.html(`
-      <div style="text-align: left;" class="mb-1">
-        ${data.name}<br>
-        <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
-            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"><span>${data.troops}</span>
-        </div>
-        <div style="display: inline-block; vertical-align: middle;">
-          <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;"><span>${data.trtys}</span>
-        </div>
-        <br>
-        <div style="display: inline-block; vertical-align: middle; direction: ltr;">
-          <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"><span>${data.PPI}</span>
+    <div class="player-name-row">
+      <div class="player-color-square" style="background-color: ${data.color};"></div>
+      <div class="player-name">${data.name}</div>
+    </div>
+    <div class="player-stats-row">
+      <div class="stat-item">
+        <div class="stat-label">TERR</div>
+        <div class="stat-value territory">
+          <img src="/static/Assets/Logo/territory.svg" alt="Territory">
+          <span>${data.trtys}</span>
         </div>
       </div>
+      <div class="stat-item">
+        <div class="stat-label">ARMY</div>
+        <div class="stat-value troops">
+          <img src="/static/Assets/Logo/soldier.svg" alt="Troops">
+          <span>${data.troops}</span>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">PPI</div>
+        <div class="stat-value power">
+          <img src="/static/Assets/Logo/PPI.svg" alt="Power">
+          <span>${data.PPI}</span>
+        </div>
+      </div>
+    </div>
   `);
 });
 
@@ -430,15 +539,10 @@ socket.on('change_click_event', function(data){
 
 // CLEAR SELECTION WINDOWS
 socket.on('clear_view', function(){
-  $('#control_panel, #middle_display, #proceed_next_stage').hide();
+  $('#control_panel, #control_mechanism, #middle_display, #proceed_next_stage').hide();
   toHighLight = [];
   otherHighlight = [];
   clickables = [];
-});
-
-// set announcements
-socket.on('set_up_announcement', function(data){
-  $('#announcement').html('<h3>' + data.msg + '</h3>');
 });
 
 // show buttons
@@ -458,13 +562,11 @@ function hide_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 }
 
-// Game over announcement
+// Game over
 socket.on('GAME_OVER', function(data) {
   $('#gameEndSound').trigger('play');
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
   currEvent = null;
-  $('#announcement').show();
-  $('#announcement').html('<h1>GAME OVER<h1>');
   $('#middle_display').css({
     'max-width': '50vw',
     'max-height': '50vh'
@@ -562,12 +664,6 @@ socket.on('arsenal_animation', function(data){
 
 //===============================Mission Related Display=============================================
 
-// Receive Mission + Display info on Mission Tracker
-socket.on('get_mission', function(data) {
-  console.log("get_mission")
-  $('#announcement').html('<h1>' + data.msg + '</h1>');
-  socket.off('get_mission');
-});
 
 // Initiate mission tracker
 socket.on('initiate_tracker', function(data){
@@ -658,7 +754,6 @@ socket.on('update_tracker', function(data) {
       const tarid = target.replace(/ /g, "_");
       const existing = $(`#target_${tarid}`);
 
-      // 🔁 If new_target flag is set and target exists, rename the old one
       if (data.new_target) {
         if (existing.length) {
           const newId = `target_${tarid}_old_${Date.now()}`;
@@ -700,13 +795,54 @@ socket.on('update_tracker', function(data) {
   }
 });
 
+socket.on('set_new_announcement', function(data) {
+    const announcement = $('#announcement');
+    const phaseIndicators = $('#phase_indicators');
+    
+    if (data.async) {
+        // Async message - simple display
+        phaseIndicators.hide();
+        announcement.html(`<div class="async-message">${data.msg}</div>`);
+    } else {
+        // Turn-based event with phase indicators
+        phaseIndicators.show();
+        
+        const phase = data.curr_phase.toUpperCase();
+        const phaseInfo = phaseMap[phase];
+        
+        if (phaseInfo) {
+            // Update phase boxes
+            $('.phase-box').removeClass('completed active');
+            
+            $('.phase-box').each(function(index) {
+                const boxPhase = index + 1;
+                if (boxPhase < phaseInfo.index) {
+                    $(this).addClass('completed'); // Red X
+                } else if (boxPhase === phaseInfo.index) {
+                    $(this).addClass('active'); // Yellow pulsing
+                }
+                // else stays gray (default)
+            });
+            
+            // Update phase name
+            announcement.html(`
+                <div class="phase-label">CURRENT PHASE</div>
+                <div class="phase-name ${phaseInfo.class}">${phaseInfo.label}${data.msg}</div>
+            `);
+        } else {
+            // Fallback for unknown phases
+            phaseIndicators.hide();
+            announcement.html(`<div class="async-message">${data.msg || phase}</div>`);
+        }
+    }
+});
+
 //======================================================================================================
 
 //=====================================SET UP EVENTS====================================================
 
 // Start Color Choosing
 socket.on('choose_color', function(data){
-    $('#announcement').html('<h2>' + data.msg + '</h2>');
     $('#middle_display').css('display', 'flex');
     let colorBoard = $('#middle_content');
     let disabled = false;
@@ -1037,15 +1173,12 @@ socket.on('troop_addition_display', function(data){
 // Display and update how many troops are deployable. Used both in initial deployment and turn-based troop deployment
 socket.on("troop_deployment", function(data){
   deployable = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Deploy your troops! </h2>`
-  announ.innerHTML += `<h2>` + String(data.amount) + ' deployable' + `</h2>`;
 });
 
 // Show the button that ends the preparation stage
 socket.on('preparation', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .text').text('Start Conquest');
+  $('#proceed_next_stage .button-text').text('Start Conquest');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
     socket.emit("terminate_preparation_stage");
@@ -1058,11 +1191,10 @@ socket.on('preparation', function(){
 // Show the button that ends the conquest stage
 socket.on('conquest', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .text').text('Finish Conquest');
+  $('#proceed_next_stage .button-text').text('Finish Conquest');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
 
-    document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -1085,7 +1217,7 @@ socket.on('conquest', function(){
 // Show the button that ends the rearrangement stage
 socket.on('rearrangement', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .text').text('Finish Rearrangement');
+  $('#proceed_next_stage .button-text').text('Finish Rearrangement');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
     socket.emit("terminate_rearrangement_stage");
@@ -1099,49 +1231,73 @@ socket.on('rearrangement', function(){
 function troop_deployment(tid){
   toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
+  document.getElementById('control_mechanism').style.display = 'none';
   if (player_territories.includes(tid)){
     toHighLight.push(tid);
     
     // Sync clicks
     socket.emit('add_click_sync', {'tid': tid});
 
-    document.getElementById('control_panel').style.display = 'none';
-    document.getElementById('control_panel').style.display = 'flex';
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
+    document.getElementById('control_mechanism').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'block';
+    
+    let troopInput = document.getElementById('control_slider');
+    let troopValue = document.getElementById('control_value');
 
-    // set shortcut id
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
-
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
-
-    troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
     troopInput.setAttribute("max", deployable);
     troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
+    troopValue.textContent = 1;
+
+    // Force reset to 1 by setting to different value first, then back to 1
+    troopInput.value = 0;
+    setTimeout(() => {
+        troopInput.value = 1;
+        troopValue.textContent = 1;
+        // Reset slider background to position 0%
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+    }, 0);
+
+    // Remove old event listeners to prevent duplicates
+    troopInput.removeEventListener("input", troopInput.inputHandler);
+
+    // Create new event handler
+    troopInput.inputHandler = function() {
+        troopValue.textContent = troopInput.value;
+        const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+    };
+
+    troopInput.addEventListener("input", troopInput.inputHandler);
+
+    curr_slider = '#control_slider';
+    curr_slider_val = '#control_value';
+
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+
     $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
     socket.emit('send_troop_update', {'choice': toHighLight[0], 'amount': troopInput.value});
     toHighLight = [];
+
+    curr_slider = '';
+    curr_slider_val = '';
 
     // Sync clicks
     socket.emit('remove_click_sync', {'tid': tid});
 
     });
+    
     $('#control_cancel').off('click').on('click' , function(){
+      document.getElementById('control_mechanism').style.display = 'none';
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
       playRefuse();
+
+      curr_slider = '';
+      curr_slider_val = '';
       // Sync clicks
       socket.emit('remove_click_sync', {'tid': tid});
 
@@ -1155,9 +1311,7 @@ socket.on('troop_result', function(data){
     popup("NOT YOUR TERRITORY!", 1000);
   } else {
     toHighLight = [];
-    document.getElementById('control_mechanism').innerHTML = '';
     deployable = 0;
-    document.getElementById('announcement').innerHTML = `<h2>Completed, waiting for others...`;
     currEvent = null;
   }
 })
@@ -1166,6 +1320,7 @@ socket.on('troop_result', function(data){
 function conquest(tid){
   if (player_territories.includes(tid)){
     document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
     $('#proceed_next_stage').show();
     clickables = [];
     if (toHighLight.length){
@@ -1196,50 +1351,70 @@ function conquest(tid){
       for (trty of toHighLight){
         socket.emit('add_click_sync', {'tid': trty});
       }
+
+      document.getElementById('control_mechanism').style.display = 'none';
+      document.getElementById('control_mechanism').style.display = 'block';
       
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
       $('#proceed_next_stage').hide();
 
-      let troopValue = document.createElement("p");
-      let troopInput = document.createElement("input");
+      let troopInput = document.getElementById('control_slider');
+      let troopValue = document.getElementById('control_value');
 
-      // set shortcut id
-      troopInput.setAttribute("id", "adjust_attack_amt");
-      troopValue.setAttribute("id", "curr_attack_amt");
-
-      curr_slider = "#adjust_attack_amt";
-      curr_slider_val = "#curr_attack_amt";
-
-      troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
       troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
       troopInput.setAttribute("value", 1);
-      troopInput.setAttribute("step", 1);
-      troopInput.style.display = "inline-block";
-      troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
       troopValue.textContent = 1;
-      let c_m = document.getElementById('control_mechanism');
-      c_m.innerHTML = "";
-      c_m.appendChild(troopInput);
-      c_m.appendChild(troopValue);
+
+      troopInput.value = 0;
+      setTimeout(() => {
+          troopInput.value = 1;
+          troopValue.textContent = 1;
+          // Reset slider background to position 0%
+          troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+      }, 0);
+
+      // Remove old event listeners to prevent duplicates
+      troopInput.removeEventListener("input", troopInput.inputHandler);
+
+      // Create new event handler
+      troopInput.inputHandler = function() {
+          troopValue.textContent = troopInput.value;
+          const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+          troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+      };
+
+      troopInput.addEventListener("input", troopInput.inputHandler);
+
+      curr_slider = '#control_slider';
+      curr_slider_val = '#control_value';
 
       $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
         socket.emit('send_battle_data', {'choice': toHighLight, 'amount': troopInput.value});
         toHighLight = [];
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
+        
+        curr_slider = '';
+        curr_slider_val = '';
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){
         playRefuse();
         document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
         toHighLight = [];
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
+
+        curr_slider = '';
+        curr_slider_val = '';
+
         $('#proceed_next_stage').show();
       });
    }
@@ -1268,51 +1443,72 @@ function rearrange(tid){
       }
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_panel').style.display = 'flex';
+
+      document.getElementById('control_mechanism').style.display = 'none';
+      document.getElementById('control_mechanism').style.display = 'block';
+
       $('#proceed_next_stage').hide();
 
-      let troopValue = document.createElement("p");
-      troopValue.textContent = 1;
-      let troopInput = document.createElement("input");
+      let troopInput = document.getElementById('control_slider');
+      let troopValue = document.getElementById('control_value');
 
-      // set shortcut id
-      troopInput.setAttribute("id", "adjust_attack_amt");
-      troopValue.setAttribute("id", "curr_attack_amt");
-
-      curr_slider = "#adjust_attack_amt";
-      curr_slider_val = "#curr_attack_amt";
-
-
-      troopInput.setAttribute("type", "range");
       troopInput.setAttribute("min", 1);
       troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
       troopInput.setAttribute("value", 1);
-      troopInput.setAttribute("step", 1);
-      troopInput.style.display = "inline-block";
-      troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-      let c_m = document.getElementById('control_mechanism');
-      c_m.innerHTML = "";
-      c_m.appendChild(troopInput);
-      c_m.appendChild(troopValue);
+      troopValue.textContent = 1;
+
+      // Force reset to 1 by setting to different value first, then back to 1
+      troopInput.value = 0;
+      setTimeout(() => {
+          troopInput.value = 1;
+          troopValue.textContent = 1;
+          // Reset slider background to position 0%
+          troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+      }, 0);
+
+      // Remove old event listeners to prevent duplicates
+      troopInput.removeEventListener("input", troopInput.inputHandler);
+
+      // Create new event handler
+      troopInput.inputHandler = function() {
+          troopValue.textContent = troopInput.value;
+          const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+          troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+      };
+
+      troopInput.addEventListener("input", troopInput.inputHandler);
+
+      curr_slider = '#control_slider';
+      curr_slider_val = '#control_value';
 
       $('#control_confirm').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
         socket.emit('send_rearrange_data', {'choice': toHighLight, 'amount': troopInput.value});
         toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
+
+        curr_slider = '';
+        curr_slider_val = '';
         $('#proceed_next_stage').show();
       });
       $('#control_cancel').off('click').on('click' , function(){playRefuse();
         document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
         toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
+
+        curr_slider = '';
+        curr_slider_val = '';
         $('#proceed_next_stage').show();
       });
    }
   }
   else if (player_territories.includes(tid)){
     document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
     $('#proceed_next_stage').show();
     clickables = [];
     if (territories[tid].troops == 1){
@@ -1332,7 +1528,7 @@ function rearrange(tid){
 //=============================Concurrent Events=================================
 socket.on('concurr_terminate_event_setup', function(data){
   $("#proceed_next_stage").show();
-  $("#proceed_next_stage .text").text('DONE');
+  $("#proceed_next_stage .button-text").text('DONE');
   $("#proceed_next_stage").off('click').on('click', function(){
     socket.emit('signal_concurr_end', {'pid': data.pid});
     $("#proceed_next_stage").hide(); 
@@ -1348,7 +1544,7 @@ socket.on('concurr_terminate_event_setup', function(data){
 // Set the button that can trigger a stop to the async event
 socket.on('async_terminate_button_setup', function(){
     $("#proceed_next_stage").show();
-    $("#proceed_next_stage .text").text('DONE');
+    $("#proceed_next_stage .button-text").text('DONE');
     $("#proceed_next_stage").off('click').on('click', function(){
       socket.emit('signal_async_end');
       $("#proceed_next_stage").hide(); 
@@ -1361,21 +1557,15 @@ socket.on('async_terminate_button_setup', function(){
 // Set and display the reserve amount for reserve deployment event
 socket.on("reserve_deployment", function(data){
   reserves = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Deploying reserves, ${data.amount} troops available</h2>`;
 });
 
 // Set and display the city amount for city settlement event
 socket.on('build_cities', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Settling new cities, ${data.amount} under construction</h2>`
 })
 
 socket.on('set_forts', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Settling new forts, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
@@ -1383,8 +1573,6 @@ socket.on('set_forts', function(data){
 
 socket.on('set_hall', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Intalling Governance Halls, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
@@ -1392,8 +1580,6 @@ socket.on('set_hall', function(data){
 
 socket.on('set_nexus', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Building Logistic Nexus, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
@@ -1401,8 +1587,6 @@ socket.on('set_nexus', function(data){
 
 socket.on('set_leyline', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Settling Leyline Cross, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
@@ -1410,8 +1594,6 @@ socket.on('set_leyline', function(data){
 
 socket.on('set_bureau', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Settling Mobilization Bureaux, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
@@ -1420,8 +1602,6 @@ socket.on('set_bureau', function(data){
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
   city_amt = data.amount;
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Raising new megacities, ${data.amount} under construction</h2>`;
   clickables = [];
   toHighLight = [];
   clickables = data.clist;
@@ -1436,40 +1616,61 @@ socket.on('update_settle_status', function(data){
 function deploy_reserves(tid){
   toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
+  document.getElementById('control_mechanism').style.display = 'none';
   if (player_territories.includes(tid)){
     toHighLight.push(tid);
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
 
-    // set shortcut id
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
+    document.getElementById('control_mechanism').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'block';
 
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
+    let troopInput = document.getElementById('control_slider');
+    let troopValue = document.getElementById('control_value');
 
-    troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
     troopInput.setAttribute("max", reserves);
     troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
+    troopValue.textContent = 1;
+
+    // Force reset to 1 by setting to different value first, then back to 1
+    troopInput.value = 0;
+    setTimeout(() => {
+        troopInput.value = 1;
+        troopValue.textContent = 1;
+        // Reset slider background to position 0%
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+    }, 0);
+
+    // Remove old event listeners to prevent duplicates
+    troopInput.removeEventListener("input", troopInput.inputHandler);
+
+    // Create new event handler
+    troopInput.inputHandler = function() {
+        troopValue.textContent = troopInput.value;
+        const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+    };
+
+    troopInput.addEventListener("input", troopInput.inputHandler);
+
+    curr_slider = '#control_slider';
+    curr_slider_val = '#control_value';
+
     $('#control_confirm').off('click').on('click' , function(){
     document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
     socket.emit('send_reserves_deployed', {'choice': toHighLight[0], 'amount': troopInput.value});
     toHighLight = [];
+    curr_slider = '';
+    curr_slider_val = '';
     });
     $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
+      document.getElementById('control_mechanism').style.display = 'none';
       toHighLight = [];
+      curr_slider = '';
+      curr_slider_val = '';
     });
   }
 }
@@ -1484,8 +1685,8 @@ function build_cities(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -1509,8 +1710,8 @@ function raise_megacities(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -1534,8 +1735,8 @@ function set_forts(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -1559,8 +1760,8 @@ function set_hall(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -1584,8 +1785,8 @@ function set_nexus(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -1609,7 +1810,6 @@ function set_leyline(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
@@ -1634,7 +1834,6 @@ function set_bureau(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length == city_amt){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
@@ -1656,6 +1855,10 @@ function set_bureau(tid){
 // Add display + Functionalities to diplomatic button
 btn_diplomatic = $('#btn-diplomatic');
 btn_diplomatic.off('click').click(function () {
+  $('#control_panel').hide();
+  $('#control_mechanism').hide();
+  clickables = []
+  toHighLight = []
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = `
   <div class="flex items-center justify-between relative">
@@ -1694,6 +1897,7 @@ btn_diplomatic.off('click').click(function () {
   // close window
   $('#btn-action-cancel').off('click').on('click', function(){
     $('#control_panel').hide()
+    document.getElementById('control_mechanism').style.display = 'none';
     $('#middle_display').hide()
     $('#middle_title, #middle_content').empty()
   });
@@ -1715,8 +1919,7 @@ btn_diplomatic.off('click').click(function () {
 });
 
 // VOTING EVENT FOR SUMMIT
-socket.on('summit_voting', function(data){
-  $("#announcement").html(`<h3>${data.msg}<h3>`);
+socket.on('summit_voting', function(){
   var votingSFX = [document.getElementById('votingSound1'), document.getElementById('votingSound2')];
   var randomIndex = Math.floor(Math.random() * votingSFX.length);
   votingSFX[randomIndex].volume = 0.7;
@@ -1789,11 +1992,10 @@ socket.on('s_voting_fb', function(data){
   }
 });
 
-// Summit is activated, display announcement
+// Summit is activated
 socket.on('activate_summit', function(){
   $("#middle_display").hide();
   $('#middle_title, #middle_content').empty();
-  $('#announcement').html(`<h3>Summit in progress...</h3>`)
 });
 
 // Discounted price displayer
@@ -1815,6 +2017,10 @@ async function get_sep_auth(){
 // Add display + Functionalities to special authority button
 btn_sep_auth = document.getElementById('btn-sep-auth');
 btn_sep_auth.onclick = function () {
+  $('#control_panel').hide();
+  $('#control_mechanism').hide();
+  clickables = []
+  toHighLight = []
   document.getElementById('middle_display').style.display = 'flex';
   // clear title
   document.getElementById('middle_title').innerHTML = "";
@@ -2058,6 +2264,7 @@ btn_sep_auth.onclick = function () {
     // close window
     $('#btn-action-cancel').off('click').on('click', function(){
       $('#control_panel').hide()
+      document.getElementById('control_mechanism').style.display = 'none';
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty()
     });
@@ -2292,6 +2499,10 @@ async function get_skill_status(){
 // Add display + Functionalities according to user's skill
 btn_skill = document.getElementById('btn-skill');
 btn_skill.onclick = function () {
+  $('#control_panel').hide();
+  $('#control_mechanism').hide();
+  clickables = []
+  toHighLight = []
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = "";
    // Grab the special authority amt of the user
@@ -2425,12 +2636,14 @@ btn_skill.onclick = function () {
 
     $('#btn-action-cancel').off('click').on('click', function(){
       $('#control_panel').hide()
+      document.getElementById('control_mechanism').style.display = 'none';
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty()
     });
 
     $('#btn-skill-activate').off('click').on('click', function(){
       $('#control_panel').hide()
+      document.getElementById('control_mechanism').style.display = 'none';
       $('#middle_display').hide()
       $('#middle_title, #middle_content').empty()
       socket.emit('signal_skill_usage');
@@ -2455,6 +2668,7 @@ btn_skill.onclick = function () {
       });
       // Hide UI elements
       $('#control_panel, #middle_display').hide();
+      document.getElementById('control_mechanism').style.display = 'none';
       $('#middle_title, #middle_content').empty();
 
     });
@@ -2475,15 +2689,13 @@ async function get_reserves_amt(){
 // RESERVE DEPLOYMENT
 btn_reserves = document.getElementById("btn-reserve");
 btn_reserves.onclick = function () {
-
+  $('#control_panel').hide();
+  $('#control_mechanism').hide();
+  clickables = []
+  toHighLight = []
   socket.emit('send_async_event', {'name': "R_D"});
 
 }
-
-socket.on('establish_pillars', function(){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h3>Establishing Pillars</h3>`
-});
 
 function establish_pillars(tid){
   if(player_territories.includes(tid)){
@@ -2491,8 +2703,8 @@ function establish_pillars(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length != 0){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
+        document.getElementById('control_mechanism').style.display = 'none';
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
@@ -2507,19 +2719,12 @@ function establish_pillars(tid){
   }
 }
 
-// Cheaper leylines
-socket.on('build_free_leyline_crosses', function(){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h3>Settling Leyline Crosses</h3>`
-});
-
 function build_free_leyline_crosses(tid){
   if(player_territories.includes(tid)){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
     if (toHighLight.length != 0){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
@@ -2536,10 +2741,6 @@ function build_free_leyline_crosses(tid){
 }
 
 // Industrial Revolution -> Free city building
-socket.on('build_free_cities', function(){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h3>Settle new cities to boost your industrial power!</h3>`
-});
 
 // Free city building for industrial revolution
 function build_free_cities(tid){
@@ -2548,7 +2749,6 @@ function build_free_cities(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length != 0){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
@@ -2566,8 +2766,6 @@ function build_free_cities(tid){
 
 // Orbital strike for divine punishment
 socket.on('launch_orbital_strike', function(data){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h3>SELECT ENEMY TERRITORIES TO DESTROY!</h3>`;
   clickables = [];
   toHighLight = [];
   clickables = data.targets;
@@ -2579,7 +2777,6 @@ function launch_orbital_strike(tid){
       toHighLight.push(tid);
     }
     if (toHighLight.length != 0){
-        $('#control_mechanism').empty();
         $('#control_panel').hide();
         $('#control_panel').show();
         $('#control_confirm').off('click').on('click', function(){
@@ -2597,8 +2794,6 @@ function launch_orbital_strike(tid){
 
 // Air superiority
 socket.on('paratrooper_attack', function(){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>PARATROOPERS ON STANDBY! READY FOR AIRDROP ATTACK!</h4>`;
   clickables = [];
   toHighLight = [];
 });
@@ -2633,33 +2828,46 @@ function paratrooper_attack(tid){
 
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
+
+        document.getElementById('control_mechanism').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'block';
         $('#proceed_next_stage').hide();
   
-        let troopValue = document.createElement("p");
-        let troopInput = document.createElement("input");
-  
-        // set shortcut id
-        troopInput.setAttribute("id", "adjust_attack_amt");
-        troopValue.setAttribute("id", "curr_attack_amt");
-  
-        curr_slider = "#adjust_attack_amt";
-        curr_slider_val = "#curr_attack_amt";
-  
-        troopInput.setAttribute("type", "range");
+        let troopInput = document.getElementById('control_slider');
+        let troopValue = document.getElementById('control_value');
+
         troopInput.setAttribute("min", 1);
         troopInput.setAttribute("max", territories[toHighLight[0]].troops-1);
         troopInput.setAttribute("value", 1);
-        troopInput.setAttribute("step", 1);
-        troopInput.style.display = "inline-block";
-        troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
         troopValue.textContent = 1;
-        let c_m = document.getElementById('control_mechanism');
-        c_m.innerHTML = "";
-        c_m.appendChild(troopInput);
-        c_m.appendChild(troopValue);
+
+        // Force reset to 1 by setting to different value first, then back to 1
+        troopInput.value = 0;
+        setTimeout(() => {
+            troopInput.value = 1;
+            troopValue.textContent = 1;
+            // Reset slider background to position 0%
+            troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+        }, 0);
+
+        // Remove old event listeners to prevent duplicates
+        troopInput.removeEventListener("input", troopInput.inputHandler);
+
+        // Create new event handler
+        troopInput.inputHandler = function() {
+            troopValue.textContent = troopInput.value;
+            const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+            troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+        };
+
+        troopInput.addEventListener("input", troopInput.inputHandler);
+
+        curr_slider = '#control_slider';
+        curr_slider_val = '#control_value';
   
         $('#control_confirm').off('click').on('click' , function(){
           document.getElementById('control_panel').style.display = 'none';
+          document.getElementById('control_mechanism').style.display = 'none';
           socket.emit('send_battle_stats_AS', {'choice': toHighLight, 'amount': troopInput.value});
           toHighLight = [];
           clickables = [];
@@ -2667,6 +2875,7 @@ function paratrooper_attack(tid){
         });
         $('#control_cancel').off('click').on('click' , function(){playRefuse();
           document.getElementById('control_panel').style.display = 'none';
+          document.getElementById('control_mechanism').style.display = 'none';
           toHighLight = [];
           clickables = [];
           $('#proceed_next_stage').show();
@@ -2678,8 +2887,6 @@ function paratrooper_attack(tid){
 
 // Collusion
 socket.on('corrupt_territory', function(data){
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>CHOOSE AN ENEMY TERRITORY TO CORRUPT!</h4>`;
   clickables = data.targets;
   toHighLight = [];
 });
@@ -2688,7 +2895,6 @@ function corrupt_territory(tid){
   toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
   toHighLight.push(tid);
-  document.getElementById('control_mechanism').innerHTML = '';
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('control_panel').style.display = 'flex';
   $('#proceed_next_stage').hide();
@@ -2818,8 +3024,6 @@ socket.on('arsenal_controls', function(data) {
 
   // Set minefields
   socket.on('set_minefields', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose territories to set up minefields! ${data.limits} can be set.</h4>`;
     clickables = data.targets;
     minefields_amount = data.limits;
     toHighLight = [];
@@ -2834,7 +3038,6 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > minefields_amount) {
         toHighLight.shift();
     }
-    document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -2852,8 +3055,6 @@ socket.on('arsenal_controls', function(data) {
 
   // set_underground_silo
   socket.on('set_underground_silo', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose a territory to build underground silo! Only one silo can be built.</h4>`;
     clickables = data.targets;
     toHighLight = [];
   });
@@ -2865,7 +3066,6 @@ socket.on('arsenal_controls', function(data) {
     toHighLight = [];
     document.getElementById('control_panel').style.display = 'none';
     toHighLight.push(tid);
-    document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -2883,8 +3083,6 @@ socket.on('arsenal_controls', function(data) {
 
   // launch from silo
   socket.on('underground_silo_launch', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Launching missiles from underground silo. Choose up to ${data.usages} targets!</h4>`;
     clickables = data.targets;
     US_usages = data.usages;
     toHighLight = [];
@@ -2900,7 +3098,6 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > US_usages) {
         toHighLight.shift();
     }
-    document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -2918,8 +3115,6 @@ socket.on('arsenal_controls', function(data) {
 
   // orbital strike
   socket.on('launch_orbital_strike_offturn', function(data){
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Orbital Strike ready. Choose up to ${data.usages} targets!</h4>`;
     clickables = data.targets;
     US_usages = data.usages;
     toHighLight = [];
@@ -2935,7 +3130,6 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > US_usages) {
         toHighLight.shift();
     }
-    document.getElementById('control_mechanism').innerHTML = '';
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -2960,9 +3154,6 @@ socket.on('arsenal_controls', function(data) {
 
   // loan shark
   socket.on('make_ransom', function(data) {
-    // Set the announcement message
-    announ = document.getElementById('announcement');
-    announ.innerHTML = `<h4>Choose a target to send your ransomware!</h4>`;
 
     // Ensure required elements are visible
     let middleDisplay = $('#middle_display');
@@ -3011,7 +3202,6 @@ socket.on('arsenal_controls', function(data) {
                 selectedButton = $(this);
 
                 // Show the control panel
-                document.getElementById('control_mechanism').innerHTML = '';
                 document.getElementById('control_panel').style.display = 'none';
                 document.getElementById('control_panel').style.display = 'flex';
                 $('#proceed_next_stage').hide();
@@ -3055,11 +3245,8 @@ socket.on('arsenal_controls', function(data) {
     }  
 });
 
-// loan shark
+// laplace
 socket.on('gather_intel', function(data) {
-  // Set the announcement message
-  announ = document.getElementById('announcement');
-  announ.innerHTML = `<h4>Choose a target to uncover their agenda!</h4>`;
 
   // Ensure required elements are visible
   let middleDisplay = $('#middle_display');
@@ -3108,7 +3295,6 @@ socket.on('gather_intel', function(data) {
               selectedButton = $(this);
 
               // Show the control panel
-              document.getElementById('control_mechanism').innerHTML = '';
               document.getElementById('control_panel').style.display = 'none';
               document.getElementById('control_panel').style.display = 'flex';
               $('#proceed_next_stage').hide();
@@ -3158,6 +3344,10 @@ socket.on('show_debt_button', function(){
   in_debt = true;
   $('#btn-debt').show();
   $('#btn-debt').off('click').on('click', function() {
+    $('#control_panel').hide();
+    $('#control_mechanism').hide();
+    clickables = []
+    toHighLight = []
     // Ensure middle_display, middle_title, and middle_content are visible and cleared
     let middleDisplay = $('#middle_display');
     let middleTitle = $('#middle_title');
@@ -3406,8 +3596,9 @@ function keyPressed(){
       $slider.val($slider.attr('max'));
       $sliderValue.text($slider.attr('max'));
 
-      curr_slider = '';
-      curr_slider_val = '';
+      let slider = document.getElementById('control_slider');
+      const percentage = (($slider.attr('max') - slider.min) / (slider.max - slider.min)) * 100;
+      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
     }
   }
 
@@ -3425,9 +3616,10 @@ function keyPressed(){
   
       $slider.val(halfMax);
       $sliderValue.text(halfMax);
-  
-      curr_slider = '';
-      curr_slider_val = '';
+
+      let slider = document.getElementById('control_slider');
+      const percentage = ((halfMax - slider.min) / (slider.max - slider.min)) * 100;
+      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
     }
   }
 
@@ -3445,9 +3637,10 @@ function keyPressed(){
   
       $slider.val(thirdMax);
       $sliderValue.text(thirdMax);
-  
-      curr_slider = '';
-      curr_slider_val = '';
+
+      let slider = document.getElementById('control_slider');
+      const percentage = ((thirdMax - slider.min) / (slider.max - slider.min)) * 100;
+      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
     }
   }
 

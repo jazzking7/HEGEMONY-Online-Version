@@ -1,0 +1,140 @@
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base gradient background -->
+  <defs>
+    <!-- Main background gradient - BALANCED -->
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Scan line pattern -->
+    <pattern id="scanlines" x="0" y="0" width="100%" height="4" patternUnits="userSpaceOnUse">
+      <rect width="100%" height="2" fill="transparent"/>
+      <rect y="2" width="100%" height="2" fill="#0ea5e9" opacity="0.08"/>
+    </pattern>
+    
+    <!-- Grid pattern -->
+    <pattern id="grid" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#0ea5e9" stroke-width="0.5" opacity="0.25"/>
+    </pattern>
+    
+    <!-- Glowing dots pattern -->
+    <pattern id="dots" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1.5" fill="#06b6d4" opacity="0.45"/>
+      <circle cx="110" cy="60" r="1.5" fill="#0ea5e9" opacity="0.35"/>
+      <circle cx="50" cy="150" r="1.5" fill="#38bdf8" opacity="0.45"/>
+      <circle cx="160" cy="120" r="1.5" fill="#06b6d4" opacity="0.35"/>
+    </pattern>
+    
+    <!-- Radial light burst -->
+    <radialGradient id="lightBurst1" cx="30%" cy="20%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0" />
+    </radialGradient>
+    
+    <radialGradient id="lightBurst2" cx="70%" cy="80%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.25" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Angular tech lines -->
+    <linearGradient id="techLine1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#0ea5e9;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0"/>
+    </linearGradient>
+    
+    <!-- Static scanning effect -->
+    <linearGradient id="scanBeam" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#0ea5e9;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0"/>
+    </linearGradient>
+    
+    <!-- Vignette effect -->
+    <radialGradient id="vignette">
+      <stop offset="65%" style="stop-color:#000000;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.25" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Base layer -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)"/>
+  
+  <!-- Light bursts -->
+  <ellipse cx="576" cy="216" rx="600" ry="400" fill="url(#lightBurst1)"/>
+  <ellipse cx="1344" cy="864" rx="500" ry="350" fill="url(#lightBurst2)"/>
+  
+  <!-- Grid layer -->
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  
+  <!-- Dots layer -->
+  <rect width="1920" height="1080" fill="url(#dots)"/>
+  
+  <!-- Angular tech elements -->
+  <g opacity="0.7">
+    <!-- Top left corner element -->
+    <path d="M 0 0 L 300 0 L 280 20 L 20 20 L 20 300 L 0 280 Z" fill="none" stroke="url(#techLine1)" stroke-width="1.2"/>
+    <path d="M 60 60 L 240 60 L 240 240" fill="none" stroke="#0ea5e9" stroke-width="0.6" opacity="0.6"/>
+    
+    <!-- Top right corner element -->
+    <path d="M 1920 0 L 1620 0 L 1640 20 L 1900 20 L 1900 300 L 1920 280 Z" fill="none" stroke="url(#techLine1)" stroke-width="1.2"/>
+    <path d="M 1860 60 L 1680 60 L 1680 240" fill="none" stroke="#0ea5e9" stroke-width="0.6" opacity="0.6"/>
+    
+    <!-- Bottom left corner element -->
+    <path d="M 0 1080 L 300 1080 L 280 1060 L 20 1060 L 20 780 L 0 800 Z" fill="none" stroke="url(#techLine1)" stroke-width="1.2"/>
+    <path d="M 60 1020 L 240 1020 L 240 840" fill="none" stroke="#0ea5e9" stroke-width="0.6" opacity="0.6"/>
+    
+    <!-- Bottom right corner element -->
+    <path d="M 1920 1080 L 1620 1080 L 1640 1060 L 1900 1060 L 1900 780 L 1920 800 Z" fill="none" stroke="url(#techLine1)" stroke-width="1.2"/>
+    <path d="M 1860 1020 L 1680 1020 L 1680 840" fill="none" stroke="#0ea5e9" stroke-width="0.6" opacity="0.6"/>
+  </g>
+  
+  <!-- Diagonal tech lines -->
+  <g opacity="0.3">
+    <line x1="0" y1="300" x2="400" y2="0" stroke="#06b6d4" stroke-width="1.2"/>
+    <line x1="1520" y1="0" x2="1920" y2="300" stroke="#06b6d4" stroke-width="1.2"/>
+    <line x1="0" y1="780" x2="400" y2="1080" stroke="#06b6d4" stroke-width="1.2"/>
+    <line x1="1520" y1="1080" x2="1920" y2="780" stroke="#06b6d4" stroke-width="1.2"/>
+  </g>
+  
+  <!-- Hexagonal pattern in center -->
+  <g opacity="0.15" transform="translate(960, 540)">
+    <polygon points="0,-100 86.6,-50 86.6,50 0,100 -86.6,50 -86.6,-50" fill="none" stroke="#0ea5e9" stroke-width="1.2"/>
+    <polygon points="0,-200 173.2,-100 173.2,100 0,200 -173.2,100 -173.2,-100" fill="none" stroke="#0ea5e9" stroke-width="1.2"/>
+    <polygon points="0,-300 259.8,-150 259.8,150 0,300 -259.8,150 -259.8,-150" fill="none" stroke="#0ea5e9" stroke-width="1.2"/>
+  </g>
+  
+  <!-- Circular radar elements -->
+  <g opacity="0.18" transform="translate(960, 540)">
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#06b6d4" stroke-width="1.2"/>
+    <circle cx="0" cy="0" r="300" fill="none" stroke="#06b6d4" stroke-width="1.2"/>
+    <circle cx="0" cy="0" r="450" fill="none" stroke="#06b6d4" stroke-width="1.2"/>
+    
+    <!-- Static radar sweep lines -->
+    <line x1="0" y1="0" x2="0" y2="-450" stroke="#0ea5e9" stroke-width="0.8" opacity="0.7"/>
+    <line x1="0" y1="0" x2="318.2" y2="318.2" stroke="#0ea5e9" stroke-width="0.8" opacity="0.5"/>
+  </g>
+  
+  <!-- Scan line pattern overlay -->
+  <rect width="1920" height="1080" fill="url(#scanlines)"/>
+  
+  <!-- Static scanning beam effect -->
+  <rect width="1920" height="1080" fill="url(#scanBeam)" opacity="0.45"/>
+  
+  <!-- Static glowing particles -->
+  <g>
+    <circle cx="400" cy="200" r="2.5" fill="#06b6d4" opacity="0.8"/>
+    <circle cx="1500" cy="300" r="2.5" fill="#0ea5e9" opacity="0.75"/>
+    <circle cx="300" cy="800" r="2.5" fill="#38bdf8" opacity="0.8"/>
+    <circle cx="1600" cy="850" r="2.5" fill="#06b6d4" opacity="0.7"/>
+    <circle cx="800" cy="400" r="2.5" fill="#0ea5e9" opacity="0.75"/>
+    <circle cx="1200" cy="700" r="2.5" fill="#38bdf8" opacity="0.7"/>
+    <circle cx="600" cy="600" r="2" fill="#06b6d4" opacity="0.6"/>
+    <circle cx="1400" cy="500" r="2" fill="#0ea5e9" opacity="0.6"/>
+  </g>
+  
+  <!-- Vignette effect -->
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+</svg>

@@ -45,7 +45,7 @@ class turn_loop_scheduler:
     def reinforcement(self, gs, curr_p):
         for player in gs.pids:
             if player != curr_p:
-                gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
+                gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"{gs.players[curr_p].name}'s turn: reinforcement"}, room=player)
         gs.server.emit('change_click_event', {'event': "troop_deployment"}, room=curr_p)
         print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
         if gs.players[curr_p].deployable_amt < 1: #???
@@ -79,23 +79,33 @@ class turn_loop_scheduler:
                         break
             gs.players[curr_p].deployable_amt = d_amt
             print(f"Player has {gs.players[curr_p].deployable_amt} deployable amount")
+        gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'DEPLOY', 'msg': f" | {gs.players[curr_p].deployable_amt} DEPLOYABLE"}, room=curr_p)
         gs.server.emit("troop_deployment", {'amount': gs.players[curr_p].deployable_amt}, room=curr_p)
         return
 
     def preparation(self, gs, curr_player):
-        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: preparation"}, room=gs.lobby)
+        for player in gs.players:
+            if player != curr_player:
+                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: preparation"}, room=player)
+        gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'PREPARE', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': None}, room=curr_player)
         gs.server.emit("preparation", room=curr_player)
         return
 
     def conquer(self, gs, curr_player):
-        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=gs.lobby)
+        for player in gs.players:
+            if player != curr_player:
+                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: conquest"}, room=player)
+        gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'ATTACK', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': 'conquest'}, room=curr_player)
         gs.server.emit("conquest", room=curr_player)
         return
     
     def rearrange(self, gs, curr_player):
-        gs.server.emit('set_up_announcement', {'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=gs.lobby)
+        for player in gs.players:
+            if player != curr_player:
+                gs.server.emit('set_new_announcement', {'async' : False, 'msg': f"{gs.players[curr_player].name}'s turn: rearrangement"}, room=player)
+        gs.server.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'REARRANGE', 'msg': f""}, room=curr_player)
         gs.server.emit("change_click_event", {'event': 'rearrange'}, room=curr_player)
         gs.server.emit("rearrangement", room=curr_player)
         return
@@ -380,7 +390,7 @@ class turn_loop_scheduler:
             # inter_turn connection event
             if ms.interturn_connections:
                 for pid in ms.interturn_connections:
-                    gs.server.emit('set_up_announcement', {'msg': f"{gs.players[pid].name} is reconnecting..."}, room=gs.lobby)
+                    gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"{gs.players[pid].name} is reconnecting..."}, room=gs.lobby)
                     c = 0
                     while not ms.interturn_connections[pid] and not ms.interrupt and c <= 60:
                         gs.server.sleep(1)

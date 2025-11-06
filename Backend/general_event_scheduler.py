@@ -137,7 +137,7 @@ class General_Event_Scheduler:
 
     def run_setup_events(self,):
         self.gs.server.sleep(15)
-        self.gs.server.emit('set_up_announcement', {'msg': "Loading resources..."}, room=self.gs.lobby)
+        self.gs.server.emit('set_new_announcement', {'async': True, 'msg': "Loading resources..."}, room=self.gs.lobby)
         self.gs.server.sleep(2)
         for event in self.SES:
             event.executable(self.gs, self)
@@ -167,6 +167,7 @@ class General_Event_Scheduler:
         if self.interrupt:
             return
         self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
+        self.gs.inGameLoop = True
         self.run_turn_scheduler()
 
     # end game
@@ -222,6 +223,7 @@ class General_Event_Scheduler:
 
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('change_click_event', {'event': "reserve_deployment"}, room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Deploying reserves, {self.gs.players[pid].reserves} troops available"}, room=pid)
         self.gs.server.emit('reserve_deployment', {'amount': self.gs.players[pid].reserves}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
         done = False
@@ -241,6 +243,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the bureaus!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Mobilization Bureaux, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_bureau', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_bureau"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -262,6 +265,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the leyline cross!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Leyline Cross, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_leyline', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_leyline"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -283,6 +287,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the nexus!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Building Logistic Nexus, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_nexus', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_nexus"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -305,6 +310,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can set hall of governance!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Intalling Governance Halls, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_hall', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_hall"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -326,6 +332,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can be fortified!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling new forts, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_forts', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_forts"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -340,6 +347,7 @@ class General_Event_Scheduler:
 
     def build_cities(self, data, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling new cities, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('build_cities', {'amount': data['amt']}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_cities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -361,6 +369,7 @@ class General_Event_Scheduler:
             self.gs.server.emit('display_new_notification', {'msg': 'Not enough cities that can be upgraded to megacities!'}, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Raising new megacities, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('raise_megacities', {'amount': int(data['amt']), 'clist': clist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "raise_megacities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
@@ -374,6 +383,7 @@ class General_Event_Scheduler:
         self.gs.server.emit("clear_view", room=pid)
 
     def activate_summit(self,):
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Summit in progress..."}, room=self.gs.lobby)
         self.gs.server.emit('activate_summit', room=self.gs.lobby)
         self.selection_time_out(60, len(self.gs.players))
 
@@ -386,7 +396,8 @@ class General_Event_Scheduler:
         for player in self.gs.players:
             if self.gs.players[player].alive:
                 c += 1
-                self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a summit"}, room=player)
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} has proposed a summit"}, room=player)
+                self.gs.server.emit('summit_voting', room=player)
         self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         self.selection_time_out(20, c)
         self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
@@ -405,7 +416,8 @@ class General_Event_Scheduler:
         for player in self.gs.players:
             if self.gs.players[player].alive:
                 c += 1
-                self.gs.server.emit('summit_voting', {'msg': f"{self.gs.players[pid].name} has proposed a global peace. The game ends immediately if nobody refuse."}, room=player)
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} has proposed a global ceasefire. The game ends immediately if nobody refuse."}, room=player)
+                self.gs.server.emit('summit_voting', room=player)
         self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         self.selection_time_out(60, c)
         self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
@@ -419,6 +431,7 @@ class General_Event_Scheduler:
 
     def build_free_cities(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settle new cities to boost your industrial power!"}, room=pid)
         self.gs.server.emit('build_free_cities', room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_free_cities"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -433,6 +446,7 @@ class General_Event_Scheduler:
 
     def build_free_leyline_crosses(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Leyline Crosses"}, room=pid)
         self.gs.server.emit('build_free_leyline_crosses', room=pid)
         self.gs.server.emit('change_click_event', {'event': "build_free_leyline_crosses"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -447,7 +461,7 @@ class General_Event_Scheduler:
 
     def establish_pillars(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
-        self.gs.server.emit('establish_pillars', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Establishing Pillars"}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "establish_pillars"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
         self.gs.players[pid].skill.finish_building = False
@@ -464,6 +478,8 @@ class General_Event_Scheduler:
 
         strikables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories]
 
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"SELECT ENEMY TERRITORIES TO DESTROY!"}, room=pid)
+
         self.gs.server.emit('launch_orbital_strike', {'targets': strikables}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "launch_orbital_strike"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -478,6 +494,7 @@ class General_Event_Scheduler:
 
     def paratrooper_attack(self, pid):
         self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"PARATROOPERS ON STANDBY! READY FOR AIRDROP ATTACK!"}, room=pid)
         self.gs.server.emit('paratrooper_attack', room=pid)
         self.gs.server.emit('change_click_event', {'event': "paratrooper_attack"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -493,6 +510,7 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         corruptables = [tid for tid in range(self.gs.map.num_nations) if tid not in self.gs.players[pid].territories and not self.gs.map.territories[tid].isMegacity]
         self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"CHOOSE AN ENEMY TERRITORY TO CORRUPT!"}, room=pid)
         self.gs.server.emit('corrupt_territory', {'targets': corruptables}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "corrupt_territory"}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -508,6 +526,8 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         potential_targets = self.gs.players[pid].skill.get_potential_targets()
         self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Choose a target to send your ransomware!"}, room=pid)
+
         self.gs.server.emit('make_ransom', {'targets': potential_targets}, room=pid)
         self.gs.server.emit('change_click_event', {'event': None}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -523,6 +543,7 @@ class General_Event_Scheduler:
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         potential_targets = self.gs.players[pid].skill.get_potential_targets()
         self.gs.players[pid].skill.finished_choosing = False
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Choose a target to uncover their agenda!"}, room=pid)
         self.gs.server.emit('gather_intel', {'targets': potential_targets}, room=pid)
         self.gs.server.emit('change_click_event', {'event': None}, room=pid)
         print(f"{self.gs.players[pid].name}'s war art triggered an inner async event.")
@@ -541,6 +562,8 @@ class General_Event_Scheduler:
                 self.gs.server.emit('async_terminate_button_setup', room=pid)
                 options = [tid for tid in player.territories if tid not in player.skill.minefields]
                 player.skill.finished_setting = False
+
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Choose territories to set up minefields! {player.skill.max_minefields-len(player.skill.minefields)} can be set."}, room=pid)
 
                 self.gs.server.emit('set_minefields', {'targets': options, 'limits': player.skill.max_minefields-len(player.skill.minefields)}, room=pid)
                 self.gs.server.emit('change_click_event', {'event': "set_minefields"}, room=pid)
@@ -563,6 +586,8 @@ class General_Event_Scheduler:
                 self.gs.server.emit('async_terminate_button_setup', room=pid)
                 options = [tid for tid in player.territories]
                 player.skill.finished_setting = False
+
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Choose a territory to build underground silo! Only one silo can be built."}, room=pid)
 
                 self.gs.server.emit('set_underground_silo', {'targets': options}, room=pid)
                 self.gs.server.emit('change_click_event', {'event': "set_underground_silo"}, room=pid)
@@ -591,6 +616,8 @@ class General_Event_Scheduler:
             options = self.gs.map.get_reachable_airspace(skill.underground_silo, skill.range)
 
             options = list(set(options) - set(player.territories))
+
+            self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Launching missiles from underground silo. Choose up to {skill.silo_usage - skill.silo_used} targets!"}, room=pid)
 
             self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
             self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
@@ -621,6 +648,7 @@ class General_Event_Scheduler:
             options = list(set(options) - set(player.territories))
 
             self.gs.server.emit('signal_hide_btns', room=pid)
+            self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Launching missiles from underground silo. Choose up to {skill.silo_usage - skill.silo_used} targets!"}, room=pid)
             self.gs.server.emit('underground_silo_launch', {'targets': options, 'usages': skill.silo_usage - skill.silo_used}, room=pid)
             self.gs.server.emit('change_click_event', {'event': "underground_silo_launch"}, room=pid)
 
@@ -637,9 +665,9 @@ class General_Event_Scheduler:
             if not (pid == self.gs.pids[self.current_player]):
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_launching:
-                self.gs.server.emit("set_up_announcement", {'msg': "Missiles launched..."}, room=pid)
+                self.gs.server.emit('set_new_announcement', {'async': True, 'msg': "Missiles launched..."}, room=self.gs.lobby)
             else:
-                self.gs.server.emit("set_up_announcement", {'msg': "Launching operation cancelled..."}, room=pid)
+                self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
             self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
     
@@ -656,7 +684,8 @@ class General_Event_Scheduler:
 
 
             self.gs.server.emit('signal_hide_btns', room=pid)
-            
+            self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Orbital Strike ready. Choose up to {skill.limit-skill.offturn_used} targets!"}, room=pid)
+
             self.gs.server.emit('launch_orbital_strike_offturn', {'targets': strikables, 'usages': skill.limit-skill.offturn_used}, room=pid)
             self.gs.server.emit('change_click_event', {'event': "launch_orbital_strike_offturn"}, room=pid)
 
@@ -673,9 +702,9 @@ class General_Event_Scheduler:
             if not (pid == self.gs.pids[self.current_player]):
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_bombardment:
-                self.gs.server.emit("set_up_announcement", {'msg': "Orbital Strike launched..."}, room=pid)
+                self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Orbital Strike launched..."}, room=pid)
             else:
-                self.gs.server.emit("set_up_announcement", {'msg': "Launching operation cancelled..."}, room=pid)
+                self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
             self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
 
@@ -690,7 +719,8 @@ class General_Event_Scheduler:
             potential_targets = self.gs.players[pid].skill.get_potential_targets()
 
             self.gs.server.emit('signal_hide_btns', room=pid)
-            
+            self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Choose a target to send your ransomware!"}, room=pid)
+
             self.gs.server.emit('make_ransom', {'targets': potential_targets}, room=pid)
             self.gs.server.emit('change_click_event', {'event': None}, room=pid)
 
@@ -707,8 +737,8 @@ class General_Event_Scheduler:
             if not (pid == self.gs.pids[self.current_player]):
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_choosing:
-                self.gs.server.emit("set_up_announcement", {'msg': "Ransomware activated..."}, room=pid)
+                self.gs.server.emit("set_new_announcement", {"async": True, 'msg': "Ransomware activated..."}, room=pid)
             else:
-                self.gs.server.emit("set_up_announcement", {'msg': "Ransomware cancelled..."}, room=pid)
+                self.gs.server.emit("set_new_announcement", {"async": True, 'msg': "Ransomware cancelled..."}, room=pid)
         else:
             self.gs.server.emit("display_new_notification", {'msg': "Ransomeware has been sealed!"}, room=pid)

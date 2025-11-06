@@ -474,6 +474,7 @@ def update_color_choice(data):
         gsm.players[request.sid].color = color
         gsm.GES.selected += 1
     else:
+        socketio.emit('set_new_announcement', {'async' : True, 'msg': 'Choose a color to represent your country'}, room=request.sid)
         socketio.emit('choose_color', {'msg': 'Choose a color to represent your country', 'options': gsm.aval_choices}, room=request.sid)
 
 @socketio.on('send_dist_choice')
@@ -840,10 +841,15 @@ def update_troop_info(data):
     gsm.signal_MTrackers('popu')
 
     if gsm.players[pid].deployable_amt > 0:
+        if gsm.inGameLoop:
+            socketio.emit('set_new_announcement', {'async' : False, 'curr_phase' : 'DEPLOY', 'msg': f" | {gsm.players[pid].deployable_amt} DEPLOYABLE"}, room=pid)
+        else:
+            socketio.emit('set_new_announcement', {'async' : True, 'msg': f"Deploy your troops! {gsm.players[pid].deployable_amt} deployable"}, room=pid)
         socketio.emit('troop_deployment', {'amount': gsm.players[pid].deployable_amt}, room=pid)
     else:
         if gsm.GES.current_event == None:
             # show only for initial deployment
+            socketio.emit('set_new_announcement', {'async' : True, 'msg': f"Completed, waiting for others..."}, room=pid)
             socketio.emit('troop_result', {'resp': True}, room=pid)
             gsm.GES.selected += 1
 
@@ -973,6 +979,7 @@ def handle_reserves_deployment(data):
         gsm.signal_MTrackers('popu')
 
         if gsm.players[pid].reserves > 0:
+            socketio.emit('set_new_announcement', {'async' : True, 'msg': f"Deploying reserves, {gsm.players[pid].reserves} troops available"}, room=pid)
             socketio.emit('reserve_deployment', {'amount': gsm.players[pid].reserves}, room=pid)
 
 @socketio.on('request_summit')
@@ -1140,8 +1147,8 @@ def handle_laplace_fetching(data):
             secret_data['Infrastructure Level'] = gsm.get_player_infra_level(info_player) + 3
             secret_data['Min Roll'] = info_player.min_roll
             if info_player.skill:
-                secret_data['Skill'] = info_player.skill.name
-                secret_data['Skill Status'] = info_player.skill.get_skill_status()
+                secret_data['War Art'] = info_player.skill.name
+                secret_data['War Art Status'] = info_player.skill.get_skill_status()
             socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
         
         if gsm.players[pid].skill.name == "Babylon":
@@ -1153,7 +1160,7 @@ def handle_laplace_fetching(data):
                 secret_data['Infrastructure Level'] = gsm.get_player_infra_level(info_player) + 3
                 secret_data['Min Roll'] = info_player.min_roll
                 if info_player.skill:
-                    secret_data['Skill'] = info_player.skill.name
+                    secret_data['War Art'] = info_player.skill.name
                 socketio.emit('laplace_info', {"color": info_player.color, "info": secret_data}, room=pid)
 
 @socketio.on('launch_silo')

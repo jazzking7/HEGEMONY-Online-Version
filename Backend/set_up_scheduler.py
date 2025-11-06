@@ -56,9 +56,8 @@ class setup_event_scheduler:
         # Set up user view for mission
         for mission in gs.Mset:
             mission.set_up_tracker_view()
-            gs.server.emit('get_mission', {'msg': f'Your agenda: {mission.name}'}, room=mission.player)
-
-        ms.selection_time_out(20, len(gs.players))
+            gs.server.emit('set_new_announcement', {'async': True, 'msg': f'Your agenda: {mission.name}'}, room=mission.player)
+        ms.selection_time_out(5, len(gs.players))
 
     # FCFS
     def start_color_distribution(self, gs, ms):
@@ -115,9 +114,9 @@ class setup_event_scheduler:
 
             for reci in gs.players:
                 if reci != player:
-                    gs.server.emit('set_up_announcement', {'msg': f"Select territorial distribution: {gs.players[player].name} is choosing"}, room=reci)
+                    gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Select territorial distribution: {gs.players[player].name} is choosing"}, room=reci)
                 else:
-                    gs.server.emit('set_up_announcement', {'msg': f"Select a territorial distribution"}, room=player)
+                    gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Select a territorial distribution"}, room=player)
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
 
@@ -139,7 +138,7 @@ class setup_event_scheduler:
         gs.send_player_list()
     
     def start_capital_settlement(self, gs, ms):
-        gs.server.emit('set_up_announcement', {'msg':f"Settle your capital!"}, room=gs.lobby)
+        gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
         ms.selection_time_out(ms.trty_set_time, len(gs.players))
@@ -157,7 +156,7 @@ class setup_event_scheduler:
         gs.signal_view_clear()
     
     def start_city_settlement(self,gs, ms):
-        gs.server.emit('set_up_announcement', {'msg':f"Build up two cities!"}, room=gs.lobby)
+        gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
         ms.selection_time_out(ms.trty_set_time, len(gs.players))
@@ -182,11 +181,13 @@ class setup_event_scheduler:
             amount = len(gs.players[player].territories) + (curr*3) + (curr//2)
             curr += 1
             gs.players[player].deployable_amt = amount
+            gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Deploy your troops! {amount} deployable"}, room=player)
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
         ms.selection_time_out(ms.power_set_time, len(gs.players))
 
         gs.signal_view_clear()
+        gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Completed, waiting for others..."}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': None}, room=gs.lobby)
         gs.server.emit('troop_result', {'resp': True}, room=gs.lobby)
         gs.server.sleep(3)
@@ -194,7 +195,7 @@ class setup_event_scheduler:
             gs.clear_deployables(player)
     
     def start_skill_selection(self, gs, ms):
-        gs.server.emit('set_up_announcement', {'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
+        gs.server.emit('set_new_announcement', {'async' : True, 'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
         for player in gs.players:
             options = gs.SDIS.get_options(gs.complexity) if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
             gs.server.emit('choose_skill', {'options': options}, room=player)
