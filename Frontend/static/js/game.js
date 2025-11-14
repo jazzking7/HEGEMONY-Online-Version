@@ -123,6 +123,10 @@ $(document).ready(async function() {
     event.stopPropagation();
   });
 
+  $('#middle_display').on('click mousemove wheel', function(event) {
+      event.stopPropagation();
+  });
+
 
   async function tryLoadSketch() {
       // GAME_SKETCH LOGIC IS LOADED HERE WITH p5.js
