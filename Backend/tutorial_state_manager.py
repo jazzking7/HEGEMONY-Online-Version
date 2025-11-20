@@ -125,13 +125,81 @@ class Tutorial_Manager:
         self.Annihilator = None
 
     def send_welcome(self, player):
+        self.server.emit('set_new_announcement', {'async': True, "msg": "Welcome to Hegemony!"}, room=player)
         self.server.emit('send_tutorial_welcome', room=player)
 
     def send_next_stage(self, player, stage):
         if stage == 1:
-            self.server.emit('show_game_goal', room=player)
+            for trty in range(0, len(self.map.territories)//2):
+                self.server.emit('update_trty_display', {trty:{'color': "#4169E1", 'troops': 1}}, room=player) 
+            for trty in range(len(self.map.territories)//2, len(self.map.territories)):
+                self.server.emit('update_trty_display', {trty:{'color': "#FFDE21", 'troops': 1}}, room=player) 
+            self.server.emit('set_new_announcement', {'async': True, "msg": "Basic Gameplay"}, room=player)
+            self.server.emit('show_territories', room=player)
             return
         elif stage == 2:
+            # self.server.emit('show_secret_agenda', room=player)
+            # self.server.emit('initiate_tracker_for_tutorial', {
+            #     'title': "Populist",
+            #     'misProgBar': [0, 4],
+            #     'misProgDesp': f'Holding the largest army for {0}/{4} consecutive rounds',
+            # }, room=player)
+            self.server.emit('update_trty_display', {30:{'troops': "10"}}, room=player)
+            self.server.emit('initial_deployment_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'troop_deployment'}, room=player)
+            return
+        elif stage == 3:
+            self.server.emit('update_trty_display', {7:{'troops': "11"}}, room=player)
+            self.server.emit('conquest_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'conquest_tutorial'}, room=player)
+            #self.server.emit('show_game_set_up', room=player)
+            return
+        elif stage == 4:
+            self.server.emit('update_trty_display', {7:{'troops': "1"}}, room=player)
+            self.server.emit('update_trty_display', {25:{'troops': "10", 'color': "#4169E1"}}, room=player)
+            #self.server.emit('pick_color', room=player)
+            self.server.emit('rearrangement_tutorial', room=player)
+            self.server.emit('change_click_event_tutorial', {'event': 'rearrangement_tutorial'}, room=player)
+            return
+        elif stage == 5:
+            self.server.emit('update_trty_display', {7:{'troops': "10"}}, room=player)
+            self.server.emit('update_trty_display', {25:{'troops': "1"}}, room=player)
+            # for trty in range(0, len(self.map.territories)//2):
+            #     self.server.emit('update_trty_display', {trty:{'color': "#3B8686"}}, room=player) 
+            # for trty in range(len(self.map.territories)//2, len(self.map.territories)):
+            #     self.server.emit('update_trty_display', {trty:{'color': "#CFF09E"}}, room=player) 
+            #self.server.emit('claim_territories', room=player)
+            self.server.emit('basic_control_done', room=player)
+            return
+        elif stage == 6:
+            # for trty in range(0, len(self.map.territories)//2):
+            #     self.server.emit('update_trty_display', {trty:{'color': "#4169E1", 'troops': 1}}, room=player) 
+            # for trty in range(len(self.map.territories)//2, len(self.map.territories)):
+            #     self.server.emit('update_trty_display', {trty:{'color': "#FFDE21", 'troops': 1}}, room=player) 
+            # self.server.emit('choose_capital_tutorial', room=player)
+            # self.server.emit('change_click_event_tutorial', {'event': 'settle_capital'}, room=player)
+            self.server.emit('set_new_announcement', {'async': True, "msg": "Game Currency"}, room=player)
+            self.server.emit('show_game_currency', room=player)
+            return
+        elif stage == 7:
+            # self.server.emit('update_trty_display', {7:{'isCapital': True}}, room=player) 
+            # self.server.emit('choose_city_tutorial', room=player)
+            # self.server.emit('change_click_event_tutorial', {'event': 'settle_cities'}, room=player)
+            self.server.emit('set_new_announcement', {'async': True, "msg": "War Art"}, room=player)
+            self.server.emit('show_war_art', room=player)
+            return
+        elif stage == 8:
+            self.server.emit('update_trty_display', {30: {'troops': "0", 'hasEffect': 'nuke'}}, room=player)
+            self.server.emit('nuke_animation', {'tid': 30}, room=player)
+            self.server.emit('post_war_art', room=player)
+            return
+        elif stage == 9:
+            # self.server.emit('update_trty_display', {7:{'troops': "31"}}, room=player)
+            # self.server.emit('war_art_tutorial', room=player)
+            self.server.emit('set_new_announcement', {'async': True, "msg": "Secret Agenda"}, room=player)
+            self.server.emit('secret_agenda_basic', room=player)
+            return
+        elif stage == 10:
             self.server.emit('show_secret_agenda', room=player)
             self.server.emit('initiate_tracker_for_tutorial', {
                 'title': "Populist",
@@ -139,48 +207,9 @@ class Tutorial_Manager:
                 'misProgDesp': f'Holding the largest army for {0}/{4} consecutive rounds',
             }, room=player)
             return
-        elif stage == 3:
-            self.server.emit('show_game_set_up', room=player)
-            return
-        elif stage == 4:
-            self.server.emit('pick_color', room=player)
-            return
-        elif stage == 5:
-            for trty in range(0, len(self.map.territories)//2):
-                self.server.emit('update_trty_display', {trty:{'color': "#3B8686"}}, room=player) 
-            for trty in range(len(self.map.territories)//2, len(self.map.territories)):
-                self.server.emit('update_trty_display', {trty:{'color': "#CFF09E"}}, room=player) 
-            self.server.emit('claim_territories', room=player)
-            return
-        elif stage == 6:
-            for trty in range(0, len(self.map.territories)//2):
-                self.server.emit('update_trty_display', {trty:{'color': "#4169E1", 'troops': 1}}, room=player) 
-            for trty in range(len(self.map.territories)//2, len(self.map.territories)):
-                self.server.emit('update_trty_display', {trty:{'color': "#FFDE21", 'troops': 1}}, room=player) 
-            self.server.emit('choose_capital_tutorial', room=player)
-            self.server.emit('change_click_event_tutorial', {'event': 'settle_capital'}, room=player)
-            return
-        elif stage == 7:
-            self.server.emit('update_trty_display', {7:{'isCapital': True}}, room=player) 
-            self.server.emit('choose_city_tutorial', room=player)
-            self.server.emit('change_click_event_tutorial', {'event': 'settle_cities'}, room=player)
-            return
-        elif stage == 8:
-            self.server.emit('update_trty_display', {8:{'hasDev': "city"}}, room=player)
-            self.server.emit('update_trty_display', {9:{'hasDev': "city"}}, room=player) 
-            self.server.emit('initial_deployment_tutorial', room=player)
-            self.server.emit('change_click_event_tutorial', {'event': 'troop_deployment'}, room=player)
-            return
-        elif stage == 9:
-            self.server.emit('update_trty_display', {7:{'troops': "31"}}, room=player)
-            self.server.emit('war_art_tutorial', room=player)
-            return
-        elif stage == 10:
-            self.server.emit('basic_gameplay', room=player)
-            return
         elif stage == 11:
-            self.server.emit('reinforcement_tutorial', room=player)
-            self.server.emit('change_click_event_tutorial', {'event': 'reinforcement_tutorial'}, room=player)
+            self.server.emit('set_new_announcement', {'async': True, "msg": "Let's get it!"}, room=player)
+            self.server.emit('end_of_tutorial', room=player)
             return
         elif stage == 12:
             self.server.emit('update_trty_display', {7:{'troops': "56"}}, room=player)

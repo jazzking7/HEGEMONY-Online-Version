@@ -2021,16 +2021,17 @@ class Pillar_of_Immortality(Skill):
         limits = min(limits, ((ply.total_troops//10 + ply.stars)-cost+free_left))
         if limits < 0:
             limits = 0
-        info = ""
-        info += "Pillars active in: "
+        info = []
         for p in self.pillars:
-            info += f"{self.gs.map.territories[p].name} "
+            info.append(self.gs.map.territories[p].name)
         self.gs.server.emit("update_skill_status", {
             'name': "Pillar of Immortality",
             'description': f"""Able to build Pillars of Immortality. When a Pillar is stationed on a territory,
-              each troop inside that territory counts for 10 troop in battles. Current costs {cost} stars each round to maintain the pillars. {info}""",
+              each troop inside that territory counts for 10 troop in battles. Current costs {cost} stars each round to maintain the pillars.""",
             'operational': self.active,
             'hasLimit': True,
+            'forbidden_targets': info,
+            'ft_msg': "Active Pillars in:",
             'limits': limits,
             'btn_msg': "Establish Pillars"
         }, room=self.player) 

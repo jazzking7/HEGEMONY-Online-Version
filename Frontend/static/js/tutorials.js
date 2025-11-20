@@ -71,7 +71,11 @@ $(document).ready(async function() {
   // Show continent border toggle
   $('#btn_show_cont').click(function() {
       showContBorders = !showContBorders;
-      $(this).text(showContBorders ? 'On' : 'Off');
+      if (showContBorders) {
+        $(this).addClass('active');
+      } else {
+        $(this).removeClass('active');
+      }
   });
 
   // Click propagation prevention
@@ -79,13 +83,40 @@ $(document).ready(async function() {
       event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
 
-  $('#overlay_sections .circular-button').on('click mousemove', function(event) {
+  $('#overlay_sections .bottom-action-button').on('click mousemove', function(event) {
     event.stopPropagation(); // Prevent click and mousemove events from reaching the background
   });
+
   
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+ $('#proceed_next_stage').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#control_panel').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#control_mechanism').on('click mousemove', function(event) {
+      event.stopPropagation();
+  });
+
+  $('#your_stats, #global_overview').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#tracker').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#event_announcement').on('click mousemove', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#middle_display').on('click mousemove wheel', function(event) {
+      event.stopPropagation();
+  });
+
+  $('#global_overview, #your_stats, #player_info, #tracker').hide();
 
   async function tryLoadSketch() {
       initializeLibraries();
@@ -143,20 +174,61 @@ async function get_tutorial_settings() {
 
 //========================= Update Game State ============================
 
+socket.on('set_new_announcement', function(data) {
+    const announcement = $('#announcement');
+    const phaseIndicators = $('#phase_indicators');
+    
+    if (data.async) {
+        // Async message - simple display
+        phaseIndicators.hide();
+        announcement.html(`<div class="async-message">${data.msg}</div>`);
+    } else {
+        // Turn-based event with phase indicators
+        phaseIndicators.show();
+        
+        const phase = data.curr_phase.toUpperCase();
+        const phaseInfo = phaseMap[phase];
+        
+        if (phaseInfo) {
+            // Update phase boxes
+            $('.phase-box').removeClass('completed active');
+            
+            $('.phase-box').each(function(index) {
+                const boxPhase = index + 1;
+                if (boxPhase < phaseInfo.index) {
+                    $(this).addClass('completed'); // Red X
+                } else if (boxPhase === phaseInfo.index) {
+                    $(this).addClass('active'); // Yellow pulsing
+                }
+                // else stays gray (default)
+            });
+            
+            // Update phase name
+            announcement.html(`
+                <div class="phase-label">CURRENT PHASE</div>
+                <div class="phase-name ${phaseInfo.class}">${phaseInfo.label}${data.msg}</div>
+            `);
+        } else {
+            // Fallback for unknown phases
+            phaseIndicators.hide();
+            announcement.html(`<div class="async-message">${data.msg || phase}</div>`);
+        }
+    }
+});
+
 socket.on('send_tutorial_welcome', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Welcome to Hegemony!</h2>`;
 
   setTimeout(() => {
-    $('#middle_display, #middle_title, #middle_content').show();
+    $('#middle_display,#middle_content').show();
     $('#middle_content').html(`
       <div style="padding: 8px; line-height: 1.5; font-size: 1.1rem;">
         <p>Welcome to the <strong>Hegemony Tutorial</strong></p>
-        <p>Here, you'll be introduced to the essentials:</p>
+        <p>Here, you will learn the essentials:</p>
         <ul style="margin: 5px 0; padding-left: 22px;">
-          <li><strong>Game Goal</strong></li>
-          <li><strong>Game Setup</strong></li>
           <li><strong>Basic Gameplay</strong></li>
+          <li><strong>Game Currency</strong></li>
+          <li><strong>War Art</strong></li>
+          <li><strong>Secret Agenda</strong></li>
         </ul>
       </div>
     `);
@@ -171,27 +243,13 @@ socket.on('send_tutorial_welcome', function () {
   }, 5000);
 });
 
-socket.on('show_game_goal', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Game Goal</h2>`;
+socket.on('show_territories', function () {
 
-  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_display, #middle_content').show();
   $('#middle_content').html(`
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
-      <p><strong>The Goal of the Game</strong></p>
       <p>
-        Your ultimate objective is to complete your <strong>Secret Agenda</strong>.
-        No one else knows what yours is, and it may even conflict with another player’s!
-      </p>
-      <p>
-        Secret Agendas come in four classes:
-        <strong>C, B, A,</strong> and <strong>S</strong>.
-        Class <strong>C</strong> is the most peaceful, while the higher classes grow increasingly
-        <em>violent</em> and <em>self-serving</em>.
-      </p>
-      <p>
-        Only players with Agendas from the <strong>same class</strong> can possibly share victory.
-        Will you form alliances, or aim to be a <em>covert solo winner</em>?
+        Each player controls a set of territories. For this tutorial, you are <strong>Blue</strong>.
       </p>
     </div>
   `);
@@ -207,22 +265,125 @@ socket.on('show_game_goal', function () {
 
 });
 
-socket.on('show_secret_agenda', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Game Goal</h2>`;
+socket.on('basic_control_done', function () {
 
-  $('#middle_display, #middle_title, #middle_content').show();
+    $('#middle_display,#middle_content').show();
+    $('#middle_content').html(`
+      <div style="padding: 8px; line-height: 1.5; font-size: 1.1rem;">
+        <p>You now mastered the following:</p>
+        <ul style="margin: 5px 0; padding-left: 22px;">
+          <li><strong>Deploy</strong></li>
+          <li><strong>Conquest</strong></li>
+          <li><strong>Rearrange</strong></li>
+        </ul>
+        <p>In a game, players take turn to do these actions</p>
+      </div>
+    `);
+    $('#proceed_next_stage').show();
+    $('#proceed_next_stage .text').text('Next');
+    $('#proceed_next_stage')
+      .off('click')
+      .on('click', () => {
+        $('#proceed_next_stage').hide();
+        socket.emit("next_tutorial_stage", {'stage': 6});
+      });
+
+});
+
+socket.on('initial_deployment_tutorial', function () {
+
+  $('#middle_display, #middle_content').show();
   $('#middle_content').html(`
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
       <p>
-        For the purpose of this tutorial, your <strong>Secret Agenda</strong> is set to a C class agenda 
-        <em>Populist</em>. To win, you must maintain the <strong>largest army</strong>
-        for <strong>4 consecutive rounds</strong>.
+        The system gave you 10 troops. Click on the <strong>pointed territory</strong> to deploy them!
+      </p>
+    </div>
+  `);
+
+  clickables.push(7);
+});
+
+socket.on('show_game_currency', function () {
+
+  $('#middle_display, #middle_content, #btn-sep-auth, #your_stats').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        You receive <strong>Special Authority</strong> (stars) after winning conquests.
       </p>
       <p>
-        Your mission’s <strong>progression, status,</strong> and <strong>details</strong> are shown
-        on the <strong>Mission Tracker</strong> located in the top-right corner.
-        This is your only way of monitoring mission progress — keep an eye on it!
+        You can trade stars for troops or upgrades.
+      </p>
+      <p>
+        Your stats are shown in the panel on the right.
+      </p>
+      <p>
+        Click the button below to see trade options.
+      </p>
+    </div>
+  `);
+
+});
+
+socket.on('show_war_art', function () {
+
+  $('#middle_display, #middle_content, #btn-skill').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        Each player controls a War Art they choose.
+      </p>
+      <p>
+        War Arts are hidden abilities that give unique advantages.
+      </p>
+      <p>
+        Click the purple button below to use your War Art.
+      </p>
+    </div>
+  `);
+
+});
+
+socket.on('post_war_art', function() {
+  $('#middle_display, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        Congratulations! You just used a War Art!
+      </p>
+      <p>
+        The War Art you just used is called <strong>Divine Punishment</strong>, pretty strong isn't it?
+      </p>
+      <p>
+        Now, let's jump into the last part!
+      </p>
+    </div>
+  `);
+
+    $('#proceed_next_stage').show();
+    $('#proceed_next_stage .text').text('Next');
+    $('#proceed_next_stage')
+      .off('click')
+      .on('click', () => {
+        $('#proceed_next_stage').hide();
+        socket.emit("next_tutorial_stage", {'stage': 9});
+      });
+});
+
+socket.on('secret_agenda_basic', function () {
+
+  $('#middle_display, #middle_content').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        Your ultimate goal is to fulfill your <strong>Secret Agenda</strong>.
+      </p>
+      <p>
+        Some Agendas are peaceful. Others are selfish, ruthless, or violent.
+      </p>
+      <p>
+        No one knows what the others are planning-so you can never be sure who's truly on your side!
       </p>
     </div>
   `);
@@ -233,7 +394,36 @@ socket.on('show_secret_agenda', function () {
     .off('click')
     .on('click', () => {
       $('#proceed_next_stage').hide();
-      socket.emit("next_tutorial_stage", {'stage': 3});
+      socket.emit("next_tutorial_stage", {'stage': 10});
+    });
+
+});
+
+socket.on('show_secret_agenda', function () {
+
+  $('#middle_display, #middle_content, #tracker').show();
+  $('#middle_content').html(`
+    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
+      <p>
+        For this tutorial, your Secret Agenda is set to <strong>Populist</strong>. 
+      </p>
+      <p>
+        Your Secret Agenda's <strong>progression, status,</strong> and <strong>details</strong> are shown
+        on the <strong>Tracker</strong> in the top-right corner.
+      </p>
+      <p>
+        This is your only way of monitoring progress — keep an eye on it!
+      </p>
+    </div>
+  `);
+
+  $('#proceed_next_stage').show();
+  $('#proceed_next_stage .text').text('Next');
+  $('#proceed_next_stage')
+    .off('click')
+    .on('click', () => {
+      $('#proceed_next_stage').hide();
+      socket.emit("next_tutorial_stage", {'stage': 11});
     });
 
 });
@@ -482,65 +672,57 @@ function settle_cities(tid){
   }
 }
 
-socket.on('initial_deployment_tutorial', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Game Setup</h2>`;
-
-  $('#middle_display, #middle_title, #middle_content').show();
-  $('#middle_content').html(`
-    <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
-      <p><strong>Initial Deployment</strong></p>
-      <p>
-        In this phase, the system gives you troops to <strong>reinforce key territories</strong>.
-      </p>
-      <p>
-        For this tutorial, you receive <strong>30 troops</strong>. Click the <strong>pointed territory</strong>
-        and deploy them all, then press <em>Confirm</em>.
-      </p>
-    </div>
-  `);
-
-
-  clickables.push(7);
-});
-
 function troop_deployment(tid){
+  document.getElementById('control_panel').style.display = 'none';
+  document.getElementById('control_mechanism').style.display = 'none';
   if(clickables.includes(tid)){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
 
+    document.getElementById('control_mechanism').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'block';
+    
+    let troopInput = document.getElementById('control_slider');
+    let troopValue = document.getElementById('control_value');
+
+    troopInput.setAttribute("min", 1);
+    troopInput.setAttribute("max", 10);
+    troopInput.setAttribute("value", 1);
+    troopValue.textContent = 1;
+
+    // Force reset to 1 by setting to different value first, then back to 1
+    troopInput.value = 0;
+    setTimeout(() => {
+        troopInput.value = 1;
+        troopValue.textContent = 1;
+        // Reset slider background to position 0%
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+    }, 0);
+
+    // Remove old event listeners to prevent duplicates
+    troopInput.removeEventListener("input", troopInput.inputHandler);
+
+    // Create new event handler
+    troopInput.inputHandler = function() {
+        troopValue.textContent = troopInput.value;
+        const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+    };
+
+    troopInput.addEventListener("input", troopInput.inputHandler);
+
+    curr_slider = '#control_slider';
+    curr_slider_val = '#control_value';
+
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
 
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
-
-    // set shortcut id
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
-
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
-
-    troopInput.setAttribute("type", "range");
-    troopInput.setAttribute("min", 1);
-    troopInput.setAttribute("max", 30);
-    troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input",function(){troopValue.textContent = troopInput.value;});
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
     $('#control_confirm').off('click').on('click' , function(){
-      if (troopInput.value == 30) {
-        let c_m = document.getElementById('control_mechanism');
-        c_m.innerHTML = "";
+      if (troopInput.value == 10) {
         document.getElementById('control_panel').style.display = 'none';
-        socket.emit("next_tutorial_stage", { stage: 9 });
+        document.getElementById('control_mechanism').style.display = 'none';
+        socket.emit("next_tutorial_stage", { stage: 3 });
         toHighLight = [];
         clickables = [];
       }
@@ -730,19 +912,12 @@ socket.on('preparation_tutorial', function () {
 });
 
 socket.on('conquest_tutorial', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Basic Gameplay</h2>`;
 
-  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_display, #middle_content').show();
   $('#middle_content').html(`
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
-      <p>
-        <strong>Conquest</strong>
-      </p>
-      <p>In this stage, you can attack and capture enemy territories.</p>
-      <p>Click one of your territories to see attack options. Pick a target, choose how many troops to send, then press <em>Confirm</em>.</p>
-      <p>For this tutorial, click on the pointed territory and attack the indicated territory with 55 troops to continue.</p>
-      <p>Capturing enemy territory earns you <strong>Stars</strong> at the end of your turn. Use Stars to upgrade your stats.</p>
+      <p>You just learned how to deploy troops!</p>
+      <p>Now, click on the <strong>pointed territory</strong> and attack a nearby territory with 10 troops!</p>
     </div>
   `);
 
@@ -768,64 +943,70 @@ function conquest_tutorial(tid) {
       toHighLight.push(25);
     }
 
-    // Show control panel with slider setup
-    const panel = document.getElementById('control_panel');
-    panel.style.display = 'none';
-    panel.style.display = 'flex';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
 
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
+    document.getElementById('control_mechanism').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'block';
+    
+    let troopInput = document.getElementById('control_slider');
+    let troopValue = document.getElementById('control_value');
 
-    // Set IDs
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
-
-    troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
-    troopInput.setAttribute("max", 55);
+    troopInput.setAttribute("max", 10);
     troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input", function () {
-      troopValue.textContent = troopInput.value;
-    });
+    troopValue.textContent = 1;
 
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
+    // Force reset to 1 by setting to different value first, then back to 1
+    troopInput.value = 0;
+    setTimeout(() => {
+        troopInput.value = 1;
+        troopValue.textContent = 1;
+        // Reset slider background to position 0%
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+    }, 0);
 
-    $('#control_confirm').off('click').on('click', function () {
-      if (troopInput.value == 55) {
-        c_m.innerHTML = "";
-        panel.style.display = 'none';
-        socket.emit("next_tutorial_stage", { stage: 14 });
+    // Remove old event listeners to prevent duplicates
+    troopInput.removeEventListener("input", troopInput.inputHandler);
+
+    // Create new event handler
+    troopInput.inputHandler = function() {
+        troopValue.textContent = troopInput.value;
+        const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+    };
+
+    troopInput.addEventListener("input", troopInput.inputHandler);
+
+    curr_slider = '#control_slider';
+    curr_slider_val = '#control_value';
+
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+
+    $('#control_confirm').off('click').on('click' , function(){
+      if (troopInput.value == 10) {
+        document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
+        socket.emit("next_tutorial_stage", { stage: 4 });
         toHighLight = [];
         clickables = [];
       }
     });
+    $('#control_cancel').off('click').on('click' , function(){
 
-    $('#control_cancel').off('click').on('click', function () {
     });
+
   }
 }
 
 socket.on('rearrangement_tutorial', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Basic Gameplay</h2>`;
 
-  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_display, #middle_content').show();
   $('#middle_content').html(`
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
-      <p>
-        <strong>Rearrangement</strong>
-      </p>
-      <p>In this stage, you can redistribute your troops among your territories.</p>
-      <p>Click one of your territories to see rearrange options. Pick a target, choose how many troops to move, then press <em>Confirm</em>.</p>
-      <p>For this tutorial, click on the pointed territory and move 30 troops to the indicated territory to continue.</p>
+      <p>You just learned how to make a conquest!</p>
+      <p>Now, click on the <strong>pointed territory</strong> and move 9 troops to the indicated territory.</p>
     </div>
   `);
 
@@ -852,48 +1033,60 @@ function rearrangement_tutorial(tid) {
       toHighLight.push(7);
     }
 
-    // Show control panel with slider setup
-    const panel = document.getElementById('control_panel');
-    panel.style.display = 'none';
-    panel.style.display = 'flex';
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'none';
 
-    let troopValue = document.createElement("p");
-    troopValue.textContent = 1;
-    let troopInput = document.createElement("input");
+     document.getElementById('control_mechanism').style.display = 'none';
+    document.getElementById('control_mechanism').style.display = 'block';
+    
+    let troopInput = document.getElementById('control_slider');
+    let troopValue = document.getElementById('control_value');
 
-    // Set IDs
-    troopInput.setAttribute("id", "adjust_attack_amt");
-    troopValue.setAttribute("id", "curr_attack_amt");
-    curr_slider = "#adjust_attack_amt";
-    curr_slider_val = "#curr_attack_amt";
-
-    troopInput.setAttribute("type", "range");
     troopInput.setAttribute("min", 1);
-    troopInput.setAttribute("max", 54);
+    troopInput.setAttribute("max", 9);
     troopInput.setAttribute("value", 1);
-    troopInput.setAttribute("step", 1);
-    troopInput.style.display = "inline-block";
-    troopInput.addEventListener("input", function () {
-      troopValue.textContent = troopInput.value;
-    });
+    troopValue.textContent = 1;
 
-    let c_m = document.getElementById('control_mechanism');
-    c_m.innerHTML = "";
-    c_m.appendChild(troopInput);
-    c_m.appendChild(troopValue);
+    // Force reset to 1 by setting to different value first, then back to 1
+    troopInput.value = 0;
+    setTimeout(() => {
+        troopInput.value = 1;
+        troopValue.textContent = 1;
+        // Reset slider background to position 0%
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) 0%, rgb(51, 65, 85) 0%, rgb(51, 65, 85) 100%)`;
+    }, 0);
 
-    $('#control_confirm').off('click').on('click', function () {
-      if (troopInput.value == 30) {
-        c_m.innerHTML = "";
-        panel.style.display = 'none';
-        socket.emit("next_tutorial_stage", { stage: 15 });
+    // Remove old event listeners to prevent duplicates
+    troopInput.removeEventListener("input", troopInput.inputHandler);
+
+    // Create new event handler
+    troopInput.inputHandler = function() {
+        troopValue.textContent = troopInput.value;
+        const percentage = ((troopInput.value - troopInput.min) / (troopInput.max - troopInput.min)) * 100;
+        troopInput.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
+    };
+
+    troopInput.addEventListener("input", troopInput.inputHandler);
+
+    curr_slider = '#control_slider';
+    curr_slider_val = '#control_value';
+
+    document.getElementById('control_panel').style.display = 'none';
+    document.getElementById('control_panel').style.display = 'flex';
+
+    $('#control_confirm').off('click').on('click' , function(){
+      if (troopInput.value == 9) {
+        document.getElementById('control_panel').style.display = 'none';
+        document.getElementById('control_mechanism').style.display = 'none';
+        socket.emit("next_tutorial_stage", { stage: 5 });
         toHighLight = [];
         clickables = [];
       }
     });
+    $('#control_cancel').off('click').on('click' , function(){
 
-    $('#control_cancel').off('click').on('click', function () {
     });
+
   }
 }
 
@@ -914,7 +1107,7 @@ function teardownTutorial() {
 
   // 4) Remove socket listeners added in tutorials.js
   [
-    'send_tutorial_welcome','show_game_goal','show_secret_agenda','show_game_set_up',
+    'send_tutorial_welcome', 'show_territories', 'show_game_goal','show_secret_agenda','show_game_set_up',
     'pick_color','claim_territories','choose_capital_tutorial','choose_city_tutorial',
     'initial_deployment_tutorial','war_art_tutorial','basic_gameplay',
     'reinforcement_tutorial','preparation_tutorial','conquest_tutorial',
@@ -938,15 +1131,13 @@ function teardownTutorial() {
 
 
 socket.on('end_of_tutorial', function () {
-  const announ = document.getElementById('announcement');
-  announ.innerHTML = `<h2>Let's get it!</h2>`;
 
-  $('#middle_display, #middle_title, #middle_content').show();
+  $('#middle_display, #middle_content').show();
   $('#middle_content').html(`
     <div style="padding: 10px; line-height: 1.6; font-size: 1.1rem;">
-      <p>That concludes the tutorial!</p>
+      <p>Congratulations! You have mastered all the basics to play the game!</p>
       <p>For detailed explanations, you can check the <strong>Game Rules</strong> page.</p>
-      <p>Thank you and have fun!</p>
+      <p>Have fun!</p>
     </div>
   `);
 
@@ -1009,7 +1200,7 @@ socket.on('change_click_event_tutorial', function(data){
   }
 });
 
-socket.on('initiate_tracker_for_tutorial', function(data){
+socket.on('initiate_tracker_for_tutorial',  function(data){
   if (data.targets || data.misProgBar || data.misProgDesp) {
     $('.winning_condition').show();
   }
@@ -1170,40 +1361,82 @@ $(document).on('click', function(event) {
   }
 });
 
+// Prevent click and scroll propagation
+$('#player_info').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+});
+
+// Scroll functionality
+let scrollInterval = null;
+
+$('#scroll-up').on('mousedown touchstart', function(e) {
+    e.preventDefault();
+    const statsList = $('#stats-list');
+    scrollInterval = setInterval(() => {
+        statsList.scrollTop(statsList.scrollTop() - 15);
+    }, 20);
+});
+
+$('#scroll-down').on('mousedown touchstart', function(e) {
+    e.preventDefault();
+    const statsList = $('#stats-list');
+    scrollInterval = setInterval(() => {
+        statsList.scrollTop(statsList.scrollTop() + 15);
+    }, 20);
+});
+
+$(document).on('mouseup touchend', function() {
+    if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+    }
+});
+
+
 // Player stats list initiate
 socket.on('get_players_stats', function(data){
   var pList = $('#stats-list');
   pList.empty();
   $.each(data, function(p, p_info) {
-    var tcolor = 'black';
-    if (isColorDark(p_info.color)){
-      tcolor = 'rgb(245, 245, 245)'
-    }
+var tcolor = 'rgb(245, 245, 245)';
     var pBtn = $('<button></button>')
       .attr('id', p)
-      .addClass('btn game_btn mb-1')
+      .addClass('player-stat-btn')
       .css({
-        'color': tcolor,
-        'background-color': p_info.color,
-        'width': '100%',
+        'color': tcolor
       })
       .html(`
-        <div style="text-align: left;">
-          ${p}<br>
-          <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
-            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"> <span>${p_info.troops}</span>
+        <div class="player-name-row">
+          <div class="player-color-square" style="background-color: ${p_info.color};"></div>
+          <div class="player-name">${p}</div>
+        </div>
+        <div class="player-stats-row">
+          <div class="stat-item">
+            <div class="stat-label">TERR</div>
+            <div class="stat-value territory">
+              <img src="/static/Assets/Logo/territory.svg" alt="Territory">
+              <span>${p_info.trtys}</span>
+            </div>
           </div>
-          <div style="display: inline-block; vertical-align: middle;">
-            <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;">  <span>${p_info.trtys}</span>
+          <div class="stat-item">
+            <div class="stat-label">ARMY</div>
+            <div class="stat-value troops">
+              <img src="/static/Assets/Logo/soldier.svg" alt="Troops">
+              <span>${p_info.troops}</span>
+            </div>
           </div>
-          <br>
-          <div style="display: inline-block; vertical-align: middle; direction: ltr;">
-            <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"> <span>${p_info.PPI}</span>
+          <div class="stat-item">
+            <div class="stat-label">PPI</div>
+            <div class="stat-value power">
+              <img src="/static/Assets/Logo/PPI.svg" alt="Power">
+              <span>${p_info.PPI}</span>
+            </div>
           </div>
         </div>
       `);
     pList.append(pBtn);
-    pBtn.on('click', function() {
+    pBtn.on('click', function(e) {
+      e.stopPropagation();
       laplace_info_fetch(p_info.player_id);
     });
   });
@@ -1212,20 +1445,36 @@ socket.on('get_players_stats', function(data){
 // Player stats list update
 socket.on('update_players_stats', function(data){
   let btn = $('#' + data.name);
+  var tcolor = 'rgb(245, 245, 245)';
+  btn.css('color', tcolor);
   btn.html(`
-      <div style="text-align: left;" class="mb-1">
-        ${data.name}<br>
-        <div style="display: inline-block; margin-left: 10px; vertical-align: middle;">
-            <img src="/static/Assets/Logo/soldier.png" alt="Soldier Logo" style="height: 20px;"><span>${data.troops}</span>
-        </div>
-        <div style="display: inline-block; vertical-align: middle;">
-          <img src="/static/Assets/Logo/territory.png" alt="Territory Logo" style="height: 20px;"><span>${data.trtys}</span>
-        </div>
-        <br>
-        <div style="display: inline-block; vertical-align: middle; direction: ltr;">
-          <img src="/static/Assets/Logo/PPI.png" alt="Stats Logo" style="height: 20px;"><span>${data.PPI}</span>
+    <div class="player-name-row">
+      <div class="player-color-square" style="background-color: ${data.color};"></div>
+      <div class="player-name">${data.name}</div>
+    </div>
+    <div class="player-stats-row">
+      <div class="stat-item">
+        <div class="stat-label">TERR</div>
+        <div class="stat-value territory">
+          <img src="/static/Assets/Logo/territory.svg" alt="Territory">
+          <span>${data.trtys}</span>
         </div>
       </div>
+      <div class="stat-item">
+        <div class="stat-label">ARMY</div>
+        <div class="stat-value troops">
+          <img src="/static/Assets/Logo/soldier.svg" alt="Troops">
+          <span>${data.troops}</span>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">PPI</div>
+        <div class="stat-value power">
+          <img src="/static/Assets/Logo/PPI.svg" alt="Power">
+          <span>${data.PPI}</span>
+        </div>
+      </div>
+    </div>
   `);
 });
 
@@ -1315,15 +1564,10 @@ socket.on('update_trty_display', function(data){
 
 // CLEAR SELECTION WINDOWS
 socket.on('clear_view', function(){
-  $('#control_panel, #middle_display, #proceed_next_stage').hide();
+  $('#control_panel, #control_mechanism, #middle_display, #proceed_next_stage').hide();
   toHighLight = [];
   otherHighlight = [];
   clickables = [];
-});
-
-// set announcements
-socket.on('set_up_announcement', function(data){
-  $('#announcement').html('<h3>' + data.msg + '</h3>');
 });
 
 // show buttons
@@ -1343,13 +1587,11 @@ function hide_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 }
 
-// Game over announcement
+// Game over
 socket.on('GAME_OVER', function(data) {
   $('#gameEndSound').trigger('play');
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
   currEvent = null;
-  $('#announcement').show();
-  $('#announcement').html('<h1>GAME OVER<h1>');
   $('#middle_display').css({
     'max-width': '50vw',
     'max-height': '50vh'
@@ -1400,12 +1642,6 @@ socket.on('display_special_notification', function(data){
 
 //===============================Mission Related Display=============================================
 
-// Receive Mission + Display info on Mission Tracker
-socket.on('get_mission', function(data) {
-  console.log("get_mission")
-  $('#announcement').html('<h1>' + data.msg + '</h1>');
-  socket.off('get_mission');
-});
 
 //============================ TURN BASED EVENTS =======================================================
 
@@ -2175,247 +2411,250 @@ function set_bureau(tid){
 //   return amt.amt;
 // }
 
-// // SPECIAL AUTHORITY
-// // Add display + Functionalities to special authority button
-// btn_sep_auth = document.getElementById('btn-sep-auth');
-// btn_sep_auth.onclick = function () {
-//   document.getElementById('middle_display').style.display = 'flex';
-//   // clear title
-//   document.getElementById('middle_title').innerHTML = "";
-//   // Grab the special authority amt of the user
-//   get_sep_auth().then(sep_auth => {
+// SPECIAL AUTHORITY
+// Add display + Functionalities to special authority button
+btn_sep_auth = document.getElementById('btn-sep-auth');
+btn_sep_auth.onclick = function () {
+  document.getElementById('middle_display').style.display = 'flex';
+  // clear title
+  document.getElementById('middle_title').innerHTML = "";
+  // Grab the special authority amt of the user
     
-//     // Show the title
-//     document.getElementById('middle_title').innerHTML = `
-//     <div style="padding: 5px;">
-//     <h5>SPECIAL AUTHORITY AVAILABLE: ${sep_auth}</h5>
-//     </div>`;
+    // Show the title
+    document.getElementById('middle_title').innerHTML = `
+    <div style="padding: 5px;">
+    <h5>SPECIAL AUTHORITY AVAILABLE: ${2}</h5>
+    </div>`;
 
-//     // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
-//     midDis = document.getElementById('middle_content')
-//     midDis.innerHTML = `
-// <style>
-//   .scroll-wrapper {
-//     max-height: 250px;
-//     overflow-y: auto;
-//     padding: 0;
-//     margin: 0;
-//   }
+    // Show options  UPGRADE INFRASTRUCTURE | BUILD CITIES | MOBILIZATION
+    midDis = document.getElementById('middle_content')
+    midDis.innerHTML = `
+<style>
+  .scroll-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+  }
 
-//   .button-grid {
-//     display: flex;
-//     flex-wrap: wrap;
-//     justify-content: center;
-//     gap: 8px;
-//     padding: 4px;
-//   }
+  .button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px;
+  }
 
-//   .action-button {
-//     width: 120px;
-//     height: 72px;
-//     border-radius: 6px;
-//     box-shadow: 0 2px 5px rgba(0,0,0,0.25);
-//     padding: 3px 4px;
-//     transition: transform 0.1s ease-in-out;
-//     overflow: hidden;
-//   }
+  .action-button {
+    width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    padding: 3px 4px;
+    transition: transform 0.1s ease-in-out;
+    overflow: hidden;
+  }
 
-//   .action-button:hover {
-//     transform: scale(1.04);
-//   }
+  .action-button:hover {
+    transform: scale(1.04);
+  }
 
-//   .action-button img {
-//     max-height: 38px;
-//     max-width: 53px;
-//   }
+  .action-button img {
+    max-height: 38px;
+    max-width: 53px;
+  }
 
-//   .price-tag {
-//     font-size: 0.85rem;
-//     font-weight: bold;
-//     margin-left: 4px;
-//   }
+  .price-tag {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-left: 4px;
+  }
 
-//   .hover-label {
-//     display: none;
-//     position: absolute;
-//     bottom: 110%;
-//     left: 50%;
-//     transform: translateX(-50%);
-//     font-size: 0.7rem;
-//     padding: 3px 6px;
-//     border-radius: 4px;
-//     white-space: nowrap;
-//     z-index: 100;
-//   }
+  .hover-label {
+    display: none;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 100;
+  }
 
-//   .action-button:hover .hover-label {
-//     display: block;
-//   }
+  .action-button:hover .hover-label {
+    display: block;
+  }
 
-//   .action-button span.small {
-//     margin-top: 2px;
-//     font-size: 0.85rem;
-//   }
+  .action-button span.small {
+    margin-top: 2px;
+    font-size: 0.85rem;
+  }
 
-//   .cancel-btn-wrapper {
-//     display: flex;
-//     justify-content: center;
-//     margin-top: 8px;
-//   }
+  .cancel-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
 
-//   .cancel-btn {
-//     width: 36px;
-//     height: 36px;
-//     background-color: #B91C1C;
-//     color: white;
-//     font-weight: bold;
-//     border-radius: 8px;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//   }
-// </style>
+  .cancel-btn {
+    width: 36px;
+    height: 36px;
+    background-color: #B91C1C;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
 
-// <div class="scroll-wrapper">
-//   <div class="button-grid">
+<div class="scroll-wrapper">
+  <div class="button-grid">
 
-//     <div class="text-center">
-//       <button id="btn-ui" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #58A680; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.color='#FFFFFF';"
-//               onmouseout="this.style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.color='#FFFFFF';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Logo/transhubimprove.png" alt="Infrastructure">
-//           <span class="price-tag" style="color: #FFFFFF;">3☆</span>
-//         </div>
-//         <span class="small">INFRASTRUCTURE</span>
-//         <div class="hover-label">Improve transport hubs</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-ui" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #58A680; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.backgroundColor='#3F805E'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.backgroundColor='#58A680'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/transhubimprove.png" alt="Infrastructure">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+        </div>
+        <span class="small">INFRASTRUCTURE</span>
+        <div class="hover-label">Improve transport hubs</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-bc" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #6067A1; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.color='#FFFFFF';"
-//               onmouseout="this.style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.color='#FFFFFF';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities">
-//           <span class="price-tag" style="color: #FFFFFF;">3☆</span>
-//         </div>
-//         <span class="small">BUILD CITIES</span>
-//         <div class="hover-label">Expand urban development</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-bc" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6067A1; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.backgroundColor='#484E80'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.backgroundColor='#6067A1'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/buildcity.png" alt="Build Cities">
+          <span class="price-tag" style="color: #FFFFFF;">3☆</span>
+        </div>
+        <span class="small">BUILD CITIES</span>
+        <div class="hover-label">Expand urban development</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-mob" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #A1606C; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.color='#FFFFFF';"
-//               onmouseout="this.style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.color='#FFFFFF';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization">
-//           <span class="price-tag" style="color: #FFFFFF;">2-15☆</span>
-//         </div>
-//         <span class="small">MOBILIZATION</span>
-//         <div class="hover-label">Recruit reserve forces</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-mob" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A1606C; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.backgroundColor='#814B56'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.backgroundColor='#A1606C'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Logo/reservesincrease.png" alt="Mobilization">
+          <span class="price-tag" style="color: #FFFFFF;">2-15☆</span>
+        </div>
+        <span class="small">MOBILIZATION</span>
+        <div class="hover-label">Recruit reserve forces</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-mega" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #FDB13F; color:#000000;"
-//               onmouseover="this.style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.color='#000000';"
-//               onmouseout="this.style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.color='#000000';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Dev/megacity.png" alt="Megacity">
-//           <span class="price-tag" style="color: #000000;">5☆</span>
-//         </div>
-//         <span class="small">RAISE MEGACITY</span>
-//         <div class="hover-label">Create economic powerhouse</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-mega" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #FDB13F; color:#000000;"
+              onmouseover="this.style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.backgroundColor='#FDBB4E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.backgroundColor='#FDB13F'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/megacity.png" alt="Megacity">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">RAISE MEGACITY</span>
+        <div class="hover-label">Create economic powerhouse</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-fort" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #878787; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#444444'; this.querySelector('.hover-label').style.backgroundColor='#444444'; this.querySelector('.hover-label').style.color='#FFFFFF';"
-//               onmouseout="this.style.backgroundColor='#878787'; this.querySelector('.hover-label').style.backgroundColor='#878787'; this.querySelector('.hover-label').style.color='#FFFFFF';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Insig/fort.png" alt="Fort">
-//           <span class="price-tag" style="color: #FFFFFF;">1☆</span>
-//         </div>
-//         <span class="small">SET UP FORTS</span>
-//         <div class="hover-label">Establish defense base</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-fort" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #878787; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#444444'; this.querySelector('.hover-label').style.backgroundColor='#444444'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#878787'; this.querySelector('.hover-label').style.backgroundColor='#878787'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/fort.png" alt="Fort">
+          <span class="price-tag" style="color: #FFFFFF;">1☆</span>
+        </div>
+        <span class="small">SET UP FORTS</span>
+        <div class="hover-label">Establish defense base</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-hall" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #6C3BAA; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.color='#FFFFFF';"
-//               onmouseout="this.style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.color='#FFFFFF';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Insig/CAD.png" alt="Hall of Governance">
-//           <span class="price-tag" style="color: #FFFFFF;">5☆</span>
-//         </div>
-//         <span class="small" style="font-size: 0.7rem;">HALL OF GOVERNANCE</span>
-//         <div class="hover-label">Extend administrative control</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-hall" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6C3BAA; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.backgroundColor='#CC8899'; this.querySelector('.hover-label').style.color='#FFFFFF';"
+              onmouseout="this.style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.backgroundColor='#6C3BAA'; this.querySelector('.hover-label').style.color='#FFFFFF';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/CAD.png" alt="Hall of Governance">
+          <span class="price-tag" style="color: #FFFFFF;">5☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">HALL OF GOVERNANCE</span>
+        <div class="hover-label">Extend administrative control</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-nexus" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #A8DCAB; color:#000000;"
-//               onmouseover="this.style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.color='#000000';"
-//               onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
-//           <span class="price-tag" style="color: #000000;">5☆</span>
-//         </div>
-//         <span class="small">LOGISTIC NEXUS</span>
-//         <div class="hover-label">Centralize distribution</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-nexus" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #A8DCAB; color:#000000;"
+              onmouseover="this.style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.backgroundColor='#8CB88E'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.backgroundColor='#A8DCAB'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Dev/transhub.png" alt="Nexus">
+          <span class="price-tag" style="color: #000000;">5☆</span>
+        </div>
+        <span class="small">LOGISTIC NEXUS</span>
+        <div class="hover-label">Centralize distribution</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-leyline" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #6987D5; color:#000000;"
-//               onmouseover="this.style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.color='#000000';"
-//               onmouseout="this.style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.color='#000000';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Insig/leyline.png" alt="Leyline">
-//           <span class="price-tag" style="color: #000000;">2☆</span>
-//         </div>
-//         <span class="small">LEYLINE CROSS</span>
-//         <div class="hover-label">Channel mystic energies</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-leyline" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #6987D5; color:#000000;"
+              onmouseover="this.style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.backgroundColor='#BBDFFA'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.backgroundColor='#6987D5'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/leyline.png" alt="Leyline">
+          <span class="price-tag" style="color: #000000;">2☆</span>
+        </div>
+        <span class="small">LEYLINE CROSS</span>
+        <div class="hover-label">Channel mystic energies</div>
+      </button>
+    </div>
 
-//     <div class="text-center">
-//       <button id="btn-bureau" class="btn d-flex flex-column align-items-center justify-content-center action-button"
-//               style="background-color: #2C5F34; color:#FFFFFF;"
-//               onmouseover="this.style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.color='#000000';"
-//               onmouseout="this.style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.color='#000000';">
-//         <div class="d-flex align-items-center justify-content-center">
-//           <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau">
-//           <span class="price-tag" style="color: #FFFFFF;">2☆</span>
-//         </div>
-//         <span class="small" style="font-size: 0.7rem;">MOBILIZATION BUREAU</span>
-//         <div class="hover-label">Enable troop call-ups</div>
-//       </button>
-//     </div>
+    <div class="text-center">
+      <button id="btn-bureau" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #2C5F34; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.backgroundColor='#5D6532'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.backgroundColor='#2C5F34'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/mobbureau.png" alt="Bureau">
+          <span class="price-tag" style="color: #FFFFFF;">2☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">MOBILIZATION BUREAU</span>
+        <div class="hover-label">Enable troop call-ups</div>
+      </button>
+    </div>
 
-//   </div>
-// </div>
+  </div>
+</div>
 
-// <div class="flex items-center justify-center mt-2">
-//   <button id='btn-action-cancel' class="w-9 h-9 bg-red-700 text-white font-bold rounded-lg flex items-center justify-center">
-//     X
-//   </button>
-// </div>
-
-//     `;
-
+    `;
+      $('#proceed_next_stage').show();
+      $('#proceed_next_stage .text').text('Next');
+      $('#proceed_next_stage')
+        .off('click')
+        .on('click', () => {
+          $('#proceed_next_stage').hide();
+          $('#middle_title').hide();
+          btn_sep_auth.onclick = null; 
+          socket.emit("next_tutorial_stage", {'stage': 7});
+        });
+}
 //     // close window
 //     $('#btn-action-cancel').off('click').on('click', function(){
 //       $('#control_panel').hide()
@@ -2644,178 +2883,87 @@ function set_bureau(tid){
 // }
 // // SKILL USAGE
 // // Add display + Functionalities according to user's skill
-// btn_skill = document.getElementById('btn-skill');
-// btn_skill.onclick = function () {
-//   document.getElementById('middle_display').style.display = 'flex';
-//   document.getElementById('middle_title').innerHTML = "";
-//    // Grab the special authority amt of the user
-//    get_skill_status().then(skillData => {
+btn_skill = document.getElementById('btn-skill');
+btn_skill.onclick = function () {
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = "";
+   // Grab the special authority amt of the user
     
-//     // operational
-//     var op_color = skillData.operational ? '#50C878' : '#E34234';
-//     var op_status = skillData.operational? 'Functional' : 'Disabled';
-//     // limit and cooldowns
-//     var limit_left = "";
-//     var cooldown_left = "";
+    // operational
+    var op_color = '#50C878';
+    var op_status = 'Functional';
+    
+    var limit_left = "";
+    var cooldown_left = "";
+    var showActivateBtn = "none";
 
-//     var showActivateBtn = "none";
-
-//     // determine limit and cooldown display
-//     if (skillData.operational) {
-//       if (skillData.hasLimit) {
-//         if (!skillData.limits) {
-//           limit_left = "No more usage available"
-//         } else {
-//           limit_left = `${skillData.limits} usages remaining`
-//           if (skillData.cooldown) {
-//             cooldown_left = `In cooldown | ${skillData.cooldown} rounds left`
-//           } else {
-//             cooldown_left = "Ready to activate"
-//             showActivateBtn = "flex";
-//           }
-//         }
-//       }
-//     }
-
-//     // single-turn skill activated
-//     var showInUse = "none";
-//     if (skillData.activated) {
-//       showActivateBtn = "none";
-//       showInUse = "flex";
-//     }
-
-//     // show targets that have been affected by skill if there are any
-//     let skill_used_targets = ``
-//     if (skillData.forbidden_targets) {
-//       if (skillData.forbidden_targets.length) {
-//         skill_used_targets += `
-//           <div style="max-height: 4rem; overflow-y: auto;">
-//             <div class="p-1 text-center break-words whitespace-normal">${skillData.ft_msg}</div>
-//             <div>
-//         `;
-//         for (let target of skillData.forbidden_targets) {
-//           skill_used_targets += (`
-//             <div style="display: inline-block;
-//               padding: 2px; margin: 2px; border-radius: 3px; background-color:#F5B301;"
-//               class="text-gray-700">${target}</div>
-//           `);
-//         }
-//         skill_used_targets += `</div></div>`;
-//       }
-//     }
-
-//     let skill_set_integer = ``;
-//     let showSepActivateBtn = 'none';
-//     // Show integer setting
-//     if (skillData.intset) {
-//       skill_set_integer += `
-//         <div style="display: flex; align-items: center; gap: 0.5rem;">
-//           <span>Running </strong>${skillData.intset}</strong> loops per battle, change to:</span>
-//           <input type="number" id="skillintdata" min="1" max="100" value="${skillData.intset}" 
-//                  style="width: 60px; padding: 2px; border: 1px solid #ccc; border-radius: 3px;">
-//         </div>
-//       `;
-//       showSepActivateBtn = 'flex';
-//       showActivateBtn = 'none';
-//     }
+    limit_left = `1 usage remaining`
+    cooldown_left = "Ready to activate"
+    showActivateBtn = "flex";
   
-//     // Show the title
-//     document.getElementById('middle_title').innerHTML = `
-//     <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px;" class="text-center">
-//       <h5 style="margin-right: 15px">${skillData.name}</h5>
-//       <h5 style="background-color: ${op_color}; border-radius: 3px;" class="p-1">${op_status}</h5>
-//     </div>`;
+    // Show the title
+    document.getElementById('middle_title').style.display = "flex";
+    document.getElementById('middle_title').innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px;" class="text-center">
+      <h5 style="margin-right: 15px">Divine Punishment</h5>
+      <h5 style="background-color: ${op_color}; border-radius: 3px;" class="p-1">${op_status}</h5>
+    </div>`;
 
-//     // Description | Show limits and cooldown if there are any | Show activation button
-//     midDis = document.getElementById('middle_content')
-//     midDis.innerHTML = `
+    // Description | Show limits and cooldown if there are any | Show activation button
+    midDis = document.getElementById('middle_content')
+    midDis.innerHTML = `
 
-//     <div class="p-2 text-center break-words whitespace-normal" 
-//         style="max-height: calc(1.5em * 3); overflow-y: auto; line-height: 1.5;">
-//         ${skillData.description}
-//     </div>
-
-
-//     <div style="display: flex; justify-content: space-between; align-items: center;">
-
-//       <div style="display: inline-block;" class="p-2 mr-2 text-center break-words whitespace=normal">
-//       ${limit_left}
-//       </div>
-
-//       <div style="display: inline-block;" class="p-2 ml-2 text-center break-words whitespace=normal">
-//       ${cooldown_left}
-//       </div>
-
-//     </div>
-
-//     ${skill_used_targets}
-//     ${skill_set_integer}
-
-//     <div style="display: ${showInUse};" class="flex items-center justify-center p-2">
-//         <h3  style="border-radius: 3px; padding:2px;" class="text-center text-lg font-bold bg-yellow-500 text-black">
-//             ${skillData.inUseMsg}
-//         </h3>
-//     </div>
-
-//     <div style="display: ${showActivateBtn};" class="flex items-center justify-center mt-2">
-//         <button id='btn-skill-activate' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
-//             ${skillData.btn_msg}
-//         </button>
-//     </div>
-
-//     <div style="display: ${showSepActivateBtn};" class="flex items-center justify-center mt-2">
-//         <button id='btn-skill-activate-sep' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
-//             ${skillData.btn_msg}
-//         </button>
-//     </div>
+    <div class="p-2 text-center break-words whitespace-normal" 
+        style="max-height: calc(1.5em * 3); overflow-y: auto; line-height: 1.5;">
+        Click on the button below to bomb a territory!
+    </div>
 
 
-//     <div class="flex items-center justify-center mt-2">
-//         <button id='btn-action-cancel' class="w-9 h-9 bg-red-500 text-white font-bold rounded-lg flex items-center justify-center">
-//             X
-//         </button>
-//     </div>
-//     `;
+    <div style="display: flex; justify-content: space-between; align-items: center;">
 
-//     $('#btn-action-cancel').off('click').on('click', function(){
-//       $('#control_panel').hide()
-//       $('#middle_display').hide()
-//       $('#middle_title, #middle_content').empty()
-//     });
+      <div style="display: inline-block;" class="p-2 mr-2 text-center break-words whitespace=normal">
+      ${limit_left}
+      </div>
 
-//     $('#btn-skill-activate').off('click').on('click', function(){
-//       $('#control_panel').hide()
-//       $('#middle_display').hide()
-//       $('#middle_title, #middle_content').empty()
-//       socket.emit('signal_skill_usage');
-//     });
+      <div style="display: inline-block;" class="p-2 ml-2 text-center break-words whitespace=normal">
+      ${cooldown_left}
+      </div>
 
-//     $('#btn-skill-activate-sep').off('click').on('click', function () {
+    </div>
 
-//       // Safely get and validate the integer input
-//       let inputEl = document.getElementById('skillintdata');
-//       let intValue = skillData.intset; // fallback default
-    
-//       if (inputEl) {
-//         let parsed = parseInt(inputEl.value, 10);
-//         if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
-//           intValue = parsed;
-//         }
-//       }
-    
-//       // Emit skill usage signal with data
-//       socket.emit('signal_skill_usage_with_data', {
-//         'intset': intValue
-//       });
-//       // Hide UI elements
-//       $('#control_panel, #middle_display').hide();
-//       $('#middle_title, #middle_content').empty();
+    <div style="display: ${showActivateBtn};" class="flex items-center justify-center mt-2">
+        <button id='btn-skill-activate' class="p-3 bg-yellow-500 text-black font-bold rounded-md flex items-center justify-center">
+            START BOMBING
+        </button>
+    </div>
 
-//     });
+    `;
 
-//   });
+    $('#btn-skill-activate').off('click').on('click', function () {
 
-// }
+      clickables.push(30)
+
+      $('#middle_title, #middle_content, #middle_display').hide();
+      btn_skill.onclick = null; 
+      currEvent = clickAndBomb;
+
+    });
+
+}
+
+function clickAndBomb(tid){
+  if (clickables.includes(tid)){
+    socket.emit('next_tutorial_stage', {"stage": 8});
+    clickables = [];
+  }
+}
+
+socket.on('nuke_animation', function(data){
+    var tid = data.tid;
+    if (tid == null || tid < 0 || tid >= territories.length) return;
+    const c = territories[tid].cps;   // world coords
+    spawnMegaNuke(c.x, c.y);
+});
 
 // // Function to grab the reserve amt for the user
 // async function get_reserves_amt(){
