@@ -106,7 +106,7 @@ class Mission_Distributor:
             return False
         if hasAnn and "Ann" not in miss_set:
             return False
-        if len(miss_set) == 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set):
+        if len(miss_set) < 3 and ('Pro' in miss_set or 'Dec' in miss_set or 'Due' in miss_set or 'Bon' in miss_set):
             return False
         if miss_set.count('Ann') > 1:
             return False
