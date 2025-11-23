@@ -1653,14 +1653,15 @@ class Pandora_Box(Skill):
         self.nulrate = 0
         self.multi = 0
         self.hasRoundEffect = True
-        self.curr_pull = 100
+        self.curr_pull = 8
         self.receivedBlessings = []
         self.guarantee = 0
-        self.gs.players[self.player].stars += 2
-        self.gs.update_private_status(self.player)
+        self.freeUsages = 1
 
     def apply_round_effect(self):
         self.curr_pull = 8
+        if self.gs.GES.round % 2 == 0:
+            self.freeUsages += 1
 
     def internalStatsMod(self, battle_stats):
         if self.active:
@@ -1685,7 +1686,7 @@ class Pandora_Box(Skill):
             'description': f"Pandora's Box is in your hands, peek through it using 2★ and you may unleash blessings... or curses. {self.curr_pull} peeks can be made in the current round.",
             'operational': self.active,
             'hasLimit': True,
-            'limits': limit,
+            'limits': limit + self.freeUsages,
             'forbidden_targets': self.receivedBlessings,
             'ft_msg': "Received Blessings:",
             'btn_msg': "Lift the Lid"
@@ -1694,7 +1695,12 @@ class Pandora_Box(Skill):
     def activate_effect(self):
         if self.active:
             if self.curr_pull:
-                if self.gs.players[self.player].stars >= 2:
+                if self.freeUsages > 0:
+                    self.freeUsages -= 1
+                    self.get_outcome()
+                    self.curr_pull -= 1
+                    return
+                elif self.gs.players[self.player].stars >= 2:
                     self.gs.players[self.player].stars -= 2
                     if self.gs.players[self.player].stars < 0:
                         self.gs.players[self.player].stars = 0
@@ -1737,14 +1743,14 @@ class Pandora_Box(Skill):
             self.gs.server.emit("display_special_notification", {"msg": "DAMAGE MULTIPLIER INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+1 Damage Multiplier')
         elif num < 70: # 6%
-            self.gs.players[self.player].min_roll += 1
+            self.gs.players[self.player].reserves += 15
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "Minimum Roll increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "Received 15 reserves!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+1 Minimum Roll')
         elif num < 73: # 3%
-            self.gs.players[self.player].min_roll += 2
+            self.gs.players[self.player].min_roll += 1
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
             self.receivedBlessings.append('+2 Minimum Roll')
         elif num < 79: # 6%
             self.infra += 1
