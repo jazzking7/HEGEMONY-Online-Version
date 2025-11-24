@@ -619,6 +619,24 @@ socket.on('display_special_notification', function(data){
   special_popup(data.msg, 3000, data.t_color, data.b_color);
 })
 
+socket.on('set_agenda_explanation', function(data){
+    $('#middle_title').empty();
+    $('#middle_content').empty();
+    
+    $('#middle_content').html(`
+        <div style="margin-bottom: 0.5rem; color: rgb(148, 163, 184); font-size: 1rem; font-weight: 600; letter-spacing: 0.05em;">YOUR OBJECTIVE</div>
+        <div style="margin-bottom: 1rem; color: rgb(103, 232, 249); font-size: 1rem; font-weight: bold;">${data.objective}</div>
+        <div style="margin-bottom: 0.5rem; color: rgb(148, 163, 184); font-size: 1rem; font-weight: 600; letter-spacing: 0.05em;">PRIORITY CLASS</div>
+        <div style="color: rgb(251, 191, 36); font-size: 1rem; font-weight: bold;">${data.priority}</div>
+    `);
+    
+    $('#middle_display').css('display', 'flex');
+});
+
+socket.on('clear_middle_content', function(data){
+  $('#middle_display').css("display", "none");
+})
+
 function playTap(){
   $('#tap').prop('volume', 0.5).trigger('play');
 }

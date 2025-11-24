@@ -57,7 +57,9 @@ class setup_event_scheduler:
         for mission in gs.Mset:
             mission.set_up_tracker_view()
             gs.server.emit('set_new_announcement', {'async': True, 'msg': f'Your agenda: {mission.name}'}, room=mission.player)
+            gs.server.emit('set_agenda_explanation', {"objective": mission.objective, "priority": mission.priority}, room=mission.player)
         ms.selection_time_out(20, len(gs.players))
+        gs.server.emit('clear_middle_content', room=gs.lobby)
 
     # FCFS
     def start_color_distribution(self, gs, ms):

@@ -88,6 +88,8 @@ class Pacifist(Mission):
         self.max_death_count = math.floor(len(gs.pids)/2)
         #self.goal_round = 8
         self.goal_round = 7
+        self.objective = "Ensure that no players die for 7 consecutive rounds."
+        self.priority = "S class | Solo Winner"
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -144,6 +146,8 @@ class Warmonger(Mission):
         self.goal_count = len(self.gs.pids)//3
         self.goal_count = 2 if len(self.gs.pids) == 5 else self.goal_count
         self.death_count = 0
+        self.objective = f"Kill {self.goal_count} players."
+        self.priority = "B class | Can win with non-conflicting B classes"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -197,6 +201,8 @@ class Loyalist(Mission):
     def __init__(self, player, gs):
         super().__init__("Loyalist", player, gs)
         self.target_player = None
+        self.objective = "Kill everyone else with your partner, DO NOT let your partner die."
+        self.priority = "A class | Can win with your partner"
 
     def set_partner(self, ):
         # you forgot to check this condition
@@ -259,6 +265,8 @@ class Bounty_Hunter(Mission):
         self.target_players = None
         numt = 0
         nump = len(gs.pids)
+        self.objective = "Kill the designated players."
+        self.priority = "B class | Can win with non-conflicting B classes"
         if nump < 5:
             numt = 1
         elif nump < 8:
@@ -330,6 +338,8 @@ class Unifier(Mission):
             self.target_round = 3
         self.round = 0
         self.type = 'r_based'
+        self.objective = f"Total control over the designated continent for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
     
     def own_target_cont(self, ):
         return self.gs.map.own_continent(self.gs.players[self.player].territories, self.gs.map.conts[self.target_continent]['trtys'])
@@ -381,6 +391,8 @@ class Polarizer(Mission):
         self.type = 'r_based'
         self.round = 0
         self.target_round = 3
+        self.objective = f"Make sure nobody (except you) controls an entire contient for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def no_unification(self,):
         for cont in self.gs.map.conts:
@@ -426,8 +438,10 @@ class Fanatic(Mission):
         super().__init__("Fanatic", player, gs)
         self.type = 'r_based'
         self.round = 0
-        self.target_round = 5
+        self.target_round = 4
         self.targets = []
+        self.objective = f"Control the target territories for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def set_targets(self, ):
         m = len(self.gs.map.territories)
@@ -511,6 +525,8 @@ class Industrialist(Mission):
         self.type = 'r_based'
         self.round = 0
         self.target_round = 4
+        self.objective = f"Be the most industrialized player (control the most cities) for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -554,6 +570,8 @@ class Expansionist(Mission):
         self.type = 'r_based'
         self.round = 0
         self.target_round = 4
+        self.objective = f"Control the most territories for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -597,6 +615,8 @@ class Populist(Mission):
         self.type = 'r_based'
         self.round = 0
         self.target_round = 4
+        self.objective = f"Hold the largest army for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -637,6 +657,8 @@ class Dominator(Mission):
         self.type = 'r_based'
         self.round = 0
         self.target_round = 3
+        self.objective = f"Hold the Superpower title for {self.target_round} consecutive rounds."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -674,6 +696,8 @@ class Dominator(Mission):
 class Guardian(Mission):
     def __init__(self, player, gs):
         super().__init__("Guardian", player, gs)
+        self.objective = f"Do not let anyone capture your Capital, you will die if that happens."
+        self.priority = "C class | Can win with non-conflicting C classes"
 
     def own_capital(self,):
         p = self.gs.players[self.player]
@@ -716,6 +740,8 @@ class Decapitator(Mission):
             self.target_players = random.sample(gs.pids, numt)
             if player in self.target_players:
                 self.target_players = None
+        self.objective = "Kill the designated players."
+        self.priority = "S class | Solo winner"
 
     # get the capital id based on the player's capital name
     def get_capital_id(self, c_name):
@@ -795,6 +821,9 @@ class Starchaser(Mission):
         self.round = 0
         self.death_round = 8
 
+        self.objective = f"Capture {self.target_chases} target territories, one after another."
+        self.priority = "S class | Solo winner"
+
     def set_up_tracker_view(self, ):
         self.gs.server.emit('mod_targets_to_capture', {'targets': [self.curr_target]}, room=self.player)
         targets = {}
@@ -865,6 +894,8 @@ class Duelist(Mission):
     def __init__(self, player, gs):
         super().__init__("Duelist", player, gs)
         self.target_player = None
+        self.objective = "Kill the designated player, you die if someone else kill them."
+        self.priority = "S class | Solo winner"
 
     def set_nemesis(self,):
         if self.target_player is not None:
@@ -922,6 +953,8 @@ class Punisher(Mission):
     def __init__(self, player, gs):
         super().__init__("Punisher", player, gs)
         self.targets = ['Punisher', 'Duelist', 'Starchaser', 'Decapitator', 'Bounty_Hunter', 'Warmonger', 'Pacifist', 'Loyalist', "Survivalist", "Protectionist", "Assassin", "Annihilator", "Spymaster"]
+        self.objective = "Kill a non-C class Agenda holder."
+        self.priority = "S class | Solo winner"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -974,6 +1007,8 @@ class Survivalist(Mission):
         self.round = 0
         self.type = 'r_based'
         self.goal_round = 8
+        self.objective = f"Survive until round {self.goal_round} (You can win by Global Ceasefire before that)."
+        self.priority = "A class | Can win with non-conflict A classes"
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -1014,6 +1049,8 @@ class Assassin(Mission):
         super().__init__("Assassin", player, gs)
         self.target_player = None
         self.nemesis = None
+        self.objective = "Kill the designated player, you die if someone else kill them."
+        self.priority = "S class | Solo winner"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -1082,6 +1119,8 @@ class Protectionist(Mission):
         super().__init__("Protectionist", player, gs)
         self.target_player = None
         self.protection = None
+        self.objective = "Protect your target and kill the Assassin. You die if your target is dead or if someone else kill the Assassin."
+        self.priority = "S class | Solo winner"
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
@@ -1160,6 +1199,8 @@ class Gambler(Mission):
         super().__init__("Gambler", player, gs)
         self.target_troops = len(self.gs.map.territories) - 20
         self.curr_troops = 0
+        self.objective = f"Win battles by sending less troops than the opponents and accumulate {self.target_troops} troop kills."
+        self.priority = "S class | Solo winner"
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
@@ -1190,6 +1231,8 @@ class Gambler(Mission):
 class Opportunist(Mission):
     def __init__(self, player, gs):
         super().__init__("Opportunist", player, gs)
+        self.objective = "Survive until someone else complete their Agenda."
+        self.priority = "Special class | Can win with anyone who does not need to kill you"
         
     def check_conditions(self):
         if not self.gs.players[self.player].alive:
@@ -1215,6 +1258,8 @@ class Annihilator(Mission):
     def __init__(self, player, gs):
         super().__init__("Annihilator", player, gs)
         gs.Annihilator = player
+        self.objective = "KILL EVERYONE!"
+        self.priority = "SSS class | Solo winner"
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
@@ -1245,6 +1290,8 @@ class Annihilator(Mission):
 class Spymaster(Mission):
     def __init__(self, player, gs):
         super().__init__("Spymaster", player, gs)
+        self.objective = "Achieve Global Ceasefire before round 5, or kill someone after round 5."
+        self.priority = "Special class | Can win with anyone before round 5, solo winner after round 5"
 
     def check_conditions(self,):
         if not self.gs.players[self.player].alive:
