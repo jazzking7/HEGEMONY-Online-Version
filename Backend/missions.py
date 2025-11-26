@@ -740,7 +740,7 @@ class Decapitator(Mission):
             self.target_players = random.sample(gs.pids, numt)
             if player in self.target_players:
                 self.target_players = None
-        self.objective = "Kill the designated players."
+        self.objective = "Capture the capitals of designated players."
         self.priority = "S class | Solo winner"
 
     # get the capital id based on the player's capital name

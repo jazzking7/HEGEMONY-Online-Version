@@ -46,6 +46,221 @@ const phaseMap = {
     'REARRANGE': { index: 4, class: 'phase-rearrange', label: 'REARRANGEMENT' }
 };
 
+class TacticalTooltip {
+    constructor() {
+        this.tooltip = null;
+        this.init();
+    }
+    
+    init() {
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'tactical-tooltip';
+        document.body.appendChild(this.tooltip);
+    }
+    
+show(element, options = {}) {
+    const {
+        title = "",
+        description = "",
+        position = 'auto'
+    } = options;
+    
+    let html = '';
+    if (title) {
+        html += `<div class="tooltip-title">${title}</div>`;
+    }
+    if (title && description) {
+        html += `<div class="tooltip-divider"></div>`;
+    }
+    if (description) {
+        html += `<div class="tooltip-description">${description}</div>`;
+    }
+    
+    this.tooltip.innerHTML = html;
+    
+    // Force display and visibility first with !important
+    this.tooltip.style.cssText = `
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: absolute !important;
+        z-index: 10000 !important;
+    `;
+    
+    // Force reflow
+    this.tooltip.offsetHeight;
+    
+    const rect = element.getBoundingClientRect();
+    const tooltipRect = this.tooltip.getBoundingClientRect();
+    
+    let finalPosition = position;
+    
+    if (position === 'auto') {
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceLeft = rect.left;
+        const spaceRight = window.innerWidth - rect.right;
+        
+        if (spaceBelow > 100) {
+            finalPosition = 'bottom';
+        } else if (spaceAbove > 100) {
+            finalPosition = 'top';
+        } else if (spaceRight > 220) {
+            finalPosition = 'right';
+        } else if (spaceLeft > 220) {
+            finalPosition = 'left';
+        } else {
+            finalPosition = 'bottom';
+        }
+    }
+    
+    let top, left;
+    
+    switch(finalPosition) {
+        case 'top':
+            top = rect.top - tooltipRect.height - 10;
+            left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+            break;
+        case 'bottom':
+            top = rect.bottom + 10;
+            left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+            break;
+        case 'left':
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+            left = rect.left - tooltipRect.width - 10;
+            break;
+        case 'right':
+            top = rect.top + (rect.height / 2) - (tooltipRect.height / 2);
+            left = rect.right + 10;
+            break;
+    }
+    
+    left = Math.max(10, Math.min(left, window.innerWidth - tooltipRect.width - 10));
+    top = Math.max(10, Math.min(top, window.innerHeight - tooltipRect.height - 10));
+    
+    this.tooltip.style.top = `${top}px`;
+    this.tooltip.style.left = `${left}px`;
+    
+    this.tooltip.classList.remove('top', 'bottom', 'left', 'right');
+    this.tooltip.classList.add(finalPosition);
+}
+
+  hide() {
+      this.tooltip.style.display = 'none';
+  }
+}
+
+// Initialize tooltip system
+const tacticalTooltip = new TacticalTooltip();
+
+// Tooltip data mapping
+const tooltipData = {
+    'btn-ui': {
+        title: 'Infrastructure',
+        description: `+1 Infrastructure Level<br>
+<b>Battle Effect</b><br>
+Max Rollable Dice +1.<br>
+<b>Special Effect</b><br>
+Every 2 Levels reduce Upgrade & Building costs by 1☆.<br>
+Higher Levels unlock a chance to gain 4☆ after conquests.`
+
+    },
+
+    'btn-bc': {
+        title: 'Build Cities',
+        description: `Convert a Territory into an Urbanized Territory.<br>
+                      <b>Battle Effect</b><br>
+                      Control 3 Urbanized Territories = Industrial Level (Max Roll) +1.<br>
+                      Every 2 Urbanized Territories after = +1 more Industrial Level.<br>
+                      <b>Special Effect</b><br>
+                      Urbanized Territories count as 2 Territories when calculating deployable troops.`
+    },
+
+    'btn-mob': {
+        title: 'Mobilization',
+        description: `Convert ☆ into Reserves.`
+    },
+
+    'btn-mega': {
+        title: 'Raise Megacity',
+        description: `Upgrade an Urbanized Territory into a Megacity.<br>
+                      <b>Battle Effect</b><br>
+                      Industrial Level (Max Roll) +1.<br>
+                      <b>Special Effect</b><br>
+                      +5 troops per turn.`
+    },
+
+    'btn-fort': {
+        title: 'Set Up Forts',
+        description: `Fortifications boost territorial defense.<br>
+                      <b>Battle Effect (Defense Only)</b><br>
+                      Minimum Roll +1 • Nullification Rate +25%<br>
+                      <b>Clustered Defense</b><br>
+                      Connected Forts = Stronger defense.<br>
+                      Nullification Rate +5% (up to 60%) for each connected Fort.<br>
+                      Minimum Roll +1 for every 4 connected Fort.`
+    },
+
+    'btn-hall': {
+        title: 'Hall of Governance',
+        description: `<b>Battle Effect</b><br>
+                      Damage Multiplier +1 for territories within reach of the Hall of Governance.<br>
+                      Army Standardization:<br>
+                      Reduce low rolls, more high rolls.<br>
+                      <b>Special Effect</b><br>
+                      +1☆ per turn.`
+    },
+
+    'btn-nexus': {
+        title: 'Logistic Nexus',
+        description: `<b>Battle Effect</b><br>
+                      Infrastructure Level +1.<br>
+                      <b>Special Effect</b><br>
+                      +1 troop for every 2 territories controlled (instead of 3).<br>
+                      Removes the chance of getting 1☆ after winning 6 conquests (instead of 9).<br>
+                      Chance to gain 4☆ after winning 9 conquests.`
+    },
+
+    'btn-leyline': {
+        title: 'Leyline Cross',
+        description: `Channel mystic energy to gain supernatural enhancements.<br>
+                     <b>Battle Effect</b><br>
+                      Crit Rate: 17% base, +5% each (max 60%).<br>
+                      Crit Damage: x3 base, +1 every 3 Crosses.<br>
+                      <b>Special Effect</b><br>
+                      Blessing chance = Crosses × 11% (max 60%).<br>
+                      Blessings give:<br>
+                      • Reserves = Crosses × 4 (60%)<br>
+                      • ☆ = Crosses (40%)`
+    },
+
+    'btn-bureau': {
+        title: 'Mobilization Bureau',
+        description: `Increase troop generation.<br>
+                      Special Effect:<br>
+                      Gain Reserves equal to 15% of your total troop count each turn.`
+    }
+};
+
+
+$(document).on('mouseenter', '.action-button', function() {
+    const buttonId = $(this).attr('id');
+    const data = tooltipData[buttonId];
+    if (data) {
+        tacticalTooltip.show(this, data);
+    }
+});
+
+$(document).on('mouseleave', '.action-button', function() {
+    tacticalTooltip.hide();
+});
+
+$(document).on('mousedown', '.action-button', function() {
+    tacticalTooltip.hide();
+    // Force immediate hiding without animation
+    tacticalTooltip.tooltip.style.display = 'none';
+});
+
 $(document).ready(async function() {
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();

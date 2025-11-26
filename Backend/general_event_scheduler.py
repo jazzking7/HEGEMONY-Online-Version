@@ -665,7 +665,7 @@ class General_Event_Scheduler:
             if not (pid == self.gs.pids[self.current_player]):
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             if skill.finished_launching:
-                self.gs.server.emit('set_new_announcement', {'async': True, 'msg': "Missiles launched..."}, room=self.gs.lobby)
+                self.gs.server.emit('set_new_announcement', {'async': True, 'msg': "Missiles launched..."}, room=pid)
             else:
                 self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
