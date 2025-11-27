@@ -1258,7 +1258,7 @@ def handle_debt_payment(data):
 def handle_skill_description(data):
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
-    socketio.emit('display_skill_description', {'description': SDIS.get_skill_description(data['name'], gsm) }, room=pid)
+    socketio.emit('display_skill_description', {'quote': SDIS.get_quote(data['name'], gsm), 'name': data['name'], 'description': SDIS.get_skill_description(data['name'], gsm) }, room=pid)
 
 @socketio.on('confirm_map_loaded')
 def handle_map_loaded_confirmation():

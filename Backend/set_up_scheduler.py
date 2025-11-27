@@ -210,4 +210,4 @@ class setup_event_scheduler:
             # CM
             if not gs.players[player].skill:
                 # Randomly assign mission to player
-                gs.players[player].skill = gs.SDIS.initiate_skill(gs.SDIS.get_single_option(), player, gs)
+                gs.players[player].skill = gs.SDIS.initiate_skill(gs.SDIS.get_single_option(), player, gs) if player != gs.Annihilator else gs.SDIS.initiate_skill( gs.SDIS.get_Annihilator_options()[random.randint(0,7)], player, gs)

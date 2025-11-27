@@ -261,6 +261,95 @@ $(document).on('mousedown', '.action-button', function() {
     tacticalTooltip.tooltip.style.display = 'none';
 });
 
+const skillIcons = {
+    'Iron_Wall': '/static/Assets/warart/ironwall.png',
+    'Realm_of_Permafrost': '/static/Assets/warart/realm.png',
+    'Dictator': '/static/Assets/warart/dictator.png',
+    'Mass Mobilization': '/static/Assets/warart/massmob.png',
+    'Industrial_Revolution': '/static/Assets/warart/indusrev.png',
+    'Robinhood': '/static/Assets/warart/rob.png',
+    "Ares' Blessing": '/static/Assets/warart/ares.png',
+    'Zealous_Expansion': '/static/Assets/warart/zealous.png',
+    'Elitocracy': '/static/Assets/warart/elito.png',
+    'Necromancer': '/static/Assets/warart/necro.png',
+    'Divine_Punishment': '/static/Assets/warart/dp.png',
+    'Air_Superiority': '/static/Assets/warart/as.png',
+    'Collusion': '/static/Assets/warart/collusion.png',
+    "Laplace's Demon": '/static/Assets/warart/laplace.png',
+    'Arsenal of the Underworld': '/static/Assets/warart/arsenal.png',
+    'Loan Shark': '/static/Assets/warart/shark.png',
+    'Reaping of Anubis': '/static/Assets/warart/anubis.png',
+    "Pandora's Box": '/static/Assets/warart/pandora.png',
+    'Loopwalker': '/static/Assets/warart/loop.png',
+    'Revanchism': '/static/Assets/warart/rev.png',
+    'Archmage': '/static/Assets/warart/archmage.png',
+    'Pillar of Immortality': '/static/Assets/warart/pillar.png',
+    'Babylon': '/static/Assets/warart/babylon.png',
+};
+
+// Skill Tooltip Class
+class SkillTooltip {
+    constructor() {
+        this.tooltip = null;
+        this.currentSkill = null;
+        this.init();
+    }
+    
+    init() {
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'skill-tooltip';
+        document.body.appendChild(this.tooltip);
+    }
+    
+    show(skillName, description, quote = '') {
+        this.currentSkill = skillName;
+        const iconPath = skillIcons[skillName] || '/static/icons/default.png';
+        
+        let quoteHtml = '';
+        if (quote) {
+            quoteHtml = `<div class="skill-tooltip-quote">"${quote}"</div>`;
+        }
+        
+        this.tooltip.innerHTML = `
+            <div class="skill-tooltip-content">
+                <div class="skill-tooltip-icon">
+                    <img src="${iconPath}" alt="${skillName}">
+                </div>
+                <div class="skill-tooltip-text">
+                    <div class="skill-tooltip-title">${skillName}</div>
+                    ${quoteHtml}
+                    <div class="skill-tooltip-description">${description}</div>
+                </div>
+            </div>
+        `;
+        
+        // Position at top center of screen - NO ANIMATION
+        this.tooltip.style.cssText = `
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 60px !important;
+            left: 50% !important;
+            transform: translate(-50%, 0) !important;
+            z-index: 10000 !important;
+            pointer-events: none !important;
+        `;
+    }
+    
+    hide() {
+        this.tooltip.style.display = 'none';
+        this.tooltip.style.opacity = '0';
+        this.currentSkill = null;
+    }
+}
+
+// Initialize tooltip
+const skillTooltip = new SkillTooltip();
+
+let pendingDescriptionRequest = null;
+
+
 $(document).ready(async function() {
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
@@ -1253,96 +1342,83 @@ socket.on('settle_result', function(data){
   }
 });
 
-// Choose skill
+// Updated socket handler
 socket.on('choose_skill', function(data){
-  document.getElementById('middle_display').style.display = 'flex';
-  let skill_options = document.getElementById('middle_content');
-  skill_options.innerHTML = '';
-  let disabled = false;
-  for (let option of data.options){
-    let btn_skill = document.createElement("button");
-    btn_skill.className = 'btn btn-info';
-    btn_skill.textContent = option;
-    btn_skill.style.border = 'none';
-    btn_skill.style.margin = '1px';
-    btn_skill.onclick = function(){
-      if(!disabled){
-        disabled = true;
-        btn_skill.style.border = '2px solid';
-        btn_skill.style.borderColor = 'red';
-        document.getElementById('control_panel').style.display = 'flex';
-        $('#control_confirm').off('click').on('click' , function(){
-          document.getElementById('control_panel').style.display = 'none';
-          socket.emit('send_skill_choice', {'choice': btn_skill.textContent})
-          document.getElementById('middle_display').style.display = 'none';
-          let existingDesc = document.getElementById('skill_description_box');
-          if (existingDesc) {
-            existingDesc.remove();
-          }
+    document.getElementById('middle_display').style.display = 'flex';
+    let skill_options = document.getElementById('middle_content');
+    skill_options.innerHTML = '';
+    
+    // Create scrollable wrapper with flexbox
+    let skillWrapper = document.createElement('div');
+    skillWrapper.className = 'skill-selection-wrapper';
+    skill_options.appendChild(skillWrapper);
+    
+    let disabled = false;
+    
+    for (let option of data.options){
+        let btn_skill = document.createElement("button");
+        btn_skill.className = 'skill-icon-button';
+        btn_skill.dataset.skillName = option;
+        
+        // Create icon image
+        const iconPath = skillIcons[option] || '/static/icons/default.png';
+        const img = document.createElement('img');
+        img.src = iconPath;
+        img.alt = option;
+        img.className = 'skill-icon';
+        btn_skill.appendChild(img);
+        
+        btn_skill.onclick = function(){
+            if(!disabled){
+                disabled = true;
+                btn_skill.classList.add('selected');
+                document.getElementById('control_panel').style.display = 'flex';
+                
+                $('#control_confirm').off('click').on('click', function(){
+                    document.getElementById('control_panel').style.display = 'none';
+                    socket.emit('send_skill_choice', {'choice': option});
+                    document.getElementById('middle_display').style.display = 'none';
+                    skillTooltip.hide();
+                });
+                
+                $('#control_cancel').off('click').on('click', function(){
+                    document.getElementById('control_panel').style.display = 'none';
+                    playRefuse();
+                    disabled = false;
+                    btn_skill.classList.remove('selected');
+                    skillTooltip.hide();
+                });
+            }
+        }
+        
+        btn_skill.addEventListener('mouseenter', function() {
+            pendingDescriptionRequest = option;
+            socket.emit('get_skill_description', { "name": option });
         });
-        $('#control_cancel').off('click').on('click' , function(){
-          document.getElementById('control_panel').style.display = 'none';
-          playRefuse();
-          disabled = false;
-          btn_skill.style.border = "none";
-          let existingDesc = document.getElementById('skill_description_box');
-          if (existingDesc) {
-            existingDesc.remove();
-          }
+        
+        btn_skill.addEventListener('mouseleave', function() {
+            skillTooltip.hide();
+            pendingDescriptionRequest = null;
         });
-      }
+        
+        btn_skill.addEventListener('mousedown', function() {
+            skillTooltip.hide();
+        });
+        
+        skillWrapper.appendChild(btn_skill);
     }
-
-    btn_skill.addEventListener('mouseenter', function() {
-      socket.emit('get_skill_description', { "name": btn_skill.textContent });
-    });
-
-    btn_skill.addEventListener('mouseleave', function () {
-      let existingDesc = document.getElementById('skill_description_box');
-      if (existingDesc) {
-        existingDesc.remove();
-      }
-    });
-
-    skill_options.appendChild(btn_skill);
-  }
 });
 
-socket.on('display_skill_description', function (data) {
-  let description = data.description;
-
-  // Remove any existing description box
-  const existingDesc = document.getElementById('skill_description_box');
-  if (existingDesc) {
-    existingDesc.remove();
-  }
-
-  // Create new description box
-  let descBox = document.createElement('div');
-  descBox.id = 'skill_description_box';
-  descBox.textContent = description;
-
-  // Use Tailwind-style classes and centered fixed positioning
-  descBox.className = `
-    bg-yellow-500 text-black
-    p-3 rounded shadow-lg
-    max-w-[40vw] max-h-[20vh] overflow-auto
-    fixed top-[30%] left-1/2 transform -translate-x-1/2
-    z-50
-  `;
-  // Add glassy + glow + font weight styling
-  descBox.style.position = 'absolute';
-  descBox.style.top = '20%';
-  descBox.style.backdropFilter = 'blur(6px)';
-  descBox.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-  descBox.style.boxShadow = `
-    0 0 10px rgba(255, 255, 150, 0.3),
-    inset 0 0 4px rgba(255, 255, 100, 0.2)
-  `;
-  descBox.style.fontWeight = '500'; // semi-bold
-  descBox.style.textShadow = '0 0 2px rgba(255, 255, 100, 0.3)';
-
-  document.body.appendChild(descBox);
+// Updated description handler
+socket.on('display_skill_description', function(data) {
+    const skillName = data.name || 'Unknown Skill';
+    const description = data.description || 'No description available';
+    const quote = data.quote || '';
+    
+    // Only show if this is still the requested skill
+    if (pendingDescriptionRequest === skillName) {
+        skillTooltip.show(skillName, description, quote);
+    }
 });
 
 //======================================================================================================

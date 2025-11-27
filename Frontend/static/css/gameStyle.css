@@ -989,6 +989,8 @@ html, body {
     
     font-family: 'Rajdhani', sans-serif;
     opacity: 0.95;
+    position: relative;
+    padding: 0.5rem 1rem;
 }
 
 #middle_title:empty {
@@ -1387,6 +1389,8 @@ html, body {
     }
 }
 
+
+
 /* Tactical Tooltip System */
 .tactical-tooltip {
     position: absolute;
@@ -1490,4 +1494,179 @@ html, body {
     border: 1px solid rgba(34, 211, 238, 0.8);
     border-left: none;
     border-bottom: none;
+}
+
+
+
+
+/* Skill Icon Buttons */
+.skill-icon-button {
+    width: 100px;
+    height: 100px;
+    padding: 0;
+    margin: 8px;
+    border: 1px solid rgba(34, 211, 238, 0.6);
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-icon-button:hover {
+    border-color: rgba(34, 211, 238, 1);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+    transform: scale(1.05);
+}
+
+.skill-icon-button.selected {
+    border: 3px solid rgb(239, 68, 68);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+}
+
+.skill-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+}
+
+/* Skill Selection Wrapper - Flexbox with wrapping */
+/* Skill Selection Wrapper - Flexbox with wrapping */
+.skill-selection-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 10px;
+    max-height: 45vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    gap: 4px;
+    box-sizing: border-box;
+}
+
+.skill-selection-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.skill-selection-wrapper::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.skill-selection-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.6);
+    border-radius: 4px;
+}
+
+.skill-selection-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 211, 238, 0.8);
+}
+
+/* Skill Tooltip - NO ANIMATION */
+.skill-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 10000;
+    pointer-events: none;
+    max-width: 700px;
+    width: 90vw;
+}
+
+.skill-tooltip-content {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+    border: 2px solid rgba(34, 211, 238, 0.8);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    box-shadow: 
+        0 0 30px rgba(34, 211, 238, 0.6),
+        inset 0 0 15px rgba(34, 211, 238, 0.1);
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    position: relative;
+}
+
+.skill-tooltip-icon {
+    flex-shrink: 0;
+    width: 150px;
+    height: 150px;
+    border: 2px solid rgba(251, 191, 36, 0.8);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+.skill-tooltip-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.skill-tooltip-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.skill-tooltip-title {
+    color: rgb(251, 191, 36);
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+    border-bottom: 2px solid rgba(34, 211, 238, 0.5);
+    padding-bottom: 0.5rem;
+    word-wrap: break-word;
+}
+
+.skill-tooltip-quote {
+    color: rgb(156, 163, 175);
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1.4;
+    padding: 0.5rem 0;
+    border-left: 3px solid rgba(34, 211, 238, 0.5);
+    padding-left: 0.75rem;
+}
+
+.skill-tooltip-description {
+    color: rgb(203, 213, 225);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* Corner accents for tooltip */
+.skill-tooltip-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(34, 211, 238, 0.8);
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 12px 0 0;
+}
+
+.skill-tooltip-content::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(34, 211, 238, 0.8);
+    border-right: none;
+    border-top: none;
+    border-radius: 0 0 0 12px;
 }

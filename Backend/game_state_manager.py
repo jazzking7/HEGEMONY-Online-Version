@@ -1087,6 +1087,7 @@ class Game_State_Manager:
         for h1 in atk_p.territories:
             if self.map.territories[h1].isHall:
                 reachable_trty = self.map.get_reachable_trty(h1, atk_p.territories)
+                reachable_trty.append(h1)
                 if t1 in reachable_trty:
                     atk_stats[4] += 1
                 atkh = True
@@ -1094,6 +1095,7 @@ class Game_State_Manager:
         for h2 in def_p.territories:
             if self.map.territories[h2].isHall:
                 reachable_trty = self.map.get_reachable_trty(h2, def_p.territories)
+                reachable_trty.append(h2)
                 if t2 in reachable_trty:
                     def_stats[4] += 1
                 defh = True

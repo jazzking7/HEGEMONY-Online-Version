@@ -139,6 +139,9 @@ class Iron_Wall(Skill):
             elif disparity == 1:
                 ownStats[3] += 5
 
+            if ownStats[3] > 95:
+                ownStats[3] = 95
+
             if self.ironwall:
                 if ownStats[3] <= 60:
                     ownStats[3] = 95
