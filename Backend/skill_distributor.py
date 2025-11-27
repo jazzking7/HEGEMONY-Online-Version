@@ -124,6 +124,54 @@ class Skill_Distributor:
             return "Able to install Pillars of Immortatlity. When a pillar is stationed on a territory, each troop stationed on that territory counts as 10 troops during battles."
         elif skill_name == "Babylon":
             return "Benefit from multiple randomly selected passives."
+        
+    def get_quote(self, skill_name, gs):
+        if skill_name == 'Iron_Wall':
+            return "Impenetrable as steel, unmoving as stone."
+        elif skill_name == 'Realm_of_Permafrost':
+            return "Nothing fades, nothing grows — all is held in the icy grip of eternity."
+        elif skill_name == 'Dictator':
+            return "The object of power is power."
+        elif skill_name == 'Mass Mobilization':
+            return "Quantity is a quality of its own."
+        elif skill_name == 'Industrial_Revolution':
+            return "Let human ingenuity power a new world order."
+        elif skill_name == 'Robinhood':
+            return "Strip the wealth of the greedy, fuel the hopes of the needy."
+        elif skill_name == "Ares' Blessing":
+            return "When war is waged under Ares' watchful eyes, even the smallest force can conquer nations."
+        elif skill_name == "Zealous_Expansion":
+            return "The road to success is always under construction."
+        elif skill_name == "Elitocracy":
+            return "Quality of men rules over quantity."
+        elif skill_name == "Necromancer":
+            return "One who controls the dead commands the living."
+        elif skill_name == "Divine_Punishment":
+            return "Justice from above, swift and unforgiving."
+        elif skill_name == "Air_Superiority":
+            return "The one who controls the skies controls the battlefield."
+        elif skill_name == "Collusion":
+            return "Corrupt the few, and they will corrupt the many."
+        elif skill_name == "Laplace's Demon":
+            return "The essence of war is not fighting; it is knowing."
+        elif skill_name == "Arsenal of the Underworld":
+            return "What is hidden is often more powerful than what is seen."
+        elif skill_name == "Loan Shark":
+            return "Strike at the shepherd, and the sheep will scatter."
+        elif skill_name == "Reaping of Anubis":
+            return "They fall before the first step is even taken."
+        elif skill_name == "Pandora's Box":
+            return "Sometimes, there's nothing inside. Sometimes, everything."
+        elif skill_name == "Loopwalker":
+            return "Every failure is fuel for the perfect loop."
+        elif skill_name == "Revanchism":
+            return "To be wronged is nothing unless you continue to remember it."
+        elif skill_name == "Archmage":
+            return "Where others beg the divine, the miracle maker becomes it."
+        elif skill_name == "Pillar of Immortality":
+            return "Where the gods once stood the pillars now remain."
+        elif skill_name == "Babylon":
+            return "All treasures return to their origin — and I am the origin."
     def initiate_skill(self, skill_name, player, gs):
         if skill_name == 'Iron_Wall':
             return Iron_Wall(player, gs)
