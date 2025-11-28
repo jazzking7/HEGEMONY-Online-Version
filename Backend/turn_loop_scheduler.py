@@ -317,11 +317,28 @@ class turn_loop_scheduler:
                 if random.randint(1, 100) <= leyprob:
                     print("Leyline Bonus Received.")
                     if random.randint(1, 100) > 40:
-                        p.reserves += p.numLeylines * 5 if moreBlessings else p.numLeylines * 4
+                        ramt = p.numLeylines * 5 if moreBlessings else p.numLeylines * 4
+                        p.reserves += ramt
+                        gs.server.emit('show_notification_right', {
+                            'message': f'+{ramt} Reserves',
+                            'duration': 3000,
+                            "text_color": "#000000", "bg_color": "#6987D5"
+                        }, room=player)
                     else:
-                        p.stars += p.numLeylines + 1 if moreBlessings else p.numLeylines
+                        samt = p.numLeylines + 1 if moreBlessings else p.numLeylines
+                        p.stars += samt
+                        gs.server.emit('show_notification_right', {
+                            'message': f'+{samt} Stars',
+                            'duration': 3000,
+                            "text_color": "#000000", "bg_color": "#6987D5"
+                        }, room=player)
                     gs.server.emit("playSFX", {"sfx": "blessing"}, room=player)
-                    gs.server.emit("display_special_notification", {"msg": "YOU HAVE RECEIVED LEYLINE BLESSING", "t_color": "#000000", "b_color": "#6987D5"}, room=player)
+                    gs.server.emit('show_notification_center', {
+                        'message': 'YOU HAVE RECEIVED LEYLINE BLESSINGS',
+                        'duration': 3000,
+                        "text_color": "#000000", "bg_color": "#6987D5"
+                    }, room=player)
+                    gs.server.sleep(1)
 
             # Dictator receives more stars
             # Ares clear stats boost
@@ -436,10 +453,18 @@ class turn_loop_scheduler:
                 if gs.in_ice_age:
                     gs.in_ice_age -= 1
                     if gs.in_ice_age:
-                        gs.server.emit("display_special_notification", {"msg": f"ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
+                        gs.server.emit('show_notification_center', {
+                                'message': f'ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}',
+                                'duration': 5000,
+                                "text_color": "#FAFEFF", "bg_color": "#3F7EB3"
+                            }, room=gs.lobby)
                     else:
-                        gs.server.emit("display_special_notification", {"msg": "ICE AGE TERMINATED", "t_color": "#FAFEFF", "b_color": "#3F7EB3"}, room=gs.lobby)
-                # nuclear deadzone kill troops
+                        gs.server.emit('show_notification_center', {
+                                'message': f'ICE AGE TERMINATED',
+                                'duration': 5000,
+                                "text_color": "#FAFEFF", "bg_color": "#3F7EB3"
+                            }, room=gs.lobby)               
+                 # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
                     if t.isDeadZone:
                         losses = math.ceil(t.troops/5)
@@ -466,22 +491,34 @@ class turn_loop_scheduler:
                         if not t.isDeadZone:
                             gs.server.emit('update_trty_display', {index: {'hasEffect': 'gone'}}, room=gs.lobby)
 
-                # Loyalist announcement
+                # Dangerous Mission announcement
                 for miss in gs.Mset:
                     if miss.name == "Loyalist":
                         if ms.round == 3:
-                            gs.server.sleep(2)
+                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF LOYALISTS DETECTED, PROCEED WITH CAUTION.", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                            gs.server.emit('show_notification_center', {
+                                'message': 'PRESENCE OF LOYALISTS DETECTED! PROCEED WITH CAUTION!',
+                                'duration': 5000,
+                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                            }, room=gs.lobby)
                     if miss.name == "Annihilator":
                         if ms.round == 2:
-                            gs.server.sleep(2)
+                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF Annihilator DETECTED! HIGHLY RISKY SITUATION!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                            gs.server.emit('show_notification_center', {
+                                'message': 'PRESENCE OF ANNIHILATOR DETECTED! HIGH RISK SITUATION!',
+                                'duration': 5000,
+                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                            }, room=gs.lobby)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
-                            gs.server.sleep(2)
+                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit("display_special_notification", {"msg": f"PRESENCE OF SURVIVALIST DETECTED! ELIMINATE THEM!", "t_color": "#D9534F", "b_color": "#F0AD4E"}, room=gs.lobby)
+                            gs.server.emit('show_notification_center', {
+                                'message': 'PRESENCE OF SURVIVALIST DETECTED! PROCEED WITH CAUTION!',
+                                'duration': 3000,
+                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                            }, room=gs.lobby)
                 print(f"Round {ms.round} completed.")
             curr_player = gs.pids[ms.current_player]

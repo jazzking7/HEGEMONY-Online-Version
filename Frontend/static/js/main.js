@@ -12,20 +12,6 @@ function popup(msg, duration) {
     }, duration);
 }
 
-function special_popup(msg, duration, text_color, background_color) {
-    if (popup_timeout) clearTimeout(popup_timeout);
-    let popup = document.getElementById("special_alert");
-    popup.innerHTML = msg;
-    popup.style.display = 'flex';
-    popup.style.color = text_color;  
-    popup.style.backgroundColor = background_color; 
-    
-    popup_timeout = setTimeout(() => {
-        popup.innerHTML = '';
-        popup.style.display = 'none';
-    }, duration);
-}
-
 // Load page
 // const URL_FRONTEND = 'http://127.0.0.1:8080/';
 const URL_FRONTEND = 'http://35.183.100.227:8080/';

@@ -349,6 +349,126 @@ const skillTooltip = new SkillTooltip();
 
 let pendingDescriptionRequest = null;
 
+// Notification System
+class NotificationManager {
+    constructor() {
+        this.notifications = {
+            center: [],
+            right: [],
+            left: []
+        };
+        this.init();
+    }
+    
+    init() {
+        // Create notification containers
+        const positions = [
+            { id: 'notif-center', class: 'notification-container-center' },
+            { id: 'notif-right', class: 'notification-container-right' },
+            { id: 'notif-left', class: 'notification-container-left' }
+        ];
+        
+        positions.forEach(pos => {
+            let container = document.createElement('div');
+            container.id = pos.id;
+            container.className = pos.class;
+            document.body.appendChild(container);
+        });
+    }
+    
+    show(type, msg, duration, textColor, bgColor) {
+        const containerId = type === 'center' ? 'notif-center' : 
+                           type === 'right' ? 'notif-right' : 'notif-left';
+        const container = document.getElementById(containerId);
+        
+        // Create notification element
+        const notif = document.createElement('div');
+        notif.className = `notification notification-${type}`;
+        
+        // Apply styles directly to avoid CSS override issues
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'notification-content';
+        contentDiv.textContent = msg;
+        
+        // Set colors with !important via style property
+        contentDiv.style.cssText = `
+            background: ${bgColor} !important;
+            color: ${textColor} !important;
+        `;
+        
+        notif.appendChild(contentDiv);
+        
+        // Start above the viewport for slide-down effect
+        notif.style.transform = 'translateY(-100px)';
+        notif.style.opacity = '0';
+        
+        // Add to container at the beginning (so new ones appear on top)
+        container.insertBefore(notif, container.firstChild);
+        this.notifications[type].unshift(notif);
+        
+        // Force reflow
+        notif.offsetHeight;
+        
+        // Update stacking
+        this.updateStack(type);
+        
+        // Trigger slide-in animation
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                notif.classList.add('show');
+            });
+        });
+        
+        // Auto-remove after duration
+        setTimeout(() => {
+            this.remove(type, notif);
+        }, duration);
+    }
+    
+    updateStack(type) {
+        const notifs = this.notifications[type];
+        notifs.forEach((notif, index) => {
+            if (index === 0) {
+                // Top notification - fully visible
+                notif.style.transform = 'translateY(0) scale(1)';
+                notif.style.opacity = '1';
+                notif.style.zIndex = '1001';
+            } else {
+                // Stacked notifications - slightly offset and scaled down
+                const offset = index * 8;
+                const scale = 1 - index * 0.05;
+                notif.style.transform = `translateY(${offset}px) scale(${scale})`;
+                notif.style.opacity = '0.7';
+                notif.style.zIndex = `${1001 - index}`;
+            }
+        });
+    }
+    
+    remove(type, notif) {
+        notif.classList.remove('show');
+        notif.classList.add('hide');
+        
+        setTimeout(() => {
+            const container = document.getElementById(
+                type === 'center' ? 'notif-center' : 
+                type === 'right' ? 'notif-right' : 'notif-left'
+            );
+            container.removeChild(notif);
+            
+            // Remove from tracking array
+            const index = this.notifications[type].indexOf(notif);
+            if (index > -1) {
+                this.notifications[type].splice(index, 1);
+            }
+            
+            // Update remaining stack
+            this.updateStack(type);
+        }, 300);
+    }
+}
+
+// Initialize notification manager
+const notificationManager = new NotificationManager();
 
 $(document).ready(async function() {
   // Hide control buttons
@@ -913,6 +1033,42 @@ socket.on('remove_tid_from_otherHighlight', function(data){
 socket.on('clear_otherHighlight', function(){
   otherHighlight = [];
 });
+
+// Socket.io handlers
+socket.on('show_notification_center', function(data) {
+    notificationManager.show(
+        'center',
+        data.message,
+        data.duration || 3000,
+        data.text_color || '#ffffff',
+        data.bg_color || 'rgba(34, 211, 238, 0.9)'
+    );
+});
+
+socket.on('show_notification_right', function(data) {
+    notificationManager.show(
+        'right',
+        data.message,
+        data.duration || 2000,
+        data.text_color || '#ffffff',
+        data.bg_color || 'rgba(34, 197, 94, 0.9)'
+    );
+});
+
+socket.on('show_notification_left', function(data) {
+    notificationManager.show(
+        'left',
+        data.message,
+        data.duration || 2000,
+        data.text_color || '#ffffff',
+        data.bg_color || 'rgba(168, 85, 247, 0.9)'
+    );
+});
+
+// Legacy function for backward compatibility
+function special_popup(msg, duration, text_color, background_color) {
+    notificationManager.show('center', msg, duration, text_color, background_color);
+}
 
 // Popup notification
 socket.on('display_new_notification', function(data){

@@ -1724,60 +1724,115 @@ class Pandora_Box(Skill):
             num = random.randint(56, 100)
             self.guarantee = 0
         if num < 10: # 10%
-            self.gs.server.emit("display_special_notification", {"msg": "Received nothing.....", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Received nothing.....',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 30: # 20%
             self.gs.players[self.player].stars += 1
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "Received 1★...", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Received 1★...',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 55: # 25%
             self.gs.players[self.player].stars += 3
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "Received 3★!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Received 3★!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 58: # 3%
             self.gs.players[self.player].stars += 7
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "RECEIVED 7★!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'RECEIVED 7★!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 61: # 3%
             self.gs.players[self.player].reserves += 30
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "RECEIVED 30 RESERVES!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'RECEIVED 30 RESERVES!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 64: # 3%
             self.multi += 1
-            self.gs.server.emit("display_special_notification", {"msg": "DAMAGE MULTIPLIER INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'DAMAGE MULTIPLIER INCREASED BY 1!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+1 Damage Multiplier')
         elif num < 70: # 6%
             self.gs.players[self.player].reserves += 15
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "Received 15 reserves!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
-            self.receivedBlessings.append('+1 Minimum Roll')
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Received 15 reserves!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
         elif num < 73: # 3%
             self.gs.players[self.player].min_roll += 1
             self.gs.update_private_status(self.player)
-            self.gs.server.emit("display_special_notification", {"msg": "MINIMUM ROLL INCREASED BY 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
-            self.receivedBlessings.append('+2 Minimum Roll')
+            self.gs.server.emit('show_notification_center', {
+                'message': 'MINIMUM ROLL INCREASED BY 1!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
+            self.receivedBlessings.append('+1 Minimum Roll')
         elif num < 79: # 6%
             self.infra += 1
-            self.gs.server.emit("display_special_notification", {"msg": "Infrastructure Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Infrastructure Level increased by 1!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+1 Infrastructure Level')
         elif num < 82: # 3%
             self.infra += 2
-            self.gs.server.emit("display_special_notification", {"msg": "INFRASTRUCTURE LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'INFRASTRUCTURE LEVEL INCREASED BY 2!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+2 Infrastructure Level')
         elif num < 88: # 6%
             self.nulrate += 10
-            self.gs.server.emit("display_special_notification", {"msg": "Nullification Rate increased by 10%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Nullification Rate increased by 10%!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+10% Nullification Rate')
         elif num < 91: # 3%
             self.nulrate += 20
-            self.gs.server.emit("display_special_notification", {"msg": "NULLIFICATION RATE INCREASED BY 20%!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'NULLIFICATION RATE INCREASED BY 20%!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+20% Nullification Rate')
         elif num < 97: # 6%
             self.indus += 1
-            self.gs.server.emit("display_special_notification", {"msg": "Industrial Level increased by 1!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'Industrial Level increased by 1!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+1 Industrial Level')
         else: # 3%
             self.indus += 2
-            self.gs.server.emit("display_special_notification", {"msg": "INDUSTRIAL LEVEL INCREASED BY 2!", "t_color": "#FFD524", "b_color": "#55185D"}, room=self.player)
+            self.gs.server.emit('show_notification_center', {
+                'message': 'INDUSTRIAL LEVEL INCREASED BY 2!',
+                'duration': 3000,
+                "text_color": "#FFD524", "bg_color": "#55185D"
+            }, room=self.player)
             self.receivedBlessings.append('+2 Industrial Level')
         if num < 30:
             self.guarantee += 1
