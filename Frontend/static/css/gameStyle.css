@@ -1827,3 +1827,243 @@ html, body {
     bottom: -2px;
     right: -2px;
 }
+
+
+
+
+
+
+
+/* Game Over Screen Styles */
+
+/* Epic Title */
+.game-over-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    animation: title-glow 2s ease-in-out infinite;
+}
+
+.title-decoration {
+    font-size: 1.5rem;
+    color: rgb(251, 191, 36);
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+    animation: decoration-pulse 1.5s ease-in-out infinite alternate;
+}
+
+.title-text {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    color: rgb(251, 191, 36);
+    text-shadow: 
+        0 0 20px rgba(251, 191, 36, 1),
+        0 0 40px rgba(251, 191, 36, 0.6);
+    text-transform: uppercase;
+}
+
+@keyframes title-glow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.3);
+    }
+}
+
+@keyframes decoration-pulse {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.2);
+    }
+}
+
+/* Victors Wrapper - with scrolling */
+.victors-wrapper {
+    max-height: 35vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.victors-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.victors-wrapper::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.victors-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(251, 191, 36, 0.6);
+    border-radius: 4px;
+}
+
+.victors-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(251, 191, 36, 0.8);
+}
+
+/* Victors Section */
+.victors-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.victor-card {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.1));
+    border: 2px solid rgba(251, 191, 36, 0.6);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    min-width: 220px;
+    text-align: center;
+    box-shadow: 
+        0 0 30px rgba(251, 191, 36, 0.4),
+        inset 0 0 20px rgba(251, 191, 36, 0.1);
+    animation: victor-float 3s ease-in-out infinite;
+    position: relative;
+}
+
+.victor-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(251, 191, 36, 0.9);
+    border-right: none;
+    border-bottom: none;
+}
+
+.victor-card::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(251, 191, 36, 0.9);
+    border-left: none;
+    border-top: none;
+}
+
+@keyframes victor-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.victor-crown {
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+    animation: crown-spin 4s linear infinite;
+}
+
+@keyframes crown-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.victor-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgb(252, 211, 77);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+}
+
+.victor-mission-label {
+    font-size: 0.7rem;
+    color: rgb(156, 163, 175);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.victor-mission {
+    font-size: 0.9rem;
+    color: rgb(226, 232, 240);
+    font-style: italic;
+    line-height: 1.3;
+}
+
+/* Player Summary Wrapper - with scrolling */
+.player-summary-wrapper {
+    max-height: 25vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.3);
+    border-top: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.player-summary-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.player-summary-wrapper::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.player-summary-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.6);
+    border-radius: 4px;
+}
+
+.player-summary-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 211, 238, 0.8);
+}
+
+/* Player Summary Lines */
+.player-summary-line {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(30, 41, 59, 0.4);
+    border-left: 3px solid rgba(34, 211, 238, 0.6);
+    border-radius: 3px;
+    color: rgb(203, 213, 225);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    transition: all 0.2s;
+}
+
+.player-summary-line:hover {
+    background: rgba(51, 65, 85, 0.6);
+    border-left-color: rgba(34, 211, 238, 1);
+    transform: translateX(4px);
+}
+
+.summary-player {
+    color: rgb(147, 197, 253);
+    font-weight: bold;
+}
+
+.summary-skill {
+    color: rgb(216, 180, 254);
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+}
+
+.summary-mission {
+    color: rgb(252, 211, 77);
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}

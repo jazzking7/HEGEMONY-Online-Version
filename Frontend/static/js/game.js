@@ -990,34 +990,71 @@ function hide_async_btns(){
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
 }
 
-// Game over
+
 socket.on('GAME_OVER', function(data) {
   $('#gameEndSound').trigger('play');
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
   currEvent = null;
+  
+  // Expand the display for game over
   $('#middle_display').css({
-    'max-width': '50vw',
-    'max-height': '50vh'
+    'max-width': '65vw',
+    'max-height': '75vh'
   });
+  
   $('#middle_display, #middle_title, #middle_content').show();
-  $('#middle_title').html('<h1 style="padding-right: 5px">FINAL VICTORS</h1>');
-  $('#middle_content').html(`<div id="winners" style="display: flex; flex-direction: column; justify-content: center; align-items: center; max-height: calc(3 * 1.5em); overflow-y: auto;"></div>`);
-  for (winner of data.winners) {
-    var wname;
-    var mission;
-    for (w in winner) {
+  
+  // Remove padding from middle_content for game over
+  $('#middle_content').css('padding', '0');
+  
+  // Epic title with animation
+  $('#middle_title').html(`
+    <div class="game-over-title">
+      <div class="title-decoration">⚔</div>
+      <div class="title-text">FINAL VICTORS</div>
+      <div class="title-decoration">⚔</div>
+    </div>
+  `);
+  
+  // Build winners section with scrolling
+  let winnersHtml = '<div class="victors-wrapper"><div class="victors-section">';
+  
+  for (let winner of data.winners) {
+    let wname, mission;
+    for (let w in winner) {
       wname = w;
       mission = winner[w];
     }
-    $('#winners').append(`<div><h3>${wname} => ${mission}</h3></div>`);
+    winnersHtml += `
+      <div class="victor-card">
+        <div class="victor-crown">👑</div>
+        <div class="victor-name">${wname}</div>
+        <div class="victor-mission-label">Triumphant Agenda</div>
+        <div class="victor-mission">${mission}</div>
+      </div>
+    `;
   }
-  $('#middle_content').append('<div id="player_overview" style="margin-top: 5px; max-height: 7em; overflow-y: auto; display: flex; flex-direction: column; align-items: flex-start;"></div>');
+  
+  winnersHtml += '</div></div>';
+  
+  // Build player summary section with natural language
+  let summaryHtml = '<div class="player-summary-wrapper">';
+  
   for (let overview of data.player_overview) {
     let [playerName, skillName, missionName] = overview;
-    $('#player_overview').append(
-      `<div style="font-size: 0.875rem; word-wrap: break-word;">${playerName} had war art ${skillName} with ${missionName} as secret agenda.</div>`
-    );
+    summaryHtml += `
+      <div class="player-summary-line">
+        <span class="summary-player">${playerName}</span> had war art 
+        <span class="summary-skill">${skillName}</span> with 
+        <span class="summary-mission">${missionName}</span> as secret agenda.
+      </div>
+    `;
   }
+  
+  summaryHtml += '</div>';
+  
+  // Set content
+  $('#middle_content').html(winnersHtml + summaryHtml);
 });
 
 // add sync click event
