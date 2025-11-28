@@ -996,6 +996,45 @@ socket.on('GAME_OVER', function(data) {
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
   currEvent = null;
   
+  // Create toggle button if it doesn't exist
+  if ($('#btn-toggle-game-over').length === 0) {
+    const toggleBtn = $(`
+      <button id="btn-toggle-game-over" class="bottom-action-button" style="
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1002;
+        padding: 0.75rem 1.5rem;
+        background-color: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(34, 211, 238, 0.4);
+        color: rgb(147, 197, 253);
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      ">
+        <span class="toggle-text">Hide Results</span>
+      </button>
+    `);
+    $('body').append(toggleBtn);
+    
+    // Toggle functionality
+    toggleBtn.on('click', function() {
+      const display = $('#middle_display');
+      const text = $(this).find('.toggle-text');
+      
+      if (display.is(':visible')) {
+        display.fadeOut(200);
+        text.text('Show Results');
+      } else {
+        display.fadeIn(200);
+        text.text('Hide Results');
+      }
+    });
+  }
+  
   // Expand the display for game over
   $('#middle_display').css({
     'max-width': '65vw',
