@@ -535,7 +535,7 @@ class turn_loop_scheduler:
                             }, room=gs.lobby)
                             gs.server.sleep(5)
                 
-                if gs.doctrineOn:
+                if gs.doctrineOn and gs.applied_doctrine:
                     gs.server.emit('show_notification_center', {
                                 'message': 'Doctrine is deactivated',
                                 'duration': 3000,

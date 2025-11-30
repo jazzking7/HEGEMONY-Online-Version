@@ -10,6 +10,7 @@ $(document).ready(function() {
         $('#power_set_time').prop("disabled", false);
         $("#turn_time").prop("disabled", false);
         $("#complexity").prop("disabled", false);
+        $("#doctrine").prop("disabled", false);
 
         // Share updates on settings
         $("#map_selection").change(function () {
@@ -52,6 +53,14 @@ $(document).ready(function() {
             });
         });
 
+        $("#doctrine").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'doctrine',
+                doctrine: selectedMap
+            });
+        });
+
         // Display start game button
         $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
 
@@ -63,7 +72,8 @@ $(document).ready(function() {
                 'power_set_time': $('#power_set_time').val(),
                 'turn_time': $('#turn_time').val(),
                 'map_selected': $('#map_selection').val(),
-                'complexity': $('#complexity').val()
+                'complexity': $('#complexity').val(),
+                'doctrine': $('#doctrine').val()
             };
             socket.emit('start_game', data);
         });
@@ -132,6 +142,10 @@ $(document).ready(function() {
             case 'complexity':
                 $('#complexity').val(data.complexity)
                 break;
+            case 'doctrine':
+                $('#doctrine').val(data.doctrine)
+                break;
+
         }
     });
 

@@ -226,6 +226,7 @@ def startGame(data):
     lobby['gsm'].egt = EGT
     lobby['gsm'].SDIS = SDIS
     lobby['gsm'].complexity = data.get('complexity')
+    lobby['gsm'].doctrineOn = data.get('doctrine') == "docOn"
 
     socketio.emit('game_started', room=lobby_id)
 
