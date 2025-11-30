@@ -1200,7 +1200,7 @@ class Gambler(Mission):
         self.target_troops = len(self.gs.map.territories) - 20
         self.curr_troops = 0
         self.objective = f"Win battles by sending less troops than the opponents and accumulate {self.target_troops} troop kills."
-        self.priority = "S class | Solo winner"
+        self.priority = "B class | Can win with non-conflicting B classes"
     
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {

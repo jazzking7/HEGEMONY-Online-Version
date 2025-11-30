@@ -523,6 +523,15 @@ def update_player_city(data):
     socketio.emit('settle_result', {'resp': True}, room=pid)
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
 
+@socketio.on("selected_doctrine")
+def handle_selected_doctrine(data):
+    choice = data.get('option')
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    gsm.GES.selected += 1
+    gsm.server.emit('clear_view', room=pid)
+    gsm.apply_doctrine(choice)
+
 @socketio.on('settle_cities')
 def settle_new_cities(data):
     choices = data.get('choice')
@@ -923,6 +932,8 @@ def send_sep_auth():
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     discountFactor = gsm.get_player_infra_level(gsm.players[pid])
     price_reduction = discountFactor//2
+    if gsm.inflation:
+        price_reduction -= 1
     socketio.emit('receive_sep_auth', {'amt': gsm.players[pid].stars, 'discount':price_reduction}, room=pid)
 
 @socketio.on('get_reserves_amt')
@@ -1073,11 +1084,14 @@ def send_skill_information():
 def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
+    if gsm.suspension:
+        socketio.emit('display_new_notification',{'msg': 'War Art activation currently blocked by Doctrine!'}, room=pid)
+        return
     if gsm.players[pid].skill:
         if pid == gsm.pids[gsm.GES.current_player] or gsm.players[pid].skill.out_of_turn_activation:
             gsm.players[pid].skill.activate_effect()
         else:
-            socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
+            socketio.emit('display_new_notification',{'msg': 'Cannot activate War Art outside your turn!'}, room=pid)
 
 @socketio.on('signal_skill_usage_with_data')
 def handle_skill_usage_with_data(data):

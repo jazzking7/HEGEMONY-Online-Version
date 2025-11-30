@@ -158,6 +158,82 @@ class Game_State_Manager:
 
         self.inGameLoop = False
 
+        self.doctrineOn = True
+        self.doctrines = {
+            "Peace Above All" : "No conquests -> Max chance of getting more stars. The more conquests someone makes the less stars they will receive.",
+            "Prosperity of the Saints": "C-class Agenda holders guaranteed to receive extra 1☆.",
+            "Self-Preservation: Authority": "You receive 1☆ immediately.",
+            "Self-Preservation: Population": "You receive 7 reserves immediately.",
+            "War Art Suspension": "No active War Art usage, War Art passives still functioning.",
+            "Continental Embargo": "No continental bonus.",
+            # "Wrath of Nature: Earth": "Earthquake on 12 random territories that kill up to 40%% of troops stationed in them. You are immune to this.",
+            # "Wrath of Nature: Sea": "All coastal regions suffering up to 3 troops of damage. You are immune to this.",
+            # "Wrath of Nature: Disease": "Patient-Zero appear in a random territory, can spread with movement of troops.",
+            # "Climate Unstability": "Next Superpower can only choose from Natural Disasters",
+            "Philanthropist": "Give the weakest player 7 reserves and 1☆",
+            "Hyperinflation": "All cost of upgrades and buildings become 1☆ more expensive",
+            "Stability": "Nothing happens",
+            "Anarchy": "+1 Damage Multiplier to all attackers.",
+            "Turtle Shield": "+15% Nullification Rate to all defenders."
+        }
+
+        self.applied_doctrine = None
+        
+        self.peaceFirst = False
+        self.inflation = False
+        self.anarchy = False
+        self.turtle = False
+        self.embargo = False
+        self.suspension = False
+        self.copro = False
+
+    def apply_doctrine(self, doctrine):
+        if not self.applied_doctrine:
+            self.applied_doctrine = doctrine
+            if doctrine == "Peace Above All":
+                self.peaceFirst = True
+                return
+            elif doctrine == "Prosperity of the Saints":
+                self.copro = True
+                return
+            elif doctrine == "Self-Preservation: Authority":
+                self.players[self.SUP].stars += 1
+                self.update_private_status(self.SUP)
+                return
+            elif doctrine == "Self-Preservation: Population":
+                self.players[self.SUP].reserves += 7
+                self.update_private_status(self.SUP)
+                return
+            elif doctrine == "War Art Suspension":
+                self.suspension = True
+                return
+            elif doctrine == "Continental Embargo":
+                self.embargo = True
+                return
+            elif doctrine == "Philanthropist":
+                weakest = self.SUP
+                min_PPI = self.players[self.SUP].PPI
+                for player in self.players:
+                    if self.players[player].PPI < min_PPI:
+                        min_PPI = self.players[player].PPI
+                        weakest = player
+                self.players[weakest].stars += 1
+                self.players[weakest].reserves += 7
+                self.update_private_status(weakest)
+                return
+            elif doctrine == "Hyperinflation":
+                self.inflation = True
+                return
+            elif doctrine == "Stability":
+                return
+            elif doctrine == "Anarchy":
+                self.anarchy = True
+                return
+            elif doctrine == "Turtle Shield":
+                self.turtle = True
+                return
+            
+
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
 
@@ -547,6 +623,8 @@ class Game_State_Manager:
         discountFactor = self.get_player_infra_level(self.players[player])
         price_reduction = discountFactor//2
         price = base - price_reduction
+        if self.inflation:
+            price += 1
         return price if price > 1 else 1
 
     def convert_reserves(self, amt, player):
@@ -707,7 +785,9 @@ class Game_State_Manager:
                     # if t.isTransportcenter:
                     #     bonus += 2
                     t_score += 1
-        bonus += self.map.get_continental_bonus(p.territories)
+
+        if not self.embargo:
+            bonus += self.map.get_continental_bonus(p.territories)
 
         # Permafrost skip ice age debuff
         if p.skill:
@@ -1012,6 +1092,9 @@ class Game_State_Manager:
         atk_stats = atk_p.temp_stats[:]
         def_stats = self.get_player_battle_stats(def_p)
 
+        if self.anarchy:
+            atk_stats[4] += 1
+
         # Fortification
         if trty_def.isFort:
             fortCounts = self.count_connected_forts(def_p, t2)
@@ -1020,6 +1103,9 @@ class Game_State_Manager:
                 def_stats[2] += 1 + (fortCounts//4)
                 if def_stats[3] > 60:
                     def_stats[3] = 60
+        
+        if self.turtle:
+            def_stats[3] += 15
 
         alcb = False
         dlcb = False

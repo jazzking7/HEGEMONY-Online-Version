@@ -1653,6 +1653,76 @@ socket.on('display_skill_description', function(data) {
     }
 });
 
+// Choose Doctrine
+socket.on('select_doctrine', function(data){
+  // Show middle display
+  document.getElementById('middle_display').style.display = 'flex';
+  document.getElementById('middle_title').innerHTML = '';
+  document.getElementById('middle_content').innerHTML = '';
+  
+  // Restore padding classes if needed
+  const middleContent = document.getElementById('middle_content');
+  
+  // Create doctrine cards container
+  const doctrineContainer = document.createElement('div');
+  doctrineContainer.className = 'doctrine-container';
+  
+  let selectedDoctrine = null;
+  
+  // Create cards for each doctrine option
+  for (let i = 0; i < data.titles.length; i++) {
+    const card = document.createElement('div');
+    card.className = 'doctrine-card';
+    card.dataset.doctrine = data.titles[i];
+    
+    card.innerHTML = `
+      <div class="doctrine-title">${data.titles[i]}</div>
+      <div class="doctrine-description">${data.descriptions[i]}</div>
+    `;
+    
+    // Click handler for selection
+    card.addEventListener('click', function() {
+      // Remove previous selection
+      document.querySelectorAll('.doctrine-card').forEach(c => {
+        c.classList.remove('selected');
+      });
+      
+      // Mark this card as selected
+      card.classList.add('selected');
+      selectedDoctrine = data.titles[i];
+      
+      // Show control panel
+      document.getElementById('control_panel').style.display = 'flex';
+    });
+    
+    doctrineContainer.appendChild(card);
+  }
+  
+  middleContent.appendChild(doctrineContainer);
+  
+  // Confirm button handler
+  $('#control_confirm').off('click').on('click', function() {
+    if (selectedDoctrine) {
+      socket.emit('selected_doctrine', { 'option': selectedDoctrine });
+      document.getElementById('middle_display').style.display = 'none';
+      document.getElementById('control_panel').style.display = 'none';
+      middleContent.innerHTML = '';
+      selectedDoctrine = null;
+    }
+  });
+  
+  // Cancel button handler
+  $('#control_cancel').off('click').on('click', function() {
+    // Remove selection highlight
+    document.querySelectorAll('.doctrine-card').forEach(c => {
+      c.classList.remove('selected');
+    });
+    
+    selectedDoctrine = null;
+    document.getElementById('control_panel').style.display = 'none';
+  });
+});
+
 //======================================================================================================
 
 //============================ TURN BASED EVENTS =======================================================

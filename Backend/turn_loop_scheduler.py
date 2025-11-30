@@ -237,7 +237,7 @@ class turn_loop_scheduler:
             # CM
             p = gs.players[player]
             # Get stars probability based on territory conquered
-            if p.turn_victory:
+            if p.turn_victory or gs.peaceFirst:
                 bonus = max(min(gs.get_player_infra_level(p),9),0)
                 infraticks = [3,3,2,2,1,1,1,1,1]
                 ticks = sum(infraticks[:bonus])
@@ -250,12 +250,19 @@ class turn_loop_scheduler:
                         advance = True
                         break
 
+                max_con = 9
+                con_amt = min(p.con_amt, max_con)
+
+                if gs.peaceFirst:
+                    eff_con = max_con - con_amt
+                else:
+                    eff_con = con_amt
+
                 s_amt = 0
                 if not advance:
                     s1, s2, s3, s4 = 0.45, 0.3, 0.25, 0.0
-                    p.con_amt = min(p.con_amt, 9)
                     per4 = cap / 9.0 if cap > 0 else 0.0
-                    for _ in range(p.con_amt):
+                    for _ in range(eff_con):
                         d = min(0.05, s1)
                         s1 -= d
                         add4 = min(per4, cap - s4, d)
@@ -267,9 +274,8 @@ class turn_loop_scheduler:
                     s_amt = random.choices([1,2,3,4],[s1, s2, s3, s4],k=1)[0]
                 else:
                     s1, s2, s3, s4 = 0.45, 0.3, 0.25, 0
-                    p.con_amt = min(p.con_amt, 9)
                     per4 = cap / 6.0 if cap > 0 else 0.0
-                    for i in range(p.con_amt):
+                    for i in range(eff_con):
                         if i < 6:
                             d = min(0.075, s1)
                             s1 -= d
@@ -295,6 +301,14 @@ class turn_loop_scheduler:
                                 s_amt = 0
                     else:
                         s_amt = 0
+                
+                if gs.copro:
+                    for miss in gs.Mset:
+                        if miss.player == player:
+                            if miss.name in ['Guardian', 'Populist', 'Expansionist', 'Dominator', 'Industrialist',
+                                             'Fanatic', 'Polarizer', 'Unifier']:
+                                s_amt += 1
+                                break
 
                 # Robinhood!
                 for pid in gs.players:
@@ -495,30 +509,50 @@ class turn_loop_scheduler:
                 for miss in gs.Mset:
                     if miss.name == "Loyalist":
                         if ms.round == 3:
-                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit('show_notification_center', {
                                 'message': 'PRESENCE OF LOYALISTS DETECTED! PROCEED WITH CAUTION!',
                                 'duration': 5000,
                                 "text_color": "#D9534F", "bg_color": "#F0AD4E"
                             }, room=gs.lobby)
+                            gs.server.sleep(5)
                     if miss.name == "Annihilator":
                         if ms.round == 2:
-                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit('show_notification_center', {
                                 'message': 'PRESENCE OF ANNIHILATOR DETECTED! HIGH RISK SITUATION!',
                                 'duration': 5000,
                                 "text_color": "#D9534F", "bg_color": "#F0AD4E"
                             }, room=gs.lobby)
+                            gs.server.sleep(5)
                     if miss.name == "Survivalist":
                         if ms.round == 5:
-                            gs.server.sleep(5)
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit('show_notification_center', {
                                 'message': 'PRESENCE OF SURVIVALIST DETECTED! PROCEED WITH CAUTION!',
-                                'duration': 3000,
+                                'duration': 5000,
                                 "text_color": "#D9534F", "bg_color": "#F0AD4E"
                             }, room=gs.lobby)
-                print(f"Round {ms.round} completed.")
+                            gs.server.sleep(5)
+                
+                if gs.doctrineOn:
+                    gs.server.emit('show_notification_center', {
+                                'message': 'Doctrine is deactivated',
+                                'duration': 3000,
+                                "text_color": "#000000", "bg_color": "#6987D5"
+                            }, room=gs.lobby)
+                    gs.server.sleep(3)
+                    gs.applied_doctrine = None
+                    gs.peaceFirst = False
+                    gs.inflation = False
+                    gs.anarchy = False
+                    gs.turtle = False
+                    gs.embargo = False
+                    gs.suspension = False
+                    gs.copro = False
+
+                if (ms.round-1) % 2 == 0 and gs.doctrineOn:
+                    ms.choose_doctrine(gs.SUP)
+
+                print(f"Round {ms.round-1} completed.")
             curr_player = gs.pids[ms.current_player]
