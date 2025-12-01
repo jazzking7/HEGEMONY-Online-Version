@@ -2802,7 +2802,7 @@ btn_sep_auth.onclick = function () {
               onmouseout="this.style.backgroundColor='#878787'; this.querySelector('.hover-label').style.backgroundColor='#878787'; this.querySelector('.hover-label').style.color='#FFFFFF';">
         <div class="d-flex align-items-center justify-content-center">
           <img src="/static/Assets/Insig/fort.png" alt="Fort">
-          <span class="price-tag" style="color: #FFFFFF;">1☆</span>
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(1)}☆</span>
         </div>
         <span class="small">SET UP FORTS</span>
         <div class="hover-label">Establish defense base</div>

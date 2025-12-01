@@ -775,7 +775,7 @@ def settle_new_forts(data):
     gsm.signal_MTrackers('indus')
 
     gsm.players[pid].s_city_amt = 0
-    gsm.players[pid].stars -= len(choices)*1
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(1, pid)
     gsm.update_private_status(pid)
 
 @socketio.on('settle_megacities')
