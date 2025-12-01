@@ -4260,3 +4260,68 @@ function keyPressed(){
   }
 
 }
+
+
+// Ice Age Overlay System
+
+// Create the ice age overlay element
+function createIceAgeOverlay() {
+    // Check if overlay already exists
+    if (document.getElementById('ice-age-overlay')) {
+        return;
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'ice-age-overlay';
+    overlay.className = 'ice-age-overlay';
+    overlay.style.display = 'none';
+    
+    // Static ice layers only - no animations
+    // overlay.innerHTML = `
+    //     <div class="ice-layer ice-layer-1"></div>
+    //     <div class="ice-layer ice-layer-2"></div>
+    //     <div class="ice-layer ice-layer-3"></div>
+    //     <div class="frost-pattern"></div>
+    // `;
+    overlay.innerHTML = `
+        <div class="ice-layer ice-layer-1"></div>
+        <div class="ice-layer ice-layer-2"></div>
+        <div class="frost-pattern"></div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+// Show Ice Age effect
+function showIceAge() {
+    createIceAgeOverlay();
+    const overlay = document.getElementById('ice-age-overlay');
+    overlay.style.display = 'block';
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+}
+
+// Hide Ice Age effect
+function hideIceAge() {
+    const overlay = document.getElementById('ice-age-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 500);
+    }
+}
+
+// Socket.io handler - Turn ON Ice Age
+socket.on('ice_age_on', function(data) {
+    showIceAge();
+});
+
+// Socket.io handler - Turn OFF Ice Age
+socket.on('ice_age_off', function(data) {
+    hideIceAge();
+});
+
+// Initialize on load
+createIceAgeOverlay();
