@@ -4325,3 +4325,63 @@ socket.on('ice_age_off', function(data) {
 
 // Initialize on load
 createIceAgeOverlay();
+
+
+
+// Rage Mode Overlay System - FULLY STATIC (No animations)
+
+// Create the rage mode overlay element
+function createRageModeOverlay() {
+    // Check if overlay already exists
+    if (document.getElementById('rage-mode-overlay')) {
+        return;
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'rage-mode-overlay';
+    overlay.className = 'rage-mode-overlay';
+    overlay.style.display = 'none';
+    
+    // Pure static layers - ZERO animations
+    overlay.innerHTML = `
+        <div class="flame-layer flame-vignette"></div>
+        <div class="flame-layer flame-glow"></div>
+        <div class="flame-layer heat-overlay"></div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+// Show Rage Mode effect
+function showRageMode() {
+    createRageModeOverlay();
+    const overlay = document.getElementById('rage-mode-overlay');
+    overlay.style.display = 'block';
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 10);
+}
+
+// Hide Rage Mode effect
+function hideRageMode() {
+    const overlay = document.getElementById('rage-mode-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 600);
+    }
+}
+
+// Socket.io handler - Turn ON Rage Mode
+socket.on('rage_mode_on', function() {
+    showRageMode();
+});
+
+// Socket.io handler - Turn OFF Rage Mode
+socket.on('rage_mode_off', function() {
+    hideRageMode();
+});
+
+// Initialize on load
+createRageModeOverlay();

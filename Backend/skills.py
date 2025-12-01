@@ -576,6 +576,7 @@ class Ares_Blessing(Skill):
     def apply_turn_effect(self, ):
         self.activated = False
         self.changed_stats = True
+        self.gs.server.emit('rage_mode_off', room=self.player)
         if self.reset_rage_meter:
             self.reset_rage_meter = False
             self.rage_not_activated = True
@@ -617,10 +618,11 @@ class Ares_Blessing(Skill):
         
         self.activated = True
         self.changed_stats = False
+        self.gs.server.emit('rage_mode_on', room=self.player)
 
         # update limits and cooldown
         self.limit -= 1
-        self.cooldown = 3
+        self.cooldown = 2
 
 class Zealous_Expansion(Skill):
 
