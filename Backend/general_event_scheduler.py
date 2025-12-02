@@ -201,15 +201,16 @@ class General_Event_Scheduler:
                 else:
                     self.gs.server.emit('set_new_announcement', {'async': True, 'msg': f'{self.gs.players[sup].name} is setting a Doctrine.'}, room=self.gs.lobby)
             self.selection_time_out(60, 1)
-            if not self.selected:
-                self.gs.apply_doctrine(random.choice(options))
-                self.gs.server.emit('clear_view', room=sup)
-            self.gs.server.emit('signal_show_btns', room=sup)
-            self.gs.server.emit('show_notification_center', {
-                        'message': f'The Doctrine: "{self.gs.applied_doctrine}" is chosen',
-                        'duration': 3000,
-                        "text_color": "#000000", "bg_color": "#6987D5"
-                    }, room=self.gs.lobby)
+            if not self.interrupt: # game over left overs
+                if not self.selected:
+                    self.gs.apply_doctrine(random.choice(options))
+                    self.gs.server.emit('clear_view', room=sup)
+                self.gs.server.emit('signal_show_btns', room=sup)
+                self.gs.server.emit('show_notification_center', {
+                            'message': f'The Doctrine: "{self.gs.applied_doctrine}" is chosen',
+                            'duration': 3000,
+                            "text_color": "#000000", "bg_color": "#6987D5"
+                        }, room=self.gs.lobby)
 
     # INNER ASYNC EVENTS FROM HERE FORWARD
     def handle_async_event(self, data, pid):

@@ -4262,6 +4262,17 @@ function keyPressed(){
 }
 
 
+// Iron Dome
+
+socket.on('ironDomeOn', function(data){
+  ironDomeOn = data.tids;
+});
+
+socket.on('ironDomeOff', function(data){
+  ironDomeOn = [];
+});
+
+
 // Ice Age Overlay System
 
 // Create the ice age overlay element

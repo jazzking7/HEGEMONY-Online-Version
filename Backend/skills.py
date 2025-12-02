@@ -152,6 +152,8 @@ class Iron_Wall(Skill):
     
     def turn_off_iron_wall(self):
         self.ironwall = False
+        self.gs.server.emit('ironDomeOff', room=self.player)
+
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -189,6 +191,7 @@ class Iron_Wall(Skill):
         self.limit -= 1
         self.cooldown += 2
         self.ironwall = True
+        self.gs.server.emit('ironDomeOn', {'tids': self.gs.players[self.player].territories}, room=self.player)
         
 class Dictator(Skill):
 

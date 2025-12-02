@@ -1294,7 +1294,7 @@ class Game_State_Manager:
                 if atk_p.skill.active:
                     if atk_p.skill.name == "Necromancer":
                         atk_p.skill.curr_turn_gain += def_amt-result[1]
-            
+
             # Revanchism
             if def_p.skill:
                 if def_p.skill.name == "Revanchism" and def_p.skill.active:
@@ -1366,6 +1366,15 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.name == "Ares' Blessing" and def_p.skill.active:
                 def_p.skill.checking_rage_meter()
+
+            if def_p.skill.name == "Iron_Wall":
+                if def_p.skill.ironwall:
+                    self.server.emit('ironDomeOn', {'tids': def_p.territories}, room=d_pid)
+        
+        if atk_p.skill:
+            if atk_p.skill.name == "Iron_Wall":
+                if atk_p.skill.ironwall:
+                    self.server.emit('ironDomeOn', {'tids': atk_p.territories}, room=a_pid)
 
         # update player stats list
         self.update_player_stats()

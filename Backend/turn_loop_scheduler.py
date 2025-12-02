@@ -301,14 +301,6 @@ class turn_loop_scheduler:
                                 s_amt = 0
                     else:
                         s_amt = 0
-                
-                if gs.copro:
-                    for miss in gs.Mset:
-                        if miss.player == player:
-                            if miss.name in ['Guardian', 'Populist', 'Expansionist', 'Dominator', 'Industrialist',
-                                             'Fanatic', 'Polarizer', 'Unifier']:
-                                s_amt += 1
-                                break
 
                 # Robinhood!
                 for pid in gs.players:
@@ -353,6 +345,14 @@ class turn_loop_scheduler:
                         "text_color": "#000000", "bg_color": "#6987D5"
                     }, room=player)
                     gs.server.sleep(1)
+
+            if gs.copro:
+                for miss in gs.Mset:
+                    if miss.player == player:
+                        if miss.name in ['Guardian', 'Populist', 'Expansionist', 'Dominator', 'Industrialist',
+                                            'Fanatic', 'Polarizer', 'Unifier']:
+                            gs.players[player].stars += 1
+                            break
 
             # Dictator receives more stars
             # Ares clear stats boost
