@@ -164,11 +164,12 @@ class turn_loop_scheduler:
                             }, room=player)
         
         atk_player.reserves += round((atk_player.total_troops * numBureaux * 15)/100)
-        gs.server.emit('show_notification_right', {
-                                    'message': f'+{round((atk_player.total_troops * numBureaux * 15)/100)} Reserves',
-                                    'duration': 3000,
-                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
-                                }, room=player)
+        if round((atk_player.total_troops * numBureaux * 15)/100):
+            gs.server.emit('show_notification_right', {
+                                        'message': f'+{round((atk_player.total_troops * numBureaux * 15)/100)} Reserves',
+                                        'duration': 3000,
+                                        "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                    }, room=player)
         gs.update_private_status(player)
 
         # Player temporary battle stats not updated
