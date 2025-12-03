@@ -40,6 +40,16 @@ class Elimination_tracker:
             # take away the victim's resources
             attacker.reserves += victim.reserves
             attacker.stars += victim.stars
+            gs.server.emit('show_notification_right', {
+                                'message': f'+{victim.reserves} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=a_pid)
+            gs.server.emit('show_notification_right', {
+                                'message': f'+ {victim.stars}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=a_pid)
             victim.stars = 0
             victim.reserves = 0
             gs.update_private_status(a_pid)
@@ -87,9 +97,19 @@ class Elimination_tracker:
             gs.GES.flush_concurrent_event(d_pid)
             # take away the victim's resources
             attacker.reserves += victim.reserves
+            gs.server.emit('show_notification_right', {
+                                'message': f'+{victim.reserves} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=a_pid)
             # check for opportunist bonus        
             bonus = 15 if any(mission.name == 'Opportunist' and mission.player == d_pid for mission in gs.Mset) else 0
             attacker.stars += victim.stars + bonus
+            gs.server.emit('show_notification_right', {
+                                'message': f'+ {victim.stars+bonus}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=a_pid)
             victim.stars = 0
             victim.reserves = 0
             gs.update_private_status(a_pid)

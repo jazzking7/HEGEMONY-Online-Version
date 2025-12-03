@@ -236,8 +236,18 @@ class Dictator(Skill):
     def apply_turn_effect(self,):
         if self.active:
             self.gs.players[self.player].stars += 2
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+ 2☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
             if self.Annihilator_as_user:
                 self.gs.players[self.player].stars += 1
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
 
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -281,6 +291,11 @@ class Dictator(Skill):
         if self.Annihilator_as_user:
             self.gs.players[self.player].stars += 3
             self.gs.update_private_status(self.player)
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+ 3☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
 
         #     while added_stars < max_add and any(self.gs.players[p].stars > 0 for p in donors):
         #         for pid in donors:
@@ -334,6 +349,11 @@ class Mass_Mobilization(Skill):
                 self.will = 0
             if self.residual:
                 self.gs.players[self.player].reserves += self.residual
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+{self.residual} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
                 self.residual = 0
                 self.gs.update_private_status(self.player)
 
@@ -399,21 +419,51 @@ class Mass_Mobilization(Skill):
         if diff < -10:
             self.gs.players[self.player].reserves += math.ceil(0.17*total_troops*round_multiplier)
             self.residual = math.ceil(0.17*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.17*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         elif diff < -5:
             self.gs.players[self.player].reserves += math.ceil(0.14*total_troops*round_multiplier)
             self.residual = math.ceil(0.14*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.14*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         elif diff < 0:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.12*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.12*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         elif diff < 5:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.12*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.12*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         elif diff < 10:
             self.gs.players[self.player].reserves += math.ceil(0.12*total_troops*round_multiplier)
             self.residual = math.ceil(0.12*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.12*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         else:
             self.gs.players[self.player].reserves += math.ceil(0.1*total_troops*round_multiplier)
             self.residual = math.ceil(0.1*total_troops*(1-round_multiplier))
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{math.ceil(0.1*total_troops*round_multiplier)} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
 
         # update private view
         self.gs.update_private_status(self.player)
@@ -584,6 +634,11 @@ class Robinhood(Skill):
             l_amt = amt//3
             self.gs.players[self.player].reserves += l_amt
             self.gs.update_private_status(self.player)
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{l_amt} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
 
             amt -= l_amt
             return amt
@@ -599,6 +654,11 @@ class Robinhood(Skill):
 
             self.gs.players[self.player].stars += l_amt
             self.gs.update_private_status(self.player)
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {l_amt}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
 
             amt -= l_amt
             return amt
@@ -834,7 +894,17 @@ class Necromancer(Skill):
 
     def soul_harvest(self,):
         self.gs.players[self.player].reserves += self.curr_turn_gain
+        self.gs.server.emit('show_notification_right', {
+                                'message': f'+{self.curr_turn_gain} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
         self.gs.players[self.player].stars += self.curr_turn_gain//self.star_per_troops
+        self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {self.curr_turn_gain//self.star_per_troops}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
         self.gs.update_private_status(self.player)
         self.curr_turn_gain = 0
 
@@ -1135,11 +1205,27 @@ class Air_Superiority(Skill):
                             distincts.append(cont)
 
             bonus = len(distincts)
-            self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            rbonus = self.calculate_bonuses(bonus)
+            self.gs.players[self.player].reserves += rbonus
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{rbonus} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
             if self.Annihilator_as_user:
                 self.gs.players[self.player].stars += bonus//3
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {bonus//3}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
             else:
                 self.gs.players[self.player].stars += bonus//4
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {bonus//4}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
             self.gs.update_private_status(self.player)
     
     def update_current_status(self):
@@ -1712,6 +1798,12 @@ class Loan_Shark(Skill):
                 debtor.stars -= r_amt
                 loaner.stars += r_amt
                 del self.loan_list[player]
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {r_amt}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
+
                 self.ransom_history[player] = self.gs.GES.round
                 debtor.hijacked = False
                 if debtor.skill:
@@ -1720,6 +1812,12 @@ class Loan_Shark(Skill):
             else:
                 self.loan_list[player][0] -= debtor.stars*5
                 loaner.stars += debtor.stars
+                if debtor.stars:
+                    self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {debtor.stars}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
                 debtor.stars = 0
             if debtor.stars < 0:
                 debtor.stars = 0
@@ -1732,6 +1830,11 @@ class Loan_Shark(Skill):
             if debt_amt <= debtor.reserves:
                 debtor.reserves -= debt_amt
                 loaner.reserves += debt_amt
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+{debt_amt} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
                 del self.loan_list[player]
                 self.ransom_history[player] = self.gs.GES.round
                 debtor.hijacked = False
@@ -1745,6 +1848,11 @@ class Loan_Shark(Skill):
                 debt_amt -= debtor.reserves
                 self.loan_list[player][0] -= debtor.reserves
                 loaner.reserves += debtor.reserves
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+{debtor.reserves} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
                 debtor.reserves = 0
                 self.gs.update_private_status(self.player)
                 self.gs.update_private_status(player)
@@ -1754,6 +1862,11 @@ class Loan_Shark(Skill):
                     curr_tid = random.choice(debtor.territories)
                     if self.gs.map.territories[curr_tid].troops:
                         loaner.reserves += 1
+                        self.gs.server.emit('show_notification_right', {
+                                'message': f'+1 Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
                         self.gs.map.territories[curr_tid].troops -= 1
                         debtor.total_troops -= 1
                         debt_amt -= 1
@@ -1782,6 +1895,11 @@ class Loan_Shark(Skill):
                     curr_tid = random.choice(debtor.territories)
                     if self.gs.map.territories[curr_tid].troops:
                         loaner.reserves += 1
+                        self.gs.server.emit('show_notification_right', {
+                                'message': f'+1 Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
                         self.gs.map.territories[curr_tid].troops -= 1
                         debtor.total_troops -= 1
                         self.gs.update_LAO(player)
@@ -2428,6 +2546,11 @@ class Babylon(Skill):
         if 7 in self.passives:
             if self.active:
                 self.gs.players[self.player].stars += 1
+                self.gs.server.emit('show_notification_right', {
+                                'message': '+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
 
     def apply_round_effect(self,):
         if 4 in self.passives:
@@ -2498,8 +2621,19 @@ class Babylon(Skill):
                             distincts.append(cont)
 
             bonus = len(distincts)
-            self.gs.players[self.player].reserves += self.calculate_bonuses(bonus)
+            rbonus = self.calculate_bonuses(bonus)
+            self.gs.players[self.player].reserves += rbonus
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+{rbonus} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.player)
             self.gs.players[self.player].stars += bonus//4
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+ {bonus//4}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
             self.gs.update_private_status(self.player)
 
     def update_current_status(self):

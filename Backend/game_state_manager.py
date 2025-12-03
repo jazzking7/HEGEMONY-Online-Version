@@ -199,10 +199,20 @@ class Game_State_Manager:
             elif doctrine == "Self-Preservation: Authority":
                 self.players[self.SUP].stars += 1
                 self.update_private_status(self.SUP)
+                self.server.emit('show_notification_right', {
+                                'message': f'+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.SUP)
                 return
             elif doctrine == "Self-Preservation: Population":
                 self.players[self.SUP].reserves += 7
                 self.update_private_status(self.SUP)
+                self.server.emit('show_notification_right', {
+                                'message': f'+7 Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=self.SUP)
                 return
             elif doctrine == "War Art Suspension":
                 self.suspension = True
@@ -218,7 +228,17 @@ class Game_State_Manager:
                         min_PPI = self.players[player].PPI
                         weakest = player
                 self.players[weakest].stars += 1
+                self.server.emit('show_notification_right', {
+                                'message': f'+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=weakest)
                 self.players[weakest].reserves += 7
+                self.server.emit('show_notification_right', {
+                                'message': '+7 Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=weakest)
                 self.update_private_status(weakest)
                 return
             elif doctrine == "Hyperinflation":
@@ -669,6 +689,11 @@ class Game_State_Manager:
             extra = 60
         if not self.players[player].hijacked:
             self.players[player].reserves += extra
+            self.server.emit('show_notification_right', {
+                                'message': f'+{extra} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=player)
             self.players[player].stars -= amt
             self.update_private_status(player)
         else:
@@ -1353,6 +1378,11 @@ class Game_State_Manager:
                     if def_p.skill.name == "Necromancer":
                         def_p.reserves += atk_amt-result[0]
                         self.update_private_status(d_pid)
+                        self.server.emit('show_notification_right', {
+                                'message': f'+{atk_amt-result[0]} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=d_pid)
         
             if atk_p.skill:
                 if atk_p.skill.active:

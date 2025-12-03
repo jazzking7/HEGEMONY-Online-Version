@@ -62,6 +62,11 @@ class turn_loop_scheduler:
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Zealous_Expansion":
                     gs.players[curr_p].reserves += gs.players[curr_p].skill.bonus_level * 5
                     gs.update_private_status(curr_p)
+                    gs.server.emit('show_notification_right', {
+                                'message': f'+{gs.players[curr_p].skill.bonus_level * 5} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=curr_p)
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Air_Superiority":
                     gs.players[curr_p].skill.long_arm_jurisdiction()
                 if gs.players[curr_p].skill.active and gs.players[curr_p].skill.name == "Babylon":
@@ -75,6 +80,11 @@ class turn_loop_scheduler:
                         for t in miss.targets:
                             if t in gs.players[curr_p].territories:
                                 gs.players[curr_p].reserves += 1
+                                gs.server.emit('show_notification_right', {
+                                    'message': f'+1 Reserves',
+                                    'duration': 3000,
+                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                }, room=curr_p)
                         gs.update_private_status(curr_p)
                         break
             gs.players[curr_p].deployable_amt = d_amt
@@ -125,9 +135,19 @@ class turn_loop_scheduler:
             if atk_player.skill.active:
                 if atk_player.skill.name == "Mass Mobilization":
                     atk_player.reserves += round((atk_player.total_troops * 15)/100)
+                    gs.server.emit('show_notification_right', {
+                                    'message': f'+{round((atk_player.total_troops * 15)/100)} Reserves',
+                                    'duration': 3000,
+                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                }, room=player)
                 if atk_player.skill.name == "Babylon":
                     if 1 in atk_player.skill.passives:
                         atk_player.reserves += round((atk_player.total_troops * 10)/100)
+                        gs.server.emit('show_notification_right', {
+                                    'message': f'+{round((atk_player.total_troops * 10)/100)} Reserves',
+                                    'duration': 3000,
+                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                }, room=player)
 
         # Hall giving authority
         # Bureau recruitement
@@ -137,8 +157,18 @@ class turn_loop_scheduler:
                 numBureaux += 1
             if gs.map.territories[t].isHall:
                 atk_player.stars += 1
+                self.gs.server.emit('show_notification_right', {
+                                'message': f'+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=player)
         
         atk_player.reserves += round((atk_player.total_troops * numBureaux * 15)/100)
+        gs.server.emit('show_notification_right', {
+                                    'message': f'+{round((atk_player.total_troops * numBureaux * 15)/100)} Reserves',
+                                    'duration': 3000,
+                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                }, room=player)
         gs.update_private_status(player)
 
         # Player temporary battle stats not updated
@@ -310,6 +340,13 @@ class turn_loop_scheduler:
                                 s_amt = gs.players[pid].skill.leech_off_stars(s_amt)
 
                 p.stars += s_amt
+                if s_amt:
+                    gs.server.emit('show_notification_right', {
+                                'message': f'+ {s_amt}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=player)
+
                 moreBlessings = False
                 if p.skill:
                     if p.skill.active and p.skill.name == "Archmage":
@@ -334,7 +371,7 @@ class turn_loop_scheduler:
                         samt = p.numLeylines + 1 if moreBlessings else p.numLeylines
                         p.stars += samt
                         gs.server.emit('show_notification_right', {
-                            'message': f'+{samt} Stars',
+                            'message': f'+ {samt}☆',
                             'duration': 3000,
                             "text_color": "#000000", "bg_color": "#6987D5"
                         }, room=player)
@@ -352,6 +389,11 @@ class turn_loop_scheduler:
                         if miss.name in ['Guardian', 'Populist', 'Expansionist', 'Dominator', 'Industrialist',
                                             'Fanatic', 'Polarizer', 'Unifier']:
                             gs.players[player].stars += 1
+                            gs.server.emit('show_notification_right', {
+                                'message': '+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=player)
                             break
 
             # Dictator receives more stars
@@ -405,6 +447,11 @@ class turn_loop_scheduler:
             if ms.round == 0:
                 gs.players[curr_player].stars += 0 if (ms.current_player <= 2) else math.floor(ms.current_player / 2)
                 gs.update_private_status(curr_player)
+                gs.server.emit('show_notification_right', {
+                                'message': f'+ {math.floor(ms.current_player / 2)}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=curr_player)
 
             # checking if player is alive | permitting entry
             if gs.players[curr_player].alive:
