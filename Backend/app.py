@@ -58,7 +58,12 @@ def disconnect():
         # disconnect user
         gsm = lobby['gsm']
         gsm.players[sid].connected = False
-        gsm.server.emit('display_new_notification', {'msg': f'Player {gsm.players[sid].name} is disconnected.'}, room=gsm.lobby)
+        gsm.server.emit('show_notification_center', {
+            'message': f'Player {gsm.players[sid].name} is disconnected.',
+            'duration': 3000,
+            "text_color": "#FECACA", "bg_color": "#991B1B"
+        }, room=gsm.lobby)
+
 
     # remove sid from lobby own list of players NOT FROM GSM
     lobby['players'].remove(sid)
@@ -554,14 +559,26 @@ def settle_new_cities(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot settle cities during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot settle cities during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot settle cities during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot settle cities during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
         return
 
     # CM
@@ -593,14 +610,26 @@ def settle_bureau(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot set bureau during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set bureau during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot set bureau during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set bureau during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
         return
 
     # CM
@@ -633,14 +662,26 @@ def settle_leyline(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot set leyline during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set leyline during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot set leyline during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set leyline during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
         return
 
     # CM
@@ -674,14 +715,26 @@ def settle_nexus(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot set nexus during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set nexus during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot set nexus during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set nexus during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
         return
 
     # CM
@@ -713,14 +766,26 @@ def settle_new_halls(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot set halls during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set halls during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot set halls during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set halls during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)                
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
         return
 
     # CM
@@ -752,14 +817,26 @@ def settle_new_forts(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot set forts during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set forts during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)                
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot set forts during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot set forts during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)    
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)    
         return
 
     # CM
@@ -794,14 +871,26 @@ def settle_new_megacities(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('display_new_notification', {'msg': 'Cannot raise megacities during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message': 'Cannot raise megacities during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)  
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('display_new_notification', {'msg': 'Cannot raise megacities during ice age!'}, room=pid)
+                socketio.emit('show_notification_center', {
+                    'message': 'Cannot raise megacities during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
         return
 
     # CM
@@ -950,7 +1039,11 @@ def convert_reserves(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.convert_reserves(int(data['amt']), pid)
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot convert reserves outside of your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot convert reserves outside of your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
         socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('upgrade_infrastructure')
@@ -960,7 +1053,11 @@ def upgrade_infrastructure(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.upgrade_infrastructure(int(data['amt']), pid)
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot upgrade infrastructure outside of your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot upgrade infrastructure outside of your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
         socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('send_reserves_deployed')
@@ -1004,7 +1101,11 @@ def handle_summit_request():
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot launch summit outside of your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot launch summit outside of your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
 @socketio.on('request_global_peace')
 def handle_global_peace_request():
@@ -1016,7 +1117,11 @@ def handle_global_peace_request():
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF GLOBAL PEACE PROPOSED!"} ,room=pid)
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot launch summit outside of your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot launch Global Ceasefire outside of your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
 @socketio.on('send_summit_choice')
 def handle_summit_choice(data):
@@ -1038,7 +1143,11 @@ def handle_async_event(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.GES.handle_async_event(data, pid)
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot perform special operation outside of your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot perform special operation outside of your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
         socketio.emit('signal_show_btns', room=pid)
 
 # EXIT POINT FOR INNER ASYNC EVENTS
@@ -1086,13 +1195,21 @@ def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if gsm.suspension:
-        socketio.emit('display_new_notification',{'msg': 'War Art activation currently blocked by Doctrine!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'War Art activation currently blocked by Doctrine!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
         return
     if gsm.players[pid].skill:
         if pid == gsm.pids[gsm.GES.current_player] or gsm.players[pid].skill.out_of_turn_activation:
             gsm.players[pid].skill.activate_effect()
         else:
-            socketio.emit('display_new_notification',{'msg': 'Cannot activate War Art outside your turn!'}, room=pid)
+            socketio.emit('show_notification_center', {
+                    'message': 'Cannot activate War Art outside your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
 @socketio.on('signal_skill_usage_with_data')
 def handle_skill_usage_with_data(data):
@@ -1103,7 +1220,11 @@ def handle_skill_usage_with_data(data):
             intset = data.get('intset', None)
             gsm.players[pid].skill.activate_effect(intset)
         else:
-            socketio.emit('display_new_notification',{'msg': 'Cannot activate skill outside your turn!'}, room=pid)
+            socketio.emit('show_notification_center', {
+                    'message': 'Cannot activate skill outside your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
 @socketio.on('build_free_cities')
 def build_free_cities(data):
@@ -1267,7 +1388,11 @@ def handle_debt_payment(data):
                         curr_p.skill.handle_payment(pid, data['method'])
                         break
     else:
-        socketio.emit('display_new_notification',{'msg': 'Cannot make payment outside your turn!'}, room=pid)
+        socketio.emit('show_notification_center', {
+                    'message': 'Cannot make payment outside your turn!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
 @socketio.on('get_skill_description')
 def handle_skill_description(data):

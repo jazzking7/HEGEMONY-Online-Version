@@ -355,7 +355,11 @@ class Game_State_Manager:
                     'renewed_targets': targets,
                     })  
                     mission.check_conditions()
-        self.server.emit('display_new_notification', {'msg': f'Player {self.players[new_pid].name} connected back to server!'}, room=self.lobby)
+        self.server.emit('show_notification_center', {
+                    'message': f'Player {self.players[new_pid].name} connected back to server!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.lobby) 
         self.players[new_pid].connected = True if not self.players[new_pid].connected else False
         return True
     
@@ -668,7 +672,11 @@ class Game_State_Manager:
             self.players[player].stars -= amt
             self.update_private_status(player)
         else:
-            self.server.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=player)
+            self.server.emit('show_notification_center', {
+                    'message': f'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=player) 
 
     def get_total_troops_of_player(self, player):
         player = self.players[player]
@@ -734,7 +742,11 @@ class Game_State_Manager:
             self.update_global_status()
             self.signal_MTrackers('popu')
         else:
-            self.server.emit('display_new_notification', {'msg': 'Cannot use your special authority!'}, room=player)
+            self.server.emit('show_notification_center', {
+                    'message': f'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=player) 
 
     # Collusion
     def in_secret_control(self, trty_number, player_id):

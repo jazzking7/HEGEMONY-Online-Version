@@ -67,22 +67,42 @@ class Realm_of_Permafrost(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.gs.pids[self.gs.GES.current_player] != self.player:
-            self.gs.server.emit("display_new_notification", {"msg": "Cannot activate outside your turn!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Cannot activate outside your turn!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.gs.players[self.player].stars < 2:
-            self.gs.server.emit("display_new_notification", {"msg": "Not enough stars to activate ice age!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Not enough stars to activate ice age!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.iceAgeCd:
-            self.gs.server.emit("display_new_notification", {"msg": "Ice age activation in cooldown!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Ice age activation in cooldown!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
 
         self.gs.set_ice_age = True
         self.iceAgeCd = 4 if not self.Annihilator_as_user else 3
         self.gs.players[self.player].stars -= 2
-        self.gs.server.emit("display_new_notification", {"msg": "Ice Age Activated!"}, room=self.player)
+        self.gs.server.emit('show_notification_left', {
+                    'message': "Ice Age Activated!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
         self.gs.update_private_status(self.player)
     
     def apply_round_effect(self):
@@ -179,13 +199,25 @@ class Iron_Wall(Skill):
     
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.cooldown:
-            self.gs.server.emit('display_new_notification', {'msg': "In cooldown!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "In cooldown!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if not self.limit:
-            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "No more usages!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         
         self.limit -= 1
@@ -219,10 +251,18 @@ class Dictator(Skill):
     
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if not self.limit:
-            self.gs.server.emit('display_new_notification', {'msg': "No more usages!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "No more usages!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         
         self.limit -= 1
@@ -316,13 +356,25 @@ class Mass_Mobilization(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.limit == 0:
-            self.gs.server.emit('display_new_notification', {'msg': "Limit reached!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Limit reached!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player)
             return
         if self.cooldown:
-            self.gs.server.emit('display_new_notification', {'msg': "Still in cooldown!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Still in cooldown!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player)
             return
         
         # compute average PPI
@@ -411,7 +463,11 @@ class Industrial_Revolution(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         self.gs.GES.handle_async_event({'name': 'BFC'}, self.player)
 
@@ -422,7 +478,11 @@ class Industrial_Revolution(Skill):
         # too many cities
         total_allowed_cities = 2 * len(self.freeCityTracker) - sum(self.freeCityTracker.values())
         if len(choices) > total_allowed_cities:
-            self.gs.server.emit("display_new_notification", {"msg": f"Selected more than allowed amount of cities!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': "Selected more than allowed amount of cities!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player)
             return
 
         tmp_count = {}
@@ -430,10 +490,18 @@ class Industrial_Revolution(Skill):
         # already built on continent
         for choice in choices:
             if self.gs.map.territories[choice].isCity:
-                self.gs.server.emit("display_new_notification", {"msg": f"Selected a territory that already has a city!"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                    'message': "Selected a territory that already has a city!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player)
                 return
             if self.gs.map.territories[choice].isDeadZone:
-                self.gs.server.emit("display_new_notification", {"msg": f"Cannot build on radioactive zone!"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                    'message': "Cannot build on radioactive zone!",
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player)
                 return
             for cont in self.gs.map.conts:
                 if choice in self.gs.map.conts[cont]['trtys']:
@@ -443,10 +511,18 @@ class Industrial_Revolution(Skill):
                         tmp_count[cont] += 1
                     
                     if tmp_count[cont] > 2:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
+                        self.gs.server.emit('show_notification_left', {
+                            'message': f"Cannot build more than 2 free cities on {cont}!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                         return
                     if self.freeCityTracker[cont] + tmp_count[cont] > 2:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Cannot build more than 2 free cities on {cont}!"}, room=self.player)
+                        self.gs.server.emit('show_notification_left', {
+                            'message': f"Cannot build more than 2 free cities on {cont}!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                         return
 
         # apply changes
@@ -610,13 +686,25 @@ class Ares_Blessing(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.limit == 0:
-            self.gs.server.emit('display_new_notification', {'msg': "Limit reached!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Limit reached!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         if self.cooldown:
-            self.gs.server.emit('display_new_notification', {'msg': "Still in cooldown!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Still in cooldown!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         
         self.activated = True
@@ -657,7 +745,11 @@ class Zealous_Expansion(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         
         self.gs.players[self.player].stars -= 2
@@ -706,10 +798,18 @@ class Elitocracy(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.gs.players[self.player].stars < 3:
-            self.gs.server.emit('display_new_notification', {'msg': "Not enough stars to upgrade!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Not enough stars to upgrade!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         self.gs.players[self.player].stars -= 3
         self.gs.players[self.player].min_roll += 1
@@ -756,10 +856,18 @@ class Necromancer(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.cooldown:
-            self.gs.server.emit('display_new_notification', {'msg': "Still in cooldown!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Still in cooldown!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         
         self.activated = True
@@ -807,7 +915,11 @@ class Divine_Punishment(Skill):
     
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.player == self.gs.pids[self.gs.GES.current_player]:
             self.gs.GES.handle_async_event({'name': 'D_P'}, self.player)
@@ -817,11 +929,19 @@ class Divine_Punishment(Skill):
     def handle_orbital_strike(self, choices):
         self.finished_bombardment = True
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Striking operation obstructed by enemy forces!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         # too many targets
         if len(choices) > self.limit:
-            self.gs.server.emit("display_new_notification", {"msg": f"Number of targets exceeding your usage limit!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Number of targets exceeding your usage limit!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         if self.player == self.gs.pids[self.gs.GES.current_player]:
             self.validate_and_apply_changes({"choice": choices})
@@ -838,20 +958,23 @@ class Divine_Punishment(Skill):
         self.offturn_used = 0
         choices = data['choice']
 
-        # Interruption
-        # if not self.active:
-        #     self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
-        #     return
-
         # too many targets
         if len(choices) > self.limit-self.offturn_used:
-            self.gs.server.emit("display_new_notification", {"msg": f"Number of targets exceeding your usage limit!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Number of targets exceeding your usage limit!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
 
         # not striking yourself
         for target in choices:
             if target in self.gs.players[self.player].territories:
-                    self.gs.server.emit("display_new_notification", {"msg": f"Cannot strike your own territories!"}, room=self.player)
+                    self.gs.server.emit('show_notification_left', {
+                            'message': f"Cannot strike your own territories!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                     return
 
         # apply changes
@@ -1035,10 +1158,18 @@ class Air_Superiority(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if self.gs.pids[self.gs.GES.current_player] != self.player or self.gs.GES.current_event.name != 'conquer':
-            self.gs.server.emit("display_new_notification", {"msg": "Not the right timing to attack!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Not the right timing to attack!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'A_S'}, self.player)
 
@@ -1048,15 +1179,27 @@ class Air_Superiority(Skill):
 
         # Interruption
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": f"Striking operation obstructed by enemy forces!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Striking operation obstructed by enemy forces!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
 
         if not self.limit:
-            self.gs.server.emit("display_new_notification", {"msg": f"No more paratrooper attacks for this round!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"No more paratrooper attacks for this round!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         
         if t2 not in self.gs.map.get_reachable_airspace(t1, 3):
-            self.gs.server.emit("display_new_notification", {"msg": f"Invalid attack option!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Invalid attack option!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         
         # if this is a air strike or not
@@ -1103,10 +1246,18 @@ class Collusion(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit('display_new_notification', {'msg': "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         if not self.free_usages:
-            self.gs.server.emit('display_new_notification', {'msg': "Not enough usages to corrupt any territory!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': f"Not enough usages to corrupt any territory!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         self.gs.GES.handle_async_event({'name': 'C_T'}, self.player)
 
@@ -1116,35 +1267,59 @@ class Collusion(Skill):
 
         # Interruption
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": f"Skill usage obstructed by enemy forces!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Skill usage obstructed by enemy forces!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
 
         if not self.free_usages:
-            self.gs.server.emit("display_new_notification", {"msg": f"No usages available!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "No usages available!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         
         for p in self.gs.players:
             if self.gs.players[p].skill:
                 if self.gs.players[p].skill.name == "Collusion":
                     if choice in self.gs.players[p].skill.secret_control_list:
-                        self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+                        self.gs.server.emit('show_notification_left', {
+                            'message': "Invalid collusion target!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                         self.gs.players[self.player].skill.finished_choosing = True
                         return
         
         if choice in self.gs.players[self.player].territories:
-            self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Invalid collusion target!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
             return
         
         if self.gs.map.territories[choice].isMegacity or self.gs.map.territories[choice].isTransportcenter:
-            self.gs.server.emit("display_new_notification", {"msg": f"Invalid collusion target!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Invalid collusion target!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             self.gs.players[self.player].skill.finished_choosing = True
             return
 
         self.finished_choosing = True
         self.secret_control_list.append(choice)
         self.free_usages -= 1
-        self.gs.server.emit('display_new_notification', {'msg': f'Gained secret control over {self.gs.map.territories[choice].name}'}, room=self.player)
+        self.gs.server.emit('show_notification_left', {
+                            'message': f'Gained secret control over {self.gs.map.territories[choice].name}',
+                            'duration': 3000,
+                            "text_color": "#EAB308", "bg_color": "#0C0A09"
+                        }, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)
         self.gs.signal_MTrackers('indus')
@@ -1224,9 +1399,17 @@ class Laplace_Demon(Skill):
             if len(self.known) < (len(self.gs.players)-1):
                 self.gs.GES.handle_async_event({'name':"G_I"}, self.player)
             else:
-                self.gs.server.emit("display_new_notification", {'msg': "No more intel can be gathered"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                            'message': "No more intel can be gathered",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "War art is currently sealed!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "War art is currently sealed!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
 
 class Arsenal_of_the_Underworld(Skill):
     
@@ -1298,7 +1481,11 @@ class Arsenal_of_the_Underworld(Skill):
             data['minefield_limit'] = self.max_minefields
             self.gs.server.emit("arsenal_controls", data, room=self.player)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "Arsenal management has been blocked!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Arsenal management has been blocked!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
 
     def handle_minefield_placements(self, choices):
         ### Safeguard In GES and app.py ###
@@ -1403,7 +1590,11 @@ class Arsenal_of_the_Underworld(Skill):
     def handle_US_strike(self, choices):
         self.finished_launching = True
         if len(choices) > (self.silo_usage - self.silo_used):
-            self.gs.server.emit("display_new_notification", {'msg': "Not enough usages left!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Not enough usages left!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
         if self.player == self.gs.pids[self.gs.GES.current_player]:
             self.apply_missile_damages(choices)
@@ -1470,9 +1661,17 @@ class Loan_Shark(Skill):
                 else:
                     self.gs.GES.add_concurrent_event('M_R', self.player)
             else:
-                self.gs.server.emit("display_new_notification", {'msg': "Ransom list is full!"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                            'message': "Ransom list is full!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "War art is currently sealed!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "War art is currently sealed!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
 
     def get_skill_status(self):
         info = 'Operational | ' if self.active else 'Inactive | '
@@ -1717,10 +1916,18 @@ class Pandora_Box(Skill):
                     self.curr_pull -= 1
                     return
             else:
-                self.gs.server.emit("display_new_notification", {'msg': "No more available pulls for this round!"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                            'message': "No more available pulls for this round!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                 return
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "War Art is disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "War Art is disabled!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
     
     def get_outcome(self):
         # more star, more reserves, stats increase, intel
@@ -1998,7 +2205,11 @@ class Archmage(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         
         self.gs.GES.handle_async_event({'name': 'BFLC'}, self.player)
@@ -2008,7 +2219,11 @@ class Archmage(Skill):
         choices = data['choice']
 
         if len(choices) > self.gs.players[self.player].stars:
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough stars!'}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Not enough stars!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
 
         # too many leylines
@@ -2017,12 +2232,20 @@ class Archmage(Skill):
             if not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
                 flist.append(t)
         if len(flist) < len(choices):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the leyline cross!'}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': "Not enough territories to build the leyline cross!",
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
 
         for choice in choices:
             if self.gs.map.territories[choice].isCapital or self.gs.map.territories[choice].isHall or self.gs.map.territories[choice].isDeadZone or self.gs.map.territories[choice].isLeyline:
-                self.gs.server.emit('display_new_notification', {'msg': 'Cannot settle on capitals, Hall of Governance, Radio Death Zone or existing leyline cross!'}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                            'message': 'Cannot settle on capitals, Hall of Governance, Radio Death Zone or existing leyline cross!',
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                 return
             
         # apply changes
@@ -2115,7 +2338,11 @@ class Pillar_of_Immortality(Skill):
 
     def activate_effect(self):
         if not self.active:
-            self.gs.server.emit("display_new_notification", {"msg": "War art disabled!"}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'War art disabled!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=self.player) 
             return
         
         self.gs.GES.handle_async_event({'name': 'EP'}, self.player)
@@ -2125,13 +2352,21 @@ class Pillar_of_Immortality(Skill):
         choices = data['choice']
 
         if len(choices) > (len(self.gs.players[self.player].territories)-len(self.pillars)):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build that many pillars!'}, room=self.player)
+            self.gs.server.emit('show_notification_left', {
+                            'message': 'Not enough territories to build that many pillars!',
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
             return
             
         # apply changes
         for choice in choices:
             if choice in self.pillars:
-                self.gs.server.emit("display_new_notification", {"msg": "Existing Pillar among chosen territories!"}, room=self.player)
+                self.gs.server.emit('show_notification_left', {
+                            'message': 'Existing Pillar among chosen territories!',
+                            'duration': 3000,
+                            "text_color": "#FECACA", "bg_color": "#991B1B"
+                        }, room=self.player)
                 return
         
         for choice in choices:

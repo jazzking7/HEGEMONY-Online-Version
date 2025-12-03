@@ -221,7 +221,11 @@ class General_Event_Scheduler:
         try:
             fn_name, needs_data = EVENT_HANDLERS[n]
         except KeyError:
-            self.gs.server.emit('display_new_notification', {'msg': f'Unknown async event: {n}'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': f'Unknown async event: {n}',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
 
         handler = getattr(self, fn_name)
@@ -265,7 +269,11 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isBureau and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isTransportcenter:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the bureaus!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories to build the bureaus!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Mobilization Bureaux, {data['amt']} under construction"}, room=pid)
@@ -287,7 +295,11 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the leyline cross!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories to build the leyline cross!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Leyline Cross, {data['amt']} under construction"}, room=pid)
@@ -309,7 +321,11 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isTransportcenter and not self.gs.map.territories[t].isDeadZone:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories to build the nexus!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories to build the nexus!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Building Logistic Nexus, {data['amt']} under construction"}, room=pid)
@@ -332,7 +348,11 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can set hall of governance!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories that can set hall of governance!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Intalling Governance Halls, {data['amt']} under construction"}, room=pid)
@@ -354,7 +374,11 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isFort and not self.gs.map.territories[t].isDeadZone:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough territories that can be fortified!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories that can be fortified!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling new forts, {data['amt']} under construction"}, room=pid)
@@ -391,7 +415,11 @@ class General_Event_Scheduler:
             if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity and not self.gs.map.territories[t].isTransportcenter:
                 clist.append(t)
         if len(clist) < int(data['amt']):
-            self.gs.server.emit('display_new_notification', {'msg': 'Not enough cities that can be upgraded to megacities!'}, room=pid)
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough cities that can be upgraded to megacities!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Raising new megacities, {data['amt']} under construction"}, room=pid)
@@ -602,7 +630,11 @@ class General_Event_Scheduler:
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
             else:
-                self.gs.server.emit("display_new_notification", {'msg': "Cannot set up more than 3 minefields!"}, room=pid)
+                self.gs.server.emit('show_notification_left', {
+                    'message': 'Cannot set up more than 3 minefields!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
     
     def build_silo(self, pid):
         player = self.gs.players[pid]
@@ -626,7 +658,11 @@ class General_Event_Scheduler:
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
             else:
-                self.gs.server.emit("display_new_notification", {'msg': "Cannot build more than 1 silo!"}, room=pid)
+                self.gs.server.emit('show_notification_left', {
+                    'message': 'Cannot build more than 1 silo!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
     # TBH switch from concurr to innerasync
     def launch_from_silo_inner(self, pid):
@@ -657,7 +693,11 @@ class General_Event_Scheduler:
             self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             self.gs.server.emit("clear_view", room=pid)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'Launching operation has been sealed!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
     # concurrent events 
     def launch_from_silo(self, pid):
@@ -694,7 +734,11 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'Launching operation has been sealed!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
     
     def launch_divine_strike(self, pid):
         player = self.gs.players[pid]
@@ -731,7 +775,11 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "Launching operation has been sealed!"}, room=pid)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'Launching operation has been sealed!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
 
     def make_ransom_outturn(self, pid):
         player = self.gs.players[pid]
@@ -766,4 +814,8 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {"async": True, 'msg': "Ransomware cancelled..."}, room=pid)
         else:
-            self.gs.server.emit("display_new_notification", {'msg': "Ransomeware has been sealed!"}, room=pid)
+            self.gs.server.emit('show_notification_left', {
+                    'message': 'Ransomeware has been sealed!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
