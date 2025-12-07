@@ -2397,3 +2397,189 @@ html, body {
         linear-gradient(to left, rgba(255, 69, 0, 0.3) 0%, rgba(220, 20, 60, 0.1) 5%, transparent 10%);
     pointer-events: none;
 }
+
+
+/* In-Game Chatbox */
+.game-chatbox {
+    position: absolute;
+    left: 0;
+    top: 72vh;  /* CHANGED: top instead of bottom */
+    width: 16vw;
+    height: 14vh;
+    
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(2, 6, 23, 0.8));
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    border-left: none;
+    backdrop-filter: blur(8px);
+    
+    display: flex;
+    flex-direction: column;  /* CHANGED back to normal column */
+    
+    transition: height 0.3s ease, top 0.3s ease;  /* CHANGED: top transition */
+    z-index: 15;
+}
+
+.game-chatbox.expanded {
+    height: 39vh;  /* 14vh base + 25vh expansion */
+    top: 47vh;  /* 72vh - 25vh (expands upward) */
+}
+
+/* Chat Display Section */
+.chat-display {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.chat-display::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-display::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.chat-display::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.5);
+    border-radius: 2px;
+}
+
+.chat-message {
+    color: rgb(203, 213, 225);
+    margin-bottom: 0.25rem;
+    word-wrap: break-word;
+}
+
+/* Chat Input Section - Fixed height */
+.chat-input-wrapper {
+    height: 4vh;
+    min-height: 30px;
+    flex-shrink: 0;
+    padding: 0.25rem 0.5rem;
+    border-top: 1px solid rgba(34, 211, 238, 0.3);
+    border-bottom: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.chat-input {
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    border-radius: 3px;
+    padding: 0.25rem 0.5rem;
+    
+    color: rgb(226, 232, 240);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    
+    outline: none;
+    transition: all 0.2s;
+}
+
+.chat-input:focus {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(34, 211, 238, 0.7);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+.chat-input::placeholder {
+    color: rgb(148, 163, 184);
+}
+
+/* Chat Channels Section - Fixed height at bottom */
+.chat-channels {
+    height: 4vh;
+    min-height: 30px;
+    flex-shrink: 0;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.chat-channels::-webkit-scrollbar {
+    height: 3px;
+}
+
+.chat-channels::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.chat-channels::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.5);
+}
+
+.channel-btn {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(71, 85, 105, 0.5);
+    border-radius: 3px;
+    
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    color: rgb(148, 163, 184);
+}
+
+.channel-btn:hover {
+    border-color: rgba(34, 211, 238, 0.7);
+    background: rgba(51, 65, 85, 0.7);
+    transform: scale(1.1);
+}
+
+.channel-btn.active {
+    border-color: rgba(34, 211, 238, 1) !important;  /* Added !important */
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+    background: rgba(6, 78, 95, 0.4) !important;  /* Added !important */
+}
+
+/* Global channel icon color */
+.channel-btn[data-channel="public"] {
+    color: rgb(34, 211, 238);
+    background: rgba(30, 41, 59, 0.6);  /* Reset background for public */
+}
+
+.channel-btn[data-channel="public"].active {
+    color: rgb(103, 232, 249);
+}
+
+/* Corner brackets */
+.game-chatbox::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    border: 1px solid rgba(34, 211, 238, 0.6);
+    border-left: none;
+    border-bottom: none;
+    pointer-events: none;
+}
+
+.game-chatbox::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    border: 1px solid rgba(34, 211, 238, 0.6);
+    border-left: none;
+    border-top: none;
+    pointer-events: none;
+}

@@ -1409,6 +1409,41 @@ def handle_map_loaded_confirmation():
     if pid in gsm.GES.interturn_connections:
         gsm.GES.interturn_connections[pid] = True
 
+# Send message to specific channel
+@socketio.on('send_text')
+def handle_send_text(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+
+    recipient = data['recipient']
+    message = data['message']
+
+    recipient_id = None
+    for player in gsm.players:
+        if gsm.players[player].color == recipient:
+            recipient_id = player
+            break
+    
+    if recipient == 'public':
+        # Broadcast to everyone
+        formatted_msg = f"{gsm.players[pid].name}: {message}"
+        socketio.emit('update_text', {
+            'color': 'public',
+            'message': formatted_msg
+        }, room=gsm.lobby)
+    else:
+        # Send to specific player
+        formatted_msg = f"{gsm.players[pid].name}: {message}"
+        # Send to both sender and recipient
+        socketio.emit('update_text', {
+            'color': recipient,
+            'message': formatted_msg
+        }, room=pid)
+        socketio.emit('update_text', {
+            'color': gsm.players[pid].color,
+            'message': formatted_msg
+        }, room=recipient_id)
+
 if __name__ == '__main__':
     # socketio.run(app, host='127.0.0.1', port=8081, debug=True)
     socketio.run(app, host='0.0.0.0', port=8081, debug=True, allow_unsafe_werkzeug=True)

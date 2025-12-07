@@ -4074,6 +4074,190 @@ socket.on('debt_off', function(){
 
 //========================================================================================================
 
+//======CHAT BOX======
+
+// In-Game Chatbox System
+
+// In-Game Chatbox System
+
+class ChatBox {
+    constructor() {
+        this.chatLogs = {}; // Store messages per channel
+        this.activeChannel = 'public';
+        this.playerColors = [];
+        this.isExpanded = false;
+        this.init();
+    }
+    
+    init() {
+      // Create chatbox HTML
+      const chatbox = document.createElement('div');
+      chatbox.id = 'game-chatbox';
+      chatbox.className = 'game-chatbox';
+      chatbox.innerHTML = `
+          <div class="chat-display" id="chat-display"></div>
+          <div class="chat-input-wrapper">
+              <input type="text" id="chat-input" class="chat-input" placeholder="Press to chat...">
+          </div>
+          <div class="chat-channels" id="chat-channels">
+              <div class="channel-btn active" data-channel="public" title="Global Channel">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+              </div>
+          </div>
+      `;
+      
+      document.body.appendChild(chatbox);
+
+      // ⬇️ Add this block
+      const publicBtn = chatbox.querySelector('.channel-btn[data-channel="public"]');
+      if (publicBtn) {
+          publicBtn.addEventListener('click', () => {
+              this.switchChannel('public');
+          });
+      }
+
+      // Initialize chat logs
+      this.chatLogs['public'] = [];
+      
+      // Event listeners
+      this.setupEventListeners();
+    }
+
+    
+    setupEventListeners() {
+        const input = document.getElementById('chat-input');
+        const chatbox = document.getElementById('game-chatbox');
+        
+        // Focus - expand
+        input.addEventListener('focus', () => {
+            this.expand();
+        });
+        
+        // Blur - collapse
+        input.addEventListener('blur', () => {
+            this.collapse();
+        });
+        
+        // Enter to send message
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const message = input.value.trim();
+                if (message) {
+                    this.sendMessage(message);
+                    input.value = '';
+                }
+            }
+        });
+    }
+    
+    expand() {
+        const chatbox = document.getElementById('game-chatbox');
+        chatbox.classList.add('expanded');
+        this.isExpanded = true;
+    }
+    
+    collapse() {
+        const chatbox = document.getElementById('game-chatbox');
+        chatbox.classList.remove('expanded');
+        this.isExpanded = false;
+    }
+    
+    initializeChannels(colors) {
+        this.playerColors = colors;
+        const channelsDiv = document.getElementById('chat-channels');
+        
+        // Clear existing player channels (keep public)
+        const existingPlayerBtns = channelsDiv.querySelectorAll('.channel-btn:not([data-channel="public"])');
+        existingPlayerBtns.forEach(btn => btn.remove());
+        
+        // Add player channels
+        colors.forEach(color => {
+            this.chatLogs[color] = [];
+            
+            const btn = document.createElement('div');
+            btn.className = 'channel-btn';
+            btn.dataset.channel = color;
+            btn.title = `Private chat: ${color}`;
+            btn.style.backgroundColor = color;
+            btn.style.border = '2px solid rgba(71, 85, 105, 0.5)';
+            
+            btn.addEventListener('click', () => {
+                this.switchChannel(color);
+            });
+            
+            channelsDiv.appendChild(btn);
+        });
+    }
+    
+    switchChannel(channel) {
+        this.activeChannel = channel;
+        
+        // Update active button
+        document.querySelectorAll('.channel-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const targetBtn = document.querySelector(`.channel-btn[data-channel="${channel}"]`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+        
+        // Update display
+        this.updateDisplay();
+    }
+    
+    sendMessage(message) {
+        socket.emit('send_text', {
+            recipient: this.activeChannel,
+            message: message
+        });
+    }
+    
+    receiveMessage(channel, message) {
+        // Initialize channel if doesn't exist
+        if (!this.chatLogs[channel]) {
+            this.chatLogs[channel] = [];
+        }
+        
+        // Add message to chat log
+        this.chatLogs[channel].push(message);
+        
+        // Update display if this is the active channel
+        if (this.activeChannel === channel) {
+            this.updateDisplay();
+        }
+    }
+    
+    updateDisplay() {
+        const display = document.getElementById('chat-display');
+        const messages = this.chatLogs[this.activeChannel] || [];
+        
+        display.innerHTML = messages.map(msg => {
+            return `<div class="chat-message">${msg}</div>`;
+        }).join('');
+        
+        // Auto-scroll to bottom
+        display.scrollTop = display.scrollHeight;
+    }
+}
+
+// Initialize chatbox
+const gameChat = new ChatBox();
+
+// Socket.io handlers
+socket.on('initiate_chatboxes', function(data) {
+    gameChat.initializeChannels(data.colors);
+});
+
+socket.on('update_text', function(data) {
+    const channel = data.color || 'public';
+    gameChat.receiveMessage(channel, data.message);
+});
+
 //============================================= Mouse events =============================================
 function mouseWheel(event) {
     // Check if the mouse is in the game map layer
@@ -4197,9 +4381,9 @@ function mouseClicked() {
 
   // TO BE UPDATED
 function keyPressed(){
-  if (key === 'c'){
-    displayScaleFactor = 1.0;
-  }
+  // if (key === 'c'){
+  //   displayScaleFactor = 1.0;
+  // }
 
   // shortcut for fast max deployment
   if (key === 'a'){
