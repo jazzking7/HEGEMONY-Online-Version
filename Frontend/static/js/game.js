@@ -4259,6 +4259,30 @@ function keyPressed(){
     }
   }
 
+  if (key === 'g') {
+    const $panel = $('#control_panel');
+
+    if ($panel.length && $panel.is(':visible')) {
+      const confirmBtn = document.getElementById('control_confirm');
+      if (confirmBtn) {
+        console.log("shortcut activated");
+        confirmBtn.click();
+      }
+    }
+  }
+
+  if (key === 'h') {
+    const $panel = $('#control_panel');
+
+    if ($panel.length && $panel.is(':visible')) {
+      const cancelBtn = document.getElementById('control_cancel');
+      if (cancelBtn) {
+        console.log("shortcut activated");
+        cancelBtn.click();
+      }
+    }
+  }
+
 }
 
 
