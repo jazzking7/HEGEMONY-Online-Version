@@ -58,7 +58,7 @@ class setup_event_scheduler:
             mission.set_up_tracker_view()
             gs.server.emit('set_new_announcement', {'async': True, 'msg': f'Your agenda: {mission.name}'}, room=mission.player)
             gs.server.emit('set_agenda_explanation', {"objective": mission.objective, "priority": mission.priority}, room=mission.player)
-        ms.selection_time_out(50, len(gs.players))
+        ms.selection_time_out(20, len(gs.players))
         gs.server.emit('clear_middle_content', room=gs.lobby)
 
     # FCFS
@@ -138,6 +138,10 @@ class setup_event_scheduler:
                 gs.server.emit('clear_view', room=player)
         gs.aval_choices = []
         gs.send_player_list()
+        for player in gs.players:
+            gs.server.emit('initiate_chatboxes', {
+                'colors': [gs.players[recipient].color for recipient in gs.players if recipient != player]
+            }, room=player)
     
     def start_capital_settlement(self, gs, ms):
         gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settle your capital!"}, room=gs.lobby)
