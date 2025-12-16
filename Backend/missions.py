@@ -1290,7 +1290,7 @@ class Annihilator(Mission):
 class Spymaster(Mission):
     def __init__(self, player, gs):
         super().__init__("Spymaster", player, gs)
-        self.objective = "Achieve Global Ceasefire before round 5, or kill someone after round 5."
+        self.objective = "Win by voting for Global Ceasefire before Round 5. After Round 5 begins, win by killing any player."
         self.priority = "Special class | Can win with anyone before round 5, solo winner after round 5"
 
     def check_conditions(self,):
@@ -1304,7 +1304,8 @@ class Spymaster(Mission):
             for p in self.gs.death_time:
                 if self.gs.death_time[p][0] == self.player:
                     if self.gs.death_time[p][1] > 4:
-                        return True
+                        self.update_tracker_view({'misProgDesp': 'Solo win achieved!'})
+                        self.signal_mission_success()
         
     def set_up_tracker_view(self, ):
         self.gs.server.emit('initiate_tracker', {
