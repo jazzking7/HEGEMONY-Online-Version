@@ -4112,7 +4112,24 @@ class ChatBox {
       
       document.body.appendChild(chatbox);
 
-      // ⬇️ Add this block
+      // Add minimal CSS for unread dot (move to your CSS file if you prefer)
+      const style = document.createElement('style');
+      style.textContent = `
+        .channel-btn { position: relative; }
+        .channel-btn .unread-dot{
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #ff2d2d;
+          box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9); /* optional ring for visibility */
+          pointer-events: none;
+        }
+      `;
+      document.head.appendChild(style);
+
       const publicBtn = chatbox.querySelector('.channel-btn[data-channel="public"]');
       if (publicBtn) {
           publicBtn.addEventListener('click', () => {
@@ -4127,7 +4144,6 @@ class ChatBox {
       this.setupEventListeners();
     }
 
-    
     setupEventListeners() {
         const input = document.getElementById('chat-input');
         const chatbox = document.getElementById('game-chatbox');
@@ -4164,6 +4180,28 @@ class ChatBox {
         const chatbox = document.getElementById('game-chatbox');
         chatbox.classList.remove('expanded');
         this.isExpanded = false;
+    }
+
+    // ✅ Add: mark unread dot on a channel button
+    markUnread(channel) {
+        const btn = document.querySelector(`.channel-btn[data-channel="${channel}"]`);
+        if (!btn) return;
+
+        // Don't add duplicates
+        if (!btn.querySelector('.unread-dot')) {
+            const dot = document.createElement('span');
+            dot.className = 'unread-dot';
+            btn.appendChild(dot);
+        }
+    }
+
+    // ✅ Add: remove unread dot from a channel button
+    clearUnread(channel) {
+        const btn = document.querySelector(`.channel-btn[data-channel="${channel}"]`);
+        if (!btn) return;
+
+        const dot = btn.querySelector('.unread-dot');
+        if (dot) dot.remove();
     }
     
     initializeChannels(colors) {
@@ -4205,6 +4243,9 @@ class ChatBox {
         if (targetBtn) {
             targetBtn.classList.add('active');
         }
+
+        // ✅ Clear unread indicator when opening the channel
+        this.clearUnread(channel);
         
         // Update display
         this.updateDisplay();
@@ -4226,10 +4267,14 @@ class ChatBox {
         // Add message to chat log
         this.chatLogs[channel].push(message);
         
-        // Update display if this is the active channel
-        if (this.activeChannel === channel) {
-            this.updateDisplay();
+        // ✅ If message arrives for a channel that's not currently open, mark it unread
+        if (this.activeChannel !== channel) {
+            this.markUnread(channel);
+            return; // don't update display if not active
         }
+        
+        // Update display if this is the active channel
+        this.updateDisplay();
     }
     
     updateDisplay() {
