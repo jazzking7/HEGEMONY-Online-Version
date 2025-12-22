@@ -1232,6 +1232,115 @@ def build_free_cities(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     gsm.players[pid].skill.validate_and_apply_changes(data)
 
+@socketio.on('land_survey')
+def land_survey(data):
+    pid = request.sid
+    gsm = lobbies[players[pid]['lobby_id']]['gsm']
+
+    if gsm.in_ice_age:
+        if gsm.players[pid].skill:
+            if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot do land survey during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+                return
+            elif not gsm.players[pid].skill.active:
+                socketio.emit('show_notification_center', {
+                    'message':'Cannot do land survey during ice age!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+                return
+            
+    if gsm.players[pid].hijacked:
+        socketio.emit('show_notification_center', {
+                    'message':'Cannot use your special authority!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+        return
+    
+    if not data['choice']:
+        socketio.emit('show_notification_center', {
+                    'message': f'Invalid Choices!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+        return
+    choices = data['choice']
+    for c in choices:
+        if c not in gsm.players[pid].territories:
+            socketio.emit('show_notification_center', {
+                    'message': f'Cannot do land survey on territories outside your control!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+            return
+
+    # CM
+    no_reward = True
+    for trty in choices:
+        curr_res = gsm.map.territories[trty].hidden_resources
+        if curr_res:
+            no_reward = False
+            if curr_res == 1:
+                gsm.players[pid].stars += 2
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+ 2☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=pid)
+            elif curr_res == 2:
+                gsm.players[pid].stars += 4
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+ 4☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=pid)
+            elif curr_res == 3:
+                gsm.players[pid].stars += 8
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+ 8☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=pid)
+            elif curr_res == 4:
+                gsm.players[pid].reserves += 10
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+{10} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=pid)
+            elif curr_res == 5:
+                gsm.players[pid].reserves += 20
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+{20} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=pid)
+            elif curr_res == 6:
+                gsm.players[pid].reserves += 30
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+{30} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=pid)
+            gsm.map.territories[trty].hidden_resources = False
+            gsm.update_private_status(pid)
+
+    if no_reward:
+        socketio.emit('show_notification_center', {
+                    'message': f'No resources detected from land survey!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid)
+
+    gsm.players[pid].s_city_amt = 0
+    gsm.players[pid].stars -= len(choices)*gsm.starPrice(1, pid)
+
+    gsm.update_private_status(pid)
 
 @socketio.on('settle_pillars')
 def settle_pillars(data):

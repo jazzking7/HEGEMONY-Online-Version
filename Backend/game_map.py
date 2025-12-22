@@ -28,6 +28,8 @@ class Territory:
         self.owner = None
         self.mem_stats = []
 
+        self.hidden_resources = False
+
 
 class Map:
 

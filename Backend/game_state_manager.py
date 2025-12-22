@@ -146,6 +146,9 @@ class Game_State_Manager:
         # Annihilator
         self.Annihilator = None
 
+        # Land survey
+        self.init_land_exploration()
+
         self.colorSets = {
             1 : ["#00BBC9"],
             2 : ["#B399D4","#F9E076"],
@@ -253,6 +256,31 @@ class Game_State_Manager:
                 self.turtle = True
                 return
             
+    def init_land_exploration(self,):
+        total = len(self.map.tnames) // 5
+        all_indexes = list(range(len(self.map.tnames)))
+
+        explorables = random.sample(all_indexes, k=total)
+
+        # Decide counts
+        grand_n = len(explorables) // 6
+        mid_n   = (len(explorables) // 6) * 2
+        small_n = len(explorables) - grand_n - mid_n
+
+        # Make a randomized, non-overlapping assignment
+        random.shuffle(explorables)
+        grand_prizes = explorables[:grand_n]
+        mid_prizes   = explorables[grand_n:grand_n + mid_n]
+        small_prizes = explorables[grand_n + mid_n:grand_n + mid_n + small_n]
+
+        for i in grand_prizes:
+            self.map.territories[i].hidden_resources = random.choice([3, 6])
+
+        for j in mid_prizes:
+            self.map.territories[j].hidden_resources = random.choice([2, 4])
+
+        for k in small_prizes:
+            self.map.territories[k].hidden_resources = random.choice([1, 3])
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):

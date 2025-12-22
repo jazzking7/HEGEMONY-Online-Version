@@ -20,6 +20,7 @@ EVENT_HANDLERS = {
     'M_B': ('mobilization_bureau', True),
     'BFLC': ('build_free_leyline_crosses', False),
     'EP' : ('establish_pillars', False),
+    'L_S': ('land_survey', True)
 }
 
 class General_Event_Scheduler:
@@ -279,6 +280,29 @@ class General_Event_Scheduler:
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Mobilization Bureaux, {data['amt']} under construction"}, room=pid)
         self.gs.server.emit('set_bureau', {'amount': data['amt'], 'flist': flist}, room=pid)
         self.gs.server.emit('change_click_event', {'event': "set_bureau"}, room=pid)
+        print(f"{self.gs.players[pid].name}'s async action started.")
+        self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
+        done = False
+        while not done and self.innerInterrupt and not self.terminated and self.gs.players[pid].connected:
+            done = self.gs.players[pid].s_city_amt == 0
+            self.gs.server.sleep(0.05)
+        print(f"{self.gs.players[pid].name}'s async action exited loop.")
+        self.gs.server.emit("change_click_event", {'event': None}, room=pid)
+        self.gs.server.emit("clear_view", room=pid)
+
+    def land_survey(self, data, pid):
+        flist = self.gs.players[pid].territories
+        if len(flist) < int(data['amt']):
+            self.gs.server.emit('show_notification_center', {
+                    'message': 'Not enough territories to explore!',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=pid) 
+            return
+        self.gs.server.emit('async_terminate_button_setup', room=pid)
+        self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Exploring for underground resources, select up to {data['amt']} territories"}, room=pid)
+        self.gs.server.emit('land_survey', {'amount': data['amt'], 'flist': flist}, room=pid)
+        self.gs.server.emit('change_click_event', {'event': "land_survey"}, room=pid)
         print(f"{self.gs.players[pid].name}'s async action started.")
         self.gs.players[pid].s_city_amt = int(data['amt']) # Borrowed from city building
         done = False

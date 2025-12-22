@@ -446,13 +446,15 @@ class turn_loop_scheduler:
         while not ms.interrupt:
 
             if ms.round == 0:
-                gs.players[curr_player].stars += 0 if (ms.current_player <= 2) else math.floor(ms.current_player / 2)
+                first_amt = 0 if (ms.current_player <= 2) else math.floor(ms.current_player / 2)
+                gs.players[curr_player].stars += first_amt
                 gs.update_private_status(curr_player)
-                gs.server.emit('show_notification_right', {
-                                'message': f'+ {math.floor(ms.current_player / 2)}☆',
-                                'duration': 3000,
-                                "text_color": "#B45309", "bg_color": "#FDE68A"
-                            }, room=curr_player)
+                if first_amt:
+                    gs.server.emit('show_notification_right', {
+                                    'message': f'+ {math.floor(ms.current_player / 2)}☆',
+                                    'duration': 3000,
+                                    "text_color": "#B45309", "bg_color": "#FDE68A"
+                                }, room=curr_player)
 
             # checking if player is alive | permitting entry
             if gs.players[curr_player].alive:

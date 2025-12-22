@@ -239,6 +239,11 @@ Higher Levels unlock a chance to gain 4☆ after conquests.`
         description: `Increase troop generation.<br>
                       Special Effect:<br>
                       Gain Reserves equal to 15% of your total troop count each turn.`
+    },
+
+    'btn-survey': {
+        title: 'Land Survey',
+        description: `Explore your territories to unlock potential treasures.`
     }
 };
 
@@ -959,6 +964,8 @@ socket.on('change_click_event', function(data){
     currEvent = set_underground_silo;
   } else if (data.event == 'underground_silo_launch'){
     currEvent = underground_silo_launch;
+  } else if (data.event == 'land_survery'){
+    currEvent = land_survey;
   }
   else {
     currEvent = null;
@@ -2214,6 +2221,13 @@ socket.on('set_bureau', function(data){
   clickables = data.flist;
 })
 
+socket.on('land_survey', function(data){
+  city_amt = data.amount;
+  clickables = [];
+  toHighLight = [];
+  clickables = data.flist;
+})
+
 // Set and display the city amount for megacity settlement event
 socket.on('raise_megacities', function(data){
   city_amt = data.amount;
@@ -2454,6 +2468,30 @@ function set_bureau(tid){
         $('#control_confirm').off('click').on('click', function(){
           $('#control_panel').hide();
           socket.emit('settle_bureau', {'choice': toHighLight});
+          toHighLight = [];
+        });
+        $('#control_cancel').off('click').on('click', function(){playRefuse();
+          $('#control_panel').hide();
+          toHighLight = [];
+        });
+    }
+  }
+}
+
+function land_survey(tid){
+  if(clickables.includes(tid) && city_amt >= 1){
+    if (toHighLight.length == city_amt){
+      toHighLight.splice(0, 1);
+    }
+    if (!toHighLight.includes(tid)){
+      toHighLight.push(tid);
+    }
+    if (toHighLight.length == city_amt){
+        $('#control_panel').hide();
+        $('#control_panel').show();
+        $('#control_confirm').off('click').on('click', function(){
+          $('#control_panel').hide();
+          socket.emit('land_survey', {'choice': toHighLight});
           toHighLight = [];
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
@@ -2865,6 +2903,20 @@ btn_sep_auth.onclick = function () {
       </button>
     </div>
 
+    <div class="text-center">
+      <button id="btn-survey" class="btn d-flex flex-column align-items-center justify-content-center action-button"
+              style="background-color: #64748b; color:#FFFFFF;"
+              onmouseover="this.style.backgroundColor='#334155'; this.querySelector('.hover-label').style.backgroundColor='#334155'; this.querySelector('.hover-label').style.color='#000000';"
+              onmouseout="this.style.backgroundColor='#64748b'; this.querySelector('.hover-label').style.backgroundColor='#64748b'; this.querySelector('.hover-label').style.color='#000000';">
+        <div class="d-flex align-items-center justify-content-center">
+          <img src="/static/Assets/Insig/investigate.png" alt="survey">
+          <span class="price-tag" style="color: #FFFFFF;">${starPrice(1)}☆</span>
+        </div>
+        <span class="small" style="font-size: 0.7rem;">LAND SURVEY</span>
+        <div class="hover-label">Underground Survey</div>
+      </button>
+    </div>
+
   </div>
 </div>
 
@@ -3094,6 +3146,31 @@ btn_sep_auth.onclick = function () {
         $("#convertBtn").on('click', function(){
           hide_async_btns();
           socket.emit('send_async_event', {'name': "M_B", 'amt': $("#amtSlider").val()});
+          $('#middle_display').hide()
+          $('#middle_title, #middle_content').empty();
+        });
+    });
+
+
+    // Land Survey
+    $("#btn-survey").off('click').on('click', function(){
+      let curr_price = starPrice(1);
+      if (sep_auth < curr_price){
+        popup(`MINIMUM ${curr_price} STAR(S) TO SURVEY A TERRITORY!`, 2000);
+        $("#middle_display").hide()
+        $("#middle_title, #middle_content").empty();
+        return;
+      }
+      $("#middle_content").html(
+        `<p>Select number of territories you want to survey:</p>
+          <input type="range" id="amtSlider" min="1" max=${Math.floor(sep_auth/curr_price)} step="1" value="1">
+          <p id="samt">1</p>
+          <button id="convertBtn" class="btn btn-success btn-block">Start Survey</button>
+        `);
+        $("#amtSlider").on('input', function(){$("#samt").text($("#amtSlider").val());});
+        $("#convertBtn").on('click', function(){
+          hide_async_btns();
+          socket.emit('send_async_event', {'name': "L_S", 'amt': $("#amtSlider").val()});
           $('#middle_display').hide()
           $('#middle_title, #middle_content').empty();
         });

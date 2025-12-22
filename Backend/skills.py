@@ -1435,29 +1435,49 @@ class Laplace_Demon(Skill):
                 count += 1
         self.names = names
 
+        bad_count = 0
+        for miss in self.gs.Mset:
+            if miss.name in ['Bounty_Hunter', 'Decapitator', 'Warmonger', 'Pacifist', 'Starchaser', 
+                             'Punisher', 'Loyalist', 'Protectionist', 'Spymaster', 'Assassin', 'Annihilator', 'Duelist'
+                     'Gambler', 'Survivalist']:
+                bad_count += 1
+        good_count = len(self.gs.Mset)-bad_count
+        self.miss_count_report = ""
+        if good_count > 1 or bad_count > 1:
+            if good_count > 1:
+                self.miss_count_report = "There are more than 1 C-class Agenda holders."
+            if bad_count > 1:
+                self.miss_count_report = "There are more than 1 Non-C class Agenda holders."
+        if bad_count:
+            self.miss_count_report = "At least 1 Non-C class Agenda holder in game."
+        else:
+            self.miss_count_report = "At least 1 C-class Agenda holder in game."
+
     def update_current_status(self):
         # modify this
         limit = self.gs.players[self.player].stars//4 if self.gs.players[self.player].stars >= 4 else 0
-        information = "You own the top information gathering group, click on player to know their hidden stats. Missions that are most likely in game: "
-        for name in self.names:
-            information += name + ' '
-        information += "\n"
-        for p in self.known:
-            for pl in self.gs.players:
-                if self.gs.players[pl].name == p:
-                    for miss in self.gs.Mset:
-                        if miss.player == pl:
-                            information += f"{p} has {miss.name} as their secret agenda.\n"
-                            break
-                    break
+        information = "You own the top information gathering group, click on player to know their hidden stats. \n"
+        information += self.miss_count_report + "\n"
+        # for p in self.known:
+        #     for pl in self.gs.players:
+        #         if self.gs.players[pl].name == p:
+        #             for miss in self.gs.Mset:
+        #                 if miss.player == pl:
+        #                     information += f"{p} has {miss.name} as their secret agenda.\n"
+        #                     break
+        #             break
+        information += "These territories provide rewards if land survey is made on them: \n"
+        for trty in self.gs.map.territories:
+            if trty.hidden_resources:
+                information += trty.name + " "
         html_info = information.replace('\n', '<br>')
         self.gs.server.emit("update_skill_status", {
             'name': "Laplace's Demon",
             'description': html_info,
             'operational': self.active,
-            'limits': limit,
-            'hasLimit': True,
-            'btn_msg': "Gather Advanced Intel"
+            # 'limits': limit,
+            # 'hasLimit': True,
+            # 'btn_msg': "Gather Advanced Intel"
         }, room=self.player)
 
     def get_skill_status(self):
@@ -1520,7 +1540,7 @@ class Arsenal_of_the_Underworld(Skill):
     # at the start of each round, compute the number of usages and range
     def apply_round_effect(self):
         dev_lvls = self.gs.get_player_industrial_level(self.gs.players[self.player]) + self.gs.get_player_infra_level(self.gs.players[self.player])
-        self.silo_usage = 2 + dev_lvls
+        self.silo_usage = 3 + dev_lvls
         self.silo_used = 0
         self.damage = 3 + dev_lvls
         self.range = 5 + dev_lvls//2
