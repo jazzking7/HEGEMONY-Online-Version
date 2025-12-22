@@ -964,7 +964,7 @@ socket.on('change_click_event', function(data){
     currEvent = set_underground_silo;
   } else if (data.event == 'underground_silo_launch'){
     currEvent = underground_silo_launch;
-  } else if (data.event == 'land_survery'){
+  } else if (data.event == 'land_survey'){
     currEvent = land_survey;
   }
   else {
