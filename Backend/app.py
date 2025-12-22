@@ -1293,37 +1293,37 @@ def land_survey(data):
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
                             }, room=pid)
             elif curr_res == 2:
+                gsm.players[pid].stars += 3
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+ 3☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=pid)
+            elif curr_res == 3:
                 gsm.players[pid].stars += 4
                 gsm.server.emit('show_notification_right', {
                                 'message': f'+ 4☆',
                                 'duration': 3000,
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
                             }, room=pid)
-            elif curr_res == 3:
-                gsm.players[pid].stars += 8
-                gsm.server.emit('show_notification_right', {
-                                'message': f'+ 8☆',
-                                'duration': 3000,
-                                "text_color": "#B45309", "bg_color": "#FDE68A"
-                            }, room=pid)
             elif curr_res == 4:
-                gsm.players[pid].reserves += 10
+                gsm.players[pid].reserves += 5
                 gsm.server.emit('show_notification_right', {
-                                'message': f'+{10} Reserves',
+                                'message': f'+{5} Reserves',
                                 'duration': 3000,
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=pid)
             elif curr_res == 5:
-                gsm.players[pid].reserves += 20
+                gsm.players[pid].reserves += 7
                 gsm.server.emit('show_notification_right', {
-                                'message': f'+{20} Reserves',
+                                'message': f'+{7} Reserves',
                                 'duration': 3000,
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=pid)
             elif curr_res == 6:
-                gsm.players[pid].reserves += 30
+                gsm.players[pid].reserves += 10
                 gsm.server.emit('show_notification_right', {
-                                'message': f'+{30} Reserves',
+                                'message': f'+{10} Reserves',
                                 'duration': 3000,
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=pid)
