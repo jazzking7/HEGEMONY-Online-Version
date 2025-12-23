@@ -157,7 +157,7 @@ class turn_loop_scheduler:
                 numBureaux += 1
             if gs.map.territories[t].isHall:
                 atk_player.stars += 1
-                self.gs.server.emit('show_notification_right', {
+                gs.server.emit('show_notification_right', {
                                 'message': f'+ 1☆',
                                 'duration': 3000,
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
