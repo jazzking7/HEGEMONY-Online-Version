@@ -252,7 +252,7 @@ class Dictator(Skill):
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
             'name': self.name,
-            'description': "Gain a minimum of 2★ per turn regardless of successful conquests. When ",
+            'description': "Gain a minimum of 2★ per turn regardless of successful conquests.",
             'operational': self.active,
             'hasLimit': True,
             'limits': self.limit,
@@ -1443,15 +1443,12 @@ class Laplace_Demon(Skill):
                 bad_count += 1
         good_count = len(self.gs.Mset)-bad_count
         self.miss_count_report = ""
-        if good_count > 1 or bad_count > 1:
-            if good_count > 1:
-                self.miss_count_report = "There are more than 1 C-class Agenda holders."
-            if bad_count > 1:
-                self.miss_count_report = "There are more than 1 Non-C class Agenda holders."
-        if bad_count:
-            self.miss_count_report = "At least 1 Non-C class Agenda holder in game."
+        if good_count > bad_count:
+            self.miss_count_report = "There are more C-class Agenda holders than Non-C class."
+        elif bad_count > good_count:
+            self.miss_count_report = "There are more Non-C class Agenda holders than C-class."
         else:
-            self.miss_count_report = "At least 1 C-class Agenda holder in game."
+            self.miss_count_report = "There are equal amount of C-class and Non-C class Agenda holders."
 
     def update_current_status(self):
         # modify this

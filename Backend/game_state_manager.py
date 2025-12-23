@@ -281,10 +281,10 @@ class Game_State_Manager:
             self.map.territories[i].hidden_resources = random.choice([3, 6])
 
         for j in mid_prizes:
-            self.map.territories[j].hidden_resources = random.choice([2, 4])
+            self.map.territories[j].hidden_resources = random.choice([2, 5])
 
         for k in small_prizes:
-            self.map.territories[k].hidden_resources = random.choice([1, 3])
+            self.map.territories[k].hidden_resources = random.choice([1, 4])
 
     # connect player to a disconnected player object
     def takeover_disconnected_player(self, new_pid, old_pid, new_name):
