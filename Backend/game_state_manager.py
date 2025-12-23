@@ -65,6 +65,10 @@ class Player:
 
         self.con_amt = 0    # keep counts of how many territories the player has conquered during a turn
 
+        # keep track of how many exploration made
+        self.land_explored = []
+        self.sunken_cost = 0
+
 class Game_State_Manager:
 
     def __init__(self, mapName, player_list, setup_events, time_settings, server, lobby):

@@ -291,7 +291,7 @@ class General_Event_Scheduler:
         self.gs.server.emit("clear_view", room=pid)
 
     def land_survey(self, data, pid):
-        flist = self.gs.players[pid].territories
+        flist = [i for i in self.gs.players[pid].territories if i not in self.gs.players[pid].land_explored]
         if len(flist) < int(data['amt']):
             self.gs.server.emit('show_notification_center', {
                     'message': 'Not enough territories to explore!',

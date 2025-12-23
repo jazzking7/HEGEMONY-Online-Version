@@ -1282,6 +1282,16 @@ def land_survey(data):
     # CM
     no_reward = True
     for trty in choices:
+        gsm.players[pid].land_explored.append(trty)
+        f = gsm.players[pid].sunken_cost
+        risk_recovery = min(f//2, 2) + min(max(0, (f-4) + (1 if f>=5 else 0)), 6)
+        gsm.players[pid].stars += risk_recovery
+        if risk_recovery:
+            gsm.server.emit('show_notification_right', {
+                            'message': f'+ {risk_recovery}☆',
+                            'duration': 3000,
+                            "text_color": "#B45309", "bg_color": "#FDE68A"
+                        }, room=pid)
         curr_res = gsm.map.territories[trty].hidden_resources
         if curr_res:
             no_reward = False
@@ -1329,6 +1339,9 @@ def land_survey(data):
                             }, room=pid)
             gsm.map.territories[trty].hidden_resources = False
             gsm.update_private_status(pid)
+            gsm.players[pid].sunken_cost = 0
+        else:
+            gsm.players[pid].sunken_cost += 1
 
     if no_reward:
         socketio.emit('show_notification_center', {
@@ -1336,6 +1349,15 @@ def land_survey(data):
                     'duration': 3000,
                     "text_color": "#FECACA", "bg_color": "#991B1B"
                 }, room=pid)
+        for trty in choices:
+            for n in gsm.map.territories[trty].neighbors:
+                if gsm.map.territories[n].hidden_resources:
+                    gsm.server.emit('show_notification_right', {
+                                'message': f'High strategic territory detected near {gsm.map.territories[trty].name}',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=pid)
+                    break
 
     gsm.players[pid].s_city_amt = 0
     gsm.players[pid].stars -= len(choices)*gsm.starPrice(1, pid)
