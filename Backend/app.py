@@ -1283,17 +1283,17 @@ def land_survey(data):
     no_reward = True
     for trty in choices:
         gsm.players[pid].land_explored.append(trty)
-        f = gsm.players[pid].sunken_cost
-        risk_recovery = min(f//2, 2) + min(max(0, (f-4) + (1 if f>=5 else 0)), 6)
-        gsm.players[pid].stars += risk_recovery
-        if risk_recovery:
-            gsm.server.emit('show_notification_right', {
-                            'message': f'+ {risk_recovery}☆',
-                            'duration': 3000,
-                            "text_color": "#B45309", "bg_color": "#FDE68A"
-                        }, room=pid)
         curr_res = gsm.map.territories[trty].hidden_resources
         if curr_res:
+            f = gsm.players[pid].sunken_cost
+            risk_recovery = min(f//2, 2) + min(max(0, (f-4) + (1 if f>=5 else 0)), 6)
+            gsm.players[pid].stars += risk_recovery
+            if risk_recovery:
+                gsm.server.emit('show_notification_right', {
+                                'message': f'+ {risk_recovery}☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=pid)
             no_reward = False
             if curr_res == 1:
                 gsm.players[pid].stars += 2
