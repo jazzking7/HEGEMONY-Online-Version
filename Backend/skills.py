@@ -1185,12 +1185,13 @@ class Air_Superiority(Skill):
 
     def calculate_bonuses(self, x):
         # Constants for the polynomial function
-        a = 0.1
-        b = 0.6
-        c = 0.5
 
-        # Calculate the bonus using the quadratic function and round up
-        bonus = math.ceil(a * x ** 2 + b * x + c)
+        a = 0.05
+        b = 0.75
+        c = -1.0
+
+        bonus = math.ceil(a * x**2 + b * x + c)
+
         if self.Annihilator_as_user:
             bonus = math.ceil(1.5*bonus)
         return bonus
@@ -2619,14 +2620,11 @@ class Babylon(Skill):
                 ownStats[3] = 90
 
     def calculate_bonuses(self, x):
-        # Constants for the polynomial function
-        a = 0.1
-        b = 0.6
-        c = 0.5
+        a = 0.05
+        b = 0.75
+        c = -1.0
 
-        # Calculate the bonus using the quadratic function and round up
-        bonus = math.ceil(a * x ** 2 + b * x + c)
-        return bonus
+        return math.ceil(a * x**2 + b * x + c)
 
     def long_arm_jurisdiction(self,):
         if self.active:
