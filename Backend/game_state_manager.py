@@ -861,14 +861,32 @@ class Game_State_Manager:
         # Permafrost skip ice age debuff
         if p.skill:
             if p.skill.name == "Realm_of_Permafrost" and p.skill.active:
-                if t_score < 9:
-                    return bonus + 3
-                return bonus + t_score//divider
+                normal = 0
+                if t_score < divider * 3:
+                    normal = bonus + 3
+                else:
+                    normal = bonus + t_score//divider
+                if not self.in_ice_age:
+                    return normal
+                perma = 0
+                if t_score < (divider+2) * 2:
+                    perma = math.ceil(bonus*0.6) + 2
+                else:
+                    perma = math.ceil(bonus*0.6) + t_score//(divider+2)
+                hidden_troops = max(0, normal - perma)
+                p.reserves += hidden_troops
+                self.update_private_status(player)
+                self.server.emit('show_notification_right', {
+                                'message': f'+{hidden_troops} Reserves',
+                                'duration': 3000,
+                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                            }, room=player)
+                return perma
         if self.in_ice_age:
-            if t_score < 15:
+            if t_score < (divider+2) * 2:
                 return math.ceil(bonus*0.6) + 2
             return math.ceil(bonus*0.6) + t_score//(divider+2)
-        if t_score < 9:
+        if t_score < divider * 3:
             return bonus + 3
         return bonus + t_score//divider
 
