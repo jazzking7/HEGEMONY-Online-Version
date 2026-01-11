@@ -511,10 +511,10 @@ class turn_loop_scheduler:
                 if gs.set_ice_age:
                     gs.set_ice_age = False
                     if gs.in_ice_age:
-                        gs.in_ice_age += 2
+                        gs.in_ice_age += 1
                     else:
                         turnIceOn = True
-                        gs.in_ice_age += 3
+                        gs.in_ice_age += 2
                 # update ice age
                 if gs.in_ice_age:
                     gs.in_ice_age -= 1

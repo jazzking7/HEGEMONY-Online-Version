@@ -41,6 +41,8 @@ class Realm_of_Permafrost(Skill):
         self.hasRoundEffect = True
         self.iceAgeCd = 0
         self.Annihilator_as_user = player == gs.Annihilator
+        self.AnnSetter = 0
+        self.notNow = False
 
     def internalStatsMod(self, battle_stats):
 
@@ -58,7 +60,7 @@ class Realm_of_Permafrost(Skill):
         battle_stats[3] = 0
         battle_stats[4] = 1
 
-        if self.Annihilator_as_user and self.gs.in_ice_age:
+        if self.Annihilator_as_user and self.gs.in_ice_age and self.AnnSetter:
             battle_stats[0] = 5
             battle_stats[1] = 2
             battle_stats[2] = 1
@@ -96,8 +98,10 @@ class Realm_of_Permafrost(Skill):
             return
 
         self.gs.set_ice_age = True
-        self.iceAgeCd = 4 if not self.Annihilator_as_user else 3
-        self.gs.players[self.player].stars -= 2
+        self.iceAgeCd = 3
+        self.gs.players[self.player].stars -= 2 if not self.Annihilator_as_user else 0
+        if self.Annihilator_as_user:
+            self.notNow = True
         self.gs.server.emit('show_notification_left', {
                     'message': "Ice Age Activated!",
                     'duration': 3000,
@@ -106,6 +110,11 @@ class Realm_of_Permafrost(Skill):
         self.gs.update_private_status(self.player)
     
     def apply_round_effect(self):
+        if self.AnnSetter:
+            self.AnnSetter -= 1
+        if self.notNow:
+            self.AnnSetter += 1
+            self.notNow = False
         if self.iceAgeCd:
             self.iceAgeCd -= 1
 
