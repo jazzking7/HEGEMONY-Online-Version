@@ -165,6 +165,8 @@ class Game_State_Manager:
 
         self.inGameLoop = False
 
+        self.forbidden_attack = {}
+
         self.doctrineOn = True
         self.doctrines = {
             "Peace Above All" : "No conquests -> Max chance of getting more stars. The more conquests someone makes the less stars they will receive.",
@@ -1175,7 +1177,7 @@ class Game_State_Manager:
                 a_pid = player
             if t2 in self.players[player].territories:
                 def_p = self.players[player]
-                d_pid = player       
+                d_pid = player
 
         def_p.aliveBefore = def_p.alive
 
@@ -1195,6 +1197,14 @@ class Game_State_Manager:
         # Compute participating forces
         atk_amt = int(data['amount'])
         def_amt = trty_def.troops
+
+        # Loan Shark EW
+        entry = self.forbidden_attack.get(a_pid)
+        if entry and entry[0] == d_pid and entry[1] > 0:
+            atk_amt = atk_amt // 2
+            entry[1] -= 1
+            if entry[1] <= 0:
+                self.forbidden_attack = {}
 
         # Compute player battle stats
         atk_stats = atk_p.temp_stats[:]

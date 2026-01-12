@@ -1766,7 +1766,7 @@ class Loan_Shark(Skill):
     def apply_round_effect(self):
         not_safe = []
         for player in self.ransom_history:
-            if self.gs.GES.round - self.ransom_history[player] == 2:
+            if (self.gs.GES.round - self.ransom_history[player]) > 1:
                 if player not in not_safe:
                     not_safe.append(player)
         for p in not_safe:
@@ -1778,7 +1778,7 @@ class Loan_Shark(Skill):
             if curr_diff > 1:
                 self.loan_list[debtor][0] += 5
             # deadline is reached
-            if curr_diff == 5:
+            if curr_diff == 3:
                 self.handle_payment(debtor, "sepauth")
                 self.handle_payment(debtor, "troops")
 
@@ -1867,6 +1867,7 @@ class Loan_Shark(Skill):
                 if debtor.skill:
                     debtor.skill.active = True
                 self.gs.server.emit('debt_off', room=player)
+                self.gs.forbidden_attack[player] = [self.player, 5]
             else:
                 self.loan_list[player][0] -= debtor.stars*5
                 loaner.stars += debtor.stars
@@ -1901,6 +1902,7 @@ class Loan_Shark(Skill):
                 self.gs.update_private_status(self.player)
                 self.gs.update_private_status(player)
                 self.gs.server.emit('debt_off', room=player)
+                self.gs.forbidden_attack[player] = [self.player, 5]
                 return
             else:
                 debt_amt -= debtor.reserves
@@ -1947,6 +1949,7 @@ class Loan_Shark(Skill):
                 self.gs.get_SUP()
                 self.gs.update_global_status()
                 self.gs.signal_MTrackers('popu')
+                self.gs.forbidden_attack[player] = [self.player, 5]
             else:
                 debt_off = debtor.total_troops
                 while debtor.total_troops > 0:

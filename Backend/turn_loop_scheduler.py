@@ -406,6 +406,8 @@ class turn_loop_scheduler:
                 if p.skill.hasTurnEffect:
                     p.skill.apply_turn_effect()
 
+            gs.forbidden_attack = {}
+
             # Update private overview
             gs.update_private_status(player)
             print(f'{gs.players[player].name} special authority amount: {p.stars}')
