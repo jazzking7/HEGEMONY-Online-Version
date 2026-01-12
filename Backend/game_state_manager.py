@@ -1171,6 +1171,15 @@ class Game_State_Manager:
         trty_atk = self.map.territories[t1]
         trty_def = self.map.territories[t2]
 
+        # Cancel Attack if attacker territory is locked
+        if trty_atk.refuseCommand:
+            self.server.emit('show_notification_center', {
+                    'message': f'Unable to command troops in {trty_atk.name}',
+                    'duration': 3000,
+                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                }, room=a_pid) 
+            return
+
         # Compute participating forces
         atk_amt = int(data['amount'])
         def_amt = trty_def.troops

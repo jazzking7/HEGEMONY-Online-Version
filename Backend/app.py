@@ -1006,8 +1006,36 @@ def handle_rearrange_data(data):
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     choices = data['choice']
     amount = int(data['amount'])
+    if choices[0] not in gsm.players[pid].territories or choices[1] not in gsm.players[pid].territories:
+        socketio.emit('show_notification_center', {
+                'message': f'Invalid Transfer of troops',
+                'duration': 3000,
+                "text_color": "#FECACA", "bg_color": "#991B1B"
+            }, room=pid) 
+        return
     t1 = gsm.map.territories[choices[0]]
     t2 = gsm.map.territories[choices[1]]
+    if t1.refuseCommand:
+        socketio.emit('show_notification_center', {
+                'message': f'Unable to move troops in {t1.name}',
+                'duration': 3000,
+                "text_color": "#FECACA", "bg_color": "#991B1B"
+            }, room=pid) 
+        return
+    if t2.refuseCommand:
+        socketio.emit('show_notification_center', {
+                'message': f'Unable to move troops in {t2.name}',
+                'duration': 3000,
+                "text_color": "#FECACA", "bg_color": "#991B1B"
+            }, room=pid) 
+        return
+    if amount >= t1.troops:
+        socketio.emit('show_notification_center', {
+                'message': f'Invalid Transfer of troops',
+                'duration': 3000,
+                "text_color": "#FECACA", "bg_color": "#991B1B"
+            }, room=pid) 
+        return
     t1.troops -= amount
     t2.troops += amount
     # CM
