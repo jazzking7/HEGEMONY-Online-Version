@@ -1193,6 +1193,9 @@ class Game_State_Manager:
 
         # Fortification
         if trty_def.isFort:
+            if def_p.skill:
+                if def_p.skill.active and def_p.skill.name == "Iron_Wall":
+                    atk_amt = min(atk_amt, 10)
             fortCounts = self.count_connected_forts(def_p, t2)
             if fortCounts:
                 def_stats[3] += 20 + (fortCounts * 5)
