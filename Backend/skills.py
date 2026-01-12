@@ -1580,6 +1580,19 @@ class Arsenal_of_the_Underworld(Skill):
             info += ' | Underground Silo located in ' + self.gs.map.territories[self.underground_silo].name
         return info
     
+    def in_turn_update(self):
+        dev_lvls = self.gs.get_player_industrial_level(self.gs.players[self.player]) + self.gs.get_player_infra_level(self.gs.players[self.player])
+        silo_usage = 3 + dev_lvls
+        self.silo_usage = max(self.silo_usage, silo_usage)
+        damage = 3 + dev_lvls
+        self.damage = max(self.damage, damage)
+        atk_range = 5 + dev_lvls//2
+        self.range = max(self.range, atk_range)
+        mines = 3 + dev_lvls
+        self.max_minefields = max(self.max_minefields, mines)
+        shockwave = 1 + dev_lvls//2
+        self.shockwaveDamage = max(self.shockwaveDamage, shockwave)
+    
     def activate_effect(self):
         if self.active:
             data = {}

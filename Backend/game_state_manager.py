@@ -798,6 +798,9 @@ class Game_State_Manager:
             self.get_SUP()
             self.update_global_status()
             self.signal_MTrackers('popu')
+            if self.players[player].skill:
+                if self.players[player].skill.name != 'Arsenal of the Underworld' and self.players[player].skill.active:
+                    self.players[player].skill.in_turn_update()
         else:
             self.server.emit('show_notification_center', {
                     'message': f'Cannot use your special authority!',

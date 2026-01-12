@@ -597,6 +597,10 @@ def settle_new_cities(data):
     gsm.players[pid].stars -= len(choices)*gsm.starPrice(3, pid)
     gsm.update_private_status(pid)
 
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name != 'Arsenal of the Underworld' and gsm.players[pid].skill.active:
+            gsm.players[pid].skill.in_turn_update()
+
 @socketio.on('settle_bureau')
 def settle_bureau(data):
     choices = data.get('choice')
@@ -908,6 +912,10 @@ def settle_new_megacities(data):
     gsm.players[pid].m_city_amt = 0
     gsm.players[pid].stars -= len(choices)*gsm.starPrice(5, pid)
     gsm.update_private_status(pid)
+
+    if gsm.players[pid].skill:
+        if gsm.players[pid].skill.name != 'Arsenal of the Underworld' and gsm.players[pid].skill.active:
+            gsm.players[pid].skill.in_turn_update()
 
 @socketio.on('send_troop_update')
 def update_troop_info(data):
