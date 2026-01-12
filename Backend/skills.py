@@ -1318,6 +1318,11 @@ class Collusion(Skill):
 
     def apply_round_effect(self):
         self.free_usages += 1
+        for tid in self.secret_control_list:
+            self.gs.map.territories[tid].refuseCommand = False
+        for tid in self.secret_control_list:
+            if random.randint(1, 100) < 45:
+                self.gs.map.territories[tid].refuseCommand = True
 
     def update_current_status(self):
 
