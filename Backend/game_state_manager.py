@@ -1133,6 +1133,15 @@ class Game_State_Manager:
         if def_p.skill:
             if def_p.skill.active and def_p.skill.reactMod:
                 def_p.skill.reactStatsMod(def_stats, atk_stats, False)
+        
+        if self.SUP:
+            if atk_p.skill:
+                if atk_p.skill.name == "Robinhood" and atk_p.skill.active:
+                    atk_p.skill.powerMatching(def_p.name == self.players[self.SUP].name, def_stats, atk_stats)
+
+            if def_p.skill:
+                if def_p.skill.name == "Robinhood" and def_p.skill.active:
+                    def_p.skill.powerMatching(atk_p.name == self.players[self.SUP].name, atk_stats, def_stats)
 
         if atk_p.skill:
             if "Realm_of_Permafrost" == atk_p.skill.name and atk_p.skill.active:

@@ -680,6 +680,19 @@ class Robinhood(Skill):
             'operational': self.active
         }, room=self.player)
 
+    def powerMatching(self, SupAsEnemy, enemy_stats, my_stats):
+        if SupAsEnemy:
+            disp = (enemy_stats[0] - my_stats[0] +
+            enemy_stats[1] - my_stats[1] +
+            (enemy_stats[2] - my_stats[2])*1.2 +
+            enemy_stats[4] - my_stats[4])*1.25
+            if disp > 0:
+                my_stats[0] = enemy_stats[0]
+                my_stats[1] = enemy_stats[1]
+                my_stats[2] = enemy_stats[2]
+                my_stats[4] = enemy_stats[4]
+        return
+
 class Ares_Blessing(Skill):
 
     def __init__(self, player, gs):
