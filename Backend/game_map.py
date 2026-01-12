@@ -30,6 +30,8 @@ class Territory:
 
         self.hidden_resources = False
 
+        self.refuseCommand = False
+
 
 class Map:
 
