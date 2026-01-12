@@ -349,6 +349,7 @@ class turn_loop_scheduler:
                             }, room=player)
 
                 moreBlessings = False
+                leylineStarProb = 40
                 if p.skill:
                     if p.skill.active and p.skill.name == "Archmage":
                         moreBlessings = True
@@ -357,10 +358,11 @@ class turn_loop_scheduler:
                     leyprob = min(leyprob, 66)
                 else:
                     leyprob = min(leyprob, 84)
+                    leylineStarProb = 47
 
                 if random.randint(1, 100) <= leyprob:
                     print("Leyline Bonus Received.")
-                    if random.randint(1, 100) > 40:
+                    if random.randint(1, 100) > leylineStarProb:
                         ramt = p.numLeylines * 5 if moreBlessings else p.numLeylines * 4
                         p.reserves += ramt
                         gs.server.emit('show_notification_right', {
