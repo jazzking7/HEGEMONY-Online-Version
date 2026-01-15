@@ -1,5 +1,62 @@
 // rules_ui.js
 const contentData = {
+  quickstart: `
+      <section id="quick-start" class="space-y-6">
+        <h2 class="text-2xl font-bold">Quick Start</h2>
+
+        <div>
+          <h3 class="text-lg font-semibold">🎯 How You Win</h3>
+          <ul class="list-disc ml-6">
+            <li>You win by completing your <strong>Secret Agenda</strong></li>
+            <li>Agendas are hidden and different for each player</li>
+            <li>Don't trust easily</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold">🗡 War Arts</h3>
+          <ul class="list-disc ml-6">
+            <li>Each player has one War Art</li>
+            <li>War Arts break rules and define playstyle</li>
+            <li>You don’t need to master them to play</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold">⭐ Special Authority (★)</h3>
+          <ul class="list-disc ml-6">
+            <li>The only currency in the game</li>
+            <li>Used to build, upgrade, mobilize, and activate War Arts</li>
+            <li>Mainly earned by winning battles</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold">🔁 Your Turn (Always this order)</h3>
+          <ol class="list-decimal ml-6">
+            <li><strong>Reinforcement</strong> — get & deploy troops</li>
+            <li><strong>Preparation</strong> — spend ★, activate abilities</li>
+            <li><strong>Conquest</strong> — attack neighbors</li>
+            <li><strong>Rearrangement</strong> — move troops</li>
+          </ol>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold">⚔ Battles (What Matters)</h3>
+          <ul class="list-disc ml-6">
+            <li>Dice-based (Risk-like)</li>
+            <li>Attacker and defender roll dice</li>
+            <li>Higher rolls win, loser loses troops</li>
+            <li>Defenders win ties</li>
+            <li>Send more troops = more likely to win</li>
+          </ul>
+        </div>
+
+        <p class="italic text-gray-300">
+          If you understand this page, you are ready to play!
+        </p>
+      </section>
+    `,
     rules: `
       <section id="objective"><h2 class="text-xl mt-1 font-bold">Game Objective</h2><p>Your main goal is to accomplish your Secret Agenda. You can choose 1 War Art to help you win. <br> 
       Your Secret Agenda and what War Art you've chosen are hidden from others.<br> 
@@ -1363,7 +1420,7 @@ const contentData = {
     });
   
     // Load default
-    $('.main-tab[data-tab="rules"]').trigger('click');
+    $('.main-tab[data-tab="quickstart"]').trigger('click');
   });
   
   
