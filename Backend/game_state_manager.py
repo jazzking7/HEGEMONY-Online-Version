@@ -1186,7 +1186,7 @@ class Game_State_Manager:
         trty_def = self.map.territories[t2]
 
         # Cancel Attack if attacker territory is locked
-        if trty_atk.refuseCommand:
+        if trty_atk.refuseCommand and trty_atk.refuseCommand != a_pid:
             self.server.emit('show_notification_center', {
                     'message': f'Unable to command troops in {trty_atk.name}',
                     'duration': 3000,

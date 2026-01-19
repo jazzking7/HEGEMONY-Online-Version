@@ -1023,14 +1023,14 @@ def handle_rearrange_data(data):
         return
     t1 = gsm.map.territories[choices[0]]
     t2 = gsm.map.territories[choices[1]]
-    if t1.refuseCommand:
+    if t1.refuseCommand and t1.refuseCommand != pid:
         socketio.emit('show_notification_center', {
                 'message': f'Unable to move troops in {t1.name}',
                 'duration': 3000,
                 "text_color": "#FECACA", "bg_color": "#991B1B"
             }, room=pid) 
         return
-    if t2.refuseCommand:
+    if t2.refuseCommand and t2.refuseCommand != pid:
         socketio.emit('show_notification_center', {
                 'message': f'Unable to move troops in {t2.name}',
                 'duration': 3000,

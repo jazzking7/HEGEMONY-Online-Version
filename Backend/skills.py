@@ -1335,7 +1335,7 @@ class Collusion(Skill):
             self.gs.map.territories[tid].refuseCommand = False
         for tid in self.secret_control_list:
             if random.randint(1, 100) < 45:
-                self.gs.map.territories[tid].refuseCommand = True
+                self.gs.map.territories[tid].refuseCommand = self.player
 
     def update_current_status(self):
 
