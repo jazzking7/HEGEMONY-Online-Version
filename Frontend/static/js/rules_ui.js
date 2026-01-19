@@ -413,331 +413,3369 @@ const contentData = {
 </section>
     `,
     agendas: `
-      <section id="agenda-types">
-        <h3>Secret Agenda</h3>
-
-        <p>Each player has a secret agenda to fulfill. These agendas define each player's win condition and vary in difficulty and priority.</p>
-
-        <ul class="list-disc ml-6">
-            <li>The system ensures that <strong>at least two players</strong> have conflicting agendas in every game.</li>
-            <li><strong>Shared victory</strong> is allowed, but only under specific conditions (e.g. global ceasefire or non-conflicting victory triggers).</li>
-        </ul>
-
-        <h3 class="text-lg font-semibold">Agenda Priority Levels</h3>
-        <p>Agendas are ranked by priority, which determines the victor when multiple players fulfill their agendas:</p>
-        <p><strong>Priority Order:</strong> <code>S &gt; A &gt; B &gt; C</code></p>
-
-        <p>When the game ends, players who fulfilled a <strong>higher priority agenda</strong> are declared the winners over those with lower ones.</p>
-     </section>
-
-    <section id="guardian">
-        <h3>Guardian</h3>
-        <p><em>"Those who defend everything, defend nothing."</em></p>
-
-        <p><strong>Win condition:</strong> Not let anyone conquer your capital.</p>
-        <p><strong>Lose condition:</strong> Should another player conquer your capital, you are eliminated from the game.</p>
-        <p><strong>Shared victory:</strong> With class C only.</p>
-        <p><strong>Priority level:</strong> C</p>
-    </section>
-
-<section id="dominator">
-  <h3>Dominator</h3>
-  <p><em>"Power is not only what you have but what the enemy thinks you have."</em></p>
-
-  <p><strong>Win condition:</strong> Hold the title of Superpower for 3 consecutive rounds.</p>
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="populist">
-  <h3>Populist</h3>
-  <p><em>"The greatest asset of any nation is its people."</em></p>
-
-  <p><strong>Win condition:</strong> Hold the most troops for 4 consecutive rounds.</p>
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="expansionist">
-  <h3>Expansionist</h3>
-  <p><em>"The world is not enough."</em></p>
-
-  <p><strong>Win condition:</strong> Hold the most territories for 4 consecutive rounds.</p>
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="industrialist">
-  <h3>Industrialist</h3>
-  <p><em>"Cities are the crucible of civilization."</em></p>
-
-  <p><strong>Win condition:</strong> Maintain the highest industrial level for 4 consecutive rounds.</p>
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="fanatic">
-  <h3>Fanatic</h3>
-  <p><em>"The Promised Land always lies on the other side of the chaos."</em></p>
-
-  <p><strong>Win condition:</strong> Capture the designated territories and hold them for 5 consecutive rounds.</p>
-
-  <p><strong>Special conditions:</strong></p>
-  <ul>
-    <li>If there are more than two Fanatic mission holders, they will have common targets that they must compete for.</li>
-    <li>When a target territory is captured, it generates 1 additional reserve per round.</li>
-  </ul>
-
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="unifier">
-  <h3>Unifier</h3>
-  <p><em>“The empire, long united, must divide; long divided, must unite.”</em></p>
-
-  <p><strong>Win condition:</strong> Capture and hold the designated continent for a designated number of consecutive rounds.</p>
-
-  <p><strong>Number of rounds required to hold the continent:</strong></p>
-
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th style="padding: 0 12px;">Number of Territories in Continent</th>
-        <th style="padding: 0 12px;">Rounds Needed to Capture</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 0 12px;">≤ 5</td>
-        <td style="padding: 0 12px;">7</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">≤ 10</td>
-        <td style="padding: 0 12px;">5</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">&gt; 10</td>
-        <td style="padding: 0 12px;">3</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="polarizer">
-  <h3>Polarizer</h3>
-  <p><em>“The empire, long divided, must unite; long united, must divide. Thus it has ever been.”</em></p>
-
-  <p><strong>Win condition:</strong> Prevent all other players from unifying any continent for 3 consecutive rounds.</p>
-  <p>If another player unifies a continent, the counter is reset and halted until a divisive state resumes.</p>
-
-  <p><strong>Shared victory:</strong> With class C only.</p>
-  <p><strong>Priority level:</strong> C</p>
-</section>
-
-<section id="warmonger">
-  <h3>Warmonger</h3>
-  <p><em>“Peace is never an option.”</em></p>
-
-  <p><strong>Win condition:</strong> Personally kill the designated number of players. The game ends immediately the moment you accumulate enough personal kills.</p>
-  <p>The required number of kills is equal to <strong>⅓ of the total players</strong> at the beginning of the game.</p>
-
-  <p><strong>Shared victory:</strong> With class B only.</p>
-  <p><strong>Priority level:</strong> B</p>
-</section>
-
-<section id="bounty-hunter">
-  <h3>Bounty-Hunter</h3>
-  <p><em>"The end crowns all."</em></p>
-
-  <p><strong>Win condition:</strong> Ensure all of your designated targets die. The game ends immediately when all your targets are dead.</p>
-
-  <p><strong>Number of targets based on total players:</strong></p>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th style="padding: 0 12px;">Number of Players</th>
-        <th style="padding: 0 12px;">Number of Targets</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 0 12px;">&lt; 5</td>
-        <td style="padding: 0 12px;">1</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">&le; 8</td>
-        <td style="padding: 0 12px;">2</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">&gt; 8</td>
-        <td style="padding: 0 12px;">3</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Shared victory:</strong> With class B only.</p>
-  <p><strong>Priority level:</strong> B</p>
-</section>
-
-<section id="loyalist">
-  <h3>Loyalist</h3>
-  <p><em>"The world cannot fit more than us."</em></p>
-
-  <p><strong>Win condition:</strong> You have an ally, who is also a loyalist and loyal to you. You know each other and your goal is to kill everyone else and be the only survivors.</p>
-
-  <p><strong>Lose condition:</strong> If your ally dies, you die too.</p>
-
-  <p><strong>Special condition:</strong></p>
-  <ul>
-    <li>This mission only appears when there are more than 4 players in the game.</li>
-    <li>The system will alert other players of your presence at round 3.</li>
-  </ul>
-
-  <p><strong>Shared victory:</strong> Only with your ally.</p>
-  <p><strong>Priority level:</strong> A</p>
-</section>
-
-<section id="decapitator">
-  <h3>Decapitator</h3>
-  <p><em>"Power resides where men believe it resides. No more and no less."</em></p>
-
-  <p><strong>Win condition:</strong> Capture the capitals of the designated players. The game ends as soon as you simultaneously control the capitals of all designated players.</p>
-
-  <p><strong>Designation rules:</strong></p>
-  <ul>
-    <li>The number of designated players is at least <strong>3</strong>.</li>
-    <li>If there are more than 7 players in the game, the number of designated players becomes <strong>½ of the total players</strong>.</li>
-  </ul>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="starchaser">
-  <h3>Starchaser</h3>
-  <p><em>"It does not matter how slowly you go, as long as you do not stop."</em></p>
-
-  <p><strong>Win condition:</strong> Chase and capture target territories a designated number of times. Each time you successfully capture a target, a new target will appear. The target is always a territory outside of your control. The game ends immediately when you complete all the chases.</p>
-
-  <p><strong>Number of required chases by map size:</strong></p>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th style="padding: 0 12px;">Map Size (Territories)</th>
-        <th style="padding: 0 12px;">Number of Chases</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 0 12px;">40–65</td>
-        <td style="padding: 0 12px;">8</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">66–85</td>
-        <td style="padding: 0 12px;">9</td>
-      </tr>
-      <tr>
-        <td style="padding: 0 12px;">More than 85</td>
-        <td style="padding: 0 12px;">10</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Lose condition:</strong> If you fail to capture a target territory within 8 rounds, you die.</p>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="pacifist">
-  <h3>Pacifist</h3>
-  <p><em>"Nonviolence is a weapon of the strong."</em></p>
-
-  <p><strong>Win condition:</strong> Ensure that no player is killed for 7 consecutive rounds. If a player is killed, the counter resets.</p>
-
-  <p><strong>Lose condition:</strong> If half of the players die, you are eliminated.</p>
-
-  <p><strong>Shared victory:</strong> Only with other Pacifists.</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="punisher">
-  <h3>Punisher</h3>
-  <p><em>"Injustice anywhere is a threat to justice everywhere."</em></p>
-
-  <p><strong>Win condition:</strong> Personally kill a high priority agenda holder. Agendas with priority higher than C are considered high priority.</p>
-
-  <p><strong>Special condition:</strong> This agenda only appears when there are at least two high priority mission holders in the game.</p>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="duelist">
-  <h3>Duelist</h3>
-  <p><em>“The world cannot fit both of us.”</em></p>
-
-  <p><strong>Win condition:</strong> Personally kill your nemesis — another player who also holds a Duelist mission targeting you.</p>
-
-  <p><strong>Lose condition:</strong> If someone else kills your nemesis, you die as well.</p>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="survivalist">
-  <h3>Survivalist</h3>
-  <p><em>“Life is everything.”</em></p>
-
-  <p><strong>Win condition:</strong> Stay alive for 8 consecutive rounds. Your presence will be announced to all players at round 5.</p>
-
-  <p><strong>Shared victory:</strong> With class A only.</p>
-  <p><strong>Priority level:</strong> A</p>
-</section>
-
-<section id="protectionist">
-  <h3>Protectionist</h3>
-  <p><em>"The shield does not question the sword — it simply stands in the way."</em></p>
-
-  <p><strong>Win condition:</strong> Protect your target until you personally kill the assassin pursuing them. The game ends immediately when you kill the assassin.</p>
-
-  <p><strong>Lose condition:</strong> If your target is eliminated, or if someone else kills the assassin, you lose.</p>
-
-  <p><strong>Special condition:</strong> You know your target’s secret agenda.</p>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="assassin">
-  <h3>Assassin</h3>
-  <p><em>"No glory awaits the dagger, only purpose."</em></p>
-
-  <p><strong>Win condition:</strong> Personally kill your designated target. If you fail to do so, you die.</p>
-
-  <p><strong>Special condition:</strong> You know the name of your target’s bodyguard.</p>
-
-  <p><strong>Shared victory:</strong> No</p>
-  <p><strong>Priority level:</strong> S</p>
-</section>
-
-<section id="gambler">
-  <h3>Gambler</h3>
-  <p><em>"Every great empire has a gambler in its bones."</em></p>
-
-  <p><strong>Win condition:</strong> Achieve successful conquests by deploying fewer troops than the defenders. You must accumulate troop kills equal to the number of territories on the map, and all kills must come from these underdog victories.</p>
-
-  <p><strong>Shared victory:</strong> With class B only.</p>
-  <p><strong>Priority level:</strong> B</p>
-</section>
 
-
+  <style scoped>
+  .agenda-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .agenda-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
+
+  .agenda-intro {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    border-left: 4px solid #8b7ff5;
+  }
+
+  .agenda-intro h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #b8aeff;
+    font-size: 24px;
+  }
+
+  .agenda-intro h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #c9bfff;
+    font-size: 18px;
+  }
+
+  .agenda-intro p {
+    margin: 10px 0;
+    line-height: 1.6;
+    color: #d0d0d0;
+  }
+
+  .agenda-intro ul {
+    margin: 10px 0;
+    padding-left: 25px;
+    list-style: disc;
+  }
+
+  .agenda-intro li {
+    margin: 8px 0;
+    line-height: 1.5;
+    color: #d0d0d0;
+  }
+
+  .agenda-intro strong {
+    color: #c9bfff;
+  }
+
+  .priority-legend {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+  }
+
+  .priority-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+  }
+
+  .priority-s { background: #e74c3c; }
+  .priority-a { background: #e67e22; }
+  .priority-b { background: #f39c12; }
+  .priority-c { background: #3498db; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  @media (max-width: 1024px) {
+    .cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .agenda-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.15), rgba(184, 174, 255, 0.08));
+    border: 1px solid rgba(139, 127, 245, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .agenda-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.4);
+    border-color: rgba(139, 127, 245, 0.7);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #c9bfff;
+    margin: 0;
+  }
+
+  .card-quote {
+    font-style: italic;
+    color: #b0b0b0;
+    font-size: 14px;
+    margin: 10px 0;
+  }
+
+  .card-preview {
+    margin: 12px 0;
+    padding: 10px;
+    background: rgba(46, 213, 115, 0.08);
+    border-left: 3px solid #2ed573;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #c0c0c0;
+    flex-grow: 1;
+  }
+
+  .card-preview strong {
+    color: #2ed573;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    font-size: 13px;
+    color: #9a9a9a;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, #1f1f2e 0%, #252538 100%);
+    border: 2px solid rgba(139, 127, 245, 0.6);
+    border-radius: 16px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-header {
+    padding: 30px 30px 20px;
+    border-bottom: 1px solid rgba(139, 127, 245, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #1f1f2e 0%, #252538 100%);
+    z-index: 10;
+  }
+
+  .modal-title-section {
+    flex: 1;
+  }
+
+  .modal-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #c9bfff;
+    margin-bottom: 10px;
+  }
+
+  .modal-quote {
+    font-style: italic;
+    color: #b0b0b0;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+
+  .close-button {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #ff6b6b;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 20px;
+  }
+
+  .close-button:hover {
+    background: rgba(231, 76, 60, 0.4);
+    transform: scale(1.1);
+  }
+
+  .modal-body {
+    padding: 30px;
+  }
+
+  .modal-body p {
+    margin: 15px 0;
+    line-height: 1.6;
+    color: #d5d5d5;
+  }
+
+  .modal-body strong {
+    color: #b8aeff;
+  }
+
+  .modal-body ul {
+    margin: 10px 0;
+    padding-left: 25px;
+    list-style: disc;
+  }
+
+  .modal-body li {
+    margin: 8px 0;
+    line-height: 1.5;
+    color: #d5d5d5;
+  }
+
+  .modal-body table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .modal-body th,
+  .modal-body td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #d5d5d5;
+  }
+
+  .modal-body th {
+    background: rgba(139, 127, 245, 0.3);
+    color: #c9bfff;
+    font-weight: bold;
+  }
+
+  .modal-body tr:last-child td {
+    border-bottom: none;
+  }
+
+  .win-condition {
+    background: rgba(46, 213, 115, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #2ed573;
+    margin: 15px 0;
+    color: #d5d5d5;
+  }
+
+  .lose-condition {
+    background: rgba(231, 76, 60, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+    margin: 15px 0;
+    color: #d5d5d5;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .info-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .info-label {
+    font-size: 12px;
+    color: #9a9a9a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .info-value {
+    font-size: 15px;
+    color: #d5d5d5;
+  }
+
+  @media (max-width: 640px) {
+    .modal-content {
+      max-height: 95vh;
+    }
+
+    .modal-header {
+      padding: 20px 20px 15px;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-title {
+      font-size: 24px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="agenda-container">
+  <div class="agenda-intro">
+    <h3>Secret Agenda</h3>
+    <p>Each player has a secret agenda to fulfill. These agendas define each player's win condition and vary in difficulty and priority.</p>
+    <ul>
+      <li>The system ensures that <strong>at least two players</strong> have conflicting agendas in every game.</li>
+      <li><strong>Shared victory</strong> is allowed, but only under specific conditions (e.g. global ceasefire or non-conflicting victory triggers).</li>
+    </ul>
+    
+    <h4>Agenda Priority Levels</h4>
+    <p>Agendas are ranked by priority, which determines the victor when multiple players fulfill their agendas:</p>
+    <p><strong>Priority Order:</strong> S &gt; A &gt; B &gt; C</p>
+    
+    <div class="priority-legend">
+      <span class="priority-badge priority-s">S - Highest</span>
+      <span class="priority-badge priority-a">A - High</span>
+      <span class="priority-badge priority-b">B - Medium</span>
+      <span class="priority-badge priority-c">C - Standard</span>
+    </div>
+  </div>
+
+  <div class="cards-grid" id="agendasGrid"></div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="agendaModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-section">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <span class="priority-badge" id="modalPriority"></span>
+          </div>
+          <p class="modal-quote" id="modalQuote"></p>
+        </div>
+        <button class="close-button" id="closeModal">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const agendas = [
+    {
+      id: "guardian",
+      title: "Guardian",
+      quote: "Those who defend everything, defend nothing.",
+      priority: "C",
+      winCondition: "Not let anyone conquer your capital.",
+      loseCondition: "Should another player conquer your capital, you are eliminated from the game.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "dominator",
+      title: "Dominator",
+      quote: "Power is not only what you have but what the enemy thinks you have.",
+      priority: "C",
+      winCondition: "Hold the title of Superpower for 3 consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "populist",
+      title: "Populist",
+      quote: "The greatest asset of any nation is its people.",
+      priority: "C",
+      winCondition: "Hold the most troops for 4 consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "expansionist",
+      title: "Expansionist",
+      quote: "The world is not enough.",
+      priority: "C",
+      winCondition: "Hold the most territories for 4 consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "industrialist",
+      title: "Industrialist",
+      quote: "Cities are the crucible of civilization.",
+      priority: "C",
+      winCondition: "Maintain the highest industrial level for 4 consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "fanatic",
+      title: "Fanatic",
+      quote: "The Promised Land always lies on the other side of the chaos.",
+      priority: "C",
+      winCondition: "Capture the designated territories and hold them for 5 consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: "<p><strong>Special conditions:</strong></p><ul><li>If there are more than two Fanatic mission holders, they will have common targets that they must compete for.</li><li>When a target territory is captured, it generates 1 additional reserve per round.</li></ul>"
+    },
+    {
+      id: "unifier",
+      title: "Unifier",
+      quote: "The empire, long united, must divide; long divided, must unite.",
+      priority: "C",
+      winCondition: "Capture and hold the designated continent for a designated number of consecutive rounds.",
+      sharedVictory: "With class C only.",
+      details: "<p><strong>Number of rounds required to hold the continent:</strong></p><table><thead><tr><th>Number of Territories in Continent</th><th>Rounds Needed to Capture</th></tr></thead><tbody><tr><td>≤ 5</td><td>7</td></tr><tr><td>≤ 10</td><td>5</td></tr><tr><td>&gt; 10</td><td>3</td></tr></tbody></table>"
+    },
+    {
+      id: "polarizer",
+      title: "Polarizer",
+      quote: "The empire, long divided, must unite; long united, must divide. Thus it has ever been.",
+      priority: "C",
+      winCondition: "Prevent all other players from unifying any continent for 3 consecutive rounds. If another player unifies a continent, the counter is reset and halted until a divisive state resumes.",
+      sharedVictory: "With class C only.",
+      details: ""
+    },
+    {
+      id: "warmonger",
+      title: "Warmonger",
+      quote: "Peace is never an option.",
+      priority: "B",
+      winCondition: "Personally kill the designated number of players. The game ends immediately the moment you accumulate enough personal kills.",
+      sharedVictory: "With class B only.",
+      details: "<p>The required number of kills is equal to <strong>⅓ of the total players</strong> at the beginning of the game.</p>"
+    },
+    {
+      id: "bounty-hunter",
+      title: "Bounty-Hunter",
+      quote: "The end crowns all.",
+      priority: "B",
+      winCondition: "Ensure all of your designated targets die. The game ends immediately when all your targets are dead.",
+      sharedVictory: "With class B only.",
+      details: "<p><strong>Number of targets based on total players:</strong></p><table><thead><tr><th>Number of Players</th><th>Number of Targets</th></tr></thead><tbody><tr><td>&lt; 5</td><td>1</td></tr><tr><td>≤ 8</td><td>2</td></tr><tr><td>&gt; 8</td><td>3</td></tr></tbody></table>"
+    },
+    {
+      id: "loyalist",
+      title: "Loyalist",
+      quote: "The world cannot fit more than us.",
+      priority: "A",
+      winCondition: "You have an ally, who is also a loyalist and loyal to you. You know each other and your goal is to kill everyone else and be the only survivors.",
+      loseCondition: "If your ally dies, you die too.",
+      sharedVictory: "Only with your ally.",
+      details: "<p><strong>Special condition:</strong></p><ul><li>This mission only appears when there are more than 4 players in the game.</li><li>The system will alert other players of your presence at round 3.</li></ul>"
+    },
+    {
+      id: "decapitator",
+      title: "Decapitator",
+      quote: "Power resides where men believe it resides. No more and no less.",
+      priority: "S",
+      winCondition: "Capture the capitals of the designated players. The game ends as soon as you simultaneously control the capitals of all designated players.",
+      sharedVictory: "No",
+      details: "<p><strong>Designation rules:</strong></p><ul><li>The number of designated players is at least <strong>3</strong>.</li><li>If there are more than 7 players in the game, the number of designated players becomes <strong>½ of the total players</strong>.</li></ul>"
+    },
+    {
+      id: "starchaser",
+      title: "Starchaser",
+      quote: "It does not matter how slowly you go, as long as you do not stop.",
+      priority: "S",
+      winCondition: "Chase and capture target territories a designated number of times. Each time you successfully capture a target, a new target will appear. The target is always a territory outside of your control. The game ends immediately when you complete all the chases.",
+      loseCondition: "If you fail to capture a target territory within 8 rounds, you die.",
+      sharedVictory: "No",
+      details: "<p><strong>Number of required chases by map size:</strong></p><table><thead><tr><th>Map Size (Territories)</th><th>Number of Chases</th></tr></thead><tbody><tr><td>40–65</td><td>8</td></tr><tr><td>66–85</td><td>9</td></tr><tr><td>More than 85</td><td>10</td></tr></tbody></table>"
+    },
+    {
+      id: "pacifist",
+      title: "Pacifist",
+      quote: "Nonviolence is a weapon of the strong.",
+      priority: "S",
+      winCondition: "Ensure that no player is killed for 7 consecutive rounds. If a player is killed, the counter resets.",
+      loseCondition: "If half of the players die, you are eliminated.",
+      sharedVictory: "Only with other Pacifists.",
+      details: ""
+    },
+    {
+      id: "punisher",
+      title: "Punisher",
+      quote: "Injustice anywhere is a threat to justice everywhere.",
+      priority: "S",
+      winCondition: "Personally kill a high priority agenda holder. Agendas with priority higher than C are considered high priority.",
+      sharedVictory: "No",
+      details: "<p><strong>Special condition:</strong> This agenda only appears when there are at least two high priority mission holders in the game.</p>"
+    },
+    {
+      id: "duelist",
+      title: "Duelist",
+      quote: "The world cannot fit both of us.",
+      priority: "S",
+      winCondition: "Personally kill your nemesis — another player who also holds a Duelist mission targeting you.",
+      loseCondition: "If someone else kills your nemesis, you die as well.",
+      sharedVictory: "No",
+      details: ""
+    },
+    {
+      id: "survivalist",
+      title: "Survivalist",
+      quote: "Life is everything.",
+      priority: "A",
+      winCondition: "Stay alive for 8 consecutive rounds. Your presence will be announced to all players at round 5.",
+      sharedVictory: "With class A only.",
+      details: ""
+    },
+    {
+      id: "protectionist",
+      title: "Protectionist",
+      quote: "The shield does not question the sword — it simply stands in the way.",
+      priority: "S",
+      winCondition: "Protect your target until you personally kill the assassin pursuing them. The game ends immediately when you kill the assassin.",
+      loseCondition: "If your target is eliminated, or if someone else kills the assassin, you lose.",
+      sharedVictory: "No",
+      details: "<p><strong>Special condition:</strong> You know your target's secret agenda.</p>"
+    },
+    {
+      id: "assassin",
+      title: "Assassin",
+      quote: "No glory awaits the dagger, only purpose.",
+      priority: "S",
+      winCondition: "Personally kill your designated target. If you fail to do so, you die.",
+      sharedVictory: "No",
+      details: "<p><strong>Special condition:</strong> You know the name of your target's bodyguard.</p>"
+    },
+    {
+      id: "gambler",
+      title: "Gambler",
+      quote: "Every great empire has a gambler in its bones.",
+      priority: "B",
+      winCondition: "Achieve successful conquests by deploying fewer troops than the defenders. You must accumulate troop kills equal to the number of territories on the map, and all kills must come from these underdog victories.",
+      sharedVictory: "With class B only.",
+      details: ""
+    }
+  ];
+
+  const modal = document.getElementById("agendaModal");
+  const closeBtn = document.getElementById("closeModal");
+
+  function openModal(agenda) {
+    document.getElementById("modalTitle").textContent = agenda.title;
+    document.getElementById("modalQuote").textContent = '"' + agenda.quote + '"';
+    
+    const priorityBadge = document.getElementById("modalPriority");
+    priorityBadge.textContent = agenda.priority;
+    priorityBadge.className = "priority-badge priority-" + agenda.priority.toLowerCase();
+
+    let bodyHTML = '<div class="win-condition"><strong>Win condition:</strong> ' + agenda.winCondition + '</div>';
+
+    if (agenda.loseCondition) {
+      bodyHTML += '<div class="lose-condition"><strong>Lose condition:</strong> ' + agenda.loseCondition + '</div>';
+    }
+
+    if (agenda.details) {
+      bodyHTML += agenda.details;
+    }
+
+    bodyHTML += '<div class="info-grid"><div class="info-item"><div class="info-label">Shared Victory</div><div class="info-value">' + agenda.sharedVictory + '</div></div><div class="info-item"><div class="info-label">Priority Level</div><div class="info-value">' + agenda.priority + '</div></div></div>';
+
+    document.getElementById("modalBody").innerHTML = bodyHTML;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && modal.classList.contains("active")) {
+      closeModal();
+    }
+  });
+
+  function createAgendaCard(agenda) {
+    const card = document.createElement("div");
+    card.className = "agenda-card";
+    card.id = agenda.id;
+    
+    card.innerHTML = '<div class="card-header"><h3 class="card-title">' + agenda.title + '</h3><span class="priority-badge priority-' + agenda.priority.toLowerCase() + '">' + agenda.priority + '</span></div><p class="card-quote">"' + agenda.quote + '"</p><div class="card-preview"><strong>WIN CONDITION</strong>' + agenda.winCondition + '</div><div class="card-footer">Click to view full details</div>';
+    
+    card.addEventListener("click", function() {
+      openModal(agenda);
+    });
+    
+    return card;
+  }
+
+  const grid = document.getElementById("agendasGrid");
+  agendas.forEach(function(agenda) {
+    grid.appendChild(createAgendaCard(agenda));
+  });
+})();
+</script>
 
     `,
+
+
+    corePillars: `
+    <style scoped>
+  .pillars-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .pillars-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
+
+  .pillars-intro {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border-radius: 12px;
+    border: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .pillars-intro h2 {
+    font-size: 32px;
+    color: #c9bfff;
+    margin-bottom: 15px;
+  }
+
+  .pillars-intro p {
+    font-size: 18px;
+    color: #b0b0b0;
+    font-style: italic;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 1024px) {
+    .pillars-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pillar-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.12), rgba(184, 174, 255, 0.06));
+    border: 1px solid rgba(139, 127, 245, 0.4);
+    border-radius: 12px;
+    padding: 30px;
+    transition: all 0.3s ease;
+  }
+
+  .pillar-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.3);
+    border-color: rgba(139, 127, 245, 0.6);
+  }
+
+  .pillar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .pillar-icon {
+    font-size: 32px;
+  }
+
+  .pillar-title-section h3 {
+    font-size: 24px;
+    color: #c9bfff;
+    margin-bottom: 4px;
+  }
+
+  .pillar-subtitle {
+    font-size: 14px;
+    color: #9a9a9a;
+    font-style: italic;
+  }
+
+  .pillar-content {
+    margin-top: 20px;
+  }
+
+  .pillar-definition {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .pillar-definition p {
+    color: #d0d0d0;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .pillar-points {
+    list-style: none;
+    padding: 0;
+  }
+
+  .pillar-points li {
+    padding: 10px 0 10px 30px;
+    position: relative;
+    color: #c5c5c5;
+    line-height: 1.6;
+  }
+
+  .pillar-points li:before {
+    content: "→";
+    position: absolute;
+    left: 10px;
+    color: #8b7ff5;
+    font-weight: bold;
+  }
+
+  .priority-tiers {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tier-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+  }
+
+  .tier-s { background: #e74c3c; }
+  .tier-a { background: #e67e22; }
+  .tier-b { background: #f39c12; }
+  .tier-c { background: #3498db; }
+
+  .synthesis-section {
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05));
+    border: 2px solid rgba(46, 213, 115, 0.4);
+    border-radius: 12px;
+    padding: 35px;
+    margin-top: 40px;
+  }
+
+  .synthesis-section h3 {
+    font-size: 26px;
+    color: #2ed573;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .synthesis-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  @media (max-width: 768px) {
+    .synthesis-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .synthesis-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 3px solid #2ed573;
+  }
+
+  .synthesis-item-title {
+    font-weight: bold;
+    color: #2ed573;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .synthesis-item-text {
+    color: #d0d0d0;
+    line-height: 1.5;
+    font-size: 15px;
+  }
+
+  .warning-box {
+    background: rgba(231, 76, 60, 0.1);
+    border: 2px solid rgba(231, 76, 60, 0.4);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 25px;
+    text-align: center;
+  }
+
+  .warning-box p {
+    color: #ff6b6b;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 8px 0;
+  }
+
+  .warning-box p:first-child {
+    font-weight: bold;
+    font-size: 17px;
+  }
+
+  .emphasis {
+    color: #c9bfff;
+    font-weight: bold;
+  }
+</style>
+
+<div class="pillars-container">
+  <div class="pillars-intro">
+    <h2>The Three Pillars of Hegemony</h2>
+    <p>Understanding these systems is the key to victory</p>
+  </div>
+
+  <div class="pillars-grid">
+    <!-- Secret Agenda Pillar -->
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <div class="pillar-icon">🎯</div>
+        <div class="pillar-title-section">
+          <h3>Secret Agenda</h3>
+          <div class="pillar-subtitle">How You Win</div>
+        </div>
+      </div>
+      
+      <div class="pillar-content">
+        <div class="pillar-definition">
+          <p>Every player has one Secret Agenda. Your Secret Agenda defines your personal victory condition.</p>
+        </div>
+
+        <ul class="pillar-points">
+          <li>It is hidden from other players</li>
+          <li>The game ends when someone quietly succeeds</li>
+          <li>Some agendas allow shared victory, others do not</li>
+        </ul>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(139, 127, 245, 0.2);">
+          <p style="color: #c0c0c0; font-size: 13px; margin-bottom: 8px;">
+            <span class="emphasis">Not all victories are equal.</span> Agendas have priority tiers that determine who wins if multiple players succeed:
+          </p>
+          <div class="priority-tiers">
+            <span class="tier-badge tier-s">S - Most Dangerous</span>
+            <span class="tier-badge tier-a">A - High Priority</span>
+            <span class="tier-badge tier-b">B - Medium Priority</span>
+            <span class="tier-badge tier-c">C - Cooperative</span>
+          </div>
+        </div>
+
+        <p style="margin-top: 20px; padding: 12px; background: rgba(231, 76, 60, 0.1); border-radius: 6px; color: #ff6b6b; font-size: 13px; border-left: 3px solid #e74c3c;">
+          <strong>Remember:</strong> The most dangerous player is not the strongest — but the one closest to finishing.
+        </p>
+      </div>
+    </div>
+
+    <!-- War Art Pillar -->
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <div class="pillar-icon">⚔️</div>
+        <div class="pillar-title-section">
+          <h3>War Art</h3>
+          <div class="pillar-subtitle">How You Break the Rules</div>
+        </div>
+      </div>
+      
+      <div class="pillar-content">
+        <div class="pillar-definition">
+          <p>Every player has one War Art. War Arts give unique advantages.</p>
+        </div>
+
+        <ul class="pillar-points">
+          <li>They bend or break core rules</li>
+          <li>They create asymmetry between players</li>
+          <li>They are usually hidden until revealed</li>
+        </ul>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+          <p style="color: #c0c0c0; font-size: 14px; line-height: 1.6;">
+            You do not need to understand every War Art to play.
+          </p>
+          <p style="color: #c9bfff; font-size: 15px; margin-top: 10px; font-weight: bold;">
+            You only need to understand this:
+          </p>
+          <p style="color: #d0d0d0; font-size: 14px; margin-top: 8px; line-height: 1.6;">
+            The rules you rely on may not apply equally to everyone.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Special Authority Pillar -->
+    <div class="pillar-card">
+      <div class="pillar-header">
+        <div class="pillar-icon">★</div>
+        <div class="pillar-title-section">
+          <h3>Special Authority</h3>
+          <div class="pillar-subtitle">What You Spend to Matter</div>
+        </div>
+      </div>
+      
+      <div class="pillar-content">
+        <div class="pillar-definition">
+          <p>Special Authority is the only currency in the game. It brings growth and power.</p>
+        </div>
+
+        <div style="margin: 15px 0;">
+          <p style="color: #c0c0c0; font-size: 13px; margin-bottom: 10px;">
+            <span class="emphasis">Mainly earned through winning conquests</span>
+          </p>
+          <p style="color: #c0c0c0; font-size: 13px; margin-bottom: 8px;">
+            <span class="emphasis">It is spent to:</span>
+          </p>
+          <ul class="pillar-points">
+            <li>Grow your power</li>
+            <li>Prepare decisive moves</li>
+            <li>Activate certain War Arts</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(46, 213, 115, 0.08); border-radius: 8px; border-left: 3px solid #2ed573;">
+          <p style="color: #d0d0d0; font-size: 14px; line-height: 1.6; margin-bottom: 8px;">
+            Special Authority does not win the game by itself.
+          </p>
+          <p style="color: #2ed573; font-size: 14px; font-weight: bold;">
+            It helps players to act decisively when it matters.
+          </p>
+        </div>
+
+        <p style="margin-top: 15px; color: #b0b0b0; font-size: 13px; font-style: italic; text-align: center;">
+          Troops win battles.<br>Special Authority decides when battles happen.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Synthesis Section -->
+  <div class="synthesis-section">
+    <h3>How These Three Work Together</h3>
+    
+    <div class="synthesis-grid">
+      <div class="synthesis-item">
+        <div class="synthesis-item-title">SECRET AGENDA</div>
+        <div class="synthesis-item-text">decides why you act</div>
+      </div>
+      <div class="synthesis-item">
+        <div class="synthesis-item-title">WAR ART</div>
+        <div class="synthesis-item-text">decides how you act</div>
+      </div>
+      <div class="synthesis-item">
+        <div class="synthesis-item-title">SPECIAL AUTHORITY</div>
+        <div class="synthesis-item-text">decides when you can act</div>
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <p>If you focus on only one of them, you will lose.</p>
+      <p>Hegemony is not about domination — it is about timing, deception, and asymmetric power.</p>
+    </div>
+  </div>
+</div>
+    
+    `,
+
+
+    gameLifecycle: `
+<style scoped>
+  .lifecycle-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .lifecycle-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .lifecycle-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.15), rgba(184, 174, 255, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(139, 127, 245, 0.4);
+  }
+
+  .lifecycle-hero h1 {
+    font-size: 32px;
+    color: #c9bfff;
+    margin-bottom: 10px;
+  }
+
+  .lifecycle-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .lifecycle-hero .emphasis {
+    color: #c9bfff;
+    font-weight: bold;
+  }
+
+  .sections-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .sections-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .section-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .section-card:hover {
+    border-color: rgba(139, 127, 245, 0.5);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.2);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .section-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #8b7ff5;
+    opacity: 0.7;
+    min-width: 35px;
+  }
+
+  .section-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    color: #c9bfff;
+    margin-bottom: 3px;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+    color: #9a9a9a;
+    font-style: italic;
+  }
+
+  .section-intro {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .section-intro p {
+    color: #d0d0d0;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .setup-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #8b7ff5;
+    transition: all 0.3s ease;
+  }
+
+  .setup-item:hover {
+    background: rgba(139, 127, 245, 0.08);
+    transform: translateX(3px);
+  }
+
+  .setup-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+
+  .setup-item-icon {
+    font-size: 16px;
+  }
+
+  .setup-item-title {
+    font-weight: bold;
+    color: #c9bfff;
+    font-size: 14px;
+  }
+
+  .setup-item-desc {
+    color: #b0b0b0;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .insight-box {
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05));
+    border: 2px solid rgba(46, 213, 115, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  .insight-box p {
+    color: #2ed573;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .phases-container {
+    margin-top: 15px;
+  }
+
+  .golden-rule {
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(243, 156, 18, 0.08));
+    border: 2px solid rgba(241, 196, 15, 0.5);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .golden-rule-title {
+    font-size: 12px;
+    color: #f1c40f;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .golden-rule-text {
+    font-size: 14px;
+    color: #f39c12;
+    font-weight: 600;
+  }
+
+  .phase-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .phase-card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+  }
+
+  .phase-card:hover {
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .phase-reinforcement {
+    border-left-color: #2ed573;
+  }
+
+  .phase-preparation {
+    border-left-color: #3498db;
+  }
+
+  .phase-conquest {
+    border-left-color: #e74c3c;
+  }
+
+  .phase-rearrangement {
+    border-left-color: #9b59b6;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .phase-title-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .phase-number {
+    font-size: 18px;
+    font-weight: bold;
+    opacity: 0.5;
+  }
+
+  .phase-icon {
+    font-size: 18px;
+  }
+
+  .phase-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #d5d5d5;
+  }
+
+  .phase-action {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: #c0c0c0;
+    font-weight: 500;
+  }
+
+  .phase-description {
+    color: #b0b0b0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .phase-key {
+    color: #8b7ff5;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .phase-key:before {
+    content: "→";
+    font-size: 14px;
+  }
+
+  .mastery-quote {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.15), rgba(184, 174, 255, 0.08));
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    text-align: center;
+    border: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .mastery-quote p {
+    color: #c9bfff;
+    font-size: 14px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .end-conditions {
+    display: grid;
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .end-condition {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #e74c3c;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .end-condition:hover {
+    background: rgba(231, 76, 60, 0.1);
+    transform: translateX(3px);
+  }
+
+  .end-condition-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .end-condition-text {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .end-rules {
+    background: rgba(231, 76, 60, 0.1);
+    border: 2px solid rgba(231, 76, 60, 0.4);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+  }
+
+  .end-rules-title {
+    font-size: 14px;
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .end-rules-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .end-rule-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #d0d0d0;
+    font-size: 13px;
+  }
+
+  .end-rule-item:before {
+    content: "✗";
+    color: #e74c3c;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .end-final {
+    background: rgba(46, 213, 115, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .end-final p {
+    color: #2ed573;
+    font-size: 13px;
+    font-weight: 600;
+  }
+</style>
+
+<div class="lifecycle-container">
+  <div class="lifecycle-hero">
+    <h1>Game Lifecycle</h1>
+    <p>Hegemony follows a fixed timeline.</p>
+    <p><span class="emphasis">Knowing when things happen matters more than knowing how they work.</span></p>
+  </div>
+
+  <div class="sections-grid">
+    <!-- SETUP SECTION -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-number">1</span>
+        <div class="section-icon">⚙️</div>
+        <div>
+          <h2>Game Setup</h2>
+          <div class="section-subtitle">Once Only</div>
+        </div>
+      </div>
+
+      <div class="section-intro">
+        <p>What happens before the game begins</p>
+      </div>
+
+      <div class="setup-grid">
+        <div class="setup-item">
+          <div class="setup-item-header">
+            <span class="setup-item-icon">🎯</span>
+            <span class="setup-item-title">Secret Agendas assigned</span>
+          </div>
+          <div class="setup-item-desc">Guaranteed conflict of interest</div>
+        </div>
+
+        <div class="setup-item">
+          <div class="setup-item-header">
+            <span class="setup-item-icon">🗺️</span>
+            <span class="setup-item-title">Territories distributed</span>
+          </div>
+          <div class="setup-item-desc">Players choose territories they want to control</div>
+        </div>
+
+        <div class="setup-item">
+          <div class="setup-item-header">
+            <span class="setup-item-icon">🏛️</span>
+            <span class="setup-item-title">Capitals & Cities placed</span>
+          </div>
+          <div class="setup-item-desc">Power centers are established</div>
+        </div>
+
+        <div class="setup-item">
+          <div class="setup-item-header">
+            <span class="setup-item-icon">🪖</span>
+            <span class="setup-item-title">Initial troops deployed</span>
+          </div>
+          <div class="setup-item-desc">Starting pressure is visible</div>
+        </div>
+
+        <div class="setup-item">
+          <div class="setup-item-header">
+            <span class="setup-item-icon">🧠</span>
+            <span class="setup-item-title">War Arts chosen</span>
+          </div>
+          <div class="setup-item-desc">Asymmetry is locked in</div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p>Setup defines who you are and what you want.<br>The rest of the game is about execution.</p>
+      </div>
+    </div>
+
+    <!-- GAME TURN SECTION -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-number">2</span>
+        <div class="section-icon">🔁</div>
+        <div>
+          <h2>Game Turn</h2>
+          <div class="section-subtitle">Always the Same Order</div>
+        </div>
+      </div>
+
+      <div class="section-intro">
+        <p>Hegemony is played in rounds.</p>
+        <p>Each round, every player takes one turn in order.</p>
+        <p>Every turn follows 4 fixed phases.</p>
+      </div>
+
+      <div class="phases-container">
+        <div class="golden-rule">
+          <div class="golden-rule-title">🧩 Turn Phases (Golden Rule)</div>
+          <div class="golden-rule-text">Actions cannot be performed outside their phase.</div>
+        </div>
+
+        <div class="phase-list">
+          <div class="phase-card phase-reinforcement">
+            <div class="phase-header">
+              <div class="phase-title-section">
+                <span class="phase-number">1</span>
+                <span class="phase-icon">🟩</span>
+                <span class="phase-name">Reinforcement</span>
+              </div>
+              <div class="phase-action">Gain Resources</div>
+            </div>
+            <div class="phase-description">
+              Receive troops, authority, or other gains generated by what you control.
+            </div>
+            <div class="phase-key">Receive only</div>
+          </div>
+
+          <div class="phase-card phase-preparation">
+            <div class="phase-header">
+              <div class="phase-title-section">
+                <span class="phase-number">2</span>
+                <span class="phase-icon">🛠️</span>
+                <span class="phase-name">Preparation</span>
+              </div>
+              <div class="phase-action">Get Ready</div>
+            </div>
+            <div class="phase-description">
+              Build, upgrade, or activate effects before combat.
+            </div>
+            <div class="phase-key">Set the board</div>
+          </div>
+
+          <div class="phase-card phase-conquest">
+            <div class="phase-header">
+              <div class="phase-title-section">
+                <span class="phase-number">3</span>
+                <span class="phase-icon">⚔️</span>
+                <span class="phase-name">Conquest</span>
+              </div>
+              <div class="phase-action">Change the Map</div>
+            </div>
+            <div class="phase-description">
+              Launch attacks and capture territories.
+            </div>
+            <div class="phase-key">Fight only</div>
+          </div>
+
+          <div class="phase-card phase-rearrangement">
+            <div class="phase-header">
+              <div class="phase-title-section">
+                <span class="phase-number">4</span>
+                <span class="phase-icon">🔄</span>
+                <span class="phase-name">Rearrangement</span>
+              </div>
+              <div class="phase-action">Stabilize</div>
+            </div>
+            <div class="phase-description">
+              Move troops and secure your position.
+            </div>
+            <div class="phase-key">Secure gains</div>
+          </div>
+        </div>
+
+        <div class="mastery-quote">
+          <p>Mastery in Hegemony is not doing more —<br>it is acting at the right phase.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME END SECTION -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-number">3</span>
+        <div class="section-icon">🏁</div>
+        <div>
+          <h2>Game End Conditions</h2>
+          <div class="section-subtitle">Immediate</div>
+        </div>
+      </div>
+
+      <div class="section-intro">
+        <p>The game ends instantly when any of the following occurs:</p>
+      </div>
+
+      <div class="end-conditions">
+        <div class="end-condition">
+          <span class="end-condition-icon">🎯</span>
+          <span class="end-condition-text">A player completes their Secret Agenda</span>
+        </div>
+
+        <div class="end-condition">
+          <span class="end-condition-icon">🕊️</span>
+          <span class="end-condition-text">A Global Ceasefire resolves the game</span>
+        </div>
+
+        <div class="end-condition">
+          <span class="end-condition-icon">☠️</span>
+          <span class="end-condition-text">Only one player remains</span>
+        </div>
+      </div>
+
+      <div class="end-rules">
+        <div class="end-rules-title">When the game ends:</div>
+        <div class="end-rules-list">
+          <div class="end-rule-item">No final turns</div>
+          <div class="end-rule-item">No extra actions</div>
+        </div>
+        <div class="end-final">
+          <p>Victory is resolved by agenda priority</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    `,
+
+
+    warMechanism: `
+
+    <style scoped>
+  .war-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .war-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .war-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(231, 76, 60, 0.4);
+  }
+
+  .war-hero h1 {
+    font-size: 32px;
+    color: #ff6b6b;
+    margin-bottom: 10px;
+  }
+
+  .war-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .war-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .war-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .war-section {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .war-section:hover {
+    border-color: rgba(139, 127, 245, 0.5);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.2);
+  }
+
+  .war-section.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .section-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    color: #c9bfff;
+  }
+
+  .content-box {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .content-box h3 {
+    font-size: 16px;
+    color: #c9bfff;
+    margin-bottom: 8px;
+  }
+
+  .content-box p,
+  .content-box li {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 5px 0;
+  }
+
+  .content-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .content-box li:before {
+    content: "→";
+    color: #8b7ff5;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.08));
+    border: 2px solid rgba(231, 76, 60, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .highlight-box p {
+    color: #ff6b6b;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .stat-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    background: rgba(139, 127, 245, 0.08);
+    transform: translateX(3px);
+  }
+
+  .stat-card.industrial { border-left-color: #e74c3c; }
+  .stat-card.infrastructure { border-left-color: #3498db; }
+  .stat-card.minimum { border-left-color: #f39c12; }
+  .stat-card.nullification { border-left-color: #2ed573; }
+  .stat-card.damage { border-left-color: #e67e22; }
+  .stat-card.crit-rate { border-left-color: #9b59b6; }
+  .stat-card.crit-damage { border-left-color: #c0392b; }
+  .stat-card.ppi { border-left-color: #f1c40f; }
+
+  .stat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .stat-icon {
+    font-size: 18px;
+  }
+
+  .stat-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #c9bfff;
+  }
+
+  .stat-description {
+    color: #b0b0b0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .stat-details {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+
+  .stat-details p {
+    color: #d0d0d0;
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+
+  .stat-example {
+    background: rgba(46, 213, 115, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border-left: 2px solid #2ed573;
+  }
+
+  .stat-example p {
+    color: #2ed573;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .step-list {
+    counter-reset: step-counter;
+    list-style: none;
+    padding: 0;
+  }
+
+  .step-list li {
+    counter-increment: step-counter;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 10px;
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .step-list li:before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #8b7ff5;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .comparison-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .comparison-label {
+    font-size: 12px;
+    color: #9a9a9a;
+    margin-bottom: 5px;
+  }
+
+  .comparison-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #c9bfff;
+  }
+</style>
+
+<div class="war-container">
+  <div class="war-hero">
+    <h1>War Mechanism</h1>
+    <p>Understanding combat is essential to survival and victory</p>
+  </div>
+
+  <div class="war-grid">
+    <!-- BATTLE MECHANISM -->
+    <div class="war-section">
+      <div class="section-header">
+        <div class="section-icon">⚔️</div>
+        <h2>Battle Mechanism</h2>
+      </div>
+
+      <div class="content-box">
+        <h3>The Core</h3>
+        <p>When two armies fight, both sides roll dice and compare numbers.</p>
+        <p>The battle continues until one side has no troops left.</p>
+      </div>
+
+      <div class="content-box">
+        <h3>Dice and Troops</h3>
+        <ul>
+          <li>Each troop gives one die</li>
+          <li>Higher numbers are better</li>
+          <li>Losing a roll means losing one troop</li>
+        </ul>
+      </div>
+
+      <div class="content-box">
+        <h3>Dice Rolled Each Clash</h3>
+        <div class="comparison-grid">
+          <div class="comparison-item">
+            <div class="comparison-label">Attacker</div>
+            <div class="comparison-value">Up to 3</div>
+          </div>
+          <div class="comparison-item">
+            <div class="comparison-label">Defender</div>
+            <div class="comparison-value">Up to 2</div>
+          </div>
+        </div>
+        <p style="margin-top: 10px; color: #b0b0b0; font-size: 13px;">You cannot roll more dice than your troops</p>
+      </div>
+
+      <div class="content-box">
+        <h3>Resolving a Clash</h3>
+        <ol class="step-list">
+          <li>Both sides roll their dice</li>
+          <li>Dice are sorted from highest to lowest</li>
+          <li>Compare the highest dice</li>
+          <li>Compare the second dice if both sides have one</li>
+        </ol>
+        <p style="margin-top: 10px; color: #d0d0d0; font-size: 13px;">For each comparison:</p>
+        <ul>
+          <li>Higher number wins</li>
+          <li>Loser removes one troop</li>
+          <li>If tied, the defender wins</li>
+        </ul>
+      </div>
+
+      <div class="content-box">
+        <h3>Ending the Battle</h3>
+        <ul>
+          <li>If both sides still have troops, roll again</li>
+          <li>If either side has no troops, the battle ends</li>
+          <li>All lost troops are removed permanently</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px;">
+        <h3 style="font-size: 16px; color: #c9bfff; margin-bottom: 12px; text-align: center;">Interactive Battle Simulator</h3>
+        <div id="battleViz" style="width:100%;height:320px;"></div>
+      </div>
+
+      
+      <div class="highlight-box">
+        <p>That's the whole battle mechanism.<br>It will remain consistent throughout the game.</p>
+      </div>
+
+    </div>
+
+    <!-- POWER STATISTICS -->
+    <div class="war-section">
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <h2>Battle Statistics</h2>
+      </div>
+
+      <p style="color: #b0b0b0; font-size: 14px; margin-bottom: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid #8b7ff5;">
+        These values change how strong your dice results are. They do not change the battle rules themselves.
+      </p>
+
+      <div class="stat-grid">
+        <div class="stat-card industrial">
+          <div class="stat-header">
+            <span class="stat-icon">🏭</span>
+            <span class="stat-title">Industrial Level</span>
+          </div>
+          <div class="stat-description">
+            Industrial Level makes your dice stronger.
+          </div>
+          <div class="stat-details">
+            <p>Dice normally roll from 1 to 6</p>
+            <p>Each Industrial Level raises the maximum roll</p>
+          </div>
+          <div class="stat-example">
+            <p>Industrial Level +2 → Roll from 1 to 8</p>
+          </div>
+        </div>
+
+        <div class="stat-card infrastructure">
+          <div class="stat-header">
+            <span class="stat-icon">🏗️</span>
+            <span class="stat-title">Infrastructure Level</span>
+          </div>
+          <div class="stat-description">
+            Infrastructure Level lets you roll more dice in battle.
+          </div>
+          <div class="stat-details">
+            <p><strong>Base dice:</strong></p>
+            <p>• Attacking: 3 dice</p>
+            <p>• Defending: 2 dice</p>
+            <p style="margin-top: 8px;"><strong>Each Infrastructure Level:</strong></p>
+            <p>• +1 die when attacking</p>
+            <p>• +1 die when defending</p>
+          </div>
+          <div class="stat-example">
+            <p>Infrastructure Level +2 → Attacking: 5 dice | Defending: 4 dice</p>
+          </div>
+        </div>
+
+        <div class="stat-card minimum">
+          <div class="stat-header">
+            <span class="stat-icon">📏</span>
+            <span class="stat-title">Minimum Roll</span>
+          </div>
+          <div class="stat-description">
+            Minimum Roll is the lowest number a die can show.
+          </div>
+          <div class="stat-details">
+            <p>Default minimum roll: 1</p>
+            <p>If your minimum roll is higher, your dice are more consistent.</p>
+          </div>
+          <div class="stat-example">
+            <p>Minimum Roll + 2 → Roll from 3 to 6</p>
+          </div>
+        </div>
+
+        <div class="stat-card nullification">
+          <div class="stat-header">
+            <span class="stat-icon">🛡️</span>
+            <span class="stat-title">Nullification Rate</span>
+          </div>
+          <div class="stat-description">
+            Nullification Rate gives a chance to ignore damage.
+          </div>
+          <div class="stat-details">
+            <p>Default: 0%</p>
+            <p>When you would lose a troop:</p>
+            <p>• Roll for nullification</p>
+            <p>• If successful, no troop is lost</p>
+          </div>
+          <div class="stat-example">
+            <p>40% nullification → 40% chance to block damage</p>
+          </div>
+        </div>
+
+        <div class="stat-card damage">
+          <div class="stat-header">
+            <span class="stat-icon">💥</span>
+            <span class="stat-title">Damage Multiplier</span>
+          </div>
+          <div class="stat-description">
+            Damage Multiplier increases how much damage you deal.
+          </div>
+          <div class="stat-details">
+            <p>Default: ×1</p>
+          </div>
+          <div class="stat-example">
+            <p>×2 Damage Multiplier -> Damages ×2 when you win a comparison</p>
+          </div>
+        </div>
+
+        <div class="stat-card crit-rate">
+          <div class="stat-header">
+            <span class="stat-icon">⚡</span>
+            <span class="stat-title">Crit Rate</span>
+          </div>
+          <div class="stat-description">
+            Crit Rate is the chance to deal extra damage.
+          </div>
+          <div class="stat-details">
+            <p>Default: 0%</p>
+            <p>Increased by some War Arts</p>
+            <p>If you deal any damage in a clash:</p>
+            <p>• Roll for crit</p>
+            <p>• If successful, extra damage is applied</p>
+          </div>
+          <div class="stat-example">
+            <p>30% Crit Rate → 30% chance to deal crit damage</p>
+          </div>
+        </div>
+
+        <div class="stat-card crit-damage">
+          <div class="stat-header">
+            <span class="stat-icon">💢</span>
+            <span class="stat-title">Crit Damage</span>
+          </div>
+          <div class="stat-description">
+            Crit Damage decides how much extra damage a crit deals.
+          </div>
+          <div class="stat-details">
+            <p>Only applies when a crit happens</p>
+            <p>Added on top of normal damage</p>
+          </div>
+          <div class="stat-example">
+            <p>Normal damage: 1 troop. Crit Damage: ×2<br>
+            Normal damage × Crit Damage → Total damage = 2 troops</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER POWER INDEX -->
+    <div class="war-section full-width">
+      <div class="section-header">
+        <div class="section-icon">👑</div>
+        <h2>Player Power Index (PPI)</h2>
+      </div>
+
+      <div class="content-box">
+        <p>PPI measures how strong a player is compared to others.</p>
+        <p style="margin-top: 10px;"><strong>It looks at 4 things:</strong></p>
+        <ul style="margin-top: 8px;">
+          <li>Troops you can generate with the territories you control</li>
+          <li>Troops you currently have</li>
+          <li>Your Industrial Level</li>
+          <li>Your Infrastructure Level</li>
+        </ul>
+      </div>
+
+      <div class="content-box">
+        <p>Each value is compared to the average of all players.</p>
+        <ul style="margin-top: 8px;">
+          <li>Higher than average → higher PPI</li>
+          <li>Lower than average → lower PPI</li>
+        </ul>
+        <p style="margin-top: 10px;">The player with the highest PPI is marked as a <strong style="color: #f1c40f;">Superpower</strong>.</p>
+      </div>
+
+      <div class="highlight-box">
+        <p>PPI does not win the game.<br>It only shows who is currently dominant.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const host = document.getElementById("battleViz");
+  if (!host) return;
+
+  const style = document.createElement("style");
+  style.textContent = "#battleViz, #battleViz * { box-sizing: border-box; } #battleViz .bv-wrap{ width:100%; height:100%; border-radius:16px; padding:12px; background:#0b1220; color:#f3f4f6; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; display:flex; flex-direction:column; gap:8px; } #battleViz .bv-top{ display:flex; justify-content:space-between; align-items:center; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,.1); } #battleViz .bv-title{ font-weight:800; font-size:14px; display:flex; align-items:center; gap:6px; } #battleViz .bv-counts{ font-size:12px; color:#d1d5db; } #battleViz .bv-counts b{ color:#fff; } #battleViz .bv-stage{ flex:1; display:grid; grid-template-columns:1fr 150px 1fr; gap:10px; align-items:stretch; } #battleViz .bv-panel{ background:#111827; border-radius:14px; padding:10px; display:flex; flex-direction:column; justify-content:center; gap:8px; } #battleViz .bv-label{ font-size:12px; display:flex; align-items:center; gap:8px; color:#e5e7eb; } #battleViz .bv-badge{ width:22px; height:22px; border-radius:7px; background:#1f2937; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; } #battleViz .bv-dice{ display:flex; gap:8px; } #battleViz .die{ width:34px; height:34px; border-radius:10px; background:#0b1220; border:1px solid rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; } #battleViz .die.ignored{ opacity:.35; } #battleViz .die.win{ border-color:rgba(255,255,255,.55); box-shadow:0 0 0 2px rgba(255,255,255,.12) inset; } #battleViz .bv-mid{ background:#0f172a; border-radius:14px; padding:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center; } #battleViz .bv-round{ font-size:12px; color:#cbd5f5; font-weight:700; } #battleViz .bv-result{ font-size:13px; font-weight:800; } #battleViz .bv-loss{ font-size:12px; color:#e5e7eb; } #battleViz .bv-bot{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:4px; border-top:1px solid rgba(255,255,255,.1); } #battleViz .bv-btns{ display:flex; gap:8px; } #battleViz button{ background:#111827; color:#fff; border-radius:12px; padding:8px 10px; font-size:12px; font-weight:800; border:1px solid rgba(255,255,255,.2); cursor:pointer; } #battleViz button:hover{ background:#1f2937; } #battleViz button:disabled{ opacity:.45; cursor:not-allowed; } #battleViz .bv-note{ font-size:11px; color:#9ca3af; white-space:normal; line-height:1.25; max-width:260px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }";
+  document.head.appendChild(style);
+
+  const state = {
+    a:10,
+    d:8,
+    clash:0,
+    over:false
+  };
+
+  const roll = () => 1 + Math.floor(Math.random()*6);
+  const sortDesc = a => [...a].sort((x,y)=>y-x);
+
+  function resolve() {
+    const aDice = sortDesc(Array(Math.min(3,state.a)).fill(0).map(roll));
+    const dDice = sortDesc(Array(Math.min(2,state.d)).fill(0).map(roll));
+    const cmp = Math.min(aDice.length,dDice.length);
+
+    let aLoss=0,dLoss=0;
+    for(let i=0;i<cmp;i++){
+      if(aDice[i]>dDice[i]) dLoss++;
+      else aLoss++;
+    }
+
+    state.a -= aLoss;
+    state.d -= dLoss;
+    if(state.a<=0||state.d<=0) state.over=true;
+
+    return {aDice,dDice,cmp,aLoss,dLoss};
+  }
+
+  host.innerHTML = '<div class="bv-wrap"><div class="bv-top"><div class="bv-title">⚔️ Battle Visualizer</div><div class="bv-counts">Attacker: <b id="aT"></b> troops | Defender: <b id="dT"></b> troops</div></div><div class="bv-stage"><div class="bv-panel"><div class="bv-label"><span class="bv-badge">A</span> Attacker dice</div><div class="bv-dice" id="aDice"></div></div><div class="bv-mid"><div class="bv-round" id="round">Clash 1</div><div class="bv-result" id="result">Click Next Clash</div><div class="bv-loss" id="loss"></div></div><div class="bv-panel"><div class="bv-label"><span class="bv-badge">D</span> Defender dice</div><div class="bv-dice" id="dDice"></div></div></div><div class="bv-bot"><div class="bv-btns"><button id="next">▶ Next Clash</button><button id="reset">↺ Reset</button></div><div class="bv-note">Compare highest to highest, second to second. Ties go to defender.</div></div></div>';
+
+  const aT = host.querySelector("#aT");
+  const dT = host.querySelector("#dT");
+  const aDiceEl = host.querySelector("#aDice");
+  const dDiceEl = host.querySelector("#dDice");
+  const roundEl = host.querySelector("#round");
+  const resultEl = host.querySelector("#result");
+  const lossEl = host.querySelector("#loss");
+  const nextBtn = host.querySelector("#next");
+  const resetBtn = host.querySelector("#reset");
+
+  function sync(){
+    aT.textContent = state.a;
+    dT.textContent = state.d;
+  }
+
+  function drawDice(el,arr,cmp){
+    el.innerHTML="";
+    arr.forEach((v,i)=>{
+      const d=document.createElement("div");
+      d.className="die"+(i>=cmp?" ignored":"");
+      d.textContent=v;
+      el.appendChild(d);
+    });
+  }
+
+  function next(){
+    if(state.over) return;
+    const r = resolve();
+    drawDice(aDiceEl,r.aDice,r.cmp);
+    drawDice(dDiceEl,r.dDice,r.cmp);
+    roundEl.textContent="Clash " + (state.clash+1);
+    lossEl.textContent="Losses: Attacker -" + r.aLoss + ", Defender -" + r.dLoss;
+    resultEl.textContent = r.dLoss>r.aLoss?"Attacker wins this clash":
+                           r.aLoss>r.dLoss?"Defender wins this clash":
+                           "Both sides lose troops";
+    sync();
+    state.clash++;
+    if(state.over){
+      nextBtn.disabled=true;
+      resultEl.textContent = state.d<=0?"Battle over: Attacker wins":"Battle over: Defender holds";
+    }
+  }
+
+  function reset(){
+    state.a=10; state.d=8; state.clash=0; state.over=false;
+    nextBtn.disabled=false;
+    aDiceEl.innerHTML=""; dDiceEl.innerHTML="";
+    resultEl.textContent="Click Next Clash";
+    lossEl.textContent="";
+    roundEl.textContent="Clash 1";
+    sync();
+  }
+
+  nextBtn.onclick=next;
+  resetBtn.onclick=reset;
+  reset();
+})();
+</script>
+
+    `,
+
+    economy: `
+    
+    <style scoped>
+  .economy-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .economy-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .economy-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(243, 156, 18, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(241, 196, 15, 0.4);
+  }
+
+  .economy-hero h1 {
+    font-size: 32px;
+    color: #f1c40f;
+    margin-bottom: 10px;
+  }
+
+  .economy-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .economy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .economy-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .economy-section {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .economy-section:hover {
+    border-color: rgba(139, 127, 245, 0.5);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.2);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .section-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+    color: #c9bfff;
+  }
+
+  .intro-box {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #f1c40f;
+  }
+
+  .intro-box p {
+    color: #d0d0d0;
+    line-height: 1.5;
+    font-size: 14px;
+    margin: 4px 0;
+  }
+
+  .intro-box .star {
+    color: #f1c40f;
+    font-weight: bold;
+  }
+
+  .content-box {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .content-box h3 {
+    font-size: 16px;
+    color: #c9bfff;
+    margin-bottom: 8px;
+  }
+
+  .content-box p,
+  .content-box li {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 5px 0;
+  }
+
+  .content-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .content-box li:before {
+    content: "→";
+    color: #8b7ff5;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .probability-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .prob-item {
+    background: rgba(241, 196, 15, 0.1);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .prob-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f1c40f;
+    margin-bottom: 5px;
+  }
+
+  .prob-chance {
+    font-size: 12px;
+    color: #b0b0b0;
+  }
+
+  .momentum-box {
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05));
+    border: 2px solid rgba(46, 213, 115, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .momentum-box h4 {
+    font-size: 15px;
+    color: #2ed573;
+    margin-bottom: 8px;
+  }
+
+  .momentum-box p {
+    color: #d0d0d0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 4px 0;
+  }
+
+  .momentum-box ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 8px;
+  }
+
+  .momentum-box li {
+    color: #c0c0c0;
+    font-size: 13px;
+    margin: 5px 0;
+  }
+
+  .momentum-box li:before {
+    content: "↗";
+    color: #2ed573;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .example-box {
+    background: rgba(139, 127, 245, 0.1);
+    border-left: 3px solid #8b7ff5;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+  }
+
+  .example-box p {
+    color: #c9bfff;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .rules-box {
+    background: rgba(231, 76, 60, 0.1);
+    border: 2px solid rgba(231, 76, 60, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .rules-box h4 {
+    font-size: 14px;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  .rules-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .rules-box li {
+    color: #d0d0d0;
+    font-size: 13px;
+    margin: 5px 0;
+  }
+
+  .rules-box li:before {
+    content: "!";
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-right: 8px;
+    background: rgba(231, 76, 60, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .formula-box {
+    background: rgba(52, 152, 219, 0.1);
+    border: 2px solid rgba(52, 152, 219, 0.4);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .formula-box h4 {
+    font-size: 14px;
+    color: #3498db;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .formula {
+    font-size: 16px;
+    color: #5dade2;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .info-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .info-item h4 {
+    font-size: 14px;
+    color: #c9bfff;
+    margin-bottom: 6px;
+  }
+
+  .info-item p {
+    color: #b0b0b0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(243, 156, 18, 0.08));
+    border: 2px solid rgba(241, 196, 15, 0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  .highlight-box p {
+    color: #f39c12;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+</style>
+
+<div class="economy-container">
+  <div class="economy-hero">
+    <h1>Economy</h1>
+    <p>Managing resources and growth is key to sustaining your campaign</p>
+  </div>
+
+  <div class="economy-grid">
+    <!-- SPECIAL AUTHORITY SECTION -->
+    <div class="economy-section">
+      <div class="section-header">
+        <div class="section-icon">★</div>
+        <h2>Special Authority</h2>
+      </div>
+
+      <div class="intro-box">
+        <p>Special Authority represents command power.</p>
+        <p>It is the main currency of the game.</p>
+        <p>Special Authority is shown as stars (<span class="star">★</span>).</p>
+      </div>
+
+      <div class="content-box">
+        <h3>What Special Authority Is Used For</h3>
+        <p>Special Authority allows players to:</p>
+        <ul>
+          <li>Upgrade military strength</li>
+          <li>Create hidden reserves</li>
+          <li>Activate certain War Art effects</li>
+          <li>Unlock special economic systems</li>
+        </ul>
+      </div>
+
+      <div class="content-box">
+        <h3>How You Gain Special Authority</h3>
+        <p>You mainly get <span class="star">★</span> by winning battles and taking land.</p>
+        <p>At the end of your turn, if you captured at least one territory, you gain <span class="star">★</span>.</p>
+        <p style="margin-top: 10px;">The amount gained is determined by probability:</p>
+        <div class="probability-grid">
+          <div class="prob-item">
+            <div class="prob-value">1★</div>
+            <div class="prob-chance">45%</div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-value">2★</div>
+            <div class="prob-chance">30%</div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-value">3★</div>
+            <div class="prob-chance">25%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="momentum-box">
+        <h4>Momentum from Multiple Conquests</h4>
+        <p>If you capture multiple territories in the same turn, your rewards improve.</p>
+        <p style="margin-top: 8px;">For each successful conquest:</p>
+        <ul>
+          <li>Chance of 1★ decreases by 5%</li>
+          <li>Chance of 2★ increases by 2.5%</li>
+          <li>Chance of 3★ increases by 2.5%</li>
+        </ul>
+        <p>After 9 successfuly conquests, you reached the max probability of getting 2★ or 3★.</p>
+        <p style="margin-top: 10px; font-weight: 600; color: #2ed573;">This rewards aggressive and well-planned turns.</p>
+      </div>
+
+      <div class="example-box">
+        <p>The more territories you conquer in one turn, the more likely you are to gain higher Special Authority.</p>
+      </div>
+
+      <div class="rules-box">
+        <h4>Important Rules</h4>
+        <ul>
+          <li>Special Authority is gained once per turn, not per battle</li>
+          <li>Failing to conquer any territory grants no ★</li>
+          <li>Special Authority is never shared between players</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- REINFORCEMENT SECTION -->
+    <div class="economy-section">
+      <div class="section-header">
+        <div class="section-icon">🪖</div>
+        <h2>Reinforcement & Territorial Value</h2>
+      </div>
+
+      <div class="intro-box">
+        <p>Reinforcement determines how many troops you get at the start of your turn.</p>
+        <p>It is calculated automatically by the system based on what you control.</p>
+      </div>
+
+      <div class="content-box">
+        <h3>Territorial Points</h3>
+        <p>Each territory you control gives Territorial Points.</p>
+        <p>Territorial Points are used only to calculate reinforcements.</p>
+        <p>Different territories and structures provide different point values, explained later.</p>
+      </div>
+
+      <div class="content-box">
+        <h3>Base Reinforcement Rule</h3>
+        <p>At the start of your Reinforcement phase:</p>
+        <p style="margin-top: 8px; font-weight: 600; color: #c9bfff;">You gain 1 troop for every 3 Territorial Points you control.</p>
+        <p style="margin-top: 5px; font-size: 13px; color: #9a9a9a;">Fractions are ignored.</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <h4>Continental Bonus</h4>
+          <p>If you fully control a continent, you gain bonus troops.</p>
+          <p style="margin-top: 5px;">• Each continent has a fixed bonus value</p>
+          <p>• The bonus is added after the base reinforcement calculation</p>
+          <p>• Losing control of any territory removes the bonus immediately</p>
+        </div>
+
+        <div class="info-item">
+          <h4>Modifiers</h4>
+          <p>Some buildings and effects can:</p>
+          <p style="margin-top: 5px;">• Improve how efficiently Territorial Points convert into troops</p>
+          <p>• Add flat bonus troops</p>
+          <p>• Change the base calculation rule</p>
+          <p style="margin-top: 8px; font-size: 12px; color: #9a9a9a;">These effects are explained in later sections.</p>
+        </div>
+      </div>
+
+      <div class="rules-box">
+        <h4>Important Rules</h4>
+        <ul>
+          <li>Reinforcement is calculated once per turn</li>
+          <li>Only territories you control at the start of your turn are counted</li>
+          <li>Territorial Points do not carry over between turns</li>
+        </ul>
+      </div>
+
+      <div class="formula-box">
+        <h4>One-Line Summary</h4>
+        <div class="formula">Troops gained = Territorial Points ÷ 3 + continent bonuses + modifiers</div>
+        <p style="font-size: 12px; color: #9a9a9a; margin-top: 8px;">(Details explained later.)</p>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    `,
+
+    systems: `
+    
+<style scoped>
+  .econ-systems-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .econ-systems-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
+
+  .econ-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(243, 156, 18, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(241, 196, 15, 0.4);
+  }
+
+  .econ-hero h1 {
+    font-size: 32px;
+    color: #f1c40f;
+    margin-bottom: 10px;
+  }
+
+  .econ-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .systems-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .system-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .system-card:hover {
+    border-color: rgba(139, 127, 245, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.3);
+  }
+
+  .system-card.expanded {
+    cursor: default;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+  }
+
+  .card-title-section {
+    flex: 1;
+  }
+
+  .card-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #c9bfff;
+    margin-bottom: 5px;
+  }
+
+  .card-category {
+    font-size: 12px;
+    color: #8b7ff5;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card-cost {
+    background: rgba(241, 196, 15, 0.2);
+    border: 1px solid rgba(241, 196, 15, 0.4);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #f1c40f;
+    font-weight: bold;
+  }
+
+  .card-summary {
+    color: #b0b0b0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .card-footer {
+    font-size: 12px;
+    color: #8b7ff5;
+    margin-top: 10px;
+  }
+
+  .card-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .system-card.expanded .card-details {
+    max-height: 3000px;
+  }
+
+  .details-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .details-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .details-box h4 {
+    font-size: 14px;
+    color: #c9bfff;
+    margin-bottom: 8px;
+  }
+
+  .details-box p,
+  .details-box li {
+    color: #d0d0d0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 4px 0;
+  }
+
+  .details-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .details-box li:before {
+    content: "→";
+    color: #8b7ff5;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .data-table {
+    width: 100%;
+    margin: 10px 0;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+  }
+
+  .data-table th {
+    background: rgba(139, 127, 245, 0.3);
+    color: #c9bfff;
+    font-weight: bold;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .close-btn {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    color: #ff6b6b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  .close-btn:hover {
+    background: rgba(231, 76, 60, 0.3);
+  }
+
+  .highlight-text {
+    color: #f1c40f;
+    font-weight: bold;
+  }
+
+  .sub-section {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+  }
+
+  .sub-section h5 {
+    font-size: 13px;
+    color: #8b7ff5;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+</style>
+
+<div class="econ-systems-container">
+  <div class="econ-hero">
+    <h1>Economic Systems & Upgrades</h1>
+    <p>These systems support your strategy and make powerful turns possible</p>
+  </div>
+
+  <div class="systems-grid" id="systemsGrid"></div>
+</div>
+
+<script>
+(function() {
+  const systems = [
+    {
+      id: "capital",
+      icon: "🏛️",
+      title: "Capital",
+      category: "Core Structure",
+      cost: null,
+      summary: "Your political and administrative center. Every player has one.",
+      details: {
+        description: "It represents your political and administrative center. Losing your Capital does not eliminate you, but it weakens your economy.",
+        attributes: [
+          "Marked with a star symbol",
+          "Always shows the color of the player who owns it",
+          "Counts as 1 Territorial Point",
+          "Grants +1 bonus troop during reinforcement"
+        ]
+      }
+    },
+    {
+      id: "reserves",
+      icon: "🎖️",
+      title: "Reserves",
+      category: "Troop Production",
+      cost: null,
+      summary: "Hidden troops kept off the map. Opponents cannot see them.",
+      details: {
+        description: "Reserves can be deployed at any time, usually to support major offensives or sudden defenses. They act as stored military strength, not tied to any territory."
+      }
+    },
+    {
+      id: "star-mobilization",
+      icon: "⚡",
+      title: "★ to Reserves Conversion",
+      category: "Troop Production",
+      cost: "2-15★",
+      summary: "Convert Special Authority directly into Reserves. Best used for emergencies or decisive turns.",
+      details: {
+        description: "Spending ★ directly converts authority into immediate Reserves. This is the fastest way to generate extra troops.",
+        table: {
+          title: "Conversion Table",
+          headers: ["★ Spent", "Reserves Gained"],
+          rows: [
+            ["2", "3"], ["3", "5"], ["4", "7"], ["5", "10"], ["6", "13"],
+            ["7", "16"], ["8", "19"], ["9", "23"], ["10", "28"], ["11", "33"],
+            ["12", "38"], ["13", "44"], ["14", "52"], ["15", "60"]
+          ]
+        },
+        note: "Higher ★ investment gives accelerating returns, rewarding players who commit heavily to mobilization."
+      }
+    },
+    {
+      id: "mobilization-bureau",
+      icon: "🏢",
+      title: "Mobilization Bureau",
+      category: "Troop Production",
+      cost: "2★",
+      summary: "A Strategic Command Structure that enables sustained troop generation.",
+      details: {
+        description: "Each Mobilization Bureau grants Reserves equal to 15% of your total troops each round. Troops gained this way are added directly to Reserves (still hidden).",
+        attributes: [
+          "Effects stack if multiple Mobilization Bureaus are built",
+          "Scales naturally with army size",
+          "Ideal for long wars, attrition strategies, or late-game power growth"
+        ]
+      }
+    },
+    {
+      id: "city",
+      icon: "🏭",
+      title: "City",
+      category: "Industrial Level",
+      cost: "3★",
+      summary: "Urbanized Territories with a Factory symbol. Increases Industrial Level.",
+      details: {
+        description: "Cities are Urbanized Territories that contribute to your Industrial Level progression and improve reinforcement calculations.",
+        attributes: [
+          "Counts as 2 points when computing reinforcements",
+          "Contributes toward Industrial Level progression",
+          "First increase: Control 3 Urbanized Regions → Industrial Level +1",
+          "After that: Every 2 additional Urbanized Regions → Industrial Level +1"
+        ]
+      }
+    },
+    {
+      id: "megacity",
+      icon: "🏙️",
+      title: "Megacity",
+      category: "Industrial Level",
+      cost: "5★",
+      summary: "Urbanized Territories with a Big Factory symbol. Powerful economic engines.",
+      details: {
+        description: "Megacities provide significant bonuses and contribute heavily to your empire's industrial capacity.",
+        attributes: [
+          "Gives 5 bonus troops per turn to their owner",
+          "Provides +1 Industrial Level directly",
+          "Counts as 2 points when computing reinforcements",
+          "Contributes toward Industrial Level progression"
+        ]
+      }
+    },
+    {
+      id: "infrastructure-upgrade",
+      icon: "📈",
+      title: "Infrastructure Upgrade",
+      category: "Infrastructure Level",
+      cost: "3★",
+      summary: "Direct infrastructure improvement. Fastest but least efficient method.",
+      details: {
+        description: "Immediately increases your Infrastructure Level by 1. Infrastructure Level affects battle dice, ★ income quality, and construction costs.",
+        attributes: [
+          "+1 Infrastructure Level",
+          "For every 2 Infrastructure Levels: All building costs reduced by 1★",
+          "Increases maximum 4★ chance cap",
+          "Allows rolling more dice in battle"
+        ],
+        table: {
+          title: "4★ Probability Cap by Infrastructure Level",
+          headers: ["Infrastructure Levels", "Max 4★ Chance"],
+          rows: [
+            ["1", "9%"], ["2", "18%"], ["3", "24%"], ["4", "30%"], ["5", "33%"],
+            ["6", "36%"], ["7", "39%"], ["8", "42%"], ["9", "45%"]
+          ]
+        }
+      }
+    },
+    {
+      id: "logistic-nexus",
+      icon: "🚚",
+      title: "Logistic Nexus",
+      category: "Infrastructure Level",
+      cost: "4★",
+      summary: "A strategic logistics hub that enhances long-term growth.",
+      details: {
+        description: "Provides +1 Infrastructure Level and improves reinforcement efficiency across your entire empire.",
+        attributes: [
+          "+1 Infrastructure Level",
+          "Counts as 1 Territorial Point",
+          "While controlling at least one: Troops generated at 1 per 2 Territorial Points (instead of 1 per 3)",
+          "Rewards infrastructure-focused empires with superior manpower efficiency"
+        ]
+      }
+    },
+    {
+      id: "fortification",
+      icon: "🛡️",
+      title: "Fortification",
+      category: "Defense",
+      cost: "1★",
+      summary: "Strengthen individual territories. Non-transferable if conquered.",
+      details: {
+        description: "Fortifications provide defensive bonuses and synergize when adjacent to other Fortifications.",
+        attributes: [
+          "Limit: 1 Fortification per territory",
+          "+1 Minimum Roll when defending",
+          "+25% Nullification Rate when defending",
+          "Destroyed if territory is conquered"
+        ],
+        subSections: [
+          {
+            title: "Clustered Defense",
+            content: "When Fortified territories are adjacent, they reinforce each other. For each connected Fortification: +5% Nullification Rate (cap +60%). For every 4 connected Fortifications: +1 Minimum Roll."
+          }
+        ]
+      }
+    },
+    {
+      id: "hall-of-governance",
+      icon: "⚖️",
+      title: "Hall of Governance",
+      category: "Administration",
+      cost: "5★",
+      summary: "Central administrative structure that grants Army Standardization.",
+      details: {
+        description: "Enhances Special Authority generation and enforces Army Standardization across your forces.",
+        attributes: [
+          "+1★ per round",
+          "+2 bonus troops per round",
+          "Grants Army Standardization (does not stack with multiple Halls)"
+        ],
+        subSections: [
+          {
+            title: "Army Standardization",
+            content: "Combat outcomes become more reliable. Low rolls lose probability, which is redistributed upward to mid-to-high rolls. This represents standardized training and equipment quality."
+          }
+        ],
+        table: {
+          title: "Probability Adjustment Example (Industrial Power 1-6)",
+          headers: ["Roll", "Normal Odds", "With Standardization"],
+          rows: [
+            ["1", "16.7%", "12.5%"], ["2", "16.7%", "12.5%"], ["3", "16.7%", "12.5%"],
+            ["4", "16.7%", "25.0%"], ["5", "16.7%", "20.8%"], ["6", "16.7%", "16.7%"]
+          ]
+        }
+      }
+    },
+    {
+      id: "leyline-cross",
+      icon: "✨",
+      title: "Leyline Cross",
+      category: "Crit Rate & Crit Damage",
+      cost: "2★",
+      summary: "Miracle sites that channel supernatural power. Grants Critical Rate and Blessings.",
+      details: {
+        description: "When you deal damage in battle, there is a chance to trigger Critical Damage. May grant Blessings after successful conquests.",
+        attributes: [
+          "Non-transferable: Destroyed if territory is conquered",
+          "Crit Rate Cap: 60%",
+          "Base Crit Damage: ×3",
+          "+1 Crit Damage for every 3 Leyline Crosses"
+        ],
+        table: {
+          title: "Critical Values by Leyline Cross Count",
+          headers: ["Leyline Crosses", "Crit Rate", "Crit Damage"],
+          rows: [
+            ["1", "17%", "×3"], ["2", "22%", "×3"], ["3", "28%", "×4"],
+            ["4", "35%", "×4"], ["5", "43%", "×4"], ["6", "52%", "×5"],
+            ["7", "60%", "×5"], ["8", "60%", "×5"], ["9", "60%", "×6"]
+          ]
+        },
+        subSections: [
+          {
+            title: "Blessings",
+            content: "After at least one successful conquest, chance = (Leyline Crosses × 11%), max 66%. When triggered: 60% chance for (Leyline Crosses × 4) Reserves, 40% chance for (Leyline Crosses) ★."
+          }
+        ]
+      }
+    },
+    {
+      id: "land-survey",
+      icon: "🔍",
+      title: "Land Survey",
+      category: "Exploration",
+      cost: "1★ per survey",
+      summary: "Explore territories you control to find hidden rewards. About 20% success rate.",
+      details: {
+        description: "Invest ★ to survey territories for hidden rewards. Each territory may be surveyed once. Results are permanent.",
+        attributes: [
+          "Only territories you control may be surveyed",
+          "Reward Chance: ~20% (1 in 5 territories)",
+          "If explored territory borders a reward, you get a hint"
+        ],
+        table: {
+          title: "Reward Types",
+          headers: ["Reward Tier", "Effect", "Probability"],
+          rows: [
+            ["Small", "2★ or equivalent troops", "50%"],
+            ["Medium", "3★ or equivalent troops", "33%"],
+            ["Large", "4★ or equivalent troops", "17%"]
+          ]
+        },
+        subSections: [
+          {
+            title: "Sunken Cost Recovery",
+            content: "When you find a reward, for every 2 failed surveys, recover 1★ (max 2★ recovery)."
+          },
+          {
+            title: "Time-Risk Bonus",
+            content: "After 4 failed surveys, starting from the 5th failure, gain +1★ bonus (increases by +1★ per additional failure, max 6★). Granted when reward is discovered."
+          }
+        ]
+      }
+    }
+  ];
+
+  function createSystemCard(system) {
+    const card = document.createElement("div");
+    card.className = "system-card";
+    card.id = system.id;
+
+    let headerHTML = '<div class="card-header"><div class="card-title-section"><div class="card-icon">' + system.icon + '</div><div class="card-title">' + system.title + '</div><div class="card-category">' + system.category + '</div></div>';
+    
+    if (system.cost) {
+      headerHTML += '<div class="card-cost">' + system.cost + '</div>';
+    }
+    headerHTML += '</div>';
+
+    let detailsHTML = '<div class="card-details"><div class="details-section">';
+
+    if (system.details.description) {
+      detailsHTML += '<div class="details-box"><h4>Description</h4><p>' + system.details.description + '</p></div>';
+    }
+
+    if (system.details.attributes) {
+      detailsHTML += '<div class="details-box"><h4>Attributes</h4><ul>';
+      system.details.attributes.forEach(function(attr) {
+        detailsHTML += '<li>' + attr + '</li>';
+      });
+      detailsHTML += '</ul></div>';
+    }
+
+    if (system.details.table) {
+      detailsHTML += '<div class="details-box"><h4>' + system.details.table.title + '</h4><table class="data-table"><thead><tr>';
+      system.details.table.headers.forEach(function(header) {
+        detailsHTML += '<th>' + header + '</th>';
+      });
+      detailsHTML += '</tr></thead><tbody>';
+      system.details.table.rows.forEach(function(row) {
+        detailsHTML += '<tr>';
+        row.forEach(function(cell) {
+          detailsHTML += '<td>' + cell + '</td>';
+        });
+        detailsHTML += '</tr>';
+      });
+      detailsHTML += '</tbody></table></div>';
+    }
+
+    if (system.details.subSections) {
+      system.details.subSections.forEach(function(sub) {
+        detailsHTML += '<div class="sub-section"><h5>' + sub.title + '</h5><p>' + sub.content + '</p></div>';
+      });
+    }
+
+    if (system.details.note) {
+      detailsHTML += '<div class="details-box" style="background: rgba(241, 196, 15, 0.1); border-left-color: #f1c40f;"><p class="highlight-text">' + system.details.note + '</p></div>';
+    }
+
+    detailsHTML += '<button class="close-btn">Close Details</button></div></div>';
+
+    card.innerHTML = headerHTML + '<div class="card-summary">' + system.summary + '</div><div class="card-footer">Click to view details</div>' + detailsHTML;
+
+    const closeBtn = card.querySelector(".close-btn");
+    
+    card.addEventListener("click", function(e) {
+      if (e.target === closeBtn) {
+        card.classList.remove("expanded");
+        e.stopPropagation();
+      } else if (!card.classList.contains("expanded")) {
+        card.classList.add("expanded");
+      }
+    });
+
+    closeBtn.addEventListener("click", function(e) {
+      card.classList.remove("expanded");
+      e.stopPropagation();
+    });
+
+    return card;
+  }
+
+  const grid = document.getElementById("systemsGrid");
+  systems.forEach(function(system) {
+    grid.appendChild(createSystemCard(system));
+  });
+})();
+</script>
+
+    `,
+
     arts: `
         <section id="iron-wall">
         <h3>Iron Wall</h3>
