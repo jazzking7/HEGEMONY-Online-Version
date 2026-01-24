@@ -816,10 +816,10 @@ const contentData = {
     <p><strong>Priority Order:</strong> S &gt; A &gt; B &gt; C</p>
     
     <div class="priority-legend">
-      <span class="priority-badge priority-s">S - Highest</span>
-      <span class="priority-badge priority-a">A - High</span>
-      <span class="priority-badge priority-b">B - Medium</span>
-      <span class="priority-badge priority-c">C - Standard</span>
+      <span class="priority-badge priority-s">S - Most Dangerous</span>
+      <span class="priority-badge priority-a">A - High Priority</span>
+      <span class="priority-badge priority-b">B - Medium Priority</span>
+      <span class="priority-badge priority-c">C - Cooperative</span>
     </div>
   </div>
 
@@ -3184,7 +3184,6 @@ const contentData = {
     `,
 
     systems: `
-    
 <style scoped>
   .econ-systems-container * {
     box-sizing: border-box;
@@ -3245,10 +3244,6 @@ const contentData = {
     box-shadow: 0 8px 24px rgba(139, 127, 245, 0.3);
   }
 
-  .system-card.expanded {
-    cursor: default;
-  }
-
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -3302,21 +3297,163 @@ const contentData = {
     margin-top: 10px;
   }
 
-  .card-details {
-    max-height: 0;
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, #1f1f2e 0%, #252538 100%);
+    border: 2px solid rgba(139, 127, 245, 0.6);
+    border-radius: 16px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
   }
 
-  .system-card.expanded .card-details {
-    max-height: 3000px;
+  .modal-header {
+    padding: 25px 25px 15px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    background: linear-gradient(135deg, #1f1f2e 0%, #252538 100%);
+    flex-shrink: 0;
   }
 
-  .details-section {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(139, 127, 245, 0.3);
+  .modal-title-section {
+    flex: 1;
   }
+
+  .modal-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #c9bfff;
+    margin-bottom: 5px;
+  }
+
+  .modal-category {
+    font-size: 13px;
+    color: #8b7ff5;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .modal-cost {
+    background: rgba(241, 196, 15, 0.2);
+    border: 1px solid rgba(241, 196, 15, 0.4);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #f1c40f;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+
+  .close-button {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #ff6b6b;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 15px;
+  }
+
+  .close-button:hover {
+    background: rgba(231, 76, 60, 0.4);
+    transform: scale(1.1);
+  }
+
+  .modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* Custom Scrollbar Styling */
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(139, 127, 245, 0.5);
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 127, 245, 0.7);
+  }
+
+  /* For Firefox */
+  .modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 127, 245, 0.5) rgba(0, 0, 0, 0.2);
+  }
+
+  /* Alternative: Hide scrollbar but keep scrolling (uncomment to use)
+  .modal-body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .modal-body::-webkit-scrollbar {
+    display: none;
+  }
+  */
 
   .details-box {
     background: rgba(0, 0, 0, 0.3);
@@ -3379,24 +3516,6 @@ const contentData = {
     border-bottom: none;
   }
 
-  .close-btn {
-    background: rgba(231, 76, 60, 0.2);
-    border: 1px solid rgba(231, 76, 60, 0.4);
-    color: #ff6b6b;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-    width: 100%;
-    transition: all 0.2s ease;
-  }
-
-  .close-btn:hover {
-    background: rgba(231, 76, 60, 0.3);
-  }
-
   .highlight-text {
     color: #f1c40f;
     font-weight: bold;
@@ -3415,6 +3534,13 @@ const contentData = {
     margin-bottom: 8px;
     font-weight: bold;
   }
+
+  .sub-section p {
+    color: #d0d0d0;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
 </style>
 
 <div class="econ-systems-container">
@@ -3424,6 +3550,25 @@ const contentData = {
   </div>
 
   <div class="systems-grid" id="systemsGrid"></div>
+
+  <div class="modal-overlay" id="systemModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-section">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="modal-icon" id="modalIcon"></div>
+            <div>
+              <div class="modal-title" id="modalTitle"></div>
+              <div class="modal-category" id="modalCategory"></div>
+            </div>
+            <div class="modal-cost" id="modalCost"></div>
+          </div>
+        </div>
+        <button class="close-button" id="closeModal">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -3434,28 +3579,26 @@ const contentData = {
       icon: "🏛️",
       title: "Capital",
       category: "Core Structure",
-      cost: null,
+      cost: "",
       summary: "Your political and administrative center. Every player has one.",
-      details: {
-        description: "It represents your political and administrative center. Losing your Capital does not eliminate you, but it weakens your economy.",
-        attributes: [
-          "Marked with a star symbol",
-          "Always shows the color of the player who owns it",
-          "Counts as 1 Territorial Point",
-          "Grants +1 bonus troop during reinforcement"
-        ]
-      }
+      description: "It represents your political and administrative center. Losing your Capital does not eliminate you, but it weakens your economy.",
+      attributes: "Marked with a star symbol<br>Always shows the color of the player who owns it<br>Counts as 1 Territorial Point<br>Grants +1 bonus troop during reinforcement",
+      table: "",
+      subSections: "",
+      note: ""
     },
     {
       id: "reserves",
       icon: "🎖️",
       title: "Reserves",
       category: "Troop Production",
-      cost: null,
+      cost: "",
       summary: "Hidden troops kept off the map. Opponents cannot see them.",
-      details: {
-        description: "Reserves can be deployed at any time, usually to support major offensives or sudden defenses. They act as stored military strength, not tied to any territory."
-      }
+      description: "Reserves can be deployed at any time, usually to support major offensives or sudden defenses. They act as stored military strength, not tied to any territory.",
+      attributes: "",
+      table: "",
+      subSections: "",
+      note: ""
     },
     {
       id: "star-mobilization",
@@ -3464,19 +3607,11 @@ const contentData = {
       category: "Troop Production",
       cost: "2-15★",
       summary: "Convert Special Authority directly into Reserves. Best used for emergencies or decisive turns.",
-      details: {
-        description: "Spending ★ directly converts authority into immediate Reserves. This is the fastest way to generate extra troops.",
-        table: {
-          title: "Conversion Table",
-          headers: ["★ Spent", "Reserves Gained"],
-          rows: [
-            ["2", "3"], ["3", "5"], ["4", "7"], ["5", "10"], ["6", "13"],
-            ["7", "16"], ["8", "19"], ["9", "23"], ["10", "28"], ["11", "33"],
-            ["12", "38"], ["13", "44"], ["14", "52"], ["15", "60"]
-          ]
-        },
-        note: "Higher ★ investment gives accelerating returns, rewarding players who commit heavily to mobilization."
-      }
+      description: "Spending ★ directly converts authority into immediate Reserves. This is the fastest way to generate extra troops.",
+      attributes: "",
+      table: "<h4>Conversion Table</h4><table class='data-table'><thead><tr><th>★ Spent</th><th>Reserves Gained</th></tr></thead><tbody><tr><td>2</td><td>3</td></tr><tr><td>3</td><td>5</td></tr><tr><td>4</td><td>7</td></tr><tr><td>5</td><td>10</td></tr><tr><td>6</td><td>13</td></tr><tr><td>7</td><td>16</td></tr><tr><td>8</td><td>19</td></tr><tr><td>9</td><td>23</td></tr><tr><td>10</td><td>28</td></tr><tr><td>11</td><td>33</td></tr><tr><td>12</td><td>38</td></tr><tr><td>13</td><td>44</td></tr><tr><td>14</td><td>52</td></tr><tr><td>15</td><td>60</td></tr></tbody></table>",
+      subSections: "",
+      note: "Higher ★ investment gives accelerating returns, rewarding players who commit heavily to mobilization."
     },
     {
       id: "mobilization-bureau",
@@ -3485,14 +3620,11 @@ const contentData = {
       category: "Troop Production",
       cost: "2★",
       summary: "A Strategic Command Structure that enables sustained troop generation.",
-      details: {
-        description: "Each Mobilization Bureau grants Reserves equal to 15% of your total troops each round. Troops gained this way are added directly to Reserves (still hidden).",
-        attributes: [
-          "Effects stack if multiple Mobilization Bureaus are built",
-          "Scales naturally with army size",
-          "Ideal for long wars, attrition strategies, or late-game power growth"
-        ]
-      }
+      description: "Each Mobilization Bureau grants Reserves equal to 15% of your total troops each round. Troops gained this way are added directly to Reserves (still hidden).",
+      attributes: "Effects stack if multiple Mobilization Bureaus are built<br>Scales naturally with army size<br>Ideal for long wars, attrition strategies, or late-game power growth",
+      table: "",
+      subSections: "",
+      note: ""
     },
     {
       id: "city",
@@ -3501,15 +3633,11 @@ const contentData = {
       category: "Industrial Level",
       cost: "3★",
       summary: "Urbanized Territories with a Factory symbol. Increases Industrial Level.",
-      details: {
-        description: "Cities are Urbanized Territories that contribute to your Industrial Level progression and improve reinforcement calculations.",
-        attributes: [
-          "Counts as 2 points when computing reinforcements",
-          "Contributes toward Industrial Level progression",
-          "First increase: Control 3 Urbanized Regions → Industrial Level +1",
-          "After that: Every 2 additional Urbanized Regions → Industrial Level +1"
-        ]
-      }
+      description: "Cities are Urbanized Territories that contribute to your Industrial Level progression and improve reinforcement calculations.",
+      attributes: "Counts as 2 points when computing reinforcements<br>Contributes toward Industrial Level progression<br>First increase: Control 3 Urbanized Regions → Industrial Level +1<br>After that: Every 2 additional Urbanized Regions → Industrial Level +1",
+      table: "",
+      subSections: "",
+      note: ""
     },
     {
       id: "megacity",
@@ -3518,15 +3646,11 @@ const contentData = {
       category: "Industrial Level",
       cost: "5★",
       summary: "Urbanized Territories with a Big Factory symbol. Powerful economic engines.",
-      details: {
-        description: "Megacities provide significant bonuses and contribute heavily to your empire's industrial capacity.",
-        attributes: [
-          "Gives 5 bonus troops per turn to their owner",
-          "Provides +1 Industrial Level directly",
-          "Counts as 2 points when computing reinforcements",
-          "Contributes toward Industrial Level progression"
-        ]
-      }
+      description: "Megacities provide significant bonuses and contribute heavily to your empire's industrial capacity. Built upon existing city.",
+      attributes: "Built upon existing city<br>Gives 5 bonus troops per turn to their owner<br>Provides +1 Industrial Level directly<br>Counts as 2 points when computing reinforcements<br>Contributes toward Industrial Level progression",
+      table: "",
+      subSections: "",
+      note: ""
     },
     {
       id: "infrastructure-upgrade",
@@ -3535,23 +3659,11 @@ const contentData = {
       category: "Infrastructure Level",
       cost: "3★",
       summary: "Direct infrastructure improvement. Fastest but least efficient method.",
-      details: {
-        description: "Immediately increases your Infrastructure Level by 1. Infrastructure Level affects battle dice, ★ income quality, and construction costs.",
-        attributes: [
-          "+1 Infrastructure Level",
-          "For every 2 Infrastructure Levels: All building costs reduced by 1★",
-          "Increases maximum 4★ chance cap",
-          "Allows rolling more dice in battle"
-        ],
-        table: {
-          title: "4★ Probability Cap by Infrastructure Level",
-          headers: ["Infrastructure Levels", "Max 4★ Chance"],
-          rows: [
-            ["1", "9%"], ["2", "18%"], ["3", "24%"], ["4", "30%"], ["5", "33%"],
-            ["6", "36%"], ["7", "39%"], ["8", "42%"], ["9", "45%"]
-          ]
-        }
-      }
+      description: "Immediately increases your Infrastructure Level by 1. Infrastructure Level affects battle dice, ★ income quality, and construction costs.",
+      attributes: "+1 Infrastructure Level<br>For every 2 Infrastructure Levels: All building costs reduced by 1★<br>Increases maximum 4★ chance cap<br>Allows rolling more dice in battle",
+      table: "<h4>4★ Probability Cap by Infrastructure Level</h4><table class='data-table'><thead><tr><th>Infrastructure Levels</th><th>Max 4★ Chance</th></tr></thead><tbody><tr><td>1</td><td>9%</td></tr><tr><td>2</td><td>18%</td></tr><tr><td>3</td><td>24%</td></tr><tr><td>4</td><td>30%</td></tr><tr><td>5</td><td>33%</td></tr><tr><td>6</td><td>36%</td></tr><tr><td>7</td><td>39%</td></tr><tr><td>8</td><td>42%</td></tr><tr><td>9</td><td>45%</td></tr></tbody></table>",
+      subSections: "",
+      note: ""
     },
     {
       id: "logistic-nexus",
@@ -3560,15 +3672,11 @@ const contentData = {
       category: "Infrastructure Level",
       cost: "4★",
       summary: "A strategic logistics hub that enhances long-term growth.",
-      details: {
-        description: "Provides +1 Infrastructure Level and improves reinforcement efficiency across your entire empire.",
-        attributes: [
-          "+1 Infrastructure Level",
-          "Counts as 1 Territorial Point",
-          "While controlling at least one: Troops generated at 1 per 2 Territorial Points (instead of 1 per 3)",
-          "Rewards infrastructure-focused empires with superior manpower efficiency"
-        ]
-      }
+      description: "Provides +1 Infrastructure Level and improves reinforcement efficiency across your entire empire.",
+      attributes: "+1 Infrastructure Level<br>Counts as 1 Territorial Point<br>While controlling at least one: Troops generated at 1 per 2 Territorial Points (instead of 1 per 3)<br>Rewards infrastructure-focused empires with superior manpower efficiency",
+      table: "",
+      subSections: "<div class='sub-section'><h5>Optimized Governance</h5><p>Guaranteed 2★ after 6 successful conquests. After making 6 successful conquests, you will receive additional chance of getting 4★.</p></div>",
+      note: ""
     },
     {
       id: "fortification",
@@ -3577,21 +3685,11 @@ const contentData = {
       category: "Defense",
       cost: "1★",
       summary: "Strengthen individual territories. Non-transferable if conquered.",
-      details: {
-        description: "Fortifications provide defensive bonuses and synergize when adjacent to other Fortifications.",
-        attributes: [
-          "Limit: 1 Fortification per territory",
-          "+1 Minimum Roll when defending",
-          "+25% Nullification Rate when defending",
-          "Destroyed if territory is conquered"
-        ],
-        subSections: [
-          {
-            title: "Clustered Defense",
-            content: "When Fortified territories are adjacent, they reinforce each other. For each connected Fortification: +5% Nullification Rate (cap +60%). For every 4 connected Fortifications: +1 Minimum Roll."
-          }
-        ]
-      }
+      description: "Fortifications provide defensive bonuses and synergize when adjacent to other Fortifications.",
+      attributes: "Limit: 1 Fortification per territory<br>+1 Minimum Roll when defending<br>+25% Nullification Rate when defending<br>Destroyed if territory is conquered",
+      table: "",
+      subSections: "<div class='sub-section'><h5>Clustered Defense</h5><p>When Fortified territories are adjacent, they reinforce each other. For each connected Fortification: +5% Nullification Rate (cap +60%). For every 4 connected Fortifications: +1 Minimum Roll.</p></div>",
+      note: ""
     },
     {
       id: "hall-of-governance",
@@ -3600,28 +3698,11 @@ const contentData = {
       category: "Administration",
       cost: "5★",
       summary: "Central administrative structure that grants Army Standardization.",
-      details: {
-        description: "Enhances Special Authority generation and enforces Army Standardization across your forces.",
-        attributes: [
-          "+1★ per round",
-          "+2 bonus troops per round",
-          "Grants Army Standardization (does not stack with multiple Halls)"
-        ],
-        subSections: [
-          {
-            title: "Army Standardization",
-            content: "Combat outcomes become more reliable. Low rolls lose probability, which is redistributed upward to mid-to-high rolls. This represents standardized training and equipment quality."
-          }
-        ],
-        table: {
-          title: "Probability Adjustment Example (Industrial Power 1-6)",
-          headers: ["Roll", "Normal Odds", "With Standardization"],
-          rows: [
-            ["1", "16.7%", "12.5%"], ["2", "16.7%", "12.5%"], ["3", "16.7%", "12.5%"],
-            ["4", "16.7%", "25.0%"], ["5", "16.7%", "20.8%"], ["6", "16.7%", "16.7%"]
-          ]
-        }
-      }
+      description: "Enhances Special Authority generation and enforces Army Standardization across your forces.",
+      attributes: "+1★ per round<br>+2 bonus troops per round<br>Grants Army Standardization (does not stack with multiple Halls)",
+      table: "",
+      subSections: "<div class='sub-section'><h5>Integrated Theater Command</h5><p>Player-controlled territories that are directly connected to a Hall of Governance by an uninterrupted chain of friendly territories gain a +1 Damage Multiplier in battles fought there.</p></div><div class='sub-section'><h5>Army Standardization</h5><p>Combat outcomes become more reliable. Low rolls lose probability, which is redistributed upward to mid-to-high rolls. This represents standardized training and equipment quality.</p></div><div class='details-box'><h4>Probability Adjustment Example (Industrial Power 1-6)</h4><table class='data-table'><thead><tr><th>Roll</th><th>Normal Odds</th><th>With Standardization</th></tr></thead><tbody><tr><td>1</td><td>16.7%</td><td>12.5%</td></tr><tr><td>2</td><td>16.7%</td><td>12.5%</td></tr><tr><td>3</td><td>16.7%</td><td>12.5%</td></tr><tr><td>4</td><td>16.7%</td><td>25.0%</td></tr><tr><td>5</td><td>16.7%</td><td>20.8%</td></tr><tr><td>6</td><td>16.7%</td><td>16.7%</td></tr></tbody></table></div>",
+      note: ""
     },
     {
       id: "leyline-cross",
@@ -3630,30 +3711,11 @@ const contentData = {
       category: "Crit Rate & Crit Damage",
       cost: "2★",
       summary: "Miracle sites that channel supernatural power. Grants Critical Rate and Blessings.",
-      details: {
-        description: "When you deal damage in battle, there is a chance to trigger Critical Damage. May grant Blessings after successful conquests.",
-        attributes: [
-          "Non-transferable: Destroyed if territory is conquered",
-          "Crit Rate Cap: 60%",
-          "Base Crit Damage: ×3",
-          "+1 Crit Damage for every 3 Leyline Crosses"
-        ],
-        table: {
-          title: "Critical Values by Leyline Cross Count",
-          headers: ["Leyline Crosses", "Crit Rate", "Crit Damage"],
-          rows: [
-            ["1", "17%", "×3"], ["2", "22%", "×3"], ["3", "28%", "×4"],
-            ["4", "35%", "×4"], ["5", "43%", "×4"], ["6", "52%", "×5"],
-            ["7", "60%", "×5"], ["8", "60%", "×5"], ["9", "60%", "×6"]
-          ]
-        },
-        subSections: [
-          {
-            title: "Blessings",
-            content: "After at least one successful conquest, chance = (Leyline Crosses × 11%), max 66%. When triggered: 60% chance for (Leyline Crosses × 4) Reserves, 40% chance for (Leyline Crosses) ★."
-          }
-        ]
-      }
+      description: "When you deal damage in battle, there is a chance to trigger Critical Damage. May grant Blessings after successful conquests.",
+      attributes: "Non-transferable: Destroyed if territory is conquered<br>Crit Rate Cap: 60%<br>Base Crit Damage: ×3<br>+1 Crit Damage for every 3 Leyline Crosses",
+      table: "<h4>Critical Values by Leyline Cross Count</h4><table class='data-table'><thead><tr><th>Leyline Crosses</th><th>Crit Rate</th><th>Crit Damage</th></tr></thead><tbody><tr><td>1</td><td>17%</td><td>×3</td></tr><tr><td>2</td><td>22%</td><td>×3</td></tr><tr><td>3</td><td>28%</td><td>×4</td></tr><tr><td>4</td><td>35%</td><td>×4</td></tr><tr><td>5</td><td>43%</td><td>×4</td></tr><tr><td>6</td><td>52%</td><td>×5</td></tr><tr><td>7</td><td>60%</td><td>×5</td></tr><tr><td>8</td><td>60%</td><td>×5</td></tr><tr><td>9</td><td>60%</td><td>×6</td></tr></tbody></table>",
+      subSections: "<div class='sub-section'><h5>Blessings</h5><p>After at least one successful conquest, chance = (Number of Leyline Crosses × 11%), max 66%.<br><br>When triggered:<br>60% chance for (Number of Leyline Crosses × 4) Reserves<br>40% chance for (Number of Leyline Crosses) ★</p></div>",
+      note: ""
     },
     {
       id: "land-survey",
@@ -3662,35 +3724,75 @@ const contentData = {
       category: "Exploration",
       cost: "1★ per survey",
       summary: "Explore territories you control to find hidden rewards. About 20% success rate.",
-      details: {
-        description: "Invest ★ to survey territories for hidden rewards. Each territory may be surveyed once. Results are permanent.",
-        attributes: [
-          "Only territories you control may be surveyed",
-          "Reward Chance: ~20% (1 in 5 territories)",
-          "If explored territory borders a reward, you get a hint"
-        ],
-        table: {
-          title: "Reward Types",
-          headers: ["Reward Tier", "Effect", "Probability"],
-          rows: [
-            ["Small", "2★ or equivalent troops", "50%"],
-            ["Medium", "3★ or equivalent troops", "33%"],
-            ["Large", "4★ or equivalent troops", "17%"]
-          ]
-        },
-        subSections: [
-          {
-            title: "Sunken Cost Recovery",
-            content: "When you find a reward, for every 2 failed surveys, recover 1★ (max 2★ recovery)."
-          },
-          {
-            title: "Time-Risk Bonus",
-            content: "After 4 failed surveys, starting from the 5th failure, gain +1★ bonus (increases by +1★ per additional failure, max 6★). Granted when reward is discovered."
-          }
-        ]
-      }
+      description: "Invest ★ to survey territories for hidden rewards. Each territory may be surveyed once. Results are permanent.",
+      attributes: "Only territories you control may be surveyed<br>Reward Chance: ~20% (1 in 5 territories)<br>If explored territory borders a reward, you get a hint",
+      table: "<h4>Reward Types</h4><table class='data-table'><thead><tr><th>Reward Tier</th><th>Effect</th><th>Probability</th></tr></thead><tbody><tr><td>Small</td><td>2★ or equivalent troops</td><td>50%</td></tr><tr><td>Medium</td><td>3★ or equivalent troops</td><td>33%</td></tr><tr><td>Large</td><td>4★ or equivalent troops</td><td>17%</td></tr></tbody></table>",
+      subSections: "<div class='sub-section'><h5>Sunken Cost Recovery</h5><p>When you find a reward, for every 2 failed surveys, recover 1★ (max 2★ recovery).</p></div><div class='sub-section'><h5>Time-Risk Bonus</h5><p>After 4 failed surveys, starting from the 5th failure, gain +1★ bonus (increases by +1★ per additional failure, max 6★). Granted when reward is discovered.</p></div>",
+      note: ""
     }
   ];
+
+  const modal = document.getElementById("systemModal");
+  const closeBtn = document.getElementById("closeModal");
+
+  function openModal(system) {
+    document.getElementById("modalIcon").textContent = system.icon;
+    document.getElementById("modalTitle").textContent = system.title;
+    document.getElementById("modalCategory").textContent = system.category;
+    
+    const costEl = document.getElementById("modalCost");
+    if (system.cost) {
+      costEl.textContent = system.cost;
+      costEl.style.display = "block";
+    } else {
+      costEl.style.display = "none";
+    }
+
+    let bodyHTML = "";
+
+    if (system.description) {
+      bodyHTML += '<div class="details-box"><h4>Description</h4><p>' + system.description + '</p></div>';
+    }
+
+    if (system.attributes) {
+      bodyHTML += '<div class="details-box"><h4>Attributes</h4><ul><li>' + system.attributes.split('<br>').join('</li><li>') + '</li></ul></div>';
+    }
+
+    if (system.table) {
+      bodyHTML += '<div class="details-box">' + system.table + '</div>';
+    }
+
+    if (system.subSections) {
+      bodyHTML += system.subSections;
+    }
+
+    if (system.note) {
+      bodyHTML += '<div class="details-box" style="background: rgba(241, 196, 15, 0.1); border-left-color: #f1c40f;"><p class="highlight-text">' + system.note + '</p></div>';
+    }
+
+    document.getElementById("modalBody").innerHTML = bodyHTML;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && modal.classList.contains("active")) {
+      closeModal();
+    }
+  });
 
   function createSystemCard(system) {
     const card = document.createElement("div");
@@ -3704,64 +3806,10 @@ const contentData = {
     }
     headerHTML += '</div>';
 
-    let detailsHTML = '<div class="card-details"><div class="details-section">';
+    card.innerHTML = headerHTML + '<div class="card-summary">' + system.summary + '</div><div class="card-footer">Click to view details</div>';
 
-    if (system.details.description) {
-      detailsHTML += '<div class="details-box"><h4>Description</h4><p>' + system.details.description + '</p></div>';
-    }
-
-    if (system.details.attributes) {
-      detailsHTML += '<div class="details-box"><h4>Attributes</h4><ul>';
-      system.details.attributes.forEach(function(attr) {
-        detailsHTML += '<li>' + attr + '</li>';
-      });
-      detailsHTML += '</ul></div>';
-    }
-
-    if (system.details.table) {
-      detailsHTML += '<div class="details-box"><h4>' + system.details.table.title + '</h4><table class="data-table"><thead><tr>';
-      system.details.table.headers.forEach(function(header) {
-        detailsHTML += '<th>' + header + '</th>';
-      });
-      detailsHTML += '</tr></thead><tbody>';
-      system.details.table.rows.forEach(function(row) {
-        detailsHTML += '<tr>';
-        row.forEach(function(cell) {
-          detailsHTML += '<td>' + cell + '</td>';
-        });
-        detailsHTML += '</tr>';
-      });
-      detailsHTML += '</tbody></table></div>';
-    }
-
-    if (system.details.subSections) {
-      system.details.subSections.forEach(function(sub) {
-        detailsHTML += '<div class="sub-section"><h5>' + sub.title + '</h5><p>' + sub.content + '</p></div>';
-      });
-    }
-
-    if (system.details.note) {
-      detailsHTML += '<div class="details-box" style="background: rgba(241, 196, 15, 0.1); border-left-color: #f1c40f;"><p class="highlight-text">' + system.details.note + '</p></div>';
-    }
-
-    detailsHTML += '<button class="close-btn">Close Details</button></div></div>';
-
-    card.innerHTML = headerHTML + '<div class="card-summary">' + system.summary + '</div><div class="card-footer">Click to view details</div>' + detailsHTML;
-
-    const closeBtn = card.querySelector(".close-btn");
-    
-    card.addEventListener("click", function(e) {
-      if (e.target === closeBtn) {
-        card.classList.remove("expanded");
-        e.stopPropagation();
-      } else if (!card.classList.contains("expanded")) {
-        card.classList.add("expanded");
-      }
-    });
-
-    closeBtn.addEventListener("click", function(e) {
-      card.classList.remove("expanded");
-      e.stopPropagation();
+    card.addEventListener("click", function() {
+      openModal(system);
     });
 
     return card;
