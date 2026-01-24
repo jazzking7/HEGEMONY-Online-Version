@@ -4140,7 +4140,7 @@ const contentData = {
         <div class="action-steps">
           <h4 style="font-size: 14px; color: #c9bfff; margin-bottom: 8px;">How It Works</h4>
           <ol>
-            <li>A player selects "Launch Summit"</li>
+            <li>A player selects "Launch Summit" in Diplomatic menu during game</li>
             <li>After their turn ends, a vote is triggered</li>
             <li>If majority votes "Yes": 120-second discussion begins</li>
             <li>If vote fails, no Summit occurs</li>
@@ -4167,7 +4167,7 @@ const contentData = {
           <ul style="list-style: none; padding-left: 0;">
             <li style="margin: 6px 0; padding-left: 20px; position: relative;">
               <span style="position: absolute; left: 0; color: #8b7ff5; font-weight: bold;">→</span>
-              Proposed via "Global Ceasefire" in menu
+              Proposed via "Global Ceasefire" in Diplomatic menu during game
             </li>
             <li style="margin: 6px 0; padding-left: 20px; position: relative;">
               <span style="position: absolute; left: 0; color: #8b7ff5; font-weight: bold;">→</span>
@@ -4183,8 +4183,8 @@ const contentData = {
         <div class="outcome-box">
           <h4 style="font-size: 14px; color: #2ed573; margin-bottom: 8px;">Victory Outcomes</h4>
           <ul>
-            <li>No conflicts: All C-Class Agenda players win</li>
-            <li>With conflicts: Only C-Class players who already fulfilled their win conditions win</li>
+            <li>No conflicts of interest: All C-Class Agenda players win</li>
+            <li>With conflicts of interest: Only C-Class players who already fulfilled their win conditions win</li>
           </ul>
         </div>
 
