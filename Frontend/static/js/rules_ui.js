@@ -3824,6 +3824,465 @@ const contentData = {
 
     `,
 
+    diplomatic: `
+   
+<style scoped>
+  .diplomatics-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .diplomatics-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
+
+  .diplo-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(41, 128, 185, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(52, 152, 219, 0.4);
+  }
+
+  .diplo-hero h1 {
+    font-size: 32px;
+    color: #3498db;
+    margin-bottom: 10px;
+  }
+
+  .diplo-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 900px) {
+    .actions-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .action-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+  }
+
+  .action-card:hover {
+    border-color: rgba(139, 127, 245, 0.5);
+    box-shadow: 0 8px 24px rgba(139, 127, 245, 0.2);
+  }
+
+  .action-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(139, 127, 245, 0.3);
+  }
+
+  .action-icon {
+    font-size: 28px;
+  }
+
+  .action-title {
+    font-size: 22px;
+    color: #c9bfff;
+    font-weight: bold;
+  }
+
+  .action-content {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .action-content p {
+    margin: 10px 0;
+  }
+
+  .action-content strong {
+    color: #8b7ff5;
+  }
+
+  .action-steps {
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid #8b7ff5;
+  }
+
+  .action-steps ol {
+    margin: 8px 0;
+    padding-left: 20px;
+  }
+
+  .action-steps li {
+    margin: 6px 0;
+    line-height: 1.5;
+  }
+
+  .action-limit {
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(241, 196, 15, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #f1c40f;
+    font-size: 13px;
+    color: #f39c12;
+  }
+
+  .outcome-box {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(46, 213, 115, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #2ed573;
+  }
+
+  .outcome-box ul {
+    margin: 8px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .outcome-box li {
+    margin: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .outcome-box li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #2ed573;
+    font-weight: bold;
+  }
+
+  .doctrines-section {
+    margin-top: 30px;
+  }
+
+  .section-header {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.1), rgba(184, 174, 255, 0.05));
+    border: 2px solid rgba(139, 127, 245, 0.3);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .section-title h2 {
+    font-size: 26px;
+    color: #c9bfff;
+  }
+
+  .section-title-icon {
+    font-size: 32px;
+  }
+
+  .section-description {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .section-description p {
+    margin: 8px 0;
+  }
+
+  .section-description strong {
+    color: #8b7ff5;
+  }
+
+  .how-it-works {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #8b7ff5;
+    margin-top: 15px;
+  }
+
+  .how-it-works h4 {
+    font-size: 14px;
+    color: #c9bfff;
+    margin-bottom: 10px;
+  }
+
+  .how-it-works ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .how-it-works li {
+    margin: 6px 0;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .how-it-works li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #8b7ff5;
+    font-weight: bold;
+  }
+
+  .doctrines-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+
+  @media (max-width: 1200px) {
+    .doctrines-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .doctrines-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .doctrines-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .doctrine-card {
+    background: linear-gradient(135deg, rgba(139, 127, 245, 0.12), rgba(184, 174, 255, 0.06));
+    border: 1px solid rgba(139, 127, 245, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .doctrine-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 127, 245, 0.3);
+    border-color: rgba(139, 127, 245, 0.5);
+  }
+
+  .doctrine-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #c9bfff;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .doctrine-effect {
+    font-size: 13px;
+    color: #b0b0b0;
+    line-height: 1.5;
+  }
+
+  .summary-box {
+    margin-top: 25px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.1), rgba(46, 213, 115, 0.05));
+    border: 2px solid rgba(46, 213, 115, 0.4);
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .summary-box p {
+    color: #2ed573;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+</style>
+
+<div class="diplomatics-container">
+  <div class="diplo-hero">
+    <h1>Diplomatic Actions</h1>
+    <p>Shape the game through negotiation and global agreements</p>
+  </div>
+
+  <div class="actions-grid">
+    <!-- SUMMIT -->
+    <div class="action-card">
+      <div class="action-header">
+        <div class="action-icon">🤝</div>
+        <div class="action-title">Summit</div>
+      </div>
+      <div class="action-content">
+        <p>Summits are temporary discussion pauses that allow players to negotiate.</p>
+        
+        <div class="action-steps">
+          <h4 style="font-size: 14px; color: #c9bfff; margin-bottom: 8px;">How It Works</h4>
+          <ol>
+            <li>A player selects "Launch Summit"</li>
+            <li>After their turn ends, a vote is triggered</li>
+            <li>If majority votes "Yes": 120-second discussion begins</li>
+            <li>If vote fails, no Summit occurs</li>
+          </ol>
+        </div>
+
+        <div class="action-limit">
+          <strong>Limit:</strong> Each player may launch up to 2 Summits per game
+        </div>
+      </div>
+    </div>
+
+    <!-- GLOBAL CEASEFIRE -->
+    <div class="action-card">
+      <div class="action-header">
+        <div class="action-icon">🕊️</div>
+        <div class="action-title">Global Ceasefire</div>
+      </div>
+      <div class="action-content">
+        <p>A diplomatic mechanism that can <strong>end the game immediately</strong>.</p>
+        
+        <div class="action-steps">
+          <h4 style="font-size: 14px; color: #c9bfff; margin-bottom: 8px;">Activation</h4>
+          <ul style="list-style: none; padding-left: 0;">
+            <li style="margin: 6px 0; padding-left: 20px; position: relative;">
+              <span style="position: absolute; left: 0; color: #8b7ff5; font-weight: bold;">→</span>
+              Proposed via "Global Ceasefire" in menu
+            </li>
+            <li style="margin: 6px 0; padding-left: 20px; position: relative;">
+              <span style="position: absolute; left: 0; color: #8b7ff5; font-weight: bold;">→</span>
+              Requires unanimous approval
+            </li>
+            <li style="margin: 6px 0; padding-left: 20px; position: relative;">
+              <span style="position: absolute; left: 0; color: #8b7ff5; font-weight: bold;">→</span>
+              A single "No" vote cancels it
+            </li>
+          </ul>
+        </div>
+
+        <div class="outcome-box">
+          <h4 style="font-size: 14px; color: #2ed573; margin-bottom: 8px;">Victory Outcomes</h4>
+          <ul>
+            <li>No conflicts: All C-Class Agenda players win</li>
+            <li>With conflicts: Only C-Class players who already fulfilled their win conditions win</li>
+          </ul>
+        </div>
+
+        <div class="action-limit">
+          <strong>Limit:</strong> Each player may propose up to 2 Global Ceasefires per game
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCTRINES SECTION -->
+  <div class="doctrines-section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-title-icon">📜</div>
+        <h2>Doctrines</h2>
+      </div>
+      
+      <div class="section-description">
+        <p>Doctrines are optional temporary rule modifiers that introduce short-term global effects lasting 1 full round.</p>
+      </div>
+
+      <div class="how-it-works">
+        <h4>How Doctrines Are Chosen</h4>
+        <ul>
+          <li>Every 2 rounds, the current <strong>Superpower</strong> (strongest player) is offered 3 random Doctrines</li>
+          <li>They may choose 1 Doctrine to activate</li>
+          <li>The selected Doctrine applies to all players during the next round</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="doctrines-grid">
+      <div class="doctrine-card">
+        <div class="doctrine-name">Peace Above All</div>
+        <div class="doctrine-effect">Players who avoid conquests gain the highest ★ rewards. More conquests reduce ★ gained.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Prosperity of the Saints</div>
+        <div class="doctrine-effect">All C-Class Agenda holders gain +1★ at the end of their turn.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Self-Preservation: Authority</div>
+        <div class="doctrine-effect">Gain +1★ immediately.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Self-Preservation: Population</div>
+        <div class="doctrine-effect">Gain 7 Reserves immediately.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">War Art Suspension</div>
+        <div class="doctrine-effect">Active War Art usage is disabled. Passive effects remain active.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Continental Embargo</div>
+        <div class="doctrine-effect">All continental bonuses are disabled.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Philanthropist</div>
+        <div class="doctrine-effect">The weakest player gains 7 Reserves and +1★.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Hyperinflation</div>
+        <div class="doctrine-effect">All building and upgrade costs increase by +1★.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Anarchy</div>
+        <div class="doctrine-effect">All attackers gain +1 Damage Multiplier.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Turtle Shield</div>
+        <div class="doctrine-effect">All defenders gain +15% Nullification Rate.</div>
+      </div>
+
+      <div class="doctrine-card">
+        <div class="doctrine-name">Stability</div>
+        <div class="doctrine-effect">Nothing happens.</div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <p>Doctrines are short-term global rules chosen by the Superpower every two rounds, reshaping strategy for a single round.</p>
+    </div>
+  </div>
+</div>
+
+    `,
+
+
     arts: `
         <section id="iron-wall">
         <h3>Iron Wall</h3>
