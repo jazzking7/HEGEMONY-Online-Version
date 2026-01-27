@@ -4284,644 +4284,607 @@ const contentData = {
 
 
     arts: `
-        <section id="iron-wall">
-        <h3>Iron Wall</h3>
-        <p><em>"Impenetrable as steel, unmoving as stone."</em></p>
+        
+    <style scoped>
+  .wararts-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .wararts-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
 
-        <p>When the player's territories are attacked, there is a <strong>30% Nullification Rate</strong>, and a <strong>x2 Damage Multiplier</strong> against attacking forces.</p>
+  .wararts-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(41, 128, 185, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(52, 152, 219, 0.4);
+  }
 
-        <p>If there is a significant disparity between the player’s and the enemy’s stats, both the Nullification Rate and Damage Multiplier increase.</p>
+  .wararts-hero h1 {
+    font-size: 32px;
+    color: #3498db;
+    margin-bottom: 10px;
+  }
 
-        <p><strong>Disparity</strong> is calculated as:</p>
-        <p><code>(Enemy’s Industrial Level - Player’s Industrial Level) + (Enemy’s Infrastructure Level - Player’s Infrastructure Level)</code></p>
+  .wararts-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
 
-        <table border="1" cellpadding="6" cellspacing="0">
-            <thead>
-            <tr>
-                <th style="padding: 0 12px;">Disparity</th>
-                <th style="padding: 0 12px;">Nullification Rate (%)</th>
-                <th style="padding: 0 12px;">Damage Multiplier</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td style="padding: 0 12px;">1</td>
-                <td style="padding: 0 12px;">35</td>
-                <td style="padding: 0 12px;">2</td>
-            </tr>
-            <tr>
-                <td style="padding: 0 12px;">2</td>
-                <td style="padding: 0 12px;">40</td>
-                <td style="padding: 0 12px;">2</td>
-            </tr>
-            <tr>
-                <td style="padding: 0 12px;">3</td>
-                <td style="padding: 0 12px;">45</td>
-                <td style="padding: 0 12px;">3</td>
-            </tr>
-            <tr>
-                <td style="padding: 0 12px;">4</td>
-                <td style="padding: 0 12px;">50</td>
-                <td style="padding: 0 12px;">3</td>
-            </tr>
-            <tr>
-                <td style="padding: 0 12px;">5+</td>
-                <td style="padding: 0 12px;">60</td>
-                <td style="padding: 0 12px;">3</td>
-            </tr>
-            </tbody>
-        </table>
+  .wararts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
 
-        <h4>Iron Dome</h4>
-        <p>When activated, <strong>Nullification Rate</strong> increases to <strong>90%</strong> and <strong>Damage Multiplier</strong> becomes <strong>3</strong> during defense.</p>
-        <p><strong>Number of activations:</strong> Equal to half the number of players.</p>
-        <p><strong>Cooldown:</strong> 2 rounds after each activation.</p>
-        </section>
+  @media (max-width: 1200px) {
+    .wararts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
 
-<section id="air-superiority">
-  <h3>Air Superiority</h3>
-  <p class="italic mb-2">"The one who controls the skies controls the battlefield."</p>
-  <p class="mb-2">
-    Airdrop paratroopers to attack enemy territories, with a maximum jump range of 3 territories.
-  </p>
+  @media (max-width: 768px) {
+    .wararts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 
-  <h4>Conditions of Use:</h4>
-  <ul class="list-disc ml-6 mb-4">
-    <li>Can only be used during the player’s turn.</li>
-    <li>Can be used up to 5 times per turn.</li>
-    <li>Cannot jump over the ocean if the two seaside regions are not connected by a maritime route.</li>
-  </ul>
+  .warart-card {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.05));
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
 
-  <h4>Long-Arm Jurisdiction</h4>
-  <p class="mb-2">
-    Gain extra reserves and Special Authorities by spreading troops over many continents.
-  </p>
+  .warart-card:hover {
+    border-color: rgba(52, 152, 219, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+  }
 
-  <div class="overflow-x-auto mb-4">
-    <table class="table-auto border border-gray-600 text-sm text-white">
-      <thead>
-        <tr class="bg-gray-700">
-          <th class="border px-4 py-2">Distinct Continents</th>
-          <th class="border px-4 py-2">Bonus Reserves 💂</th>
-          <th class="border px-4 py-2">Bonus Special Authority ★</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="border px-4 py-2">1</td><td class="border px-4 py-2">2</td><td class="border px-4 py-2">0</td></tr>
-        <tr><td class="border px-4 py-2">2</td><td class="border px-4 py-2">3</td><td class="border px-4 py-2">0</td></tr>
-        <tr><td class="border px-4 py-2">3</td><td class="border px-4 py-2">4</td><td class="border px-4 py-2">0</td></tr>
-        <tr><td class="border px-4 py-2">4</td><td class="border px-4 py-2">5</td><td class="border px-4 py-2">0</td></tr>
-        <tr><td class="border px-4 py-2">5</td><td class="border px-4 py-2">6</td><td class="border px-4 py-2">1</td></tr>
-        <tr><td class="border px-4 py-2">6</td><td class="border px-4 py-2">8</td><td class="border px-4 py-2">1</td></tr>
-        <tr><td class="border px-4 py-2">7</td><td class="border px-4 py-2">10</td><td class="border px-4 py-2">1</td></tr>
-        <tr><td class="border px-4 py-2">8</td><td class="border px-4 py-2">12</td><td class="border px-4 py-2">1</td></tr>
-        <tr><td class="border px-4 py-2">9</td><td class="border px-4 py-2">14</td><td class="border px-4 py-2">1</td></tr>
-        <tr><td class="border px-4 py-2">10</td><td class="border px-4 py-2">17</td><td class="border px-4 py-2">2</td></tr>
-        <tr><td class="border px-4 py-2">11</td><td class="border px-4 py-2">20</td><td class="border px-4 py-2">2</td></tr>
-        <tr><td class="border px-4 py-2">12</td><td class="border px-4 py-2">23</td><td class="border px-4 py-2">2</td></tr>
-        <tr><td class="border px-4 py-2">13</td><td class="border px-4 py-2">26</td><td class="border px-4 py-2">2</td></tr>
-        <tr><td class="border px-4 py-2">14</td><td class="border px-4 py-2">29</td><td class="border px-4 py-2">2</td></tr>
-        <tr><td class="border px-4 py-2">15</td><td class="border px-4 py-2">32</td><td class="border px-4 py-2">3</td></tr>
-      </tbody>
-    </table>
+  .card-header {
+    margin-bottom: 12px;
+  }
+
+  .card-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #5dade2;
+    margin-bottom: 5px;
+  }
+
+  .card-tagline {
+    font-size: 13px;
+    color: #7fb3d5;
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+
+  .card-summary {
+    color: #b0b0b0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .card-footer {
+    font-size: 12px;
+    color: #3498db;
+    margin-top: 10px;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, #1a2332 0%, #1e2936 100%);
+    border: 2px solid rgba(52, 152, 219, 0.6);
+    border-radius: 16px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 25px 25px 15px;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    background: linear-gradient(135deg, #1a2332 0%, #1e2936 100%);
+    flex-shrink: 0;
+  }
+
+  .modal-title-section {
+    flex: 1;
+  }
+
+  .modal-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #5dade2;
+    margin-bottom: 5px;
+  }
+
+  .modal-tagline {
+    font-size: 14px;
+    color: #7fb3d5;
+    font-style: italic;
+  }
+
+  .close-button {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e74c3c;
+    color: #ff6b6b;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 15px;
+  }
+
+  .close-button:hover {
+    background: rgba(231, 76, 60, 0.4);
+    transform: scale(1.1);
+  }
+
+  .modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background: rgba(52, 152, 219, 0.5);
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 152, 219, 0.7);
+  }
+
+  .modal-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(52, 152, 219, 0.5) rgba(0, 0, 0, 0.2);
+  }
+
+  .section-box {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 3px solid #3498db;
+  }
+
+  .section-box h3 {
+    font-size: 16px;
+    color: #5dade2;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .section-box h4 {
+    font-size: 14px;
+    color: #5dade2;
+    margin-bottom: 8px;
+    margin-top: 12px;
+  }
+
+  .section-box p,
+  .section-box li {
+    color: #d0d0d0;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 6px 0;
+  }
+
+  .section-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .section-box li:before {
+    content: "▹";
+    color: #3498db;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .data-table {
+    width: 100%;
+    margin: 12px 0;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+  }
+
+  .data-table th {
+    background: rgba(52, 152, 219, 0.3);
+    color: #5dade2;
+    font-weight: bold;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table td:first-child,
+  .data-table th:first-child {
+    text-align: center;
+  }
+
+  .annihilator-badge {
+    display: inline-block;
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.5);
+    color: #e74c3c;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  .highlight-text {
+    color: #3498db;
+    font-weight: bold;
+  }
+</style>
+
+<div class="wararts-container">
+  <div class="wararts-hero">
+    <h1>War Arts</h1>
+    <p>Specialized combat doctrines and strategic abilities that define your military doctrine</p>
   </div>
 
-  <p>In addition, the player will be able to rearrange troops without being bounded by land borders.</p>
-</section>
+  <div class="wararts-grid" id="warartsGrid"></div>
 
-<section id="mass-mobilization">
-  <h3 class="font-semibold mb-2">Mass Mobilization</h3>
-  <p class="italic mb-2">"When the many rise, no force can stand against them."</p>
-  <p class="mb-4">
-    Defend the nation, unite as one! Able to summon a huge amount of reserves based on the player’s current PPI.
-    The Average PPI is calculated based on all active players.
-  </p>
+  <div class="modal-overlay" id="warartModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-section">
+          <div class="modal-icon" id="modalIcon"></div>
+          <div class="modal-title" id="modalTitle"></div>
+          <div class="modal-tagline" id="modalTagline"></div>
+        </div>
+        <button class="close-button" id="closeModal">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+</div>
 
-  <h4 class="font-semibold mb-1">Reserve Calculation</h4>
-  <p class="mb-2">X = Player’s PPI − Average PPI</p>
-  <table class="table-auto border border-gray-500 mb-4">
-    <thead>
-      <tr>
-        <th class="border border-gray-500 px-2 py-1">X Range</th>
-        <th class="border border-gray-500 px-2 py-1">Amount of Reserves<br>(% of total troops on the Map)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">X ≤ -10</td>
-        <td class="border border-gray-500 px-2 py-1">25%</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">-10 &lt; X ≤ -5</td>
-        <td class="border border-gray-500 px-2 py-1">22%</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">-5 &lt; X ≤ 0</td>
-        <td class="border border-gray-500 px-2 py-1">18%</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">0 &lt; X ≤ 5</td>
-        <td class="border border-gray-500 px-2 py-1">15%</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">5 &lt; X ≤ 10</td>
-        <td class="border border-gray-500 px-2 py-1">12%</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">X &gt; 10</td>
-        <td class="border border-gray-500 px-2 py-1">10%</td>
-      </tr>
-    </tbody>
-  </table>
+<script>
+(function() {
+  var wararts = [
+    {
+      id: "iron-wall",
+      icon: "🛡️",
+      title: "Iron Wall",
+      tagline: "Impenetrable as steel, unmoving as stone.",
+      summary: "A defensive War Art that punishes attackers with nullification and devastating counterattacks. Grows stronger against economically superior foes.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>When your territories are attacked:<br>• 30% chance to nullify incoming damage<br>• Counterattack damage is doubled</p></div><div class='section-box'><h3>Disparity Scaling</h3><p>If the attacker significantly outclasses you economically or infrastructurally, Iron Wall becomes even stronger.<br><br>Disparity Formula:<br>(enemy Industrial Level − your Industrial Level) + (enemy Infrastructure Level − your Infrastructure Level)<br><br>Higher disparity increases both damage nullification and counterattack strength.</p><table class='data-table'><thead><tr><th>Disparity</th><th>Nullification Rate</th><th>Counterattack Multiplier</th></tr></thead><tbody><tr><td>1</td><td>35%</td><td>×2</td></tr><tr><td>2</td><td>40%</td><td>×2</td></tr><tr><td>3</td><td>45%</td><td>×3</td></tr><tr><td>4</td><td>50%</td><td>×3</td></tr><tr><td>5+</td><td>60%</td><td>×3</td></tr></tbody></table></div><div class='section-box'><h3>Iron Dome (Active Ability)</h3><p>A short-term emergency defense protocol.<br><br>Effect (while defending):<br>• 95% Nullification Rate<br>• ×3 Counterattack Damage<br><br>Activation Limit: (Number of players ÷ 2)<br>Cooldown: 2 rounds after each activation</p></div><div class='section-box'><h3>Chokepoint Defense (Passive Ability)</h3><p>A structural defensive advantage.<br><br>When enemies attack Fortified territories owned by an Iron Wall player:<br>• They may deploy no more than 10 troops per attack</p></div>"
+    },
+    {
+      id: "air-superiority",
+      icon: "✈️",
+      title: "Air Superiority",
+      tagline: "The one who controls the skies controls the battlefield.",
+      summary: "Enables rapid global force projection through airborne operations and rewards continental presence with scaling bonuses.",
+      content: "<div class='section-box'><h3>Core Ability</h3><p>Air Superiority allows rapid force projection through airborne operations.<br><br>You may airdrop paratroopers to attack enemy territories within a maximum range of 3 territories.<br><br>Conditions of Use:<br>• Can only be used during your turn<br>• Maximum 5 airdrop attacks per turn<br>• Airdrops cannot cross oceans unless both coastal territories are connected by a maritime route</p></div><div class='section-box'><h3>Long-Arm Jurisdiction (Passive Ability)</h3><p>Maintaining troops across multiple continents grants strategic bonuses. Bonuses scale with the number of distinct continents where you have troops stationed.</p><table class='data-table'><thead><tr><th>Continents Controlled</th><th>Bonus Reserves</th><th>Bonus ★</th></tr></thead><tbody><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>2</td><td>1</td><td>0</td></tr><tr><td>3</td><td>2</td><td>0</td></tr><tr><td>4</td><td>3</td><td>1</td></tr><tr><td>5</td><td>4</td><td>1</td></tr><tr><td>6</td><td>6</td><td>1</td></tr><tr><td>7</td><td>7</td><td>1</td></tr><tr><td>8</td><td>9</td><td>2</td></tr><tr><td>9</td><td>10</td><td>2</td></tr><tr><td>10</td><td>12</td><td>2</td></tr><tr><td>11</td><td>14</td><td>2</td></tr><tr><td>12</td><td>16</td><td>3</td></tr><tr><td>13</td><td>18</td><td>3</td></tr><tr><td>14</td><td>20</td><td>3</td></tr><tr><td>15</td><td>22</td><td>3</td></tr></tbody></table></div><div class='section-box'><h3>Strategic Mobility</h3><p>While controlling Air Superiority:<br>• You may rearrange troops freely, ignoring geographical constraints</p></div><div class='section-box'><h3>Last-Hold Defense Bonus</h3><p>When your final territory on a continent is attacked:<br>• +25% Nullification Rate<br>• ×2 Damage Multiplier<br><br>Represents emergency airlift and concentrated defensive response.</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Passive)</h3><p>An advanced scaling effect based on extreme global reach.<br><br>• Gain +50% bonus Reserves<br>• Gain +1★ for every 3 continents where troops are stationed</p><div class='annihilator-badge'>Annihilator Boost</div></div><div class='section-box'><h3>Defensive Surge (Single-Territory Defense)</h3><p>When defending a lone territory on a continent:<br>• +1 Minimum Roll<br>• ×2 Damage Multiplier<br>• +30% Nullification Rate</p></div>"
+    },
+    {
+      id: "mass-mobilization",
+      icon: "⚔️",
+      title: "Mass Mobilization",
+      tagline: "Quantity is a quality of its own.",
+      summary: "Leverages overwhelming manpower and offensive momentum. Rewards large armies with continuous reserve generation and devastating assault bonuses.",
+      content: "<div class='section-box'><h3>Passive Effects</h3><p>Continuous Reserve Generation:<br>• Each round, gain Reserves equal to 15% of your total troops on the map<br><br>Overwhelming Assault Bonus:<br>• When launching an attack with large troop numbers, gain +1 Damage Multiplier for every 20 troops sent<br><br>Example:<br>• 20 troops → ×2<br>• 40 troops → ×3<br>• 60 troops → ×4<br><br>This bonus reflects sheer numerical pressure rather than elite quality.</p></div><div class='section-box'><h3>Active Ability — National Mobilization</h3><p>You may trigger a large-scale reserve call-up based on your population standing.<br><br>Let X = (Your PPI − Average PPI of all active players)<br><br>The amount of Reserves gained is a percentage of your total troops on the map, based on X:</p><table class='data-table'><thead><tr><th>X (PPI Difference)</th><th>Reserves Gained</th></tr></thead><tbody><tr><td>X ≤ −10</td><td>17%</td></tr><tr><td>−10 < X ≤ −5</td><td>14%</td></tr><tr><td>−5 < X ≤ 0</td><td>12%</td></tr><tr><td>0 < X ≤ 5</td><td>12%</td></tr><tr><td>5 < X ≤ 10</td><td>12%</td></tr><tr><td>X > 10</td><td>10%</td></tr></tbody></table></div><div class='section-box'><h3>Usage Limits & Recharge</h3><p>Mobilization Charges:<br>• Every 8 rounds, you gain one additional mobilization charge</p><table class='data-table'><thead><tr><th>Number of Players</th><th>Max Charges</th></tr></thead><tbody><tr><td>< 6</td><td>2</td></tr><tr><td>6–9</td><td>3</td></tr><tr><td>10–12</td><td>4</td></tr><tr><td>12+</td><td>5</td></tr></tbody></table></div><div class='section-box'><h3>Conditions of Use</h3><p>• Can only be activated during your turn<br>• After each use, there is a 1-round cooldown<br>• If used in Round 1: You immediately gain 60% of the calculated Reserves. The remaining 40% is granted at the start of the next round</p></div>"
+    },
+    {
+      id: "divine-punishment",
+      icon: "⚡",
+      title: "Divine Punishment",
+      tagline: "Justice from above, swift and unforgiving.",
+      summary: "Control an orbital railgun powered by solar energy. Deliver devastating strikes anywhere on the map, creating radiation zones and cascading damage.",
+      content: "<div class='section-box'><h3>Orbital Strike</h3><p>When a territory is bombarded:<br>• 75% of stationed troops are destroyed<br>• City built on the territory is destroyed<br>• The territory becomes a Radiation Death Zone for 2 rounds<br>• Orbital strikes may be executed outside of your turn</p></div><div class='section-box'><h3>Radiation Death Zone</h3><p>A bombarded territory enters a hazardous state.<br><br>While radioactive:<br>• At the end of each round, 20% of stationed troops are eliminated<br>• Cities cannot be built<br>• The territory is marked with a radiation symbol<br>• Radiation effects expire automatically after 2 rounds</p></div><div class='section-box'><h3>Usage Limits & Recharge</h3><p>Base Usage Count:<br>Total initial uses = (Number of players at game start − 1) ÷ 2 (rounded down)<br><br>Recharge Rate:<br>• Gain 1 additional use every 2 rounds</p></div><div class='section-box'><h3>Fission Chain (Secondary Effects)</h3><p>An orbital strike creates cascading shockwaves.<br><br>Adjacent territories:<br>• Become radioactive<br>• Take up to 5 troop damage<br><br>Territories two steps away:<br>• Take up to 3 troop damage<br><br>Secondary territories do not receive the main strike's annihilation effect</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>Orbital railgun recharges 1 usage every round instead of every 2 rounds</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "industrial-revolution",
+      icon: "🏭",
+      title: "Industrial Revolution",
+      tagline: "Let human ingenuity power a new world order.",
+      summary: "Enhances industrial capacity and enables rapid urban development. Build free cities across continents and gain combat bonuses from industrial prowess.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Industrial Revolution enhances industrial capacity and rapid urban development.<br><br>• Gain +1 Industrial Level in battles</p></div><div class='section-box'><h3>City Construction Bonus</h3><p>You may build up to 2 Cities per continent you control at no cost<br><br>Cities must be built on territories you control<br><br>Free Cities:<br>• Can only be built during your turn<br>• Follow all normal placement rules<br>• Do not stack beyond the per-continent limit</p></div>"
+    },
+    {
+      id: "zealous-expansion",
+      icon: "📈",
+      title: "Zealous Expansion",
+      tagline: "The road to success is always under construction.",
+      summary: "Improves infrastructure upgrade efficiency. Each upgrade costs less and generates passive reserve income, supporting long-term growth.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Zealous Expansion improves the efficiency and payoff of Infrastructure upgrades.</p></div><div class='section-box'><h3>Infrastructure Upgrade Bonus</h3><p>When upgrading Infrastructure Level using this War Art:<br>• Upgrade cost is reduced from 3★ → 2★ per level<br>• Each Infrastructure Level upgraded this way grants +5 Reserves per turn<br><br>The reserve bonus applies only to Infrastructure Levels gained through this War Art.</p></div><div class='section-box'><h3>Starting Benefits</h3><p>At game start, you receive:<br>• +1 Infrastructure Level<br>• +1 War Art–granted Infrastructure Level<br>• This level also provides +5 Reserves per turn</p></div>"
+    },
+    {
+      id: "ares-blessing",
+      icon: "🔥",
+      title: "Ares' Blessing",
+      tagline: "When war is waged under Ares' watchful eyes, even the smallest force can conquer nations.",
+      summary: "Temporarily boosts combat strength with divine power. Triggers automatically when suffering heavy losses, rewarding aggressive play.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>When activated, Ares' Blessing temporarily boosts combat strength.<br><br>• +2 Industrial Level<br>• +2 Infrastructure Level<br>• +1 Damage Multiplier</p></div><div class='section-box'><h3>Conditions of Use</h3><p>• Can only be activated during your turn<br>• Effect lasts for 1 turn<br>• Cooldown: 3 rounds</p></div><div class='section-box'><h3>Usage Limit</h3><p>Total uses = (Number of players ÷ 2)<br>If this value is less than 3, total uses are set to 3</p></div><div class='section-box'><h3>Berserker (Passive Effect)</h3><p>If more than 40% of your total troops are lost due to a series of attacks from opponents:<br>• Gain +1 additional usage of Ares' Blessing<br>• The cooldown is immediately reset</p></div>"
+    },
+    {
+      id: "realm-of-permafrost",
+      icon: "❄️",
+      title: "Realm of Permafrost",
+      tagline: "Nothing fades, nothing grows — all is held in the icy grip of eternity.",
+      summary: "Neutralizes all combat bonuses in battle, forcing default values for both sides. Can trigger Ice Age to cripple enemy economies globally.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>In all battles involving the Realm of Permafrost player:<br>• Both the player's and the enemy's stats are ignored<br>• Combat uses default values for both sides<br>• This applies regardless of attacker or defender</p></div><div class='section-box'><h3>Ice Age (Active Ability)</h3><p>Activation:<br>• Cost: 2★<br>• Duration: 1 round<br>• Cooldown: 3 rounds between activations<br><br>Ice Age Effects:<br>During Ice Age, players who do not have Realm of Permafrost as their War Art suffer:<br>• −40% troop production<br>• No Special Authority generation<br>• Special Authority cannot be used<br>• War Art usage is still allowed</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>When facing an Annihilator during Ice Age:<br>• Ice Age costs 0★ to activate<br>• Enemy Industrial Level −1<br>• Enemy Infrastructure Level −1<br><br>These effects apply only during Ice Age set by the Annihilator.</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "necromancer",
+      icon: "☠️",
+      title: "Necromancer",
+      tagline: "One who controls the dead commands the living.",
+      summary: "Converts enemy casualties into your Reserves. Failed enemy attacks become recruitment opportunities through dark magic.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>The Necromancer holds the Staff of Limbo.<br><br>During the Conquest Stage, the player enters the Blood Moon phase.<br><br>At the end of the Conquest Stage:<br>• All enemy casualties caused by the player's attacks are converted into Reserves<br>• For every 9 enemy troops killed by the player's attacks, the player gains +1★</p></div><div class='section-box'><h3>Submission by Death (Passive Effect)</h3><p>When an enemy attack against the player fails:<br>• All enemy casualties from that attack are converted into the player's Reserves</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>During each round, for every 5 enemy troops killed, the player gains +1★</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "dictator",
+      icon: "👑",
+      title: "Dictator",
+      tagline: "The object of power is power.",
+      summary: "Generates constant Special Authority regardless of conquests. Can strip ★ from all opponents simultaneously.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>The Dictator gains constant Special Authority.<br><br>• Gain 2★ at the end of each turn, regardless of conquests<br>• If a conquest is successful: Gain additional ★ according to default probabilities (in addition to the guaranteed 2★)</p></div><div class='section-box'><h3>I Alone Am Worthy (Active Ability)</h3><p>When activated:<br>• All opponents lose 1★<br><br>Usage Limit: (Number of players ÷ 3)</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>• Gain 3★ per turn instead of 2★<br>• When activating I Alone Am Worthy: After all opponents lose 1★, you gain an additional 3★</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "robinhood",
+      icon: "🏹",
+      title: "Robinhood",
+      tagline: "Strip the wealth of the greedy, fuel the hopes of the needy.",
+      summary: "Steals reinforcements and ★ from the strongest players. Mirrors Superpower stats when fighting them.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>At the end of each round, the strongest player(s)—determined by PPI—are marked as targets.<br><br>During the next round, the following effects apply to each targeted player:<br>• ⅓ of their reinforcements are transferred to you as Reserves<br>• If a targeted player gains more than 1★, you steal 1★ from them</p></div><div class='section-box'><h3>Target Selection</h3><p>The number of players targeted depends on the total number of players at game start:</p><table class='data-table'><thead><tr><th>Total Players</th><th>Targeted Players</th></tr></thead><tbody><tr><td>< 6</td><td>1</td></tr><tr><td>< 10</td><td>2</td></tr><tr><td>< 16</td><td>3</td></tr></tbody></table></div><div class='section-box'><h3>Self-Targeting</h3><p>The Robinhood player may be included as a target.<br>• This does not negate the effect<br>• It exists to hide the identity of the Robinhood player</p></div><div class='section-box'><h3>Dragon Slayer (Passive Effect)</h3><p>When attacking or defending against the Superpower title holder:<br>• If the Superpower's offensive stats are higher than yours, you mirror their offensive stats for that combat</p></div>"
+    },
+    {
+      id: "elitocracy",
+      icon: "⭐",
+      title: "Elitocracy",
+      tagline: "Quality of men rules over quantity.",
+      summary: "Focuses on elite troop quality through Minimum Roll growth. Damage scales with training level, creating unstoppable veterans.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Elitocracy focuses on improving combat quality through higher Minimum Roll.</p></div><div class='section-box'><h3>Minimum Roll Growth</h3><p>• For 3★, you may increase your Minimum Roll by +1<br>• Every 3 rounds, your Minimum Roll increases by +1 automatically, at no cost</p></div><div class='section-box'><h3>Industrial Level Constraint</h3><p>If your Industrial Level is lower than your Minimum Roll:<br>• During battles, your Minimum Roll is reduced to match your Industrial Level</p></div><div class='section-box'><h3>Damage Multiplier Scaling</h3><p>Your Damage Multiplier scales directly with your Minimum Roll:<br>Damage Multiplier = 1 + (Minimum Roll ÷ 2)<br><br>Examples:<br>• Minimum Roll = 2 → Damage Multiplier = 2<br>• Minimum Roll = 4 → Damage Multiplier = 3<br>• Minimum Roll = 6 → Damage Multiplier = 4</p></div><div class='section-box'><h3>Gathering of the Elites (Passive Effect)</h3><p>During combat:<br>• All troops stationed in Cities and Capitals gain +1 Minimum Roll</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>Damage Multiplier equals Minimum Roll</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "laplaces-demon",
+      icon: "👁️",
+      title: "Laplace's Demon",
+      tagline: "The essence of war is not fighting; it is knowing.",
+      summary: "Grants perfect intelligence on all players. Know War Arts, hidden stats, faction majorities, and Land Survey rewards.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Laplace's Demon grants advanced intelligence access.</p></div><div class='section-box'><h3>Intelligence Advantages</h3><p>The player gains the following information advantages:<br>• Knows which faction is in the majority (C-Class Agenda holders or Non-C Agenda holders)<br>• Knows the locations of reward-generating territories for Land Survey<br>• Knows the hidden stats of all other players<br>• Knows the War Arts selected by all other players</p></div><div class='section-box'><h3>Diplomatic Impact</h3><p>Provides strong leverage in diplomatic negotiations.</p></div>"
+    },
+    {
+      id: "collusion",
+      icon: "🤝",
+      title: "Collusion",
+      tagline: "Corrupt the few, and they will corrupt the many.",
+      summary: "Secretly gain De Facto control of enemy territories. Receive bonuses while enemies retain legal ownership and burden.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Collusion allows the player to secretly compromise the authority of an enemy territory, gaining De Facto control over it.<br><br>• The colluding player receives the territorial bonuses and industrial bonuses of the colluded territory<br>• The original owner remains the De Jure owner<br>• Continental bonuses are not affected<br>• Legal ownership does not change<br><br>De Facto: Control in practice<br>De Jure: Control by law</p></div><div class='section-box'><h3>Usage Limits</h3><p>Initial Usages:</p><table class='data-table'><thead><tr><th>Number of Players</th><th>Usages</th></tr></thead><tbody><tr><td>< 5</td><td>2</td></tr><tr><td>5–6</td><td>3</td></tr><tr><td>> 6</td><td>4</td></tr></tbody></table></div><div class='section-box'><h3>Recharge</h3><p>Gain +1 additional usage every round</p></div><div class='section-box'><h3>Industrial Lockdown (Passive Effect)</h3><p>If a City is colluded:<br>• The original owner cannot upgrade that City into a Megacity</p></div><div class='section-box'><h3>Command Paralysis (Passive Effect)</h3><p>Each round, every colluded territory has a 45% chance to:<br>• Completely ignore conquest actions<br>• Completely ignore rearrangement actions<br><br>This effect lasts for the entire round and applies only to actions initiated by the actual owner.</p></div>"
+    },
+    {
+      id: "arsenal-of-the-underworld",
+      icon: "💣",
+      title: "Arsenal of the Underworld",
+      tagline: "What is hidden is often more powerful than what is seen.",
+      summary: "Deploy hidden minefields and underground missile silos. Scale damage with infrastructure levels for devastating long-range strikes.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Arsenal of the Underworld focuses on concealed underground weapons that inflict damage through traps and long-range strikes.</p></div><div class='section-box'><h3>Minefields</h3><p>Deployment Rules:<br>• You may deploy up to 3 Minefields, each in a different territory<br>• Each Minefield contains 5 mines<br>• Each mine destroys 1 troop when triggered<br><br>Large-Force Interaction:<br>• If the attacking force contains more than 20 troops, each mine removes 5% of the attacking troops instead of 1 troop<br><br>Minefield Regeneration:<br>• When a Minefield is fully depleted, a new Minefield may be deployed<br>• The maximum number of deployable Minefields depends on your cumulative Industrial Level + Infrastructure Level<br>• This maximum is recalculated at the start of every round<br>• For every 2 total levels gained: +1 deployable Minefield</p></div><div class='section-box'><h3>Underground Missile Silo</h3><p>Structure Rules:<br>• You may build only 1 Underground Missile Silo<br>• The silo launches missiles from underground, remaining hidden<br><br>Missile Properties:<br>• Base range: up to 5 territories<br>• Missile count, damage, shockwave damage, and range scale with Industrial Level + Infrastructure Level<br>• All values are recomputed at the start of each round<br>• Each missile causes shockwave damage to territories surrounding the impact point</p><table class='data-table'><thead><tr><th>Cumulative Level</th><th>Usages / Round</th><th>Damage</th><th>Shockwave Damage</th><th>Max Range</th></tr></thead><tbody><tr><td>0</td><td>3</td><td>3</td><td>1</td><td>5</td></tr><tr><td>1</td><td>4</td><td>4</td><td>1</td><td>5</td></tr><tr><td>2</td><td>5</td><td>5</td><td>2</td><td>6</td></tr><tr><td>3</td><td>6</td><td>6</td><td>2</td><td>6</td></tr><tr><td>4</td><td>7</td><td>7</td><td>3</td><td>7</td></tr><tr><td>5</td><td>8</td><td>8</td><td>3</td><td>7</td></tr><tr><td>6</td><td>9</td><td>9</td><td>4</td><td>8</td></tr></tbody></table></div><div class='section-box'><h3>Delayed Launching</h3><p>The Underground Missile Silo may launch missiles during another player's turn.<br><br>Missiles fired this way:<br>• Resolve at the end of that player's turn<br>• Allow unexpected damage against enemy forces</p></div>"
+    },
+    {
+      id: "loan-shark",
+      icon: "💸",
+      title: "Loan Shark",
+      tagline: "Debts are paid in full, one way or another.",
+      summary: "Ransoms defeated players and extracts economic tribute. Failed payments accumulate interest and trigger automatic collection.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Loan Shark allows the player to launch ransomware attacks against enemy players at any time.<br><br>When a player is targeted, they are placed under debt enforcement until the debt is paid.<br><br>While under ransomware:<br>• Skill usage is disabled<br>• Special Authority usage is disabled<br>• These restrictions remain until the debt is fully paid</p></div><div class='section-box'><h3>Debt Amount</h3><p>Standard debt: 2★ or 10 troops<br><br>If triggered in Round 1: 1★ or 5 troops</p></div><div class='section-box'><h3>Targeting Rules</h3><p>• Only one player may be targeted at a time<br>• Once the debt is fully paid, that player is immune to ransomware from the Loan Shark for 2 rounds<br>• If there are 5 or more players in the game, up to 2 players may be targeted simultaneously</p></div><div class='section-box'><h3>Payment Methods</h3><p>A debtor may choose one payment method:<br><br>Pay by Special Authority:<br>• All available ★ are transferred until debt is cleared<br>• Partial payment is allowed<br><br>Pay by Troops:<br>• Troops are taken in order: Reserves → Territories<br>• Resources are extracted automatically until debt is cleared or exhausted<br>• If insufficient resources exist, all available resources are taken</p></div><div class='section-box'><h3>Interest Rate & Forced Collection</h3><p>If the debt is not fully paid:<br>• +1★ interest is added each round<br><br>If the debt remains unpaid after 3 rounds:<br>• The system automatically uses all available resources to clear the debt</p></div><div class='section-box'><h3>Counter-Retaliation Protocol (Passive Effect)</h3><p>Once a ransomed player fully repays their debt:<br>• The next 5 attacks they make against the Loan Shark player destroy 50% of their attacking troops before combat begins</p></div>"
+    },
+    {
+      id: "revanchism",
+      icon: "⚡",
+      title: "Revanchism",
+      tagline: "To be wronged is nothing unless you continue to remember it.",
+      summary: "Converts territorial and military losses into Rage Points. Accumulated rage grants escalating combat bonuses for devastating comebacks.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Revanchism converts territorial and military losses into Rage Points. Accumulated Rage Points grant combat bonuses.</p></div><div class='section-box'><h3>Gaining Rage Points</h3><p>Territory & Structure Losses:<br>• Losing a Territory → +1 point<br>• Losing a City → +20 points<br>• Losing a Megacity → +50 points<br>• Losing a Capital → +25 points<br>• Losing a Fortification → +10 points<br>• Losing a Leyline Cross → +15 points<br>• Losing a Logistic Nexus → +40 points<br>• Losing a Hall of Governance → +50 points<br>• Losing a Mobilization Bureau → +20 points<br><br>Troop Losses:<br>• Losing more than 10% of total troops: Gain Rage Points equal to the percentage lost<br>• Example: Losing 18% → 18 points<br><br>Continental Loss:<br>• Losing a continent unification: Gain 2.5 × the continent's bonus value as Rage Points</p></div><div class='section-box'><h3>Rage Bonus Effects</h3><p>For Every 100 Rage Points:<br>• Industrial Level +1<br>• Infrastructure Level +1<br>• Nullification Rate +10%<br><br>For Every 150 Rage Points:<br>• Minimum Roll +1<br>• Damage Multiplier +1<br><br>All bonuses scale directly with total accumulated Rage Points.</p></div>"
+    },
+    {
+      id: "reaping-of-anubis",
+      icon: "💀",
+      title: "Reaping of Anubis",
+      tagline: "They fall before the first step is even taken.",
+      summary: "Removes enemy troops before combat resolution. Reaping value scales through upgrades, creating devastating pre-battle attrition.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>At the start of every battle, a fixed number of enemy troops—called the Reaping—are removed immediately before combat resolution through dice.</p></div><div class='section-box'><h3>Reaping Value & Upgrades</h3><p>Initial Reaping: 0<br><br>The Reaping value may be increased by spending ★<br>Upgrade costs scale linearly:</p><table class='data-table'><thead><tr><th>Reaping Level</th><th>Upgrade Cost</th></tr></thead><tbody><tr><td>0 → 1</td><td>3★</td></tr><tr><td>1 → 2</td><td>6★</td></tr><tr><td>2 → 3</td><td>9★</td></tr><tr><td>…</td><td>+3★ per level</td></tr></tbody></table></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>Reaping upgrade cost starts at 0★<br>Each subsequent Reaping level increases the cost by +2★</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    },
+    {
+      id: "pandoras-box",
+      icon: "📦",
+      title: "Pandora's Box",
+      tagline: "Sometimes, there's nothing inside. Sometimes, everything.",
+      summary: "Gamble ★ for random powerful rewards. Includes bad-luck protection and free peeks every 2 rounds.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Pandora's Box allows the player to gamble ★ for a chance at powerful rewards.<br><br>Cost: 2★ per peek<br>Each peek grants one random outcome or nothing</p></div><div class='section-box'><h3>Possible Outcomes</h3><p>Each peek resolves using the following probabilities:</p><table class='data-table'><thead><tr><th>Outcome</th><th>Probability</th></tr></thead><tbody><tr><td>Nothing</td><td>10%</td></tr><tr><td>+1★</td><td>20%</td></tr><tr><td>+3★</td><td>25%</td></tr><tr><td>+1 Industrial Level</td><td>6%</td></tr><tr><td>+1 Infrastructure Level</td><td>6%</td></tr><tr><td>+15 Reserves</td><td>6%</td></tr><tr><td>+10% Nullification Rate</td><td>6%</td></tr><tr><td>+2 Industrial Levels</td><td>3%</td></tr><tr><td>+2 Infrastructure Levels</td><td>3%</td></tr><tr><td>+1 Minimum Roll</td><td>3%</td></tr><tr><td>+20% Nullification Rate</td><td>3%</td></tr><tr><td>+1 Damage Multiplier</td><td>3%</td></tr><tr><td>+30 Reserves</td><td>3%</td></tr><tr><td>+7★</td><td>3%</td></tr></tbody></table></div><div class='section-box'><h3>Usage Rules</h3><p>• Gain 1 free peek every 2 rounds, starting from Round 0<br>• You may peek up to 8 times per round (including free peeks)</p></div><div class='section-box'><h3>Bad-Luck Protection</h3><p>If no blessing is received for 4 consecutive peeks:<br>• The next peek is guaranteed to grant a blessing</p></div><div class='section-box'><h3>Limits</h3><p>Nullification Rate gained through Pandora's Box is capped at 99%</p></div>"
+    },
+    {
+      id: "loopwalker",
+      icon: "🔄",
+      title: "Loopwalker",
+      tagline: "Every failure is fuel for the perfect loop.",
+      summary: "Rerun simulated battle timelines to select optimal outcomes. Finite resource requiring strategic allocation across battles.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Loopwalker allows the player to rerun multiple simulated timelines during battles to select the best outcome.</p></div><div class='section-box'><h3>Loop Allocation</h3><p>• Gain 200 loops per enemy player<br>• Loops are shared across all battles</p></div><div class='section-box'><h3>Loop Usage</h3><p>• Before or during a battle, you may choose how many loops to apply<br>• Maximum loops per battle: 100<br>• Unused loops remain available for future battles</p></div><div class='section-box'><h3>Management Note</h3><p>Loops are a finite resource. Efficient allocation across battles is required.</p></div>"
+    },
+    {
+      id: "archmage",
+      icon: "🔮",
+      title: "Archmage",
+      tagline: "Where others beg the divine, the miracle maker becomes it.",
+      summary: "Enhances Leyline-based systems with reduced costs and improved critical effects. Stronger Blessings and higher crit potential.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Archmage enhances Leyline-based systems and improves critical combat effects.</p></div><div class='section-box'><h3>Leyline Construction</h3><p>Leyline Cross build cost: 1★ (instead of 2★)</p></div><div class='section-box'><h3>Critical Stats</h3><p>Starting Crit Rate: 18%<br>Starting Crit Damage: ×4<br>Crit Rate Cap: 80%<br><br>Each Leyline Cross improves critical performance according to the table below:</p><table class='data-table'><thead><tr><th>Leyline Crosses</th><th>Crit Rate</th><th>Crit Damage</th></tr></thead><tbody><tr><td>1</td><td>18%</td><td>×4</td></tr><tr><td>2</td><td>24%</td><td>×4</td></tr><tr><td>3</td><td>31%</td><td>×5</td></tr><tr><td>4</td><td>39%</td><td>×5</td></tr><tr><td>5</td><td>48%</td><td>×5</td></tr><tr><td>6</td><td>58%</td><td>×6</td></tr><tr><td>7</td><td>69%</td><td>×6</td></tr><tr><td>8</td><td>80%</td><td>×6</td></tr><tr><td>9</td><td>80%</td><td>×7</td></tr></tbody></table></div><div class='section-box'><h3>Blessing Chance</h3><p>Each Leyline Cross provides +14% chance to receive a Blessing<br>Blessing chance cap: 84%</p></div><div class='section-box'><h3>Blessing Outcomes</h3><p>When a Blessing is received:<br>• 53% chance: Gain (Number of Leyline Crosses × 5) Reserves<br>• 47% chance: Gain (Number of Leyline Crosses + 1) ★</p></div>"
+    },
+    {
+      id: "pillar-of-immortality",
+      icon: "🗿",
+      title: "Pillar of Immortality",
+      tagline: "Where the gods once stood the pillars now remain.",
+      summary: "Build Pillars that magnify troop effectiveness (1 troop = 10 troops). Includes maintenance costs and instant elimination mechanics.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>You may build Pillars of Immortality on territories.<br><br>When a Pillar is built on a territory:<br>• Each troop in that territory counts as 10 troops during battles</p></div><div class='section-box'><h3>Pillar Maintenance</h3><p>Free Maintenance:<br>• You may maintain (Number of players ÷ 2, rounded up) Pillars for free<br><br>Ongoing Maintenance Cost:<br>• Each Pillar beyond the free limit costs 1★ per round to maintain<br>• If maintenance is not paid: 10 troops are removed from your territories per unpaid Pillar</p></div><div class='section-box'><h3>Build Limit</h3><p>The system prevents overbuilding.<br><br>You cannot build more Pillars than you can sustain.<br><br>Maximum sustainable Pillars:<br>(Total Troops ÷ 10) + Number of ★ − Current Maintenance Cost</p></div><div class='section-box'><h3>Instant Ace (Passive Effect)</h3><p>Each Pillar grants a chance to instantly eliminate enemy troops.<br><br>• Each Pillar provides a 5% chance to trigger Instant Ace<br>• During a battle, every dice comparison (clash) may trigger Instant Ace<br>• When triggered: 1 enemy troop is immediately removed</p></div>"
+    },
+    {
+      id: "babylon",
+      icon: "🌟",
+      title: "Babylon",
+      tagline: "All treasures return to their origin — and I am the origin.",
+      summary: "Grants multiple randomly selected passive abilities simultaneously. Scales with player count for diverse strategic combinations.",
+      content: "<div class='section-box'><h3>Core Effect</h3><p>Babylon grants the player multiple randomly selected passive abilities.<br><br>Number of passives gained: (Number of players ÷ 2), rounded up<br><br>All selected passives are active simultaneously.<br>Passives are granted at game start unless otherwise specified.</p></div><div class='section-box'><h3>Available Passives</h3><p>The following passives may be randomly selected:<br><br>• Grand Mobilization: Gain +10% of total troops as Reserves each turn<br><br>• Loopwalker: Always run 2 loops per battle<br><br>• Gathering of the Elites: Troops in Cities and Capitals gain +1 Minimum Roll and +1 Damage Multiplier<br><br>• Elitocracy: Gain +1 Minimum Roll every 3 rounds<br><br>• Laplace's Apprentice: Clicking a player reveals their War Art name and hidden stats<br><br>• Iron Shield: Gain Reactive Armour with 15% base Nullification Rate and base Damage Multiplier of 1. Both scale upward with disparity<br><br>• Little King: Gain +1★ every round, regardless of successful conquests<br><br>• Air Dominance: Gain Long-Arm Jurisdiction<br><br>• Industrial Leap: Gain +1 Industrial Level during battle<br><br>• Zealous Expansion: Gain +2 Infrastructure Levels during battle<br><br>• Avenger: Gain points only when built upgrades/structures are captured or Capitals are captured</p></div><div class='section-box'><h3>Annihilator Boost (Enhanced Effect)</h3><p>Gain +1 additional passive</p><div class='annihilator-badge'>Annihilator Boost</div></div>"
+    }
+  ];
 
-  <h4 class="font-semibold mb-3">Mobilization Frequency</h4>
-  <table class="table-auto border border-gray-500 mb-4">
-    <thead>
-      <tr>
-        <th class="border border-gray-500 px-2 py-1">Number of Players</th>
-        <th class="border border-gray-500 px-2 py-1">Number of Usages</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&lt; 6</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">6–9</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">10–12</td>
-        <td class="border border-gray-500 px-2 py-1">4</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">12+</td>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-      </tr>
-    </tbody>
-  </table>
-  <p class="mb-2">Every 8 rounds, the player accumulates enough popular support for another mobilization usage.</p>
+  var modal = document.getElementById("warartModal");
+  var closeBtn = document.getElementById("closeModal");
 
-  <h4 class="font-semibold mb-1">Conditions of Use</h4>
-  <ul class="list-disc list-inside mb-2">
-    <li>Can only be used during the player's turn.</li>
-    <li>After each use, there is a cooldown of 1 round.</li>
-    <li>If used in the 1st round, only 60% of the reserves are granted immediately. The remaining 40% are received in the next round.</li>
-  </ul>
-</section>
+  function openModal(warart) {
+    document.getElementById("modalIcon").textContent = warart.icon;
+    document.getElementById("modalTitle").textContent = warart.title;
+    document.getElementById("modalTagline").textContent = warart.tagline;
+    document.getElementById("modalBody").innerHTML = warart.content;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
 
-<section id="divine-punishment">
-  <h3 class="font-semibold mb-2">Divine Punishment</h3>
-  <p class="italic mb-2">"Justice from above, swift and unforgiving."</p>
-  <p class="mb-4">
-    Controls an orbital railgun that gathers solar energy, allowing the player to strike any location on the map.
-    75% of stationed troops and constructed cities of bombarded territories will be annihilated, turning the area into a Radiation Death Zone for 2 rounds.
-  </p>
+  function closeModal() {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  }
 
-  <h4 class="font-semibold mb-1">Radiation Death Zone</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Each round, 20% of any stationed troops are eliminated.</li>
-    <li>City cannot be built on the territory.</li>
-    <li>Radiation death zones have radioactive signs on them.</li>
-  </ul>
+  closeBtn.addEventListener("click", closeModal);
+  
+  modal.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
 
-  <h4 class="font-semibold mb-1">Usage Rules</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Number of usages = Number of players at the beginning of the game + 1.</li>
-    <li>Every 3 rounds, a new usage is generated.</li>
-  </ul>
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && modal.classList.contains("active")) {
+      closeModal();
+    }
+  });
 
-  <h4 class="font-semibold mb-1">Fission Chain</h4>
-  <p>
-    When a Radiation Death Zone is bombed, all surrounding territories become radioactive, each receiving shockwave damage that can remove up to 5 troops.
-  </p>
-</section>
+  function createWarartCard(warart) {
+    var card = document.createElement("div");
+    card.className = "warart-card";
+    card.id = warart.id;
 
-<section id="industrial-revolution">
-  <h3 class="font-semibold mb-2">Industrial Revolution</h3>
-  <p class="italic mb-2">"Let human ingenuity power a new world order."</p>
-  <p class="mb-4">
-    R&amp;D powerhouse, industrial level +1 during combat. Player can build 2 cities at no cost per continent on their territories.
-    The cities can only be built during the player’s turn.
-  </p>
-</section>
+    card.innerHTML = 
+      '<div class="card-header">' +
+        '<div class="card-icon">' + warart.icon + '</div>' +
+        '<div class="card-title">' + warart.title + '</div>' +
+        '<div class="card-tagline">' + warart.tagline + '</div>' +
+      '</div>' +
+      '<div class="card-summary">' + warart.summary + '</div>' +
+      '<div class="card-footer">Click to view details</div>';
 
-<section id="zealous-expansion">
-  <h3 class="font-semibold mb-2">Zealous Expansion</h3>
-  <p class="italic mb-2">"The road to success is always under construction."</p>
-  <p class="mb-4">
-    Cost to upgrade Infrastructure level is reduced from 4★ to 2★ per level. For every infrastructure level upgraded, you get 5 extra reserves per turn.
-    In all battles, 1 Infrastructure Level is added on top of your current Infrastructure Level.
-  </p>
-</section>
+    card.addEventListener("click", function() {
+      openModal(warart);
+    });
 
-<section id="ares-blessing">
-  <h3 class="font-semibold mb-2">Ares’ Blessing</h3>
-  <p class="italic mb-2">"When war is waged under Ares' watchful eyes, even the smallest force can conquer nations."</p>
-  <p class="mb-4">
-    Blessed by the god of war, industrial and infrastructure level +2, double damage to the enemy.
-  </p>
+    return card;
+  }
 
-  <h4 class="font-semibold mb-1">Conditions of Usage</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Can only be used when it is the player's turn.</li>
-    <li>The effect lasts for 1 turn.</li>
-    <li>3 round cooldown.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Usage Limit</h4>
-  <p class="mb-4">
-    Number of usages = Number of players / 2<br>
-    If the number of players divided by 2 is less than 3, then the number of usages is set at 3.
-  </p>
-
-  <h4 class="font-semibold mb-1">Berserker</h4>
-  <p>
-    When more than 40% of the player’s troops are gone due to a series of attacks from opponents, the player receives one more usage and the cooldown is immediately reset.
-  </p>
-</section>
-
-<section id="realm-of-permafrost">
-  <h3 class="font-semibold mb-2">Realm of Permafrost</h3>
-  <p class="italic mb-2">“Nothing fades, nothing grows — all is held in the icy grip of eternity."</p>
-  <p class="mb-4">
-    In all battles the player engages in, both the player's and the enemy's stats are disregarded. Instead, both sides revert to default values during combat.
-  </p>
-
-  <h4 class="font-semibold mb-1">Ice Age</h4>
-  <p class="mb-4">
-    With 2★ the player can activate Ice Age that lasts 2 rounds. During Ice Age, players who do not have Realm of Permafrost as War Art will experience:
-  </p>
-  <ul class="list-disc list-inside mb-4">
-    <li>40% troop production decrease</li>
-    <li>No special authority generation</li>
-    <li>Inability to use special authority</li>
-  </ul>
-  <p>There is a 4 round cooldown between each Ice Age activation.</p>
-</section>
-
-<section id="necromancer">
-  <h3 class="font-semibold mb-2">Necromancer</h3>
-  <p class="italic mb-2">"One who controls the dead commands the living."</p>
-  <p class="mb-4">
-    Holder of the Staff of Limbo. During the Conquest Stage, the player enters the Blood Moon phase. All enemy casualties from the player’s attacks are turned into reserves.
-  </p>
-
-  <h4 class="font-semibold mb-1">Submission by Death</h4>
-  <p>
-    When an enemy fails an attack against the player, all enemy casualties become the player’s reserves.
-  </p>
-</section>
-
-<section id="dictator">
-  <h3 class="font-semibold mb-2">Dictator</h3>
-  <p class="italic mb-2">"The object of power is power."</p>
-  <p class="mb-4">
-    The player gains 2★ each turn, regardless of successful conquests. If a successful conquest is made, the player also earns special authorities based on default probabilities, in addition to the guaranteed 2★.
-  </p>
-
-  <h4 class="font-semibold mb-1">I Alone Am Worthy</h4>
-  <p class="mb-4">
-    When activated, the player will take away stars from opponents. Up to 12 stars can be obtained.
-  </p>
-  <p>Number of usages = Number of players / 3</p>
-</section>
-
-<section id="robinhood">
-  <h3 class="font-semibold mb-2">Robinhood</h3>
-  <p class="italic mb-2">"Strip the wealth of the greedy, fuel the hopes of the needy."</p>
-  <p class="mb-4">
-    At the end of each round, the strongest player(s) based on PPI will be targeted. In the next round, 1/3 of their reinforcements will be transferred to you as reserves. 
-    If they earn more than 1 special authority, you will steal 1 for yourself. If you are among the top players, this ability won't affect you.
-    The number of top players targeted depends on the total number of players at the start of the game.
-  </p>
-
-  <table class="table-auto border border-gray-500 mb-4">
-    <thead>
-      <tr>
-        <th class="border border-gray-500 px-2 py-1">Number of Players</th>
-        <th class="border border-gray-500 px-2 py-1">Number of Targeted Players</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&lt; 6</td>
-        <td class="border border-gray-500 px-2 py-1">1</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&lt; 10</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&lt; 16</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
-
-<section id="elitocracy">
-  <h3 class="font-semibold mb-2">Elitocracy</h3>
-  <p class="italic mb-2">"Quality of men rules over quantity."</p>
-  <p class="mb-4">
-    For 3★, the player can boost their minimum roll by 1, up to a maximum increase equal to their current industrial level.
-    If the player's industrial level is lower than their minimum roll, the minimum roll is adjusted to match the industrial level during battles.
-  </p>
-  <p class="mb-4">
-    The player’s damage multiplier increases with minimum roll. It is equal to 1 + player's minimum roll divided by 2.<br>
-    If the player has a minimum roll of 2, then their damage multiplier increases from 1 to 2.<br>
-    If the player has a minimum roll of 4, then their damage multiplier increases from 2 to 3, and so on.
-  </p>
-
-  <h4 class="font-semibold mb-1">Gathering of the Elites</h4>
-  <p>
-    All troops stationed in cities and capitals have their minimum roll increase by 2 during combat.
-  </p>
-</section>
-
-<section id="collusion">
-  <h3 class="font-semibold mb-2">Collusion</h3>
-  <p class="italic mb-2">"Corrupt the few, and they will corrupt the many."</p>
-  <p class="mb-4">
-    The player can corrupt the authority of an enemy territory, secretly gaining De Facto control over it.
-    The player will receive the territorial and industrial bonuses from the corrupted territory instead of the original owner.
-    However, this will not impact the actual owner’s continental bonus, as that remains under De Jure control.
-  </p>
-  <p class="mb-4">
-    <strong>De Facto</strong> → What is according to reality<br>
-    <strong>De Jure</strong> → What is according to laws
-  </p>
-
-  <h4 class="font-semibold mb-1">Initial Number of Usages</h4>
-  <table class="table-auto border border-gray-500 mb-4">
-    <thead>
-      <tr>
-        <th class="border border-gray-500 px-2 py-1">Number of Players</th>
-        <th class="border border-gray-500 px-2 py-1">Number of Usages</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&lt; 5</td>
-        <td class="border border-gray-500 px-2 py-1">1</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">5 to 6</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">&gt; 6</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p>Every round, you receive 1 more usage.</p>
-</section>
-
-<section id="laplaces-demon">
-  <h3 class="font-semibold mb-2">Laplace’s Demon</h3>
-  <p class="italic mb-2">“The essence of war is not fighting; it is knowing.”</p>
-  <p class="mb-4">
-    Can peek into the hidden stats of players by a click of a button. The hidden stats include:
-    War Art, number of Special Authority, Infrastructure Level, and Minimum Roll.
-  </p>
-
-  <p class="mb-4">
-    Know all secret agendas present in game with high accuracy.
-  </p>
-
-  <p>
-    A list of secret agenda names is shown to the player when they click the war art usage button.
-    However, two of the names in the list do not exist in the game. It is up to the player to discern which ones are fake.
-  </p>
-</section>
-
-<section id="arsenal-of-the-underworld">
-  <h3 class="font-semibold mb-2">Arsenal of the Underworld</h3>
-  <p class="italic mb-2">"What is hidden is often more powerful than what is seen."</p>
-  <p class="mb-4">
-    Specializing in building invisible underground weaponries that deal heavy damage to enemy forces.
-  </p>
-
-  <h4 class="font-semibold mb-1">Minefields</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Can set up to 3 minefields in 3 different territories.</li>
-    <li>Each minefield contains 5 mines that kill 1 troop each.</li>
-    <li>When facing large enemy forces (offensive troop &gt; 20), each mine will wipe 5% of troops off the attacking forces.</li>
-    <li>Once a minefield is completely used up, new minefields can be settled within the buildable minefield limit.</li>
-    <li>Max amount of minefields depends on the cumulative industrial and infrastructure level of the player, computed at the beginning of every round.</li>
-    <li>For every 2 levels of stat increase, the number of deployable minefields increases by 1.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Underground Missile Silo</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Can only build one.</li>
-    <li>Its base range can reach targets up to 5 territories away.</li>
-    <li>Number of usages and damage depend on the cumulative industrial and infrastructure level, computed at the beginning of every round.</li>
-    <li>Each missile can cause shockwave damage to surrounding territories of the impact point.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Missile Stats Table</h4>
-  <table class="table-auto border border-gray-500 mb-4">
-    <thead>
-      <tr>
-        <th class="border border-gray-500 px-2 py-1">Cumulative<br>Level</th>
-        <th class="border border-gray-500 px-2 py-1">Usages<br>per Round</th>
-        <th class="border border-gray-500 px-2 py-1">Damage<br>per Missile</th>
-        <th class="border border-gray-500 px-2 py-1">Shockwave<br>Damage</th>
-        <th class="border border-gray-500 px-2 py-1">Max<br>Range</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">0</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-        <td class="border border-gray-500 px-2 py-1">1</td>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">1</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-        <td class="border border-gray-500 px-2 py-1">4</td>
-        <td class="border border-gray-500 px-2 py-1">1</td>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-        <td class="border border-gray-500 px-2 py-1">4</td>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-        <td class="border border-gray-500 px-2 py-1">6</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-        <td class="border border-gray-500 px-2 py-1">6</td>
-        <td class="border border-gray-500 px-2 py-1">2</td>
-        <td class="border border-gray-500 px-2 py-1">6</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">4</td>
-        <td class="border border-gray-500 px-2 py-1">6</td>
-        <td class="border border-gray-500 px-2 py-1">7</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-        <td class="border border-gray-500 px-2 py-1">7</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">5</td>
-        <td class="border border-gray-500 px-2 py-1">7</td>
-        <td class="border border-gray-500 px-2 py-1">8</td>
-        <td class="border border-gray-500 px-2 py-1">3</td>
-        <td class="border border-gray-500 px-2 py-1">7</td>
-      </tr>
-      <tr>
-        <td class="border border-gray-500 px-2 py-1">6</td>
-        <td class="border border-gray-500 px-2 py-1">8</td>
-        <td class="border border-gray-500 px-2 py-1">9</td>
-        <td class="border border-gray-500 px-2 py-1">4</td>
-        <td class="border border-gray-500 px-2 py-1">8</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h4 class="font-semibold mb-1">Delayed Launching</h4>
-  <p>
-    Underground silo can launch missiles outside of the player's turn, dealing unexpected damage on enemy forces.
-    When launching missiles during another player's turn, the missile will reach their targets by the end of the other player's turn.
-  </p>
-</section>
-
-<section id="loan-shark">
-  <h3 class="font-semibold mb-2">Loan Shark</h3>
-  <p class="italic mb-2">"Strike at the shepherd, and the sheep will scatter."</p>
-  <p class="mb-4">
-    Able to launch ransomware attacks on enemy players.
-  </p>
-
-  <h4 class="font-semibold mb-1">Effect</h4>
-  <p class="mb-4">
-    When a player is targeted by a ransomware, their skill usage and special authority usage is disabled until they pay 2★ or 10 troops to the loan shark.
-    If it is the first round, the debt amount is reduced to 1★ or 5 troops.
-  </p>
-
-  <h4 class="font-semibold mb-1">Usage</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Only one player can be targeted at a time.</li>
-    <li>Once a player pays off their debt, they are immune to ransomware for 2 rounds.</li>
-    <li>If there are at least 5 players in the game, 2 players can be targeted at once.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Special Rules</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>If the loan shark dies, any active ransomware is deactivated and victims are freed.</li>
-    <li>If a targeted player dies, the ransomware extracts all their remaining resources to repay the debt before anyone else can claim them.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Payment Methods</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Players may pay using either special authority or troops.</li>
-    <li>If paying by special authority, all available stars are given to the loan shark.</li>
-    <li>If paying by troops, the system deducts from reserves first, then from territories if necessary.</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Interest Rate</h4>
-  <ul class="list-disc list-inside">
-    <li>If a debt is not paid in full, 1★ interest is added every 2 rounds.</li>
-    <li>If unpaid for 5 rounds, all available resources from the player are used to clear the debt.</li>
-  </ul>
-</section>
-
-<section id="revanchism">
-  <h3 class="font-semibold mb-2">Revanchism</h3>
-  <p class="italic mb-2">"To be wronged is nothing unless you continue to remember it."</p>
-  <p class="mb-4">
-    When the player loses territories and troops to enemy conquests, they accumulate rage points.
-    With enough rage points, the player will receive bonus battle stats to take revenge.
-  </p>
-
-  <h4 class="font-semibold mb-1">Rage Points Are Received When:</h4>
-  <ul class="list-disc list-inside mb-4">
-    <li>Losing a territory → 1 point</li>
-    <li>Losing a city → 20 points</li>
-    <li>Losing a capital → 25 points</li>
-    <li>Losing more than 10% of total troops → lost percentage as points</li>
-    <li>Losing a continent unification → 2.5 × continental bonus of the continent as points</li>
-  </ul>
-
-  <h4 class="font-semibold mb-1">Bonus Battle Stats</h4>
-  <ul class="list-disc list-inside">
-    <li>For every 100 rage points:<br>
-      → Industrial Level +1<br>
-      → Infrastructure Level +1<br>
-      → Nullification Rate +10%</li>
-    <li class="mt-2">For every 150 rage points:<br>
-      → Minimum Roll +1<br>
-      → Damage Multiplier +1</li>
-  </ul>
-</section>
-
-<section id="reaping-of-anubis">
-  <h3 class="font-semibold mb-2">Reaping of Anubis</h3>
-  <p class="italic mb-2">"They fall before the first step is even taken."</p>
-  <p class="mb-4">
-    At the start of all battles, a set amount of troops, called the Reaping, is removed from enemy forces.
-    The Reaping is set at 0 at the start of the game, and it can be increased to 1 using 3★.
-  </p>
-
-  <h4 class="font-semibold mb-1">Reaping Upgrade Cost</h4>
-  <p>
-    The cost to increase the Reaping level grows as follows:
-  </p>
-  <ul class="list-disc list-inside">
-    <li>0 → 1: 3★</li>
-    <li>1 → 2: 5★</li>
-    <li>2 → 3: 7★</li>
-    <li>... and so on</li>
-  </ul>
-</section>
-
-<section id="pandoras-box">
-  <h3 class="font-semibold mb-2">Pandora’s Box</h3>
-  <p class="italic mb-2">"Sometimes, there’s nothing inside. Sometimes, everything."</p>
-  <p class="mb-4">
-    For 2★, the player can peek into Pandora’s Box. They may receive blessings... or nothing at all.
-  </p>
-  <p class="mb-4">
-    Player gets 1 free peek at the start of the game.
-  </p>
-
-  <h4 class="font-semibold mb-1">Probability Outcomes</h4>
-  <ul class="list-disc list-inside">
-    <li>Gaining nothing: 20%</li>
-    <li>Gaining 1★: 20%</li>
-    <li>Gaining 3★: 15%</li>
-    <li>Gaining 1 Industrial Level: 6%</li>
-    <li>Gaining 1 Infrastructure Level: 6%</li>
-    <li>Gaining 1 Minimum Roll: 6%</li>
-    <li>Gaining 5% Nullification Rate: 6%</li>
-    <li>Gaining 2 Industrial Level: 3%</li>
-    <li>Gaining 2 Infrastructure Level: 3%</li>
-    <li>Gaining 2 Minimum Roll: 3%</li>
-    <li>Gaining 10% Nullification Rate: 3%</li>
-    <li>Increasing Damage Multiplier by 1: 3%</li>
-    <li>Gaining 30 reserves: 3%</li>
-    <li>Gaining 7★: 3%</li>
-  </ul>
-</section>
-
-<section id="loopwalker">
-  <h3 class="font-semibold mb-2">Loopwalker</h3>
-  <p class="italic mb-2">"Every failure is fuel for the perfect loop."</p>
-  <p class="mb-4">
-    Time is not linear to you — you will be able to run multiple timelines during battles and get the best outcome out of them.
-    For every enemy player, you will receive 200 loops. You can set the number of loops per battle anytime.
-    Only 100 loops max can be used per battle. Manage your time well!
-  </p>
-</section>
-
+  var grid = document.getElementById("warartsGrid");
+  wararts.forEach(function(warart) {
+    grid.appendChild(createWarartCard(warart));
+  });
+})();
+</script>
+    
     `
   };
   
