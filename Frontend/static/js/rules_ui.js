@@ -4885,7 +4885,200 @@ const contentData = {
 })();
 </script>
     
-    `
+    `,
+
+eliminations: `
+<style scoped>
+  .elimination-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .elimination-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #e0e0e0;
+  }
+
+  .elimination-hero {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.08));
+    border-radius: 12px;
+    border: 2px solid rgba(231, 76, 60, 0.4);
+  }
+
+  .elimination-hero h1 {
+    font-size: 32px;
+    color: #e74c3c;
+    margin-bottom: 10px;
+  }
+
+  .elimination-hero p {
+    font-size: 16px;
+    color: #b0b0b0;
+    line-height: 1.6;
+  }
+
+  .elimination-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .elimination-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .elimination-card {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.05));
+    border: 2px solid rgba(231, 76, 60, 0.3);
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+  }
+
+  .elimination-card:hover {
+    border-color: rgba(231, 76, 60, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.3);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+  }
+
+  .card-icon {
+    font-size: 36px;
+  }
+
+  .card-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+  }
+
+  .card-content {
+    color: #d0d0d0;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .card-content p {
+    margin-bottom: 12px;
+  }
+
+  .card-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .highlight-box {
+    background: rgba(231, 76, 60, 0.15);
+    border-left: 3px solid #e74c3c;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+  }
+
+  .highlight-box p {
+    margin: 0;
+    color: #e0e0e0;
+  }
+
+  .example-box {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid #3498db;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+  }
+
+  .example-box p {
+    margin: 0;
+    color: #d0d0d0;
+  }
+
+  .example-label {
+    color: #3498db;
+    font-weight: bold;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .important-note {
+    background: rgba(241, 196, 15, 0.15);
+    border: 1px solid rgba(241, 196, 15, 0.4);
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+    color: #f1c40f;
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>
+
+<div class="elimination-container">
+  <div class="elimination-hero">
+    <h1>Elimination</h1>
+    <p>Two paths lead to a player's demise: failure to complete their secret agenda, or losing all territories through conquest</p>
+  </div>
+
+  <div class="elimination-grid">
+    <div class="elimination-card">
+      <div class="card-header">
+        <div class="card-icon">📜</div>
+        <div class="card-title">Secret Agenda Failure</div>
+      </div>
+      <div class="card-content">
+        <p>Players are eliminated if they fail to complete their secret agenda. Some secret agendas even have losing conditions that eliminate the player when triggered.</p>
+        
+        <div class="highlight-box">
+          <p>When a player dies due to secret agenda failure, it is <strong>not</strong> considered "murder" by the system.</p>
+        </div>
+
+        <p>This means:</p>
+        <p>• No resources are transferred to any player<br>• No player receives credit for the elimination<br>• The death is treated as a self-inflicted failure</p>
+      </div>
+    </div>
+
+    <div class="elimination-card">
+      <div class="card-header">
+        <div class="card-icon">⚔️</div>
+        <div class="card-title">Personal Kill</div>
+      </div>
+      <div class="card-content">
+        <p>Personal kills are conventional deaths through battles. Players are considered dead if there are no territories that belong to them on the game map.</p>
+        
+        <div class="highlight-box">
+          <p>When a player is killed, <strong>all their resources</strong> (special authority ★ and reserves) are transferred to the killer.</p>
+        </div>
+
+        <p>A player is considered a killer if they conquered the last territory of another player.</p>
+
+        <div class="example-box">
+          <div class="example-label">Example</div>
+          <p>If Player A attacked and conquered all territories of Player B, it would be considered a Personal Kill, and Player A would receive all special authority and reserves of Player B.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="important-note">
+    ⚠️ Important: Only Personal Kills result in resource transfer. Secret Agenda failures do not transfer resources to any player.
+  </div>
+</div>
+`
+
   };
   
   function showSubtabs($el) {
