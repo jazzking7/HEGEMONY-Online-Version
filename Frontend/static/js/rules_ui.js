@@ -489,6 +489,8 @@ const contentData = {
   .priority-a { background: #e67e22; }
   .priority-b { background: #f39c12; }
   .priority-c { background: #3498db; }
+  .priority-ss { background: #dc2626;}
+  .priority-special { background: #6366f1;}
 
   .cards-grid {
     display: grid;
@@ -1031,6 +1033,33 @@ const contentData = {
       winCondition: "Achieve successful conquests by deploying fewer troops than the defenders. You must accumulate troop kills equal to the number of territories on the map, and all kills must come from these underdog victories.",
       sharedVictory: "With class B only.",
       details: ""
+    },
+    {
+      id: "annihilator",
+      title: "Annihilator",
+      quote: "Death is the only treaty.",
+      priority: "SS",
+      winCondition: "Kill everyone.",
+      sharedVictory: "No",
+      details: "<p><strong>Special condition:</strong> You can only select from a specific set of enhanced War Arts.</p>"
+    },
+    {
+      id: "opportunist",
+      title: "Opportunist",
+      quote: "Wait. Watch. Win.",
+      priority: "SPECIAL",
+      winCondition: "Stay alive until someone finishes their mission.",
+      sharedVictory: "Only with players who don't need to kill you",
+      details: "<p><strong>Special condition:</strong> If someone kill you, they gain 15★</p>"
+    },
+    {
+      id: "spymaster",
+      title: "Spymaster",
+      quote: "To strike unseen is to win twice: once with silence, and once with steel.",
+      priority: "SPECIAL",
+      winCondition: "Vote Global Ceasefire with everyone else before Round 5, or kill someone afterwards.",
+      sharedVictory: "With players who don't need to kill you before round 5, Solo Winner afterwards",
+      details: "<p><strong>Special condition:</strong> You are considered S class by the system.</p>"
     }
   ];
 
