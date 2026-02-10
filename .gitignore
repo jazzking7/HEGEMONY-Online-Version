@@ -3,7 +3,7 @@ test.py
 __pycache__/
 *.py[cod]
 *$py.class
-
+user_logs.txt
 # C extensions
 *.so
 

@@ -5,6 +5,7 @@ from mission_distributor import *
 from game_state_manager import *
 from skill_distributor import *
 from tutorial_state_manager import Tutorial_Manager
+from datetime import datetime
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -31,10 +32,18 @@ def generate_unique_code(length):
 def connect(auth):
     print('Client connected with socket ID:', request.sid)
 
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("user_logs.txt", "a") as f:
+        f.write(f"Client with socket ID {request.sid} connected at {timestamp}\n")
+
 @socketio.on('disconnect')
 def disconnect():
     sid = request.sid
     print('Client disconnected with socket ID:', sid)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("user_logs.txt", "a") as f:
+        f.write(f"Client with socket ID {request.sid} disconnected at {timestamp}\n")
 
     # Player not even connected to a lobby
     if not sid in players:
