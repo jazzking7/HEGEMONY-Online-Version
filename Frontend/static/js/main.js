@@ -14,7 +14,7 @@ function popup(msg, duration) {
 
 // Load page
 // const URL_FRONTEND = 'http://127.0.0.1:8080/';
-const URL_FRONTEND = 'http://35.183.100.227:8080/';
+const URL_FRONTEND = 'http://35.183.100.227:80/';
 var main;
 
 // function loadPage(page_route) {
