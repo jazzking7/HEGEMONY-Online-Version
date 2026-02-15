@@ -2,6 +2,49 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="rules_ui.js"></script>
 
+<style> 
+
+#content {
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+#content.quickstart-background::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 18rem; /* Width of sidebar (w-72 = 18rem) */
+  right: 0;
+  bottom: 0;
+  background-image: url('static/Assets/Background/websitebg.png'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(5px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+#content.quickstart-background::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 18rem; /* Width of sidebar (w-72 = 18rem) */
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 20, 30, 0.75);
+  z-index: 1;
+  pointer-events: none;
+}
+
+#content.quickstart-background > * {
+  position: relative;
+  z-index: 2;
+}
+
+</style>
+
 <div class="flex h-screen text-white">
   <!-- Sidebar -->
   <div id="sidebar" class="w-72 bg-gray-900 border-r border-gray-700 p-4 overflow-y-auto text-sm">

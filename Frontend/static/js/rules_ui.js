@@ -5048,47 +5048,52 @@ eliminations: `
 
   };
   
-  function showSubtabs($el) {
-    $el.removeClass('max-h-0 hidden').addClass('max-h-96');
-  }
-  
-  function hideAllSubtabs() {
-    $('.subtabs').removeClass('max-h-96').addClass('max-h-0 hidden');
-  }
-  
-  $(function () {
-    $('.main-tab').on('click', function () {
-      const tab = $(this).data('tab');
-      const $subtabs = $(`.subtabs[data-subtab-for="${tab}"]`);
-      const isVisible = $subtabs.is(':visible');
-  
-      // Hide all subtabs and remove highlights
-      $('.subtabs').addClass('hidden');
-      $('.main-tab').removeClass('bg-gray-700');
-  
-      if (!isVisible) {
-        $subtabs.removeClass('hidden');
-        $(this).addClass('bg-gray-700');
-  
-        // Load content if different
-        const currentTab = $('#content').data('loaded');
-        if (currentTab !== tab) {
-          $('#content').html(contentData[tab] || '').data('loaded', tab);
+function showSubtabs($el) {
+  $el.removeClass('max-h-0 hidden').addClass('max-h-96');
+}
+
+function hideAllSubtabs() {
+  $('.subtabs').removeClass('max-h-96').addClass('max-h-0 hidden');
+}
+
+$(function () {
+  $('.main-tab').on('click', function () {
+    const tab = $(this).data('tab');
+    const $subtabs = $(`.subtabs[data-subtab-for="${tab}"]`);
+    const isVisible = $subtabs.is(':visible');
+
+    // Hide all subtabs and remove highlights
+    $('.subtabs').addClass('hidden');
+    $('.main-tab').removeClass('bg-gray-700');
+
+    if (!isVisible) {
+      $subtabs.removeClass('hidden');
+      $(this).addClass('bg-gray-700');
+
+      // Load content if different
+      const currentTab = $('#content').data('loaded');
+      if (currentTab !== tab) {
+        $('#content').html(contentData[tab] || '').data('loaded', tab);
+        
+        // Add/remove background for quickstart
+        if (tab === 'quickstart') {
+          $('#content').addClass('quickstart-background');
+        } else {
+          $('#content').removeClass('quickstart-background');
         }
       }
-    });
-  
-    $(document).on('click', '.subtab', function (e) {
-      e.stopPropagation();
-      const targetId = $(this).data('target');
-      const target = document.getElementById(targetId);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  
-    // Load default
-    $('.main-tab[data-tab="quickstart"]').trigger('click');
+    }
   });
-  
-  
+
+  $(document).on('click', '.subtab', function (e) {
+    e.stopPropagation();
+    const targetId = $(this).data('target');
+    const target = document.getElementById(targetId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Load default
+  $('.main-tab[data-tab="quickstart"]').trigger('click');
+});
