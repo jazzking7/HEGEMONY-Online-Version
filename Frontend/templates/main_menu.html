@@ -1,87 +1,320 @@
-<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+<style>
+  .hegemony-main-menu * {
+    box-sizing: border-box;
+  }
 
-  <div class="text-center" style="margin: 8vh 0">
-    <h1>HEGEMONY</h1>
-  </div>
+  .hegemony-main-menu {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    width: 100%;
+  }
 
-  <div class="container">
-    <div class="row">
-      <!-- Play Game stays on left -->
-      <div class="col">
-        <div class="card text-center">
-          <h4 class="card-header">Play Game</h4>
-          <div class="card-body">
-            <div class="input-group space">
-              <span class="input-group-text">Nickname</span>
-              <input id="nickname" class="form-control" type="text" placeholder="Enter a nickname..." />
-            </div>
-            <div class="input-group space">
-              <input id="joinLobbyCode" class="form-control" type="text" placeholder="Lobby ID" />
-              <button id="btn_joinLobby" class="btn btn-primary">Join Lobby</button>
-            </div>
-            <button id="btn_createLobby" class="space btn btn-primary">Create Lobby</button>
+  /* Background with blur */
+  .hegemony-main-menu::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('static/Assets/Background/websitebg.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(5px);
+    z-index: -2;
+  }
+
+  /* Dark overlay */
+  .hegemony-main-menu::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 20, 30, 0.75);
+    z-index: -1;
+  }
+
+  .hegemony-main-menu .main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .hegemony-main-menu .title-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .hegemony-main-menu .title-section h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    margin-bottom: 0.5rem;
+  }
+
+  .hegemony-main-menu .title-section .subtitle {
+    font-size: 1.1rem;
+    color: #b0b0b0;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+
+  .hegemony-main-menu .content-grid {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 992px) {
+    .hegemony-main-menu .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hegemony-main-menu .game-card {
+    background: linear-gradient(135deg, rgba(50, 60, 90, 0.4), rgba(40, 50, 80, 0.3));
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 15px) 0,
+      100% 15px,
+      100% 100%,
+      15px 100%,
+      0 calc(100% - 15px)
+    );
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .hegemony-main-menu .game-card:hover {
+    background: linear-gradient(135deg, rgba(60, 70, 100, 0.5), rgba(50, 60, 90, 0.4));
+    border-color: rgba(100, 120, 180, 0.5);
+    transform: translateY(-4px);
+  }
+
+  .hegemony-main-menu .game-card h4 {
+    font-size: 1.4rem;
+    color: #c9bfff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(100, 120, 180, 0.3);
+    font-weight: 600;
+  }
+
+  .hegemony-main-menu .game-card .card-content {
+    color: #c5c5c5;
+  }
+
+  .hegemony-main-menu .input-group {
+    margin-bottom: 1rem;
+  }
+
+  .hegemony-main-menu .input-group-text {
+    background: rgba(30, 40, 60, 0.6);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    color: #c9bfff;
+    font-weight: 500;
+  }
+
+  .hegemony-main-menu .form-control {
+    background: rgba(20, 30, 50, 0.6);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    color: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  .hegemony-main-menu .form-control:focus {
+    background: rgba(30, 40, 60, 0.7);
+    border-color: rgba(100, 120, 180, 0.6);
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(100, 120, 180, 0.25);
+  }
+
+  .hegemony-main-menu .form-control::placeholder {
+    color: #7a7a7a;
+  }
+
+  .hegemony-main-menu .btn-primary {
+    background: linear-gradient(135deg, rgba(100, 120, 180, 0.6), rgba(80, 100, 160, 0.5));
+    border: 1px solid rgba(100, 120, 180, 0.4);
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .hegemony-main-menu .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(120, 140, 200, 0.7), rgba(100, 120, 180, 0.6));
+    border-color: rgba(120, 140, 200, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 120, 180, 0.4);
+  }
+
+  .hegemony-main-menu .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .hegemony-main-menu .space {
+    margin-top: 0.75rem;
+  }
+
+  .hegemony-main-menu .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .hegemony-main-menu .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 576px) {
+    .hegemony-main-menu .bottom-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hegemony-main-menu .discord-card {
+    max-width: 400px;
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.3), rgba(68, 81, 222, 0.25));
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(88, 101, 242, 0.4);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 12px) 0,
+      100% 12px,
+      100% 100%,
+      12px 100%,
+      0 calc(100% - 12px)
+    );
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .hegemony-main-menu .discord-card:hover {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.4), rgba(68, 81, 222, 0.35));
+    border-color: rgba(88, 101, 242, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
+  }
+
+  .hegemony-main-menu .discord-card strong {
+    color: #ffffff;
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+  }
+
+  .hegemony-main-menu .card-description {
+    font-size: 0.95rem;
+    color: #c5c5c5;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .hegemony-main-menu .title-section h1 {
+      font-size: 2.5rem;
+    }
+  }
+
+  .hegemony-main-menu .w-100 {
+    width: 100%;
+  }
+
+  .hegemony-main-menu .d-flex {
+    display: flex;
+  }
+
+  .hegemony-main-menu .align-items-center {
+    align-items: center;
+  }
+
+  .hegemony-main-menu .justify-content-center {
+    justify-content: center;
+  }
+</style>
+
+<div class="hegemony-main-menu">
+  <div class="main-container">
+    <!-- Title Section -->
+    <div class="title-section">
+      <h1>HEGEMONY</h1>
+      <div class="subtitle">"Let Your Rules Shape The World."</div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Play Game Card -->
+      <div class="game-card">
+        <h4>Play Game</h4>
+        <div class="card-content">
+          <div class="input-group">
+            <span class="input-group-text">Nickname</span>
+            <input id="nickname" class="form-control" type="text" placeholder="Enter a nickname..." />
           </div>
+          <div class="input-group">
+            <input id="joinLobbyCode" class="form-control" type="text" placeholder="Lobby ID" />
+            <button id="btn_joinLobby" class="btn btn-primary">Join Lobby</button>
+          </div>
+          <button id="btn_createLobby" class="space btn btn-primary w-100">Create Lobby</button>
         </div>
       </div>
 
-      <!-- Right side: Roll Simulator (top), then Game Rules + Tutorials (bottom row) -->
-      <div class="col">
-        <!-- Roll Simulator full width -->
-        <div class="card text-center mb-3">
-          <h4 class="card-header">Roll Simulator</h4>
-          <div class="card-body">
-            <div>Use this to get a win rate approximation</div>
-            <button id="btn_roll_simulator" class="space btn btn-primary">Enter Simulator</button>
+      <!-- Right Column -->
+      <div class="right-column">
+        <!-- Roll Simulator -->
+        <div class="game-card">
+          <h4>Roll Simulator</h4>
+          <div class="card-content">
+            <div class="card-description">Use this to get a win rate approximation</div>
+            <button id="btn_roll_simulator" class="btn btn-primary w-100">Enter Simulator</button>
           </div>
         </div>
 
-        <!-- Game Rules + Tutorials side by side -->
-        <div class="row">
-          <div class="col">
-            <div class="card text-center">
-              <h4 class="card-header">Game Rules</h4>
-              <div class="card-body">
-                <button id="btn_game_rules" class="space btn btn-primary">Enter Game Rules</button>
-              </div>
+        <!-- Bottom Row: Game Rules + Tutorials -->
+        <div class="bottom-row">
+          <div class="game-card">
+            <h4>Game Rules</h4>
+            <div class="card-content">
+              <button id="btn_game_rules" class="btn btn-primary w-100">Enter</button>
             </div>
           </div>
-          <div class="col">
-            <div class="card text-center">
-              <h4 class="card-header">Tutorials</h4>
-              <div class="card-body">
-                <button id="btn_tutorials" class="space btn btn-primary">Enter Tutorials</button>
-              </div>
+
+          <div class="game-card">
+            <h4>Tutorials</h4>
+            <div class="card-content">
+              <button id="btn_tutorials" class="btn btn-primary w-100">Enter</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Discord Join -->
-<div style="width: 100%; display: flex; justify-content: center;">
-  <div 
-    class="card text-center"
-    style="cursor: pointer; max-width: 320px; background-color: #5865F2; color: white;"
-    onclick="window.open('https://discord.gg/25TJSnt8Xd', '_blank')"
-  >
-    <div class="card-body d-flex align-items-center justify-content-center">
-      <strong>Join Us on Discord</strong>
+    <!-- Discord Card -->
+    <div class="discord-card" onclick="window.open('https://discord.gg/25TJSnt8Xd', '_blank')">
+      <div class="d-flex align-items-center justify-content-center">
+        <strong>Join Us on Discord</strong>
+      </div>
     </div>
   </div>
 </div>
-
-
-</div>
-
-
-<!-- <div class="col">
-            <div class="card text-center">
-                <h4 class="card-header">Credits</h4>
-                <div class="card-body">
-                    <p>Sum Ting Wong — Designer</p>
-                    <p>Ho Lee Fuk — Programmer</p>
-                    <p>Long Buk Lao — Beta Tester</p>
-                </div>
-            </div>
-        </div>  -->
