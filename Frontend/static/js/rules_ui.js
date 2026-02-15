@@ -1,373 +1,311 @@
 // rules_ui.js
 const contentData = {
   quickstart: `
-      <section id="quick-start" class="space-y-6">
-        <h2 class="text-2xl font-bold">Quick Start</h2>
 
-        <div>
-          <h3 class="text-lg font-semibold">🎯 How You Win</h3>
-          <ul class="list-disc ml-6">
-            <li>You win by completing your <strong>Secret Agenda</strong></li>
-            <li>Agendas are hidden and different for each player</li>
-            <li>Don't trust easily</li>
-          </ul>
+<style>
+  .quick-start-container * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .quick-start-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #e4e8f0;
+    line-height: 1.5;
+  }
+
+  .quick-start-intro {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: linear-gradient(90deg, 
+      rgba(50, 60, 90, 0.3) 0%, 
+      rgba(40, 50, 80, 0.2) 100%);
+    border-left: 3px solid rgba(100, 120, 180, 0.4);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 10px) 0,
+      100% 10px,
+      100% 100%,
+      10px 100%,
+      0 calc(100% - 10px)
+    );
+  }
+
+  .quick-start-intro h2 {
+    font-size: 1.75rem;
+    color: #c9bfff;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .quick-start-intro p {
+    font-size: 1rem;
+    color: #b0b0b0;
+    font-style: italic;
+  }
+
+  .quick-start-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 1024px) {
+    .quick-start-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .quick-start-card {
+    background: linear-gradient(135deg, rgba(50, 60, 90, 0.25), rgba(40, 50, 80, 0.15));
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 12px) 0,
+      100% 12px,
+      100% 100%,
+      12px 100%,
+      0 calc(100% - 12px)
+    );
+    padding: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .quick-start-card:hover {
+    background: linear-gradient(135deg, rgba(50, 60, 90, 0.35), rgba(40, 50, 80, 0.25));
+    border-color: rgba(100, 120, 180, 0.5);
+    transform: translateX(4px);
+  }
+
+  .quick-start-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(100, 120, 180, 0.25);
+  }
+
+  .quick-start-title-section h3 {
+    font-size: 1.25rem;
+    color: #c9bfff;
+    margin-bottom: 0.2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .quick-start-subtitle {
+    font-size: 0.8rem;
+    color: #9a9a9a;
+    font-style: italic;
+  }
+
+  .quick-start-content {
+    margin-top: 0.5rem;
+  }
+
+  .quick-start-points {
+    list-style: none;
+    padding: 0;
+  }
+
+  .quick-start-points li {
+    padding: 0.35rem 0 0.35rem 1.5rem;
+    position: relative;
+    color: #c5c5c5;
+    line-height: 1.6;
+    font-size: 0.9rem;
+  }
+
+  .quick-start-points li:before {
+    content: "→";
+    position: absolute;
+    left: 0.5rem;
+    color: #8b7ff5;
+    font-weight: bold;
+  }
+
+  .quick-start-points strong {
+    color: #d0d0d0;
+    font-weight: 600;
+  }
+
+  /* Different colors for each card */
+  .quick-start-card:nth-child(1) .quick-start-header {
+    border-bottom-color: rgba(100, 120, 180, 0.3);
+  }
+
+  .quick-start-card:nth-child(1) .quick-start-points li:before {
+    color: #8b7ff5;
+  }
+
+  .quick-start-card:nth-child(2) .quick-start-header {
+    border-bottom-color: rgba(100, 120, 180, 0.3);
+  }
+
+  .quick-start-card:nth-child(2) .quick-start-points li:before {
+    color: #8b7ff5;
+  }
+
+  .quick-start-card:nth-child(3) .quick-start-header {
+    border-bottom-color: rgba(100, 120, 180, 0.3);
+  }
+
+  .quick-start-card:nth-child(3) .quick-start-points li:before {
+    color: #8b7ff5;
+  }
+
+  .quick-start-card:nth-child(4) .quick-start-header {
+    border-bottom-color: rgba(100, 120, 180, 0.3);
+  }
+
+  .quick-start-card:nth-child(4) .quick-start-points li:before {
+    color: #8b7ff5;
+  }
+
+  .quick-start-card:nth-child(5) .quick-start-header {
+    border-bottom-color: rgba(100, 120, 180, 0.3);
+  }
+
+  .quick-start-card:nth-child(5) .quick-start-points li:before {
+    color: #8b7ff5;
+  }
+
+  .quick-start-footer {
+    background: rgba(40, 50, 70, 0.25);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(100, 120, 180, 0.2);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 8px) 0,
+      100% 8px,
+      100% 100%,
+      8px 100%,
+      0 calc(100% - 8px)
+    );
+    padding: 0.75rem 1rem;
+    margin-top: 0.75rem;
+    text-align: center;
+  }
+
+  .quick-start-footer p {
+    color: #b0b0b0;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+</style>
+
+<div class="quick-start-container">
+  <div class="quick-start-intro">
+    <h2>Quick Start</h2>
+    <p>Everything you need to know to begin playing</p>
+  </div>
+
+  <div class="quick-start-grid">
+    <!-- How You Win Card -->
+    <div class="quick-start-card">
+      <div class="quick-start-header">
+        <div class="quick-start-title-section">
+          <h3>How You Win</h3>
+          <div class="quick-start-subtitle">Your Victory Condition</div>
         </div>
+      </div>
+      
+      <div class="quick-start-content">
+        <ul class="quick-start-points">
+          <li>You win by completing your <strong>Secret Agenda</strong></li>
+          <li>Agendas are hidden and different for each player</li>
+          <li>Don't trust easily</li>
+        </ul>
+      </div>
+    </div>
 
-        <div>
-          <h3 class="text-lg font-semibold">🗡 War Arts</h3>
-          <ul class="list-disc ml-6">
-            <li>Each player has one War Art</li>
-            <li>War Arts break rules and define playstyle</li>
-            <li>You don’t need to master them to play</li>
-          </ul>
+    <!-- War Arts Card -->
+    <div class="quick-start-card">
+      <div class="quick-start-header">
+        <div class="quick-start-title-section">
+          <h3>War Arts</h3>
+          <div class="quick-start-subtitle">Your Unique Advantage</div>
         </div>
+      </div>
+      
+      <div class="quick-start-content">
+        <ul class="quick-start-points">
+          <li>Each player has one War Art</li>
+          <li>War Arts break rules and define playstyle</li>
+          <li>You don't need to master them to play</li>
+        </ul>
+      </div>
+    </div>
 
-        <div>
-          <h3 class="text-lg font-semibold">⭐ Special Authority (★)</h3>
-          <ul class="list-disc ml-6">
-            <li>The only currency in the game</li>
-            <li>Used to build, upgrade, mobilize, and activate War Arts</li>
-            <li>Mainly earned by winning battles</li>
-          </ul>
+    <!-- Special Authority Card -->
+    <div class="quick-start-card">
+      <div class="quick-start-header">
+        <div class="quick-start-title-section">
+          <h3>Special Authority (★)</h3>
+          <div class="quick-start-subtitle">The Only Currency</div>
         </div>
+      </div>
+      
+      <div class="quick-start-content">
+        <ul class="quick-start-points">
+          <li>The only currency in the game</li>
+          <li>Used to build, upgrade, mobilize, and activate War Arts</li>
+          <li>Mainly earned by winning battles</li>
+        </ul>
+      </div>
+    </div>
 
-        <div>
-          <h3 class="text-lg font-semibold">🔁 Your Turn (Always this order)</h3>
-          <ol class="list-decimal ml-6">
-            <li><strong>Reinforcement</strong> — get & deploy troops</li>
-            <li><strong>Preparation</strong> — spend ★, activate abilities</li>
-            <li><strong>Conquest</strong> — attack neighbors</li>
-            <li><strong>Rearrangement</strong> — move troops</li>
-          </ol>
+    <!-- Your Turn Card -->
+    <div class="quick-start-card">
+      <div class="quick-start-header">
+        <div class="quick-start-title-section">
+          <h3>Your Turn</h3>
+          <div class="quick-start-subtitle">Always This Order</div>
         </div>
+      </div>
+      
+      <div class="quick-start-content">
+        <ul class="quick-start-points">
+          <li><strong>Reinforcement</strong> — get & deploy troops</li>
+          <li><strong>Preparation</strong> — spend ★, activate abilities</li>
+          <li><strong>Conquest</strong> — attack neighbors</li>
+          <li><strong>Rearrangement</strong> — move troops</li>
+        </ul>
+      </div>
+    </div>
 
-        <div>
-          <h3 class="text-lg font-semibold">⚔ Battles (What Matters)</h3>
-          <ul class="list-disc ml-6">
-            <li>Dice-based (Risk-like)</li>
-            <li>Attacker and defender roll dice</li>
-            <li>Higher rolls win, loser loses troops</li>
-            <li>Defenders win ties</li>
-            <li>Send more troops = more likely to win</li>
-          </ul>
+    <!-- Battles Card -->
+    <div class="quick-start-card">
+      <div class="quick-start-header">
+        <div class="quick-start-title-section">
+          <h3>Battles</h3>
+          <div class="quick-start-subtitle">What Matters</div>
         </div>
-
-        <p class="italic text-gray-300">
-          If you understand this page, you are ready to play!
-        </p>
-      </section>
-    `,
-    rules: `
-      <section id="objective"><h2 class="text-xl mt-1 font-bold">Game Objective</h2><p>Your main goal is to accomplish your Secret Agenda. You can choose 1 War Art to help you win. <br> 
-      Your Secret Agenda and what War Art you've chosen are hidden from others.<br> 
-      Good luck! Who knows... Maybe the "good friend" next to you is after your life.
-      </p></section>
-
-      <section id="setup"><h2 class="text-xl font-bold">Game Set Up</h2><p>
-      The following 7 events take place during set up:<br> 
-        1. Players receive their secret agenda, the system will make sure at least two players have conflicting interests when assigning agendas.<br> 
-        2. Players choose a color to represent themselves.<br> 
-        3. Players choose a territory distribution that best fits their interests, The territory distributions are randomly generated by the system. Players take turns to choose their distribution, the order is randomly assigned by the system.<br> 
-        4. Players choose one of their territories as the capital region.<br> 
-        5. Players settle cities in two of their territories, turning them into urbanized regions.<br> 
-        6. Players make initial deployment on their territories. The number of troops available for initial deployment equals the number of territories they control. Players whose turns are behind the queue will receive more troops for initial deployment. <br> 
-        7. Players choose their War Art. The system will randomly take half of the available war arts as options to choose for each player.
-      </p></section>
-
-      <section id="flow"><h2 class="text-xl font-bold">Game Flow</h2><p>
-        Players take turns to take actions. The order is determined by the action queue.<br> 
-        1. Reinforcement<br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; Reinforcement stage allows players to deploy troops on their territories. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; The number of deployable Troops is equal to the total points of all territories controlled by the player divided by 3 (round down).<br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; Normal territories are worth 1 point each, and special territories give extra points or bonus troops (see the Territory tab for more details).<br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; When an entire continent is controlled by a player, the player will receive Continental Bonus Troops. <br>
-        &nbsp;&nbsp;&nbsp;&nbsp; Click on “Show continental border” to see how many Bonus Troops are given by each continent. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; After deploying all troops, players enter the Preparation stage. <br> 
-        2. Preparation <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; During the Preparation stage, players can boost their strength by using Special Authority and by activating their War Art.  <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; When all preparation is done, players enter the Conquest stage.  <br> 
-        3. Conquest <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; During the Conquest stage, players can attack bordering territories (maritime or land border). <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; When players make a successful conquest during this stage, they will receive Special Authority (in units of stars) based on predetermined probabilities (see Special &nbsp;&nbsp;&nbsp;&nbsp;  Authority section) at the end of the turn. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; Special Authorities can be converted into reserves, cities, or infrastructure levels. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp;  Battle stats of the player who is playing their turn are computed before the Conquest stage and they remain constant throughout the turn. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; Urbanized regions, megacities, and transport hubs captured during the Conquest stage will not change <br>  
-        &nbsp;&nbsp;&nbsp;&nbsp; the battle stats of the player before the end of their turn. <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; During the Conquest stage, battle stat upgrades do not take effect until the end of the current turn. <br> 
-        4.  Rearrangement<br> 
-        &nbsp;&nbsp;&nbsp;&nbsp; Players rearrange troops on their territories.<br> 
-      </p></section>
-
-<section id="battle_mech"><h2 class="text-xl font-bold">Battle Mechanism</h2><p>
-  The outcome of a battle is determined by a clash of dice. The number of dice used in a battle is determined by the number of troops.<br>
-  Each troop is worth one die, which can roll from 1 to 6. <br>
-  During a clash, the attacker rolls 3 dice, while the defender only rolls 2. <br>
-  The two highest dice rolls on the attacker’s side are kept and compared to the rolls on the defender’s side. <br>
-  The higher roll wins the clash. The die that loses the clash is discarded. <br>
-  If the values are equal, the defender wins, and the attacker will lose one troop. <br>
-  The 3rd attacker die is ignored but kept for the next clash. <br>
-  The battle continues until one side runs out of troops. Troops discarded during the battle are permanently lost. <br>
-
-  <h3 class="text-lg font-semibold mt-6 mb-2">Example:</h3>
-  <p>If the attacker rolled: <strong>6 4 1</strong></p>
-  <p>And the defender rolled: <strong>6 2</strong></p>
-  <p>→ The 1 from the attacker is ignored. The system compares:</p>
-  <ul class="list-disc list-inside ml-4">
-    <li>6 vs 6 → draw → attacker loses 1 troop</li>
-    <li>4 vs 2 → attacker wins → defender loses 1 troop</li>
-  </ul>
-  <p>Result: both sides lose 1 troop.</p>
-
-  <h3 class="text-lg font-semibold mt-6 mb-2">Full Example Battle</h3>
-  <p><strong>Attacker: 10 troops</strong><br><strong>Defender: 7 troops</strong></p>
-
-  <ol class="list-decimal list-inside space-y-4 mt-4">
-    <li>
-      <strong>Clash 1:</strong><br>
-      Attacker rolls: 5, 4, 2 (2 ignored)<br>
-      Defender rolls: 4, 3<br>
-      5 vs 4 → defender loses 1<br>
-      4 vs 3 → defender loses 1<br>
-      Troops left → Attacker: 10, Defender: 5
-    </li>
-    <li>
-      <strong>Clash 2:</strong><br>
-      Attacker rolls: 6, 3, 2 (2 ignored)<br>
-      Defender rolls: 5, 3<br>
-      6 vs 5 → defender loses 1<br>
-      3 vs 3 → draw → attacker loses 1<br>
-      Troops left → Attacker: 9, Defender: 4
-    </li>
-    <li>
-      <strong>Clash 3:</strong><br>
-      Attacker rolls: 5, 4, 1 (1 ignored)<br>
-      Defender rolls: 4, 3<br>
-      5 vs 4 → defender loses 1<br>
-      4 vs 3 → defender loses 1<br>
-      Troops left → Attacker: 9, Defender: 2
-    </li>
-    <li>
-      <strong>Clash 4:</strong><br>
-      Attacker rolls: 6, 5, 3 (3 ignored)<br>
-      Defender rolls: 6, 1<br>
-      6 vs 6 → draw → attacker loses 1<br>
-      5 vs 1 → defender loses 1<br>
-      Troops left → Attacker: 8, Defender: 1
-    </li>
-    <li>
-      <strong>Clash 5:</strong><br>
-      Attacker rolls: 5, 4, 4 (4 ignored)<br>
-      Defender rolls: 4<br>
-      5 vs 4 → defender loses 1<br>
-      Troops left → Attacker: 8, Defender: 0
-    </li>
-  </ol>
-  <p class="mt-4"><strong>Result:</strong> Attacker won the battle, lost 2 troops, and wiped out all 7 defending troops.</p>
-    </p>
- </section>
-
-<section id="stats"><h2 class="text-xl font-bold">Power Statistics</h2>
-  <div>
-    <h3 class="text-lg font-semibold">Industrial Level</h3>
-    <p>A player's Industrial Level increases the maximum roll value of their dice, which are set to a default range of 1 to 6.</p>
-    <p>The Industrial Level can be increased by controlling urbanized regions (either by conquering them or transforming a territory into an urbanized region). Urbanized regions are territories that have city/factory symbols on them (See Territories section).</p>
-    <p>For the 1st level up, a player must control 3 urbanized regions. Afterward, every 2 additional urbanized regions controlled will increase their Industrial Level by 1.</p>
-    <p><strong>Example:</strong> Player A controls 5 cities, they will have +2 Industrial Level, 1 from controlling 3 cities and 1 from controlling another 2 cities. Their dice rolls will range from 1 to 8.</p>
+      </div>
+      
+      <div class="quick-start-content">
+        <ul class="quick-start-points">
+          <li>Dice-based (Risk-like)</li>
+          <li>Attacker and defender roll dice</li>
+          <li>Higher rolls win, loser loses troops</li>
+          <li>Defenders win ties</li>
+          <li>Send more troops = more likely to win</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <h3 class="text-lg font-semibold">Infrastructure Level</h3>
-    <p>A player’s Infrastructure Level can increase the number of dice used in a battle. By default, the number of dice allowed in a clash is set to 3 when attacking and 2 when defending.</p>
-    <p>Players can upgrade their Infrastructure Level by spending their Special Authorities obtained during the Conquest phase. Each Infrastructure Level allows players 1 extra die when attacking and defending.</p>
-    <p><strong>Example:</strong> If a player upgraded their Infrastructure Level by 2, they will be able to roll 5 dice when attacking and 4 dice when defending.</p>
+  <div class="quick-start-footer">
+    <p>If you understand this page, you are ready to play!</p>
   </div>
+</div>
 
-  <div>
-    <h3 class="text-lg font-semibold">Player Power Index (PPI)</h3>
-    <p>Player Power Index, or PPI, is a metric used to approximate how strong a player is relative to other players. It considers 4 aspects of a player:</p>
-    <ul class="list-disc ml-6">
-      <li>How many troops can be generated with the player’s currently controlled territories.</li>
-      <li>How many troops the player currently owns.</li>
-      <li>The industrial level of the player.</li>
-      <li>The infrastructure level of the player.</li>
-    </ul>
-    <p>The average of each of the 4 aspects is computed based on all active players. If a player has exceeded the average in many aspects, their PPI will be higher. Conversely, if a player’s stats are mostly lower than the average, their PPI will be a lower number.</p>
-    <p>The player with the highest PPI is considered a <strong>Superpower</strong> by the system.</p>
-  </div>
-  <hr>
-
-  <div>
-    <h2 class="text-xl font-semibold">War Art Related Combat Statistics</h2>
-
-    <h3 class="text-lg font-semibold mt-2">Minimum Roll</h3>
-    <p>The smallest number that can be rolled by a die, which is set at 1 by default. Minimum roll can be increased using War Arts such as <em>Elitocracy</em>, <em>Pandora’s Box</em>, and <em>Revanchism</em>.</p>
-
-    <h3 class="text-lg font-semibold mt-2">Damage Multiplier</h3>
-    <p>Set to 1 by default. Can be increased using War Arts such as <em>Ares’ Blessing</em>, <em>Iron Wall</em>, <em>Elitocracy</em>, <em>Pandora’s Box</em>, and <em>Revanchism</em>.</p>
-    <p><strong>Example:</strong></p>
-    <p>Player A fights Player B using 10 troops against 10.</p>
-    <p>Player A rolls: <strong>6 5 5</strong><br>Player B rolls: <strong>6 4 2</strong></p>
-    <ul class="list-disc ml-6">
-      <li>6 = 6 → draw → Player A loses 1 troop</li>
-      <li>5 > 4 → Player B loses 1 troop</li>
-      <li>5 > 2 → Player B loses 1 troop</li>
-    </ul>
-    <p>Normal: Player A has 9 troops left, Player B has 8.</p>
-    <p>If Player A has x2 damage multiplier: Player B would have only 6 troops left instead of 8.</p>
-
-    <h3 class="text-lg font-semibold mt-2">Nullification Rate</h3>
-    <p>Set to 0 by default. Can be increased using War Arts such as <em>Iron Wall</em>, <em>Pandora’s Box</em>, and <em>Revanchism</em>.</p>
-    <p>Nullification rate grants players a chance to negate damage from enemies.</p>
-    <p><strong>Example:</strong> If a player has a 40% nullification rate, then during battle, if the enemy has a higher roll, there is a 40% chance that the damage will be blocked, causing no loss.</p>
-  </div>
-</section>
-
-<section id="authority" class="space-y-6">
-  <h2 class="text-xl font-bold">Special Authority</h2>
-
-  <p>Special Authority makes it possible for players to upgrade their battle stats, activate special effects of certain War Arts, and mobilize reserves. It is quantified in units of stars (★).</p>
-
-  <p>Special Authority can be obtained through battles. When a player makes a successful conquest during their turn, they will gain Special Authority based on the following probabilities:</p>
-
-  <ul class="list-disc ml-6">
-    <li>1★: 45%</li>
-    <li>2★: 30%</li>
-    <li>3★: 25%</li>
-  </ul>
-
-  <p>Every successful conquest during a player’s turn reduces the chance of getting 1★ by 5%, while increasing the chance of getting 2★ and 3★ by 2.5% each.</p>
-
-  <p><strong>Example:</strong> If a player made 9 successful conquests, their chance would be:<br>
-  2★: <strong>52.5%</strong>, 3★: <strong>47.5%</strong>, 1★: <strong>0%</strong></p>
-
-  <h3 class="text-lg font-semibold mt-4">Reserves</h3>
-  <p>Reserves are troops that are on stand-by, hidden from opponents’ knowledge. They can be deployed whenever players want to make a major operation.</p>
-  <p>Special Authority can be converted into reserves according to the following table:</p>
-
-  <div class="overflow-x-auto">
-    <table class="table-auto border border-gray-500 mt-2">
-      <thead>
-        <tr class="bg-gray-700 text-white">
-          <th class="px-4 py-2 border">★</th>
-          <th class="px-4 py-2 border">2</th>
-          <th class="px-4 py-2 border">3</th>
-          <th class="px-4 py-2 border">4</th>
-          <th class="px-4 py-2 border">5</th>
-          <th class="px-4 py-2 border">6</th>
-          <th class="px-4 py-2 border">7</th>
-          <th class="px-4 py-2 border">8</th>
-          <th class="px-4 py-2 border">9</th>
-          <th class="px-4 py-2 border">10</th>
-          <th class="px-4 py-2 border">11</th>
-          <th class="px-4 py-2 border">12</th>
-          <th class="px-4 py-2 border">13</th>
-          <th class="px-4 py-2 border">14</th>
-          <th class="px-4 py-2 border">15</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="bg-white text-black">
-          <td class="px-4 py-2 border font-semibold">💂</td>
-          <td class="px-4 py-2 border">3</td>
-          <td class="px-4 py-2 border">5</td>
-          <td class="px-4 py-2 border">7</td>
-          <td class="px-4 py-2 border">10</td>
-          <td class="px-4 py-2 border">13</td>
-          <td class="px-4 py-2 border">16</td>
-          <td class="px-4 py-2 border">19</td>
-          <td class="px-4 py-2 border">23</td>
-          <td class="px-4 py-2 border">28</td>
-          <td class="px-4 py-2 border">33</td>
-          <td class="px-4 py-2 border">38</td>
-          <td class="px-4 py-2 border">44</td>
-          <td class="px-4 py-2 border">52</td>
-          <td class="px-4 py-2 border">60</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3 class="text-lg font-semibold mt-4">City Building</h3>
-  <p>Special Authority can convert territories into urbanized regions by building cities upon them. There can only be one city on each territory. It costs <strong>3★</strong> to build a city.</p>
-
-  <h3 class="text-lg font-semibold mt-4">Infrastructure Upgrade</h3>
-  <p>Special Authority can increase a player's Infrastructure Level. It costs <strong>4★</strong> to increase one level.</p>
-    
-  <hr>
-  <h2 class="text-xl font-semibold">War Art Special Effects</h2>
-  <h3 class="text-lg font-semibold mt-3">Ice Age</h3>
-  <p><em>Ice Age</em> is a debuff that can be activated through the War Art <strong>Realm of Permafrost</strong>. It costs <strong>2★</strong> to activate and lasts for 2 consecutive rounds.</p>
-  <ul class="list-disc ml-6">
-    <li>Players cannot gain Special Authority through conquests.</li>
-    <li>Players cannot spend Special Authority on cities, infrastructure, or reserves.</li>
-    <li>Troop generation is reduced by 40% from territories and continental bonuses.</li>
-    <li>Only players with <strong>Realm of Permafrost</strong> are immune.</li>
-  </ul>
-
-  <h3 class="text-lg font-semibold mt-3">Zealous Expansion</h3> <br>
-  Infrastructure Level upgrades cost only <strong>2★</strong> instead of 4★. <br>
-
-  <h3 class="text-lg font-semibold mt-3">Elitocracy</h3> <br>
-  Allows players to increase their minimum roll by 1 using <strong>3★</strong>. <br>
-</section>
-
-<section id="diplomacy"><h2 class="text-xl mt-1 font-bold">Diplomacy</h2>
-
-  <div>
-    <h3 class="text-lg font-semibold">Summits</h3>
-    <p>Summits are inter-turn timeouts that allow players to make discussions. To initiate a summit, a player needs to click the <strong>“Launch Summit”</strong> button in the diplomatic menu.</p>
-    <p>When the initiating player’s turn ends, a voting popup will appear to collect votes from all active players. If a majority of players vote “Yes”, a <strong>120-second timeout</strong> will be activated to allow discussion.</p>
-    <p><strong>Limit:</strong> Each player can launch a maximum of <strong>2 summits</strong> per game.</p>
-  </div>
-
-  <div>
-    <h3 class="text-lg font-semibold">Global Ceasefire</h3>
-    <p>Global ceasefire is a special way to end the game. It immediately halts the game flow and evaluates players’ victory conditions.</p>
-    <ul class="list-disc ml-6">
-      <li>If there are <strong>no conflicts of interest</strong> between active players, <strong>all players are declared winners</strong>.</li>
-      <li>If conflicts of interest exist, then only <strong>C-class secret agenda</strong> players who are already on the path to winning (i.e., have fulfilled their condition and are waiting on progression counters) are declared winners.</li>
-      <li>This mechanism allows players with C-class secret agendas to <strong>share victory</strong> without being blocked by progression delays.</li>
-    </ul>
-    <p>The ceasefire is only activated if <strong>all players voted “Yes”</strong>. Even one “No” will cancel the proposal.</p>
-    <p>Global ceasefire can be proposed via the <strong>“Global Ceasefire”</strong> button in the diplomatic menu.</p>
-    <p><strong>Limit:</strong> Each player can launch up to <strong>2 ceasefire proposals</strong> per game.</p>
-  </div>
-</section>
-
-<section id="elimination"><h2 class="text-xl mt-1 font-bold">Elimination</h2>
-
-  <p>There are two ways to eliminate (kill) a player:</p>
-
-  <div>
-    <h3 class="text-lg font-semibold">Secret Agenda Failure</h3>
-    <p>Some Secret Agendas include <strong>losing conditions</strong> that will instantly eliminate a player when triggered. Players with such Agenda are eliminated if they fail to complete their Secret Agenda.</p>
-    <p>If a player is eliminated this way, it is <strong>not considered a “kill”</strong> by the system.</p>
-  </div>
-
-  <div>
-    <h3 class="text-lg font-semibold">Personal Kill</h3>
-    <p>Personal kills refer to conventional elimination through combat.</p>
-    <ul class="list-disc ml-6">
-      <li>A player is considered dead if they control <strong>no territories</strong> on the game map.</li>
-      <li>All of their resources—<strong>Special Authority</strong> and <strong>Reserves</strong>—are transferred to their killer.</li>
-      <li>The <strong>killer</strong> is the player who conquers the victim's final remaining territory.</li>
-    </ul>
-    <p><strong>Example:</strong> If Player A conquers the last territory of Player B, Player A is credited with a Personal Kill and inherits all of Player B’s Special Authority and Reserves.</p>
-  </div>
-</section>
-
-<section id="gameover"><h2 class="text-xl mt-1 font-bold">Game Over</h2>
-
-  <p>The game ends under any of the following conditions:</p>
-
-  <ul class="list-disc ml-6">
-    <li><strong>Only one player remains alive</strong> — that player is declared the final victor.</li>
-    <li><strong>One or more players complete their Secret Agenda</strong>.</li>
-    <li><strong>All active players vote to initiate a Global Ceasefire</strong>.</li>
-  </ul>
-</section>
-
-    `,
+  `,
     territories: `
       <section id="territory-types"><h2 class="text-xl font-bold">Territory Types</h2>
 
