@@ -1,13 +1,140 @@
-<div style="display: flex;
+<style>
+.lobby-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Background with blur */
+.lobby-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('static/Assets/Background/websitebg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(5px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dark overlay */
+.lobby-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 20, 30, 0.75);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lobby-container > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Style the cards with sci-fi theme */
+.lobby-container .card {
+  background: linear-gradient(135deg, rgba(50, 60, 90, 0.4), rgba(40, 50, 80, 0.3));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(100, 120, 180, 0.3);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 15px) 0,
+    100% 15px,
+    100% 100%,
+    15px 100%,
+    0 calc(100% - 15px)
+  );
+}
+
+.lobby-container .card-header {
+  background: linear-gradient(90deg, 
+    rgba(100, 120, 180, 0.3) 0%, 
+    rgba(80, 100, 160, 0.2) 100%);
+  border-bottom: 2px solid rgba(100, 120, 180, 0.3);
+  color: #c9bfff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.lobby-container .input-group-text {
+  background: rgba(30, 40, 60, 0.6);
+  border: 1px solid rgba(100, 120, 180, 0.3);
+  color: #c9bfff;
+  font-weight: 500;
+}
+
+.lobby-container .form-select,
+.lobby-container .form-control {
+  background: rgba(20, 30, 50, 0.6);
+  border: 1px solid rgba(100, 120, 180, 0.3);
+  color: #ffffff;
+}
+
+.lobby-container .form-select:disabled,
+.lobby-container .form-control:disabled {
+  background: rgba(20, 30, 50, 0.4);
+  color: #9a9a9a;
+}
+
+.lobby-container h1 {
+  color: #ffffff;
+}
+
+.lobby-container .space {
+  margin-top: 0.75rem;
+}
+
+.lobby-container .btn-start-game {
+  width: 100%;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, rgba(100, 120, 180, 0.6), rgba(80, 100, 160, 0.5));
+  border: 2px solid rgba(100, 120, 180, 0.5);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 20px,
+    100% 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.lobby-container .btn-start-game:hover {
+  background: linear-gradient(135deg, rgba(120, 140, 200, 0.7), rgba(100, 120, 180, 0.6));
+  border-color: rgba(120, 140, 200, 0.7);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(100, 120, 180, 0.5);
+}
+
+.lobby-container .btn-start-game:active {
+  transform: translateY(0);
+}
+</style>
+
+<div class="lobby-container" style="display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-width: 100%;">
-
-    <!-- Game Title -->
-    <!-- <div class="text-center" style="margin: 2vh 0">
-        <h1>HEGEMONY</h1>
-    </div> -->
+width: 100%;
+padding: 0.5rem 0;">
 
     <!-- Game settings Main -->
     <div class="container" style="margin: 0 15vw">
@@ -104,13 +231,6 @@ width: 100%;">
                         </div>
                     </div>
                 </div>
-
-                <!-- Gamemode Select
-                <div class="col">
-                    <div class="card text-center">
-                        gamemode select
-                    </div>
-                </div> -->
 
             </div> <!-- Map selection and lobby settings col-->
 

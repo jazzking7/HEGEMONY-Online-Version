@@ -62,7 +62,13 @@ $(document).ready(function() {
         });
 
         // Display start game button
-        $(".container").append('<div class="row"><button class="btn btn-primary" id="start_game" style="padding: 1rem 5rem; margin-bottom: 20px;">START GAME</button></div>');
+        $(".container").append(`
+        <div class="row">
+            <div class="col">
+            <button class="btn-start-game" id="start_game">START GAME</button>
+            </div>
+        </div>
+        `);
 
         // Connect start_game button
         $('#start_game').click(function() {
