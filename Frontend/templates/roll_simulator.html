@@ -1,108 +1,407 @@
-<div class="container my-3">
+<style>
+  .roll-simulator * {
+    box-sizing: border-box;
+  }
+
+  .roll-simulator {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #c5c5c5;
+  }
+
+  .roll-simulator h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Return Button */
+  .roll-simulator .return-btn {
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 100;
+    background: linear-gradient(135deg, rgba(100, 120, 180, 0.5), rgba(80, 100, 160, 0.4));
+    border: 1px solid rgba(100, 120, 180, 0.4);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    clip-path: polygon(
+      0 0,
+      calc(100% - 10px) 0,
+      100% 10px,
+      100% 100%,
+      10px 100%,
+      0 calc(100% - 10px)
+    );
+    transition: all 0.3s ease;
+  }
+
+  .roll-simulator .return-btn:hover {
+    background: linear-gradient(135deg, rgba(120, 140, 200, 0.65), rgba(100, 120, 180, 0.55));
+    border-color: rgba(120, 140, 200, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 120, 180, 0.4);
+  }
+
+  .roll-simulator .return-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Mode Selection */
+  .roll-simulator .text-center {
+    text-align: center;
+  }
+
+  .roll-simulator .mb-3 {
+    margin-bottom: 1rem;
+  }
+
+  .roll-simulator .mb-2 {
+    margin-bottom: 0.6rem;
+  }
+
+  .roll-simulator .mb-1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .roll-simulator .mb-0 {
+    margin-bottom: 0;
+  }
+
+  .roll-simulator .my-3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .roll-simulator .mt-2 {
+    margin-top: 1rem;
+  }
+
+  .roll-simulator .me-3 {
+    margin-right: 1rem;
+  }
+
+  .roll-simulator .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .roll-simulator .py-3 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .roll-simulator .fs-5 {
+    font-size: 1.1rem;
+  }
+
+  .roll-simulator .fs-6 {
+    font-size: 0.88rem;
+  }
+
+  .roll-simulator label {
+    color: #c9bfff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+
+  .roll-simulator input[type="radio"] {
+    accent-color: #c9bfff;
+    margin-right: 0.4rem;
+  }
+
+  /* Description */
+  .roll-simulator #description {
+    color: #9a9ab0;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  /* Grid — override Bootstrap's flex row */
+  .roll-simulator .row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem !important;
+    flex-wrap: unset !important;
+    margin: 0 !important;
+  }
+
+  .roll-simulator .row > [class*="col"] {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 0 !important;
+  }
+
+  @media (max-width: 900px) {
+    .roll-simulator .row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .roll-simulator .row {
+      grid-template-columns: 1fr;
+    }
+    .roll-simulator h1 {
+      font-size: 2rem;
+    }
+  }
+
+  /* Cards */
+  .roll-simulator .card {
+    background: linear-gradient(135deg, rgba(50, 60, 90, 0.4), rgba(40, 50, 80, 0.3));
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    clip-path: polygon(
+      0 0,
+      calc(100% - 15px) 0,
+      100% 15px,
+      100% 100%,
+      15px 100%,
+      0 calc(100% - 15px)
+    );
+    transition: all 0.3s ease;
+  }
+
+  .roll-simulator .card:hover {
+    background: linear-gradient(135deg, rgba(60, 70, 100, 0.5), rgba(50, 60, 90, 0.4));
+    border-color: rgba(100, 120, 180, 0.5);
+    transform: translateY(-3px);
+  }
+
+  .roll-simulator .card.d-none {
+    display: none !important;
+  }
+
+  .roll-simulator .card-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid rgba(100, 120, 180, 0.3);
+    text-align: center;
+  }
+
+  .roll-simulator .card-header h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #c9bfff;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .roll-simulator .card-body {
+    padding: 1.25rem;
+  }
+
+  /* Form */
+  .roll-simulator .form-label {
+    display: block;
+    color: #a0a0c0;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.02em;
+  }
+
+  .roll-simulator .form-control {
+    width: 100%;
+    background: rgba(20, 30, 50, 0.6);
+    border: 1px solid rgba(100, 120, 180, 0.3);
+    color: #ffffff;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+    clip-path: polygon(
+      0 0,
+      calc(100% - 7px) 0,
+      100% 7px,
+      100% 100%,
+      7px 100%,
+      0 calc(100% - 7px)
+    );
+  }
+
+  .roll-simulator .form-control:focus {
+    background: rgba(30, 40, 60, 0.7);
+    border-color: rgba(100, 120, 180, 0.6);
+    box-shadow: 0 0 0 2px rgba(100, 120, 180, 0.2);
+  }
+
+  .roll-simulator .form-control::placeholder {
+    color: #5a5a7a;
+  }
+
+  .roll-simulator .d-none {
+    display: none !important;
+  }
+
+  /* Buttons */
+  .roll-simulator .btn {
+    font-family: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .roll-simulator .btn-primary {
+    background: linear-gradient(135deg, rgba(100, 120, 180, 0.6), rgba(80, 100, 160, 0.5));
+    border: 1px solid rgba(100, 120, 180, 0.4);
+    color: #ffffff;
+    padding: 0.55rem 1.4rem;
+    font-size: 0.88rem;
+    clip-path: polygon(
+      0 0,
+      calc(100% - 9px) 0,
+      100% 9px,
+      100% 100%,
+      9px 100%,
+      0 calc(100% - 9px)
+    );
+  }
+
+  .roll-simulator .btn-primary:hover {
+    background: linear-gradient(135deg, rgba(120, 140, 200, 0.7), rgba(100, 120, 180, 0.6));
+    border-color: rgba(120, 140, 200, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 120, 180, 0.4);
+  }
+
+  .roll-simulator .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .roll-simulator .btn-lg {
+    padding: 0.7rem 2.5rem;
+    font-size: 1rem;
+  }
+</style>
+
+<div class="roll-simulator">
+  <!-- Return Button -->
+  <button class="return-btn" onclick="location.reload()">← Return</button>
+
+  <div class="container my-3">
     <h1 class="text-center mb-2">Roll Simulator</h1>
 
     <!-- Mode Selection -->
     <div class="text-center mb-3">
-        <label class="me-3">
-            <input type="radio" name="simulationMode" value="singleRoll" checked> Single Roll
-        </label>
-        <label>
-            <input type="radio" name="simulationMode" value="battleSimulation"> Battle Simulation
-        </label>
+      <label class="me-3">
+        <input type="radio" name="simulationMode" value="singleRoll" checked> Single Roll
+      </label>
+      <label>
+        <input type="radio" name="simulationMode" value="battleSimulation"> Battle Simulation
+      </label>
     </div>
 
-    <p class="text-center text-muted fs-6 mb-1" id="description">
-        Approximating win rate by simulating 10,000 rolls using the given stats. Each roll uses the full capacity of the given stats. Empty inputs use their indicated default value.
+    <p class="text-center fs-6 mb-1" id="description">
+      Approximating win rate by simulating 10,000 rolls using the given stats. Each roll uses the full capacity of the given stats. Empty inputs use their indicated default value.
     </p>
 
     <div class="row g-3">
-        <!-- Attacker Stats -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header text-center py-2">
-                    <h3 class="fs-5 mb-0">Attacker Stats</h3>
-                </div>
-                <div class="card-body py-3">
-                    <form id="attackerForm">
-                        <div class="mb-2">
-                            <label for="attackerIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
-                            <input type="number" id="attackerIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="attackerInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
-                            <input type="number" id="attackerInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="attackerMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
-                            <input type="number" id="attackerMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="attackerDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
-                            <input type="number" id="attackerDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="attackerNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
-                            <input type="number" id="attackerNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
-                        </div>
-                        <div class="mb-2 d-none" id="attackerTroopSizeContainer">
-                            <label for="attackerTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
-                            <input type="number" id="attackerTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <!-- Attacker Stats -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header text-center py-2">
+            <h3 class="fs-5 mb-0">Attacker Stats</h3>
+          </div>
+          <div class="card-body py-3">
+            <form id="attackerForm">
+              <div class="mb-2">
+                <label for="attackerIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
+                <input type="number" id="attackerIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
+              </div>
+              <div class="mb-2">
+                <label for="attackerInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
+                <input type="number" id="attackerInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
+              </div>
+              <div class="mb-2">
+                <label for="attackerMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
+                <input type="number" id="attackerMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="mb-2">
+                <label for="attackerDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
+                <input type="number" id="attackerDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="mb-2">
+                <label for="attackerNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
+                <input type="number" id="attackerNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
+              </div>
+              <div class="mb-2 d-none" id="attackerTroopSizeContainer">
+                <label for="attackerTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
+                <input type="number" id="attackerTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
 
-        <!-- Defender Stats -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header text-center py-2">
-                    <h3 class="fs-5 mb-0">Defender Stats</h3>
-                </div>
-                <div class="card-body py-3">
-                    <form id="defenderForm">
-                        <div class="mb-2">
-                            <label for="defenderIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
-                            <input type="number" id="defenderIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="defenderInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
-                            <input type="number" id="defenderInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="defenderMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
-                            <input type="number" id="defenderMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="defenderDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
-                            <input type="number" id="defenderDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
-                        </div>
-                        <div class="mb-2">
-                            <label for="defenderNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
-                            <input type="number" id="defenderNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
-                        </div>
-                        <div class="mb-2 d-none" id="defenderTroopSizeContainer">
-                            <label for="defenderTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
-                            <input type="number" id="defenderTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <!-- Defender Stats -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header text-center py-2">
+            <h3 class="fs-5 mb-0">Defender Stats</h3>
+          </div>
+          <div class="card-body py-3">
+            <form id="defenderForm">
+              <div class="mb-2">
+                <label for="defenderIndustrialLevel" class="form-label fs-6">Industrial Level (Min: 6)</label>
+                <input type="number" id="defenderIndustrialLevel" name="industrialLevel" class="form-control form-control-sm" min="6" required>
+              </div>
+              <div class="mb-2">
+                <label for="defenderInfrastructureLevel" class="form-label fs-6">Infrastructure Level (Min: 3)</label>
+                <input type="number" id="defenderInfrastructureLevel" name="infrastructureLevel" class="form-control form-control-sm" min="3" required>
+              </div>
+              <div class="mb-2">
+                <label for="defenderMinRoll" class="form-label fs-6">Min Roll (Min: 1)</label>
+                <input type="number" id="defenderMinRoll" name="minRoll" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="mb-2">
+                <label for="defenderDamageMultiplier" class="form-label fs-6">Damage Multiplier (Min: 1)</label>
+                <input type="number" id="defenderDamageMultiplier" name="damageMultiplier" class="form-control form-control-sm" min="1" required>
+              </div>
+              <div class="mb-2">
+                <label for="defenderNullificationRate" class="form-label fs-6">Nullification Rate (Min: 0)</label>
+                <input type="number" id="defenderNullificationRate" name="nullificationRate" class="form-control form-control-sm" min="0" required>
+              </div>
+              <div class="mb-2 d-none" id="defenderTroopSizeContainer">
+                <label for="defenderTroopSize" class="form-label fs-6">Troop Size (Min: 1)</label>
+                <input type="number" id="defenderTroopSize" name="troopSize" class="form-control form-control-sm" min="1" max="200">
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
 
-        <!-- Result -->
-        <div class="col-md-4">
-            <div class="card d-none" id="resultCard">
-                <div class="card-header text-center py-2">
-                    <h3 class="fs-5 mb-0">Result</h3>
-                </div>
-                <div class="card-body py-3">
-                    <!-- Content will be dynamically updated via JavaScript -->
-                </div>
-            </div>
-        </div>        
+      <!-- Result -->
+      <div class="col-md-4">
+        <div class="card d-none" id="resultCard">
+          <div class="card-header text-center py-2">
+            <h3 class="fs-5 mb-0">Result</h3>
+          </div>
+          <div class="card-body py-3">
+            <!-- Content will be dynamically updated via JavaScript -->
+          </div>
+        </div>
+      </div>
     </div>
+
     <div class="text-center mt-2">
-        <button class="btn btn-primary btn-lg" id="startSimulation">Start Simulation</button>
+      <button class="btn btn-primary btn-lg" id="startSimulation">Start Simulation</button>
     </div>
+  </div>
 </div>
