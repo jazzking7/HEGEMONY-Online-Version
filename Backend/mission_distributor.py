@@ -135,6 +135,8 @@ class Mission_Distributor:
 
     # Generate mission set based on number of players
     def get_mission_set(self, num_p, complexity="pioneer"):
+        if num_p == 5:
+            return ['Sur', 'Exp', 'Ind', 'Dom', 'Pun']
         mission_pool = self.missions
         if complexity == 'beginner':
             mission_pool = self.beginner
