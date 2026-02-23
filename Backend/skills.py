@@ -2296,9 +2296,14 @@ class Revanchism(Skill):
         return info
     
     def update_current_status(self):
+        information = f"What was taken away must be taken back. {self.ragePoints} rage points accumulated. <br>"
+        if self.ragePoints >= 100:
+            information += f"Industrial Bonus: +{self.ragePoints//100} | Infrasturcture Bonus: +{self.ragePoints//100} <br>"
+            information += f"Minimum Roll Bonus: +{self.ragePoints//150} | Nullification Bonus: Up to +{10*min(self.ragePoints//100,9)}% <br>"
+            information += f"Damage Multiplier Bonus: +{self.ragePoints//150}"
         self.gs.server.emit("update_skill_status", {
             'name': "Revanchism",
-            'description': f"What was taken away must be taken back. {self.ragePoints} rage points accumulated.",
+            'description': information,
             'operational': self.active,
         }, room=self.player)
 
@@ -2312,27 +2317,43 @@ class Revanchism(Skill):
                 battle_stats[3] = 90
             battle_stats[4] += self.ragePoints//150
 
+    def showRagePoints(self, points):
+        self.gs.server.emit('show_notification_left', {
+                    'message': f"+{points} Rage Points",
+                    'duration': 3000,
+                    "text_color": "#991B1B", "bg_color": "#FECACA"
+                }, room=self.player) 
+
     def accumulate_rage(self, troop_loss, trty_loss):
         if self.gs.players[self.player].total_troops:
             troop_loss_percentage = math.ceil(troop_loss*100/self.gs.players[self.player].total_troops)
             if troop_loss_percentage > 10:
                 self.ragePoints += troop_loss_percentage
+                self.showRagePoints(troop_loss_percentage)
         if trty_loss.isCapital:
             self.ragePoints += 25
+            self.showRagePoints(25)
         if trty_loss.isCity:
             self.ragePoints += 20
+            self.showRagePoints(20)
         if trty_loss.isMegacity:
             self.ragePoints += 50
+            self.showRagePoints(50)
         if trty_loss.isFort:
             self.ragePoints += 10
+            self.showRagePoints(10)
         if trty_loss.isLeyline:
             self.ragePoints += 15
+            self.showRagePoints(15)
         if trty_loss.isTransportcenter:
             self.ragePoints += 40
+            self.showRagePoints(40)
         if trty_loss.isHall:
             self.ragePoints += 50
+            self.showRagePoints(50)
         if trty_loss.isBureau:
             self.ragePoints += 20
+            self.showRagePoints(20)
         tid = 0
         for trty in self.gs.map.territories:
             if trty.name == trty_loss.name:
@@ -2350,9 +2371,12 @@ class Revanchism(Skill):
         if set(contlist).issubset(set(tmp_trty)):
             if contValue < 7:
                 self.ragePoints += round(contValue * 3)
+                self.showRagePoints(round(contValue * 3))
             else:
                 self.ragePoints += round(contValue * 2.5)
+                self.showRagePoints(round(contValue * 2.5))
         self.ragePoints += 1
+        self.showRagePoints(1)
 
 class Archmage(Skill):
 
