@@ -71,7 +71,7 @@ class Skill_Distributor:
         elif complexity == 'master':
             skill_pool = self.master
             N = 8
-        N = len(skill_pool)
+        # N = len(skill_pool)
         print(skill_pool)
         return random.sample(skill_pool, k=N)
     
