@@ -2322,7 +2322,7 @@ class Revanchism(Skill):
         if points > 1:
             message = f"+{points} Rage Points"
         self.gs.server.emit('show_notification_left', {
-                    'message': f"+{points} Rage Points",
+                    'message': message,
                     'duration': 3000,
                     "text_color": "#991B1B", "bg_color": "#FECACA"
                 }, room=self.player) 
