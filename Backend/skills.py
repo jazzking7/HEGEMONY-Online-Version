@@ -2318,6 +2318,9 @@ class Revanchism(Skill):
             battle_stats[4] += self.ragePoints//150
 
     def showRagePoints(self, points):
+        message = f"+{points} Rage Point"
+        if points > 1:
+            message = f"+{points} Rage Points"
         self.gs.server.emit('show_notification_left', {
                     'message': f"+{points} Rage Points",
                     'duration': 3000,
