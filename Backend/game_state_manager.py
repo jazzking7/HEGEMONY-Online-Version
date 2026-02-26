@@ -6,6 +6,8 @@ from game_map import *
 from general_event_scheduler import *
 from elimination_tracker import *
 from end_game_tracker import *
+import string
+from botplayer import *
 
 class Player:
 
@@ -69,20 +71,41 @@ class Player:
         self.land_explored = []
         self.sunken_cost = 0
 
+        self.isBot = False
+
 class Game_State_Manager:
 
-    def __init__(self, mapName, player_list, setup_events, time_settings, server, lobby):
+    def __init__(self, mapName, player_list, setup_events, time_settings, minplayer, server, lobby):
 
         # Player dict => key: player_id (socket connection id)  value: player object
         self.players = {}
         # All communicatable ids | Used as the turn order for turn based events
         self.pids = []
+        # player names, used for initiating bot player
+        self.player_names = []
+
         # Original players -> not created using skills
         self.oriPlayers = []
-        for player in player_list:
-            self.pids.append(player['sid'])
-            self.oriPlayers.append(player['sid'])
-            self.players[player['sid']] = Player(player['name'], self)
+        if minplayer == "any":
+            for player in player_list:
+                self.pids.append(player['sid'])
+                self.oriPlayers.append(player['sid'])
+                self.players[player['sid']] = Player(player['name'], self)
+        else:
+            minnump = int(minplayer)
+            havenump = len(player_list)
+            for player in player_list:
+                self.pids.append(player['sid'])
+                self.oriPlayers.append(player['sid'])
+                self.players[player['sid']] = Player(player['name'], self)
+                self.player_names.append(player['name'])
+            if havenump < minnump:
+                for _ in range(minnump-havenump):
+                    botpid = ''.join(random.choices(string.ascii_letters + string.digits, k=28))
+                    self.pids.append(botpid)
+                    self.oriPlayers.append(botpid)
+                    self.players[botpid] = Botplayer(self)
+                    self.players[botpid].isBot = True
         
         # Map
         self.map = Map(mapName)

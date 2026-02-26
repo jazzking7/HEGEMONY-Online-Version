@@ -112,7 +112,8 @@ def createLobby(data):
     lobbies[lobby_code] = {
         'host': sid,
         'players': [sid],
-        'game_started': False
+        'game_started': False,
+        'minplayer': "any"
     }
     socketio.emit('lobby_created', room=sid)
 
@@ -204,6 +205,10 @@ def get_lobby_data():
 def update_lobby_settings(data):
     sid = request.sid
     lobby_id = players[sid]['lobby_id']
+    if lobbies[lobby_id]['host'] != sid:
+        return
+    if data['event'] == 'minplayer':
+        lobbies[lobby_id]['minplayer'] = int(data['minplayer']) if data['minplayer'] != "any" else 3
     socketio.emit('update_lobby', data, room=lobby_id)
 
 @socketio.on('start_game')
@@ -235,7 +240,7 @@ def startGame(data):
     lobby['waitlist'] = []
     lobby['map_name'] = data.get('map_selected')
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
-    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), time_settings, socketio, lobby_id)
+    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), time_settings, lobby['minplayer'], socketio, lobby_id)
     lobby['gsm'].Mdist = MDIS
     lobby['gsm'].egt = EGT
     lobby['gsm'].SDIS = SDIS

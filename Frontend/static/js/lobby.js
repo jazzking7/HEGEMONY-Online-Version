@@ -5,6 +5,7 @@ $(document).ready(function() {
         // TODO Display kick player option
 
         // Display enable settings
+        $("#minplayer").prop("disabled", false);
         $("#map_selection").prop("disabled", false);
         $('#trty_set_time').prop("disabled", false);
         $('#power_set_time').prop("disabled", false);
@@ -61,6 +62,14 @@ $(document).ready(function() {
             });
         });
 
+        $("#minplayer").change(function () {
+            const selectedMap = $(this).val();
+            socket.emit('update_lobby_settings', {
+                event: 'minplayer',
+                minplayer: selectedMap
+            });
+        });
+
         // Display start game button
         $(".container").append(`
         <div class="row">
@@ -79,7 +88,8 @@ $(document).ready(function() {
                 'turn_time': $('#turn_time').val(),
                 'map_selected': $('#map_selection').val(),
                 'complexity': $('#complexity').val(),
-                'doctrine': $('#doctrine').val()
+                'doctrine': $('#doctrine').val(),
+                'minplayer': $('#minplayer').val(),
             };
             socket.emit('start_game', data);
         });
@@ -150,6 +160,9 @@ $(document).ready(function() {
                 break;
             case 'doctrine':
                 $('#doctrine').val(data.doctrine)
+                break;
+            case 'minplayer':
+                $('#minplayer').val(data.minplayer)
                 break;
 
         }
