@@ -208,7 +208,7 @@ def update_lobby_settings(data):
     if lobbies[lobby_id]['host'] != sid:
         return
     if data['event'] == 'minplayer':
-        lobbies[lobby_id]['minplayer'] = int(data['minplayer']) if data['minplayer'] != "any" else 3
+        lobbies[lobby_id]['minplayer'] = int(data['minplayer']) if data['minplayer'] != "any" else "any"
     socketio.emit('update_lobby', data, room=lobby_id)
 
 @socketio.on('start_game')
