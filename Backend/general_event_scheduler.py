@@ -111,6 +111,49 @@ class General_Event_Scheduler:
         for pid in self.gs.players:
             self.flush_concurrent_event(pid)
 
+    def selection_time_out_with_bot(self, num_secs, count, event):
+        self.selected = 0
+        self.gs.server.emit('start_timeout', {'secs': num_secs}, room=self.gs.lobby)
+        if num_secs > 50:
+            self.gs.server.emit('set_countdown', room=self.gs.lobby)
+
+        # Separate bot players from human players
+        bot_players = [p for p in self.gs.players.values() if p.isBot]
+        num_bots = len(bot_players)
+
+        # Schedule bot decision timepoints randomly within (num_secs - 10)
+        bot_deadline = num_secs - 10
+        bot_times = sorted([random.randint(1, bot_deadline) for _ in bot_players])
+
+        # Map each bot to its scheduled decision time
+        bot_schedule = {bot: t for bot, t in zip(bot_players, bot_times)}
+        # Reverse lookup: time -> list of bots deciding at that second
+        time_to_bots = {}
+        for bot, t in bot_schedule.items():
+            time_to_bots.setdefault(t, []).append(bot)
+
+        for second in range(1, num_secs + 1):
+            if self.selected >= count:
+                break
+
+            self.gs.server.sleep(1)
+
+            # Trigger any bots scheduled for this second
+            if second in time_to_bots:
+                for bot in time_to_bots[second]:
+                    if event == "set_capital":
+                        bot.set_capital()
+                    elif event == "set_cities":
+                        bot.set_cities(2)
+                    elif event == "initial_deploy":
+                        bot.deploy_troops()
+                    elif event == "get_skill":
+                        bot.choose_skill()
+                    if self.selected >= count:
+                        break
+
+        self.gs.server.emit('stop_timeout', room=self.gs.lobby)
+
     def selection_time_out(self, num_secs, count):
         self.selected = 0
         self.gs.server.emit('start_timeout',{'secs': num_secs}, room=self.gs.lobby)

@@ -84,6 +84,8 @@ class Game_State_Manager:
         # player names, used for initiating bot player
         self.player_names = []
 
+        self.hasBot = False
+
         # Original players -> not created using skills
         self.oriPlayers = []
         if minplayer == "any":
@@ -100,6 +102,7 @@ class Game_State_Manager:
                 self.players[player['sid']] = Player(player['name'], self)
                 self.player_names.append(player['name'])
             if havenump < minnump:
+                self.hasBot = True
                 for _ in range(minnump-havenump):
                     botpid = ''.join(random.choices(string.ascii_letters + string.digits, k=28))
                     self.pids.append(botpid)

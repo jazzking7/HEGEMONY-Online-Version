@@ -122,7 +122,14 @@ class setup_event_scheduler:
             gs.server.emit('choose_territorial_distribution', {'options': gs.aval_choices}, room=player)
             
 
-            ms.selection_time_out(ms.trty_set_time, 1)
+            # bot makes decision
+            if gs.players[player].isBot:
+                gs.server.emit('start_timeout',{'secs': ms.trty_set_time}, room=gs.lobby)
+                gs.players[player].choose_territory()
+                gs.server.emit('stop_timeout', room=gs.lobby)
+            else:
+            # human makes decision 
+                ms.selection_time_out(ms.trty_set_time, 1)
             
             # handle timeout
             if not ms.selected:
@@ -147,7 +154,10 @@ class setup_event_scheduler:
         gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settle your capital!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_capital"}, room=gs.lobby)
 
-        ms.selection_time_out(ms.trty_set_time, len(gs.players))
+        if gs.hasBot:
+            ms.selection_time_out_with_bot(ms.trty_set_time, len(gs.players), 'set_capital')
+        else:
+            ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
         # handle not choosing
         for player in gs.players.values():
@@ -165,7 +175,10 @@ class setup_event_scheduler:
         gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Build up two cities!"}, room=gs.lobby)
         gs.server.emit('change_click_event', {'event': "settle_cities"}, room=gs.lobby)
 
-        ms.selection_time_out(ms.trty_set_time, len(gs.players))
+        if gs.hasBot:
+            ms.selection_time_out_with_bot(ms.trty_set_time, len(gs.players), "set_cities")
+        else:
+            ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
 
         for player in gs.players.values():
@@ -190,7 +203,10 @@ class setup_event_scheduler:
             gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Deploy your troops! {amount} deployable"}, room=player)
             gs.server.emit('troop_deployment', {'amount': amount}, room=player)
 
-        ms.selection_time_out(ms.power_set_time, len(gs.players))
+        if gs.hasBot:
+            ms.selection_time_out_with_bot(ms.trty_set_time, len(gs.players), "initial_deploy")
+        else:
+            ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
         gs.signal_view_clear()
         gs.server.emit('set_new_announcement', {'async' : True, 'msg': f"Completed, waiting for others..."}, room=gs.lobby)
@@ -204,9 +220,14 @@ class setup_event_scheduler:
         gs.server.emit('set_new_announcement', {'async' : True, 'msg': "Choose your Ultimate War Art"}, room=gs.lobby)
         for player in gs.players:
             options = gs.SDIS.get_options(gs.complexity) if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
+            if gs.players[player].isBot:
+                gs.players[player].skill_options = options
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
-        ms.selection_time_out(ms.power_set_time, len(gs.players))
+        if gs.hasBot:
+            ms.selection_time_out_with_bot(ms.trty_set_time, len(gs.players), "get_skill")
+        else:
+            ms.selection_time_out(ms.trty_set_time, len(gs.players))
 
         gs.signal_view_clear()
 

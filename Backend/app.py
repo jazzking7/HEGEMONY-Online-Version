@@ -88,6 +88,17 @@ def disconnect():
 
         return
     
+    gsm = lobby['gsm']
+    hasHuman = False
+    for p in gsm.players:
+        if not gsm.players[p].isBot:
+            hasHuman = True
+    if not hasHuman:
+        if lobby['game_started']:
+            gsm = lobby['gsm']
+            gsm.GES.halt_events()
+        del lobbies[lobby_id]
+    
     if lobby['host'] == sid:
         lobby['host'] = random.choice(lobby['players'])
         socketio.emit('update_lobby', {"event": "change_host", "target": lobby['host']}, room=lobby_id)
