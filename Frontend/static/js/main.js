@@ -90,7 +90,7 @@ function unloadScript(script_id) {
 
 // Initiate socket connection
 // const URL_BACKEND = 'http://127.0.0.1:8081';
-const URL_BACKEND = 'http://35.183.100.227:8081/';
+const URL_BACKEND = 'https://hegemonyonline.io/';
 var socket = io.connect(URL_BACKEND);
 
 // Main logic
