@@ -482,7 +482,9 @@ $(document).ready(async function() {
   // Load in gameStyle.css
   var newLink = $('<link>', {
       rel: 'stylesheet',
-      href: URL_FRONTEND + "/static/css/gameStyle.css"
+      // href: URL_FRONTEND + "/static/css/gameStyle.css"
+      href: "/static/css/gameStyle.css"
+
   });
   $('#initial_styling').replaceWith(newLink);
 
@@ -567,10 +569,20 @@ $(document).ready(async function() {
 
 });
 
+// function loadLibraries() {
+//   return new Promise((resolve) => {
+//     $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
+//       $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
+//         resolve();
+//       });
+//     });
+//   });
+// }
+
 function loadLibraries() {
   return new Promise((resolve) => {
-    $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
-      $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
+    $.getScript(`/static/js/p5.js`, function() {
+      $.getScript(`/static/js/p5.sound.js`, function() {
         resolve();
       });
     });

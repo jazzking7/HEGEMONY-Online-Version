@@ -177,7 +177,9 @@ $(document).ready(function() {
                 return unloadScript('page_script');
             })
             .then(() => {
-                return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+                // return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+                return loadScript('/static/js/game.js', 'page_script');
+
             })
             .then(() => {
                 socket.off('lobby_data');

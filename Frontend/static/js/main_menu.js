@@ -52,7 +52,9 @@ $(document).ready(function() {
                 return unloadScript('page_script');
             })
             .then(() => {
-                return loadScript(URL_FRONTEND + 'static/js/roll_simulator.js', 'page_script');
+                // return loadScript(URL_FRONTEND + 'static/js/roll_simulator.js', 'page_script');
+
+                return loadScript('/static/js/roll_simulator.js', 'page_script');
             })
             .then(() => {
                 console.log('Entered Roll Simulator');
@@ -68,7 +70,8 @@ $(document).ready(function() {
                 return unloadScript('page_script');
             })
             .then(() => {
-                return loadScript(URL_FRONTEND + 'static/js/rules_ui.js', 'page_script');
+                // return loadScript(URL_FRONTEND + 'static/js/rules_ui.js', 'page_script');
+                return loadScript('/static/js/rules_ui.js', 'page_script');
             })
             .then(() => {
                 console.log('Entered Game Rules');
@@ -84,7 +87,8 @@ $(document).ready(function() {
                 return unloadScript('page_script');
             })
             .then(() => {
-                return loadScript(URL_FRONTEND + 'static/js/tutorials.js', 'page_script');
+                // return loadScript(URL_FRONTEND + 'static/js/tutorials.js', 'page_script');
+                return loadScript('/static/js/tutorials.js', 'page_script');
             })
             .then(() => {
                 console.log('Entered Game Tutorials');
@@ -107,7 +111,8 @@ $(document).ready(function() {
             return unloadScript('page_script');
         })
         .then(() => {
-            return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+            // return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+            return loadScript('/static/js/lobby.js', 'page_script');
         })
         .then(() => {
             socket.off('lobby_created');
@@ -125,7 +130,8 @@ $(document).ready(function() {
             return unloadScript('page_script');
         })
         .then(() => {
-            return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+            // return loadScript(URL_FRONTEND + 'static/js/lobby.js', 'page_script');
+            return loadScript('/static/js/lobby.js', 'page_script');
         })
         .then(() => {
             socket.off('lobby_joined');
@@ -144,7 +150,8 @@ $(document).ready(function() {
             return unloadScript('page_script');
         })
         .then(() => {
-            return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+            // return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+            return loadScript('/static/js/game.js', 'page_script');
         })
         .then(() => {
             socket.off('lobby_joined');

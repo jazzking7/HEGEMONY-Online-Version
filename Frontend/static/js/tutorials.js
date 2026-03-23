@@ -41,8 +41,10 @@ $(document).ready(async function() {
   var newLink = $('<link>', {
       id: 'initial_styling',  
       rel: 'stylesheet',
-      href: URL_FRONTEND + "/static/css/gameStyle.css"
-  });
+      // href: URL_FRONTEND + "/static/css/gameStyle.css"
+      href: "/static/css/gameStyle.css"
+
+    });
   $('#initial_styling').replaceWith(newLink);
 
   // Get game settings
@@ -125,10 +127,20 @@ $(document).ready(async function() {
   tryLoadSketch();
 });
 
+// function loadLibraries() {
+//   return new Promise((resolve) => {
+//     $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
+//       $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
+//         resolve();
+//       });
+//     });
+//   });
+// }
+
 function loadLibraries() {
   return new Promise((resolve) => {
-    $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
-      $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
+    $.getScript(`/static/js/p5.js`, function() {
+      $.getScript(`/static/js/p5.sound.js`, function() {
         resolve();
       });
     });
@@ -1151,7 +1163,8 @@ socket.on('end_of_tutorial', function () {
         var newLink = $('<link>', {
           id: 'initial_styling',  
           rel: 'stylesheet',
-          href: URL_FRONTEND + "/static/css/style.css"
+          // href: URL_FRONTEND + "/static/css/style.css"
+          href: "/static/css/style.css"
       });
       $('#initial_styling').replaceWith(newLink);
       main = document.getElementById('main');
@@ -1160,8 +1173,9 @@ socket.on('end_of_tutorial', function () {
                 return unloadScript('page_script');
             }).then(() => {
               console.log('Main menu page loaded successfully');
-              return loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
-          })
+              // return loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+              return loadScript('/static/js/main_menu.js', 'page_script');
+            })
       .then(() => {
           console.log('Both page and script are fully loaded');
                 window.location.reload(true);
