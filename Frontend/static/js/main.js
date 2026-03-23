@@ -14,7 +14,7 @@ function popup(msg, duration) {
 
 // Load page
 // const URL_FRONTEND = 'http://127.0.0.1:8080/';
-const URL_FRONTEND = 'https://35.183.100.227/';
+// const URL_FRONTEND = 'https://35.183.100.227/';
 var main;
 
 // function loadPage(page_route) {
@@ -46,7 +46,9 @@ var main;
 function loadPage(page_route) {
     return new Promise((resolve, reject) => {
         // cache-busting -> use unique time stamp to force new request
-        const url = `${URL_FRONTEND + page_route}?_=${new Date().getTime()}`;
+        // const url = `${URL_FRONTEND + page_route}?_=${new Date().getTime()}`;
+        const url = `${page_route}?_=${new Date().getTime()}`;
+
         $.ajax({
             url: url,
             type: 'GET',
@@ -101,9 +103,10 @@ $(document).ready(function() {
     // loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
 
     // Load main_menu page and script
-    loadPage('main_menu').then(() => {
+    loadPage('/main_menu').then(() => {
             console.log('Main menu page loaded successfully');
-            return loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+            // return loadScript(URL_FRONTEND + 'static/js/main_menu.js', 'page_script');
+            return loadScript('/static/js/main_menu.js', 'page_script');
         })
     .then(() => {
         console.log('Both page and script are fully loaded');
