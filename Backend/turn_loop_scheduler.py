@@ -422,7 +422,10 @@ class turn_loop_scheduler:
         ms.stage_completed = False
         ms.innerInterrupt = False
 
-        gs.server.start_background_task(self.execute_turn_events, gs, ms, curr_player, token)
+        if gs.players[curr_player].isBot:
+            gs.server.start_background_task(self.execute_ai_turn, gs, ms, curr_player, token)
+        else:
+            gs.server.start_background_task(self.execute_turn_events, gs, ms, curr_player, token)
         gs.server.start_background_task(ms.activate_timer, ms.turn_time, curr_player, token)
         
         gs.server.emit('start_timeout', {'secs': ms.turn_time}, room=gs.lobby)
@@ -440,6 +443,282 @@ class turn_loop_scheduler:
         # Handle end of turn
         self.handle_end_turn(ms, gs, curr_player)
 
+    def execute_ai_turn(self, gs, ms, player, token):
+        atk_player = gs.players[player]
+
+        # ------------------------------------------------------------------ #
+        #  HELPERS
+        # ------------------------------------------------------------------ #
+
+        def should_terminate():
+            return (
+                ms.terminated or
+                not atk_player.connected or
+                token != ms.turn_token
+            )
+
+        def wait_for_stage():
+            """
+            Wait until stage is marked complete or termination condition hit.
+            Mirrors the human while loops.
+            """
+            while (not ms.stage_completed
+                and not ms.terminated
+                and atk_player.connected
+                and token == ms.turn_token):
+                if ms.innerInterrupt:
+                    gs.server.sleep(0.05)
+                    continue
+                gs.server.sleep(0.05)
+
+        # ------------------------------------------------------------------ #
+        #  SETUP
+        # ------------------------------------------------------------------ #
+
+        ms.flush_concurrent_event(player)
+        atk_player.deployable_amt = 0
+        atk_player.turn_victory   = False
+        atk_player.con_amt        = 0
+
+        if atk_player.skill:
+            if atk_player.skill.name == "Iron_Wall" and atk_player.skill.ironwall:
+                atk_player.skill.turn_off_iron_wall()
+            if atk_player.skill.active:
+                if atk_player.skill.name == "Mass Mobilization":
+                    atk_player.reserves += round((atk_player.total_troops * 15) / 100)
+                if atk_player.skill.name == "Babylon":
+                    if 1 in atk_player.skill.passives:
+                        atk_player.reserves += round((atk_player.total_troops * 10) / 100)
+
+        for t in atk_player.territories:
+            if gs.map.territories[t].isHall:
+                atk_player.stars += 1
+
+        numBureaux = sum(
+            1 for t in atk_player.territories
+            if gs.map.territories[t].isBureau
+        )
+        atk_player.reserves += round(
+            (atk_player.total_troops * numBureaux * 15) / 100
+        )
+
+        gs.update_private_status(player)
+        ms.stats_set       = False
+        ms.stage_completed = False
+
+        # ------------------------------------------------------------------ #
+        #  STAGE 0 — GET PLANS
+        # ------------------------------------------------------------------ #
+
+        # ------------------------------------------------------------------ #
+        #  STAGE 1 — DEPLOY + PREPARATION
+        # ------------------------------------------------------------------ #
+
+        self.set_curr_state(ms, self.events[0])
+        self.reinforcement(gs, player)
+
+        EXECUTION_PLAN, UPGRADE_PLAN = atk_player.get_current_game_plan()
+
+        # Launch AI deploy as background task so timer can still fire
+        gs.server.start_background_task(self.ai_deploy, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN)
+
+        wait_for_stage()
+        if should_terminate(): return
+
+        # ------------------------------------------------------------------ #
+        #  STAGE 2 — CONQUER
+        # ------------------------------------------------------------------ #
+
+        atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
+        ms.stats_set          = True
+        ms.stage_completed    = False
+        self.set_curr_state(ms, self.events[2])
+        self.conquer(gs, player)
+
+        gs.server.start_background_task(self.ai_attack, gs, ms, player, token, EXECUTION_PLAN)
+
+        wait_for_stage()
+        if should_terminate():
+            if ms.terminated and atk_player.skill and \
+            atk_player.skill.name == "Necromancer":
+                atk_player.skill.soul_harvest()
+            return
+
+        # ------------------------------------------------------------------ #
+        #  STAGE 3 — REARRANGE
+        # ------------------------------------------------------------------ #
+
+        ms.stage_completed = False
+        self.set_curr_state(ms, self.events[3])
+        self.rearrange(gs, player)
+
+        gs.server.start_background_task(self.ai_rearrange, gs, ms, player, token)
+
+        wait_for_stage()
+
+        if atk_player.skill and atk_player.skill.name == "Necromancer":
+            atk_player.skill.soul_harvest()
+
+        if should_terminate(): return
+
+        # ------------------------------------------------------------------ #
+        #  DONE
+        # ------------------------------------------------------------------ #
+
+        ms.terminated = True
+
+    def ai_deploy(self, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN):
+        """Runs in background. Sets ms.stage_completed when done."""
+        try:
+            atk_player = gs.players[player]
+
+            gs.server.sleep(5) 
+
+            atk_player.execute_upgrade_plan(UPGRADE_PLAN)
+            atk_player.deploy_troops_by_plan(EXECUTION_PLAN)
+
+            gs.server.sleep(5)  # small delay so it feels natural
+
+        finally:
+            # Always mark complete even if something errors,
+            # so the main loop doesn't hang
+            if not ms.terminated and token == ms.turn_token:
+                ms.stage_completed = True
+
+    def ai_attack(self, gs, ms, player, token, attack_sequence):
+        try:
+            atk_player = gs.players[player]
+
+            def should_stop():
+                return ms.terminated or token != ms.turn_token
+
+            def execute_chain(chain):
+                """
+                Execute a linear chain of steps.
+                Returns False if execution should stop entirely, True otherwise.
+                """
+                for item in chain:
+                    if should_stop():
+                        return False
+
+                    if isinstance(item, dict) and 'split_from' in item:
+                        # Split encountered — execute each branch
+                        result = execute_split(item)
+                        if not result:
+                            return False
+
+                    elif isinstance(item, list) and len(item) == 3:
+                        # Normal step [from, to, easiness]
+                        tid_from, tid_to, easiness = item
+
+                        # -------------------------------------------------- #
+                        #  LEGALITY CHECK
+                        #  Verify the attacking territory is still under control.
+                        #  If not, abort this chain — troops may have been lost
+                        #  in a previous step or another player intervened.
+                        #  FUTURE: could assess remaining troops vs remaining
+                        #  easiness to decide if it's worth continuing.
+                        # -------------------------------------------------- #
+                        if tid_from not in atk_player.territories:
+                            # Lost control of attacking tile — stop this chain
+                            break
+
+                        # -------------------------------------------------- #
+                        #  TROOP ASSESSMENT
+                        #  FUTURE: check if remaining troops on tid_from are
+                        #  sufficient to continue (e.g. troops > easiness).
+                        #  If not, could abort or deploy reserves before continuing.
+                        # -------------------------------------------------- #
+
+                        # -------------------------------------------------- #
+                        #  EXECUTE ATTACK
+                        # -------------------------------------------------- #
+                        troops_available = gs.map.territories[tid_from].troops - 1
+                        if troops_available <= 0:
+                            # No troops to send — stop this chain
+                            break
+
+                        gs.handle_battle({
+                            'choice': (tid_from, tid_to),
+                            'amount': troops_available
+                        })
+
+                        # -------------------------------------------------- #
+                        #  POST-BATTLE ASSESSMENT
+                        #  FUTURE: check if attack succeeded (tid_to now in
+                        #  atk_player.territories). If failed, could decide
+                        #  whether to retry, reroute, or abort the chain.
+                        # -------------------------------------------------- #
+
+                        gs.server.sleep(1.5)
+
+                return True
+
+            def execute_split(split_entry):
+                """
+                Execute a split — each branch is executed independently.
+                Branches are already sorted by offense value (highest first).
+                Returns False if execution should stop entirely, True otherwise.
+                FUTURE: could assess troop availability at split_from before
+                deciding how many branches to execute and how to divide troops.
+                """
+                for branch in split_entry['branches']:
+                    if should_stop():
+                        return False
+
+                    # -------------------------------------------------- #
+                    #  BRANCH LEGALITY CHECK
+                    #  Verify split_from is still under control before
+                    #  launching each branch.
+                    #  FUTURE: could skip low-value branches if troops are
+                    #  insufficient rather than aborting entirely.
+                    # -------------------------------------------------- #
+                    split_from = split_entry['split_from']
+                    if split_from not in atk_player.territories:
+                        break
+
+                    result = execute_chain(branch)
+                    if not result:
+                        return False
+
+                return True
+
+            # ------------------------------------------------------------------ #
+            #  MAIN EXECUTION LOOP
+            #  Iterate through outer list — each entry is either a flat chain
+            #  (list) or a pure split at a player-owned tile (dict).
+            #  FUTURE: could re-evaluate the plan between chains based on
+            #  how previous chains went (e.g. skip remaining chains if we
+            #  lost too many troops).
+            # ------------------------------------------------------------------ #
+
+            for entry in attack_sequence:
+                if should_stop():
+                    break
+
+                if isinstance(entry, dict) and 'split_from' in entry:
+                    # Pure split at player-owned tile
+                    result = execute_split(entry)
+                    if not result:
+                        break
+
+                elif isinstance(entry, list):
+                    # Flat chain or linear steps ending with split dict
+                    result = execute_chain(entry)
+                    if not result:
+                        break
+
+        finally:
+            if not ms.terminated and token == ms.turn_token:
+                ms.stage_completed = True
+
+    def ai_rearrange(self, gs, ms, player, token):
+        try:
+            # --- your rearrange logic here ---
+            gs.server.sleep(0.5)
+        finally:
+            if not ms.terminated and token == ms.turn_token:
+                ms.stage_completed = True
 
     # MAIN LOOP FOR TURN BASED EVENTS
     def run_turn_loop(self, gs, ms):

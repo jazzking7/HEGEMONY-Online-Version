@@ -657,56 +657,197 @@ class Botplayer:
         if status not in ('upgrade', 'abandon'):
             return
 
-        plan = upgrade_result.get('plan', []) if status == 'upgrade' else upgrade_result.get('best_plan', [])
+        plan = upgrade_result.get('plan', []) if status == 'upgrade' \
+            else upgrade_result.get('best_plan', [])
         if not plan:
             return
+
+        CONVERSION = {
+            2: 3,  3: 5,  4: 7,  5: 10, 6: 13, 7: 16,
+            8: 19, 9: 23, 10: 28, 11: 33, 12: 38,
+            13: 44, 14: 52, 15: 60
+        }
 
         for item in plan:
             name  = item['item']
             count = item['count']
+            cost  = item['cost']
 
+            # ---------------------------------------------------------- #
+            #  TROOP CONVERSION
+            # ---------------------------------------------------------- #
             if name == 'troop_conversion':
-                # count = troops gained, not number of purchases
-                # find the star cost that gives exactly this many troops
-                CONVERSION = {
-                    2: 3,  3: 5,  4: 7,  5: 10, 6: 13, 7: 16,
-                    8: 19, 9: 23, 10: 28, 11: 33, 12: 38,
-                    13: 44, 14: 52, 15: 60
-                }
+                # count = troops gained, find the star cost
                 star_cost = next(
                     (s for s, t in CONVERSION.items() if t == count),
                     None
                 )
-                if star_cost and self.stars >= star_cost:
-                    self.build('troop_conversion', None, star_cost)
-                continue
+                if star_cost is None or self.stars < star_cost:
+                    continue
+                self.build('troop_conversion', None, star_cost)
 
-            if name == 'infrastructure':
-                # global, no territory needed
+            # ---------------------------------------------------------- #
+            #  INFRASTRUCTURE (global, no territory)
+            # ---------------------------------------------------------- #
+            elif name == 'infrastructure':
                 for _ in range(count):
-                    if self.stars < self.starPrice(3):
+                    result = self.build('infrastructure', None)
+                    if not result:
                         break
-                    self.build('infrastructure', None)
-                continue
 
-            # territory-based builds
-            build_type_map = {
-                'leyline':       'leyline',
-                'hall':          'hall',
-                'city':          'city',
-                'logistic_nexus': 'logistic_nexus',
-                'megacity':      'megacity',
+            # ---------------------------------------------------------- #
+            #  TERRITORY-BASED BUILDS
+            # ---------------------------------------------------------- #
+            else:
+                tids = self.get_best_territories_to_build(count, name)
+                for tid in tids:
+                    result = self.build(name, tid)
+                    if not result:
+                        break
+
+    def build(self, build_type, tid, star_cost=None):
+        """
+        Executes a single build action.
+        Returns True on success, False on failure.
+        
+        build_type: 'infrastructure', 'leyline', 'city', 'logistic_nexus',
+                    'megacity', 'hall', 'troop_conversion'
+        tid: territory id (None for global builds)
+        star_cost: only used for troop_conversion
+        """
+
+        # ------------------------------------------------------------------ #
+        #  PRICE CALCULATION
+        # ------------------------------------------------------------------ #
+
+        BASE_COSTS = {
+            'infrastructure':  3,
+            'leyline':         2,
+            'city':            3,
+            'logistic_nexus':  4,
+            'megacity':        5,
+            'hall':            5,
+            'troop_conversion': star_cost or 0
+        }
+
+        cost = star_cost if build_type == 'troop_conversion' \
+            else self.starPrice(BASE_COSTS[build_type])
+
+        # ------------------------------------------------------------------ #
+        #  STAR CHECK
+        # ------------------------------------------------------------------ #
+
+        if self.stars < cost:
+            return False
+
+        # ------------------------------------------------------------------ #
+        #  VALIDITY CHECK
+        # ------------------------------------------------------------------ #
+
+        if build_type != 'infrastructure' and build_type != 'troop_conversion':
+            if tid is None:
+                return False
+            t = self.gs.map.territories[tid]
+            if t.isDeadZone:
+                return False
+            if tid not in self.territories:
+                return False
+
+            # Slot checks
+            if build_type in ('leyline', 'hall'):
+                if t.isCapital or t.isHall or t.isLeyline:
+                    return False
+            elif build_type in ('city', 'logistic_nexus'):
+                if t.isCity or t.isBureau or t.isTransportcenter:
+                    return False
+            elif build_type == 'megacity':
+                if not t.isCity or t.isMegacity:
+                    return False
+
+        if build_type == 'troop_conversion' and star_cost is None:
+             return False
+
+        # ------------------------------------------------------------------ #
+        #  DEDUCT STARS
+        # ------------------------------------------------------------------ #
+
+        self.stars -= cost
+
+        # ------------------------------------------------------------------ #
+        #  EXECUTE BUILD
+        # ------------------------------------------------------------------ #
+
+        if build_type == 'infrastructure':
+            self.infrastructure_upgrade += 1
+            # TODO: apply any combat/stat bonuses from infrastructure
+            self.gs.update_private_status(self.uid)
+            self.gs.update_HIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.update_player_stats()
+            self.gs.signal_MTrackers('popu')
+
+        elif build_type == 'leyline':
+            t.isLeyline = True
+            # TODO: apply crit rate, crit damage, reserve bonuses
+            self.gs.server.emit('update_trty_display', {tid: {'hasEffect': 'leyline'}}, room=self.gs.lobby)
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+
+        elif build_type == 'city':
+            t.isCity = True
+            self.gs.server.emit('update_trty_display', {tid: {'hasDev': 'city'}}, room=self.gs.lobby)
+            # TODO: update industrial level based on city count threshold
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+            self.gs.update_TIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.update_player_stats()
+            self.gs.signal_MTrackers('indus')
+
+        elif build_type == 'logistic_nexus':
+            t.isTransportcenter = True
+            self.gs.server.emit('update_trty_display', {tid: {'hasDev': 'nexus'}}, room=self.gs.lobby)
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+            self.gs.update_HIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.update_player_stats()
+            # TODO: apply +1 infra_lvl and troop generation boost
+
+        elif build_type == 'megacity':
+            t.isMegacity = True
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {tid: {'hasDev': 'megacity'}}, room=self.gs.lobby)
+            self.gs.update_TIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.signal_MTrackers('indus')
+            self.gs.update_player_stats()
+            # TODO: apply +1 ind_lvl directly and +5 troops per turn
+
+        elif build_type == 'hall':
+            t.isHall = True
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {tid: {'hasEffect': 'hall'}}, room=self.gs.lobby)
+            self.gs.update_TIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.signal_MTrackers('indus')
+            # TODO: apply troop and star bonuses
+
+        elif build_type == 'troop_conversion':
+            CONVERSION = {
+                2: 3,  3: 5,  4: 7,  5: 10, 6: 13, 7: 16,
+                8: 19, 9: 23, 10: 28, 11: 33, 12: 38,
+                13: 44, 14: 52, 15: 60
             }
+            troops_gained = CONVERSION.get(star_cost, 0)
+            self.reserves += troops_gained
+        # ------------------------------------------------------------------ #
+        #  SERVER EMISSIONS
+        # ------------------------------------------------------------------ #
 
-            build_type = build_type_map.get(name)
-            if not build_type:
-                continue
-
-            tids = self.get_best_territories_to_build(count, build_type)
-            for tid in tids:
-                if self.stars < self.starPrice(item['cost'] // count):
-                    break
-                self.build(build_type, tid)
+        return True
 
     # Assess the utility loss
     def assess_attack(self):
@@ -913,6 +1054,7 @@ class Botplayer:
         print(OTHER_PLAYER_STATS)
         print(MY_OWN_STATS)
         self.print_attack_plan(EXECUTION_PLAN)
+        self.print_upgrade_plan(UPGRADE_PLAN)
         
         # How hard to conquer
         # Troop stationed | Disparity between side

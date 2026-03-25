@@ -109,6 +109,7 @@ class Game_State_Manager:
                     self.oriPlayers.append(botpid)
                     self.players[botpid] = Botplayer(self)
                     self.players[botpid].isBot = True
+                    self.players[botpid].uid = botpid
         
         # Map
         self.map = Map(mapName)
