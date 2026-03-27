@@ -35,6 +35,8 @@ class setup_event_scheduler:
         miss_set = gs.Mdist.get_mission_set(len(gs.pids), gs.complexity)
         for index, player in enumerate(gs.pids):
             miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
+            if gs.players[player].isBot:
+                gs.palyers[player].agenda = miss_set[index]
 
         # Set up mission trackers for all missions
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
