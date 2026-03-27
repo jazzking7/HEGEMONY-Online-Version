@@ -849,6 +849,247 @@ class Botplayer:
 
         return True
 
+    # In botplayer
+    def rearrange_troops(self, ms, token):
+
+        def should_stop():
+            return ms.terminated or token != ms.turn_token
+
+        # ------------------------------------------------------------------ #
+        #  STEP 1: GET TERRITORIAL IMPORTANCE
+        # ------------------------------------------------------------------ #
+
+        importance, held_continents = self.get_trty_importance(self)
+
+        # ------------------------------------------------------------------ #
+        #  STEP 2: FIND CONNECTED GROUPS
+        # ------------------------------------------------------------------ #
+
+        player_set = set(self.territories)
+        visited    = set()
+        groups     = []
+
+        for start in self.territories:
+            if start in visited:
+                continue
+            group = []
+            queue = [start]
+            while queue:
+                tid = queue.pop()
+                if tid in visited:
+                    continue
+                visited.add(tid)
+                group.append(tid)
+                for nb in self.gs.map.territories[tid].neighbors:
+                    if nb in player_set and nb not in visited:
+                        queue.append(nb)
+            groups.append(group)
+
+        # ------------------------------------------------------------------ #
+        #  STEP 3: MOST IMPORTANT CONTINENT'S CHOKEPOINTS
+        # ------------------------------------------------------------------ #
+
+        priority_chokepoints = set()
+        if held_continents:
+            most_important_cont  = next(iter(held_continents))
+            priority_chokepoints = set(
+                held_continents[most_important_cont]['chokepoints']
+            )
+            print(f"[REARRANGE] Priority continent: {most_important_cont} | "
+                f"Chokepoints: {[self.gs.map.territories[t].name for t in priority_chokepoints]}")
+
+        # ------------------------------------------------------------------ #
+        #  STEP 4: HIGH VALUE CHECK
+        # ------------------------------------------------------------------ #
+
+        def is_high_value(tid):
+            t = self.gs.map.territories[tid]
+            return (
+                t.isMegacity or t.isTransportcenter or t.isHall or
+                t.isLeyline or t.isBureau or t.isCapital or t.isCity or
+                tid in priority_chokepoints
+            )
+
+        # ------------------------------------------------------------------ #
+        #  STEP 5: TRANSFER FUNCTION
+        # ------------------------------------------------------------------ #
+
+        def transfer(tid_from, tid_to, amount):
+            t1 = self.gs.map.territories[tid_from]
+            t2 = self.gs.map.territories[tid_to]
+
+            if tid_from not in self.territories or tid_to not in self.territories:
+                print(f"[REARRANGE] ILLEGAL: {t1.name} or {t2.name} not owned")
+                return False
+            if t1.refuseCommand and t1.refuseCommand != self.uid:
+                print(f"[REARRANGE] BLOCKED: {t1.name} refuses command")
+                return False
+            if t2.refuseCommand and t2.refuseCommand != self.uid:
+                print(f"[REARRANGE] BLOCKED: {t2.name} refuses command")
+                return False
+            if amount <= 0 or amount >= t1.troops:
+                print(f"[REARRANGE] INVALID AMOUNT: {amount} from {t1.name} "
+                    f"(has {t1.troops} troops)")
+                return False
+
+            t1.troops -= amount
+            t2.troops += amount
+
+            print(f"[REARRANGE] Transfer {amount} troops: "
+                f"{t1.name}({t1.troops + amount} -> {t1.troops}) → "
+                f"{t2.name}({t2.troops - amount} -> {t2.troops})")
+
+            self.gs.server.emit('update_trty_display', {
+                tid_from: {'troops': t1.troops},
+                tid_to:   {'troops': t2.troops}
+            }, room=self.gs.lobby)
+
+            return True
+
+        # ------------------------------------------------------------------ #
+        #  STEP 6: REARRANGE EACH GROUP
+        # ------------------------------------------------------------------ #
+
+        for g_idx, group in enumerate(groups):
+            if should_stop():
+                break
+
+            group_set = set(group)
+
+            # Build target list
+            targets    = [tid for tid in group if is_high_value(tid)]
+            target_set = set(targets)
+
+            if not targets:
+                print(f"\n[REARRANGE] Group {g_idx + 1}: no high value targets, skipping")
+                continue
+
+            targets.sort(key=lambda t: importance.get(t, 0), reverse=True)
+
+            # Total moveable troops in group
+            total_moveable = sum(
+                max(0, self.gs.map.territories[tid].troops - 1)
+                for tid in group
+            )
+
+            print(f"\n[REARRANGE] Group {g_idx + 1} | "
+                f"Territories: {len(group)} | "
+                f"Moveable troops: {total_moveable}")
+
+            if total_moveable <= 0:
+                print(f"[REARRANGE] Group {g_idx + 1}: no moveable troops, skipping")
+                continue
+
+            # ---------------------------------------------------------- #
+            #  CALCULATE ALLOCATIONS
+            #  Proportional to importance. int() floors so no troop creation.
+            # ---------------------------------------------------------- #
+
+            total_importance = sum(importance.get(t, 0) for t in targets)
+            if total_importance == 0:
+                continue
+
+            allocations = {
+                tid: int(total_moveable * importance.get(tid, 0) / total_importance)
+                for tid in targets
+            }
+
+            print(f"[REARRANGE] Group {g_idx + 1} targets and allocations:")
+            for tid in targets:
+                current = self.gs.map.territories[tid].troops
+                alloc   = allocations[tid]
+                print(f"  {self.gs.map.territories[tid].name} | "
+                    f"importance: {importance.get(tid, 0):.1f} | "
+                    f"current: {current} | allocated: {alloc} | "
+                    f"net need: {alloc - current}")
+
+            # ---------------------------------------------------------- #
+            #  CALCULATE NEEDS AND SOURCES
+            #  need  = allocation - current troops (positive = needs troops)
+            #  source = surplus beyond allocation for HV, or all moveable for non-HV
+            # ---------------------------------------------------------- #
+
+            needs   = {}  # tid -> troops needed
+            sources = {}  # tid -> troops available to donate
+
+            for tid in group:
+                current = self.gs.map.territories[tid].troops
+                if tid in target_set:
+                    alloc   = allocations.get(tid, 0)
+                    deficit = alloc - current
+                    if deficit > 0:
+                        needs[tid] = deficit
+                    elif current - 1 > alloc:
+                        # HV territory has more than its allocation — donate surplus
+                        sources[tid] = current - alloc  # donate down to allocation
+                else:
+                    # Non-target territory — all moveable troops available
+                    if current > 1:
+                        sources[tid] = current - 1
+
+            print(f"[REARRANGE] Group {g_idx + 1} sources:")
+            for tid, avail in sources.items():
+                print(f"  {self.gs.map.territories[tid].name}: {avail} available")
+
+            # Sort needs: most important first
+            sorted_needs = sorted(
+                needs.items(),
+                key=lambda x: importance.get(x[0], 0),
+                reverse=True
+            )
+
+            # Sort sources: non-HV first, then least important HV
+            sorted_sources = sorted(
+                sources.keys(),
+                key=lambda t: (1 if t in target_set else 0, importance.get(t, 0))
+            )
+
+            # ---------------------------------------------------------- #
+            #  EXECUTE TRANSFERS
+            #  For each needy target, collect from sources until need met.
+            #  Sources dict is updated live to reflect remaining availability.
+            # ---------------------------------------------------------- #
+
+            for tid_to, needed in sorted_needs:
+                if should_stop():
+                    break
+                if needed <= 0:
+                    continue
+
+                print(f"[REARRANGE] Filling {self.gs.map.territories[tid_to].name} "
+                    f"(needs {needed} troops)")
+
+                for tid_from in sorted_sources:
+                    if should_stop():
+                        break
+                    if tid_from == tid_to:
+                        continue
+                    if tid_from not in group_set:
+                        continue
+
+                    available = sources.get(tid_from, 0)
+                    if available <= 0:
+                        continue
+
+                    # Double check live troop count to be safe
+                    live_available = self.gs.map.territories[tid_from].troops - 1
+                    if live_available <= 0:
+                        continue
+
+                    # Take the minimum of planned availability and live availability
+                    actual_available = min(available, live_available)
+                    send = min(needed, actual_available)
+                    if send <= 0:
+                        continue
+
+                    if transfer(tid_from, tid_to, send):
+                        needed          -= send
+                        sources[tid_from] -= send  # update source tracking
+                        self.gs.server.sleep(0.2)
+
+                    if needed <= 0:
+                        break
+
     # Assess the utility loss
     def assess_attack(self):
         return
@@ -947,12 +1188,13 @@ class Botplayer:
             t = self.gs.map.territories[tid]
             points = 0
 
-            if t.isMegacity:        points += 50
-            if t.isTransportcenter: points += 40
+            if t.isMegacity:        points += 60
+            if t.isTransportcenter: points += 50
             if t.isHall:            points += 50
             if t.isLeyline:         points += 15
             if t.isBureau:          points += 15
-            if t.isCapital:         points += 20
+            if t.isCapital:         points += 25
+            if t.isCity:            points += 20
 
             if total_troops > 0 and t.troops > total_troops * 0.01:
                 points += (t.troops / total_troops) * 100
@@ -1009,7 +1251,7 @@ class Botplayer:
             for tid in cont_tids:
                 if tid in importance:
                     if tid in chokepoint_set:
-                        importance[tid] += 25
+                        importance[tid] += 5
                     importance[tid] *= multiplier
 
         return importance, held_continents

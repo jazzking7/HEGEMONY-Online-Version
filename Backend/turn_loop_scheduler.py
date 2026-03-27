@@ -714,8 +714,8 @@ class turn_loop_scheduler:
 
     def ai_rearrange(self, gs, ms, player, token):
         try:
-            # --- your rearrange logic here ---
-            gs.server.sleep(0.5)
+            atk_player = gs.players[player]
+            atk_player.rearrange_troops(ms, token)
         finally:
             if not ms.terminated and token == ms.turn_token:
                 ms.stage_completed = True
