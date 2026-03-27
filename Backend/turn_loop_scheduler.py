@@ -453,6 +453,7 @@ class turn_loop_scheduler:
         def should_terminate():
             return (
                 ms.terminated or
+                ms.interrupt or
                 not atk_player.connected or
                 token != ms.turn_token
             )
@@ -464,6 +465,7 @@ class turn_loop_scheduler:
             """
             while (not ms.stage_completed
                 and not ms.terminated
+                and not ms.interrupt
                 and atk_player.connected
                 and token == ms.turn_token):
                 if ms.innerInterrupt:

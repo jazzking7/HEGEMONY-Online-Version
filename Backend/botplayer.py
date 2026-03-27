@@ -1288,7 +1288,7 @@ class Botplayer:
         # Continental Defend mode -> Yes or No
 
         EXECUTION_PLAN, SUMMARY = self.get_attack_plan(OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE)
-
+        EXECUTION_PLAN = self.reduce_splits(EXECUTION_PLAN)
         CONDITIONS = self.evaluate_plan(EXECUTION_PLAN, MY_OWN_STATS, SUMMARY)
 
         UPGRADE_PLAN = self.get_upgrade_plan(CONDITIONS)
@@ -1988,6 +1988,168 @@ class Botplayer:
         for p in self.gs.players:
             if self.gs.players[p].name == self.name:
                 return self.gs.starPrice(base, p)
+
+    def reduce_splits(self, execution_plan):
+        """
+        Goes through the execution plan and reduces unnecessary splits
+        into linear chains where possible.
+        Splits are only kept when territories truly cannot be linearized
+        i.e. they can only reach each other through the split point.
+        """
+
+        def are_neighbors(tid_a, tid_b):
+            """Check if two territories are direct map neighbors."""
+            return tid_b in self.gs.map.territories[tid_a].neighbors
+
+        def get_first_tid(branch):
+            """
+            Get the first tid_to in a branch.
+            This is the first territory attacked in this branch.
+            """
+            if isinstance(branch, dict) and 'split_from' in branch:
+                return branch['split_from']
+            if isinstance(branch, list):
+                for item in branch:
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        return item[1]
+            return None
+
+        def get_last_tid(branch):
+            """
+            Get the last tid_to in a branch.
+            This is the last territory captured.
+            """
+            if isinstance(branch, dict) and 'split_from' in branch:
+                last = None
+                for b in branch['branches']:
+                    last = get_last_tid(b)
+                return last
+            if isinstance(branch, list):
+                for item in reversed(branch):
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        return item[1]
+                    elif isinstance(item, dict) and 'split_from' in item:
+                        return get_last_tid(item)
+            return None
+
+        def get_branch_easiness(branch):
+            """Get easiness of the first step in a branch."""
+            if isinstance(branch, list):
+                for item in branch:
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        return item[2]
+            elif isinstance(branch, dict) and 'split_from' in branch:
+                if branch['branches']:
+                    return get_branch_easiness(branch['branches'][0])
+            return float('inf')
+
+        def rewrite_first_step(branch, new_from):
+            """
+            Rewrite the tid_from of the first step in a branch
+            to reflect the actual attacking position after linearization.
+            """
+            if isinstance(branch, list) and branch:
+                new_branch = list(branch)
+                for i, item in enumerate(new_branch):
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        new_branch[i] = [new_from, item[1], item[2]]
+                        return new_branch
+            return branch
+
+        def flatten_split(split_from, branches):
+            """
+            Try to flatten a split into a linear chain.
+            Returns either:
+            - a list of steps (fully or partially linearized)
+            - a dict (pure split, nothing could be merged)
+            """
+
+            # Step 1: Recursively reduce nested splits in each branch first
+            reduced_branches = [reduce_chain(branch) for branch in branches]
+
+            # Step 2: Sort by easiness of first step (easiest first)
+            reduced_branches.sort(key=lambda b: get_branch_easiness(b))
+
+            # Step 3: Iteratively try to merge branches into linear chain
+            result_chain = []
+            remaining    = list(reduced_branches)
+            current_tid  = split_from
+
+            changed = True
+            while changed and remaining:
+                changed        = False
+                next_remaining = []
+
+                for branch in remaining:
+                    first_tid = get_first_tid(branch)
+                    if first_tid is None:
+                        continue
+
+                    if are_neighbors(current_tid, first_tid):
+                        # Rewrite first step's tid_from to current_tid
+                        branch = rewrite_first_step(branch, current_tid)
+
+                        if isinstance(branch, list):
+                            result_chain.extend(branch)
+                        else:
+                            result_chain.append(branch)
+
+                        last = get_last_tid(branch)
+                        if last is not None:
+                            current_tid = last
+                        changed = True
+                    else:
+                        next_remaining.append(branch)
+
+                remaining = next_remaining
+
+            # Step 4: Remaining branches truly need a split
+            if remaining:
+                if result_chain:
+                    result_chain.append({
+                        'split_from': current_tid,
+                        'branches':   remaining
+                    })
+                else:
+                    return {'split_from': split_from, 'branches': reduced_branches}
+
+            return result_chain
+
+        def reduce_chain(chain):
+            """
+            Walk through a chain and reduce any splits found.
+            """
+            if isinstance(chain, dict) and 'split_from' in chain:
+                return flatten_split(chain['split_from'], chain['branches'])
+
+            if not isinstance(chain, list):
+                return chain
+
+            result = []
+            for item in chain:
+                if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                    result.append(item)
+                elif isinstance(item, dict) and 'split_from' in item:
+                    flattened = flatten_split(item['split_from'], item['branches'])
+                    if isinstance(flattened, list):
+                        result.extend(flattened)
+                    else:
+                        result.append(flattened)
+                else:
+                    result.append(item)
+
+            return result
+
+        # ------------------------------------------------------------------ #
+        #  MAIN: Process each entry in execution plan
+        # ------------------------------------------------------------------ #
+
+        reduced_plan = []
+        for entry in execution_plan:
+            reduced = reduce_chain(entry)
+            reduced_plan.append(reduced)
+
+        return reduced_plan
 
     def get_attack_sequences(
         self,
