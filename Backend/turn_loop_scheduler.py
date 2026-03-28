@@ -513,13 +513,26 @@ class turn_loop_scheduler:
         # ------------------------------------------------------------------ #
 
         # ------------------------------------------------------------------ #
-        #  STAGE 1 — DEPLOY + PREPARATION
+        #  STAGE 1 — DEPLOY
         # ------------------------------------------------------------------ #
 
         self.set_curr_state(ms, self.events[0])
         self.reinforcement(gs, player)
 
-        EXECUTION_PLAN, UPGRADE_PLAN = atk_player.get_current_game_plan()
+        if atk_player.hijacked:
+            for player in self.gs.players:
+                currp = self.gs.players[player]
+                if currp.skill.name == "Loan Shark":
+                    if self.uid in currp.skill.loan_list:
+                        if self.total_troops > self.stars*10:
+                            currp.skill.handle_payment(self.uid, 'troops')
+                            currp.skill.handle_payment(self.uid, 'sepauth')
+                        else:
+                            currp.skill.handle_payment(self.uid, 'sepauth')
+                            currp.skill.handle_payment(self.uid, 'troops')
+                        break
+
+        EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE = atk_player.get_current_game_plan()
 
         # Launch AI deploy as background task so timer can still fire
         gs.server.start_background_task(self.ai_deploy, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN)
@@ -528,7 +541,20 @@ class turn_loop_scheduler:
         if should_terminate(): return
 
         # ------------------------------------------------------------------ #
-        #  STAGE 2 — CONQUER
+        #  STAGE 2 — PREPARATION (upgrades)
+        # ------------------------------------------------------------------ #
+
+        ms.stage_completed = False
+        self.set_curr_state(ms, self.events[1])
+        self.preparation(gs, player)
+
+        gs.server.start_background_task(self.ai_prepare, gs, ms, player, token, MY_OWN_STATS, GLOBAL_AVERAGE)
+
+        wait_for_stage()
+        if should_terminate(): return
+
+        # ------------------------------------------------------------------ #
+        #  STAGE 3 — CONQUER
         # ------------------------------------------------------------------ #
 
         atk_player.temp_stats = gs.get_player_battle_stats(atk_player)
@@ -547,7 +573,7 @@ class turn_loop_scheduler:
             return
 
         # ------------------------------------------------------------------ #
-        #  STAGE 3 — REARRANGE
+        #  STAGE 4 — REARRANGE
         # ------------------------------------------------------------------ #
 
         ms.stage_completed = False
@@ -584,6 +610,15 @@ class turn_loop_scheduler:
         finally:
             # Always mark complete even if something errors,
             # so the main loop doesn't hang
+            if not ms.terminated and token == ms.turn_token:
+                ms.stage_completed = True
+
+    def ai_prepare(self, gs, ms, player, token, MY_OWN_STATS, GLOBAL_AVERAGE):
+        try:
+            atk_player = gs.players[player]
+            atk_player.make_upgrades(MY_OWN_STATS, GLOBAL_AVERAGE)
+            gs.server.sleep(3) 
+        finally:
             if not ms.terminated and token == ms.turn_token:
                 ms.stage_completed = True
 

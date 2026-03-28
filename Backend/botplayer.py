@@ -121,6 +121,8 @@ class Botplayer:
 
         self.disparity_acceptance = 2
 
+        self.growth_expectation = len(self.gs.map.territories)//(len(self.gs.players)+2)
+
         self.uid = None
 
     def get_worthy_continent_from_set(self, curr_dist, setupmode=False):
@@ -705,6 +707,264 @@ class Botplayer:
                     if not result:
                         break
 
+    def make_upgrades(self, MY_OWN_STATS, GLOBAL_AVERAGE):
+        if self.stars <= 0:
+            self.stars = 0
+            return
+        # WAR ART RELATED
+        if self.skill:
+            if self.skill.name == "Realm_of_Permafrost":
+                if self.PPI < GLOBAL_AVERAGE['PPI']:
+                    self.skill.activate_effect()
+                
+            if self.skill.name == "Iron_Wall":
+                if self.PPI < GLOBAL_AVERAGE['PPI']:
+                    if random.randint(1,100) > 60:
+                        self.skill.activate_effect()
+                
+            if self.skill.name == "Dictator":
+                if self.PPI < GLOBAL_AVERAGE['PPI']:
+                    if random.randint(1,100) > 50:
+                        self.skill.activate_effect()
+                else:
+                    if random.randint(1,100) > 60:
+                        self.skill.activate_effect()
+                
+            if self.skill.name == "Pandora's Box":
+                maxpeek = 8 - self.skill.freeUsages
+                for _ in range(self.skill.freeUsages):
+                    self.skill.activate_effect()
+                curr = 0
+                while not curr >= maxpeek:
+                    self.skill.activate_effect()
+                    curr += 1
+            if self.skill.name == "Elitocracy":
+                if MY_OWN_STATS['ind_lvl'] > self.min_roll:
+                    self.skill.activate_effect()
+            if self.skill.name == "Zealous_Expansion":
+                if self.infrastructure_upgrade < 4:
+                    for _ in range(4-self.infrastructure_upgrade):
+                        self.skill.activate_effect()
+        
+        # NORMAL UPGRADE
+        if self.stars <= 0:
+            return
+
+        my_ind    = MY_OWN_STATS.get('ind_lvl', 0)
+        my_infra  = MY_OWN_STATS.get('infra_lvl', 0)
+        my_ley    = MY_OWN_STATS.get('num_ley', 0)
+        my_troops = MY_OWN_STATS.get('total_troop', 0)
+        my_income = MY_OWN_STATS.get('troop_income', 0)
+
+        avg_ind    = GLOBAL_AVERAGE.get('ind_lvl', 0)
+        avg_infra  = GLOBAL_AVERAGE.get('infra_lvl', 0)
+        avg_ley    = GLOBAL_AVERAGE.get('num_ley', 0)
+        avg_troops = GLOBAL_AVERAGE.get('total_troop', 0)
+        avg_income = GLOBAL_AVERAGE.get('troop_income', 0)
+
+        my_combined  = my_ind + my_infra
+        avg_combined = avg_ind + avg_infra
+        combined_gap = avg_combined - my_combined
+
+        def can_afford(base):
+            return self.stars >= self.starPrice(base)
+
+        def has_slot_a():
+            return any(
+                not self.gs.map.territories[tid].isDeadZone
+                and not self.gs.map.territories[tid].isCapital
+                and not self.gs.map.territories[tid].isHall
+                and not self.gs.map.territories[tid].isLeyline
+                for tid in self.territories
+            )
+
+        def has_slot_b():
+            return any(
+                not self.gs.map.territories[tid].isDeadZone
+                and not self.gs.map.territories[tid].isCity
+                and not self.gs.map.territories[tid].isBureau
+                and not self.gs.map.territories[tid].isTransportcenter
+                for tid in self.territories
+            )
+
+        def has_upgradeable_city():
+            return any(
+                self.gs.map.territories[tid].isCity
+                and not self.gs.map.territories[tid].isMegacity
+                for tid in self.territories
+            )
+
+        def city_gives_ind():
+            """Check if building one more city gives +1 ind_lvl."""
+            current_cities = sum(
+                1 for tid in self.territories
+                if self.gs.map.territories[tid].isCity
+                or self.gs.map.territories[tid].isMegacity
+            )
+            def ind_at(n):
+                if n < 3: return 0
+                return 1 + max(0, (n - 3) // 2)
+            return ind_at(current_cities + 1) > ind_at(current_cities)
+        
+
+        if self.skill:
+            if self.skill.name == "Realm_of_Permafrost":
+                for _ in range(self.stars):
+                    if self.stars <= 0:
+                        break
+                    choice = random.choice(['mobbureau', 'leyline'])
+                    if choice == 'leyline':
+                        if can_afford(2) and has_slot_a():
+                            tids = self.get_best_territories_to_build(1, 'leyline')
+                            if tids:
+                                self.build('leyline', tids[0])
+                    else:
+                        tids = self.get_best_territories_to_build(1, 'city')
+                        if tids:
+                            self.build('mobbureau', tids[0])
+                return
+                
+
+        jumped_to_final = False
+
+        # ------------------------------------------------------------------ #
+        #  MAJOR GAP IN IND + INFRA
+        # ------------------------------------------------------------------ #
+
+        if combined_gap >= 1:
+            infra_gap = avg_infra - my_infra
+            ind_gap   = avg_ind   - my_ind
+
+            if infra_gap >= ind_gap:
+                # Infra is the main gap
+                if my_troops >= avg_troops - 10 and can_afford(4) and has_slot_b():
+                    self.build('logistic_nexus',
+                               self.get_best_territories_to_build(1, 'logistic_nexus')[0]
+                               if self.get_best_territories_to_build(1, 'logistic_nexus') else None)
+                else:
+                    while self.stars > 0 and can_afford(3):
+                        self.build('infrastructure', None)
+
+            else:
+                # Ind is the main gap
+                if my_troops >= avg_troops - 10 and can_afford(5) and has_upgradeable_city():
+                    tids = self.get_best_territories_to_build(1, 'megacity')
+                    if tids:
+                        self.build('megacity', tids[0])
+                else:
+                    if city_gives_ind() and can_afford(3) and has_slot_b():
+                        tids = self.get_best_territories_to_build(1, 'city')
+                        if tids:
+                            self.build('city', tids[0])
+                    elif can_afford(2) and has_slot_a():
+                        tids = self.get_best_territories_to_build(1, 'leyline')
+                        if tids:
+                            self.build('leyline', tids[0])
+
+        # ------------------------------------------------------------------ #
+        #  MAJOR GAP IN LEYLINES
+        # ------------------------------------------------------------------ #
+
+        ley_gap = avg_ley - my_ley
+        if ley_gap > 1:
+            to_build = min(int(ley_gap) // 2, 1)
+            for _ in range(to_build):
+                if can_afford(2) and has_slot_a():
+                    tids = self.get_best_territories_to_build(1, 'leyline')
+                    if tids:
+                        self.build('leyline', tids[0])
+
+        # ------------------------------------------------------------------ #
+        #  MAJOR GAP IN TROOPS OR INCOME
+        # ------------------------------------------------------------------ #
+
+        troop_gap  = avg_troops - my_troops > 20
+        income_gap = my_income < avg_income * 0.5
+
+        if troop_gap or income_gap:
+            tids = self.get_best_territories_to_build(1, 'city')
+            if tids:
+                self.build('mobbureau', tids[0])
+
+        # ------------------------------------------------------------------ #
+        #  NO MAJOR GAP — SELF ASSESSMENT
+        # ------------------------------------------------------------------ #
+
+        if combined_gap < 1 and not troop_gap and not income_gap:
+
+            if my_ind >= my_infra + 2:
+                # Ind significantly higher than infra
+                if random.randint(1, 100) > 60:
+                    jumped_to_final = True
+                else:
+                    if can_afford(4) and has_slot_b():
+                        tids = self.get_best_territories_to_build(1, 'logistic_nexus')
+                        if tids:
+                            self.build('logistic_nexus', tids[0])
+                    elif can_afford(3):
+                        self.build('infrastructure', None)
+
+            elif my_infra >= my_ind + 2:
+                # Infra significantly higher than ind
+                if random.randint(1, 100) > 60:
+                    jumped_to_final = True
+                else:
+                    if can_afford(5) and has_upgradeable_city():
+                        tids = self.get_best_territories_to_build(1, 'megacity')
+                        if tids:
+                            self.build('megacity', tids[0])
+                    elif can_afford(3) and has_slot_b():
+                        tids = self.get_best_territories_to_build(1, 'city')
+                        if tids:
+                            self.build('city', tids[0])
+
+        # ------------------------------------------------------------------ #
+        #  FINAL — RANDOM WEIGHTED SPENDING
+        # ------------------------------------------------------------------ #
+
+        if jumped_to_final or (self.stars > 1):
+            items   = ['ind', 'infra', 'leyline', 'hall', 'bureau']
+            weights = [25, 25, 15, 25, 10]
+
+            for _ in range(self.stars):
+                if self.stars <= 1:
+                    break
+
+                choice = random.choices(items, weights=weights, k=1)[0]
+
+                if choice == 'ind':
+                    if can_afford(5) and has_upgradeable_city():
+                        tids = self.get_best_territories_to_build(1, 'megacity')
+                        if tids:
+                            self.build('megacity', tids[0])
+                    elif can_afford(3):
+                        self.build('infrastructure', None)
+
+                elif choice == 'infra':
+                    if can_afford(4) and has_slot_b():
+                        tids = self.get_best_territories_to_build(1, 'logistic_nexus')
+                        if tids:
+                            self.build('logistic_nexus', tids[0])
+                    elif can_afford(3):
+                        self.build('infrastructure', None)
+
+                elif choice == 'leyline':
+                    if can_afford(2) and has_slot_a():
+                        tids = self.get_best_territories_to_build(1, 'leyline')
+                        if tids:
+                            self.build('leyline', tids[0])
+
+                elif choice == 'hall':
+                    if can_afford(5) and has_slot_a():
+                        tids = self.get_best_territories_to_build(1, 'hall')
+                        if tids:
+                            self.build('hall', tids[0])
+
+                elif choice == 'bureau':
+                    tids = self.get_best_territories_to_build(1, 'city')
+                    if tids:
+                        self.build('mobbureau', tids[0])
+
     def build(self, build_type, tid, star_cost=None):
         """
         Executes a single build action.
@@ -727,6 +987,7 @@ class Botplayer:
             'logistic_nexus':  4,
             'megacity':        5,
             'hall':            5,
+            'mobbureau':       2,
             'troop_conversion': star_cost or 0
         }
 
@@ -757,7 +1018,7 @@ class Botplayer:
             if build_type in ('leyline', 'hall'):
                 if t.isCapital or t.isHall or t.isLeyline:
                     return False
-            elif build_type in ('city', 'logistic_nexus'):
+            elif build_type in ('city', 'logistic_nexus', 'mobbureau'):
                 if t.isCity or t.isBureau or t.isTransportcenter:
                     return False
             elif build_type == 'megacity':
@@ -829,6 +1090,16 @@ class Botplayer:
             t.isHall = True
             self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
             self.gs.server.emit('update_trty_display', {tid: {'hasEffect': 'hall'}}, room=self.gs.lobby)
+            self.gs.update_TIP(self.uid)
+            self.gs.get_SUP()
+            self.gs.update_global_status()
+            self.gs.signal_MTrackers('indus')
+            # TODO: apply troop and star bonuses
+
+        elif build_type == 'mobbureau':
+            t.isBureau = True
+            self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {tid: {'hasEffect': 'bureau'}}, room=self.gs.lobby)
             self.gs.update_TIP(self.uid)
             self.gs.get_SUP()
             self.gs.update_global_status()
@@ -1155,12 +1426,16 @@ class Botplayer:
                 for k in totals:
                     totals[k] += stats[pid][k]
             else:
+                stats = self.gs.get_player_battle_stats(self)
+                if self.skill:
+                    if self.skill.active and self.skill.intMod:
+                        self.skill.internalStatsMod(stats)
                 my_stats = {
                     'num_trty': len(self.territories),
                     'troop_income': self.gs.get_deployable_amt(pid),
                     'total_troop': self.total_troops,
-                    'ind_lvl': self.gs.get_player_industrial_level(self) + 6,
-                    'infra_lvl': self.gs.get_player_infra_level(self) + 3,
+                    'ind_lvl': stats[0],
+                    'infra_lvl': stats[1],
                     'num_ley': self.count_ley(self),
                     'PPI': self.PPI
                 }
@@ -1196,6 +1471,10 @@ class Botplayer:
             if t.isCapital:         points += 25
             if t.isCity:            points += 20
 
+            if player.name == self.name:
+                if tid in self.get_mission_related_tids():
+                    points += 50
+
             if total_troops > 0 and t.troops > total_troops * 0.01:
                 points += (t.troops / total_troops) * 100
 
@@ -1227,8 +1506,13 @@ class Botplayer:
                     if neighbor_tid not in cont_tids:
                         chokepoints.append(tid)
                         break
+
+            agenda_importance = 0
+            if player.name == self.name:
+                if cont_name == self.get_mission_related_cont():
+                    agenda_importance = 1
             
-            cont_importance = cont_importance + (cont_data["bonus"]) + troop_presence
+            cont_importance = cont_importance + (cont_data["bonus"]) + troop_presence + agenda_importance*100
             held_continents[cont_name] = {
                 "importance": cont_importance,
                 "chokepoints": chokepoints
@@ -1255,6 +1539,18 @@ class Botplayer:
                     importance[tid] *= multiplier
 
         return importance, held_continents
+    
+    def get_mission_related_tids(self,):
+        if self.agenda.name == "Fanatic":
+            return self.agenda.targets
+        elif self.agenda.name == "Guardian":
+            for tid in self.territories:
+                if self.gs.map.territories[tid].name == self.capital:
+                    return tid
+    
+    def get_mission_related_cont(self,):
+        if self.agenda.name == "Unifier":
+            return self.agenda.target_continent
 
     # CORE FUNCTION
     def get_current_game_plan(self,):
@@ -1287,11 +1583,7 @@ class Botplayer:
 
         # Continental Defend mode -> Yes or No
 
-        EXECUTION_PLAN, SUMMARY = self.get_attack_plan(OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE)
-        EXECUTION_PLAN = self.reduce_splits(EXECUTION_PLAN)
-        CONDITIONS = self.evaluate_plan(EXECUTION_PLAN, MY_OWN_STATS, SUMMARY)
-
-        UPGRADE_PLAN = self.get_upgrade_plan(CONDITIONS)
+        EXECUTION_PLAN, SUMMARY, UPGRADE_PLAN = self.get_attack_plan(OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE)
 
         print(OTHER_PLAYER_STATS)
         print(MY_OWN_STATS)
@@ -1305,8 +1597,31 @@ class Botplayer:
         # Grudge Target | Primary Target
 
         # Territories have strategic value points based on the current goal (troop diminition, expansion, industrial gain, etc)
-        return EXECUTION_PLAN, UPGRADE_PLAN
-    
+        return EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE
+
+    def get_main_group(self, tid):
+        """
+        Returns all tids reachable from the given tid
+        through only player-owned territories (including tid itself).
+        """
+        if tid not in self.territories:
+            return []
+
+        player_set = set(self.territories)
+        visited    = set()
+        queue      = [tid]
+
+        while queue:
+            current = queue.pop()
+            if current in visited:
+                continue
+            visited.add(current)
+            for nb in self.gs.map.territories[current].neighbors:
+                if nb in player_set and nb not in visited:
+                    queue.append(nb)
+
+        return list(visited)    
+
     def print_attack_plan(self, plan):
     
         def tid_name(tid):
@@ -1431,8 +1746,83 @@ class Botplayer:
                 )
                 deploy_to(best, self.deployable_amt)
     
-    def get_agenda_plan(self, OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE):
-        return self.get_attack_sequences(
+    def get_easiest_continent(self, exclude = None):
+        """
+        Returns the continent name that is easiest to conquer
+        based on player troop presence vs enemy troop presence.
+        Excludes fully controlled continents.
+        """
+        exclude = exclude or []
+        player_set = set(self.territories + exclude)
+        best_cont  = None
+        best_ratio = -1
+
+        for cont_name, cont_data in self.gs.map.conts.items():
+            cont_tids = cont_data['trtys']
+
+            # Skip fully controlled continents
+            if all(tid in player_set for tid in cont_tids):
+                continue
+
+            # Skip continents where player has no presence
+            if not any(tid in player_set for tid in cont_tids):
+                continue
+
+            player_troops = sum(
+                self.gs.map.territories[tid].troops
+                for tid in cont_tids
+                if tid in player_set
+            )
+            enemy_troops = sum(
+                self.gs.map.territories[tid].troops
+                for tid in cont_tids
+                if tid not in player_set
+            )
+
+            if enemy_troops == 0:
+                continue
+
+            ratio = player_troops / enemy_troops
+
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_cont  = cont_name
+
+        return best_cont
+
+    def get_economical_growth(self, TERRITORIAL_IMPORTANCE, OTHER_PLAYER_STATS, MY_OWN_STATS):
+        targets = []
+        continent = self.get_easiest_continent()
+        if continent:
+            targets = [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
+        if len(targets) > min(9, len(self.gs.map.territories)-len(self.territories)):
+            return self.get_attack_sequences(
+                    self.territories,
+                    targets,
+                    None,
+                    None,
+                    self.grudge_targets,
+                    False,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                )
+        else:
+            continent = self.get_easiest_continent(targets)
+            if continent:
+                targets += [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
+                return self.get_attack_sequences(
+                    self.territories,
+                    targets[:min(9, len(self.gs.map.territories)-len(self.territories))],
+                    None,
+                    None,
+                    self.grudge_targets,
+                    False,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                )
+            return self.get_attack_sequences(
                     self.territories,
                     [],
                     min(9, len(self.gs.map.territories)-len(self.territories)),
@@ -1443,38 +1833,268 @@ class Botplayer:
                     OTHER_PLAYER_STATS,
                     MY_OWN_STATS
                 )
+
+    def get_agenda_plan(self, OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE):
         if self.agenda.name == "Expansionist":
             if self.gs.players[self.gs.MTO].name != self.name:
                 self.grudge_targets.append(self.gs.MTO)
                 return self.get_attack_sequences(
-                    self,
                     self.territories,
                     [],
-                    N=len(self.gs.players[self.gs.MTO].territories) - len(self.territories),
-                    main_group=None,
-                    grudge_targets=self.grudge_targets,
-                    minimize_offense=True,
-                    territorial_importance=TERRITORIAL_IMPORTANCE,
-                    other_player_stats=OTHER_PLAYER_STATS,
-                    my_own_stats=MY_OWN_STATS
-                )
+                    len(self.gs.players[self.gs.MTO].territories) - len(self.territories),
+                    None,
+                    self.grudge_targets,
+                    False,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ), "active"
             else:
                 return self.get_attack_sequences(
-                    self,
                     self.territories,
                     [],
-                    N=min(9, len(self.gs.map.territories)-len(self.territories)),
-                    main_group=None,
-                    grudge_targets=self.grudge_targets,
-                    minimize_offense=True,
-                    territorial_importance=TERRITORIAL_IMPORTANCE,
-                    other_player_stats=OTHER_PLAYER_STATS,
-                    my_own_stats=MY_OWN_STATS
-                )
+                    min(9, len(self.gs.map.territories)-len(self.territories)),
+                    None,
+                    self.grudge_targets,
+                    True,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ), "passive"
+        if self.agenda.name == "Guardian":
+            capitalid = None
+            for tid, trty in enumerate(self.gs.map.territories):
+                if trty.name == self.capital:
+                    capitalid = tid
+                    break
+            return self.get_attack_sequences(
+                self.territories,
+                [],
+                min(9, len(self.gs.map.territories)-len(self.territories)),
+                self.get_main_group(capitalid),
+                self.grudge_targets,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+            ), "passive"
+        if self.agenda.name == "Unifier":
+            targetCont = self.agenda.target_continent
+            randomtid = self.map.conts[targetCont]['trtys'][0]
+            targets = [tid for tid in self.gs.map.conts[targetCont]['trtys'] if tid not in self.territories]
+            if len(targets) > 0:
+                return self.get_attack_sequences(
+                self.territories,
+                targets,
+                None,
+                None,
+                self.grudge_targets,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+                ) , "active"
+            else:
+                return self.get_attack_sequences(
+                self.territories,
+                [],
+                min(9, len(self.gs.map.territories)-len(self.territories)),
+                self.get_main_group(randomtid),
+                self.grudge_targets,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+                ), "passive"
+            
+        if self.agenda.name == "Survivalist" or self.agenda.name == "Pacifist":
+            if self.uid == self.gs.SUP:
+                return self.get_attack_sequences(
+                    self.territories,
+                    [],
+                    min(9, len(self.gs.map.territories)-len(self.territories)),
+                    None,
+                    self.grudge_targets,
+                    True,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ) , "passive"
+            else:
+                return self.get_attack_sequences(
+                self.territories,
+                [],
+                min(9, len(self.gs.map.territories)-len(self.territories)),
+                None,
+                [self.gs.SUP],
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+                ), "active"
+        
+        if self.agenda.name == "Decapitator":
+            targets = []
+            for player in self.agenda.target_players:
+                capital_name = self.gs.players[player].capital
+                for tid, trty in enumerate(self.gs.map.territories):
+                    if trty.name == capital_name and tid not in self.territories:
+                        targets.append(tid)
+                    
+            return self.get_attack_sequences(
+                self.territories,
+                targets,
+                None,
+                None,
+                self.agenda.target_players,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+                ), "active"
+
+        if self.agenda.name == "Warmonger":
+            lowest = 100
+            weakest = None
+            for player in self.gs.players:
+                if self.gs.players[player].PPI <= lowest and player != self.uid:
+                    weakest = player
+            if weakest:
+                return self.get_attack_sequences(
+                    self.territories,
+                    self.gs.players[weakest].territories,
+                    None,
+                    None,
+                    self.grudge_targets,
+                    False,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ), "active"
+        
+        if self.agenda.name == "Bounty_Hunter":
+            mission_grudges = [player for player in self.agenda.target_players if self.gs.players[player].alive]
+            targets = []
+            for p in mission_grudges:
+                targets += self.gs.players[p].territories
+            return self.get_attack_sequences(
+                self.territories,
+                targets,
+                None,
+                None,
+                mission_grudges,
+                False,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+            ), "active"
+
+        if self.agenda.name == "Fanatic":
+            targets = [tid for tid in self.agenda.targets if tid not in self.territories]
+            if len(targets)> 0:
+                return self.get_attack_sequences(
+                    self.territories,
+                    targets,
+                    None,
+                    None,
+                    self.grudge_targets,
+                    False,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ), "active"
+            else:
+                return self.get_attack_sequences(
+                    self.territories,
+                    [],
+                    min(9, len(self.gs.map.territories)-len(self.territories)),
+                    self.get_main_group(self.agenda.targets[0]),
+                    mission_grudges,
+                    True,
+                    TERRITORIAL_IMPORTANCE,
+                    OTHER_PLAYER_STATS,
+                    MY_OWN_STATS
+                ), "passive"
+
+
+        return self.get_attack_sequences(
+                self.territories,
+                [],
+                min(9, len(self.gs.map.territories)-len(self.territories)),
+                None,
+                self.grudge_targets,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+            ), "passive"
 
     def get_attack_plan(self, OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE):
-        AGENDA_PLAN, SUMMARY = self.get_agenda_plan(OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE)
-        return AGENDA_PLAN, SUMMARY
+
+        troop_income      = MY_OWN_STATS.get('troop_income', 0)
+        growth_met        = troop_income >= self.growth_expectation
+
+        # ------------------------------------------------------------------ #
+        #  GET BOTH PLANS
+        # ------------------------------------------------------------------ #
+
+        AGENDA_PLAN, AGENDA_SUMMARY, _ = self.get_agenda_plan(
+            OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE,
+            TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE
+        )
+        AGENDA_PLAN        = self.reduce_splits(AGENDA_PLAN)
+        AGENDA_CONDITIONS  = self.evaluate_plan(AGENDA_PLAN, MY_OWN_STATS, AGENDA_SUMMARY)
+        AGENDA_UPGRADE     = self.get_upgrade_plan(AGENDA_CONDITIONS)
+
+        ECONOMIC_PLAN, ECONOMIC_SUMMARY = self.get_economical_growth(
+            TERRITORIAL_IMPORTANCE, OTHER_PLAYER_STATS, MY_OWN_STATS
+        )
+        ECONOMIC_PLAN      = self.reduce_splits(ECONOMIC_PLAN)
+        ECONOMIC_CONDITIONS = self.evaluate_plan(ECONOMIC_PLAN, MY_OWN_STATS, ECONOMIC_SUMMARY)
+        ECONOMIC_UPGRADE   = self.get_upgrade_plan(ECONOMIC_CONDITIONS)
+
+        # ------------------------------------------------------------------ #
+        #  PLAN SELECTION
+        # ------------------------------------------------------------------ #
+
+        def upgrade_cost(upgrade_plan):
+            """Extract total cost from upgrade plan regardless of status."""
+            status = upgrade_plan.get('status')
+            if status == 'safe' or status == 'acceptable':
+                return 0
+            elif status == 'upgrade':
+                return upgrade_plan.get('total_cost', 0)
+            elif status == 'abandon':
+                return upgrade_plan.get('total_cost', float('inf'))
+            return float('inf')
+
+        def is_cheap_status(upgrade_plan):
+            status = upgrade_plan.get('status')
+            return status in ('safe', 'acceptable')
+
+        if growth_met:
+            # Always execute agenda plan
+            return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
+
+        else:
+            # Growth not met
+            agenda_cheap   = is_cheap_status(AGENDA_UPGRADE)
+            economic_cheap = is_cheap_status(ECONOMIC_UPGRADE)
+
+            if agenda_cheap:
+                # Agenda is safe/acceptable — execute it
+                return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
+
+            elif not agenda_cheap and not economic_cheap:
+                # Both are upgrade or abandon — pick cheapest
+                if upgrade_cost(AGENDA_UPGRADE) <= upgrade_cost(ECONOMIC_UPGRADE):
+                    return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
+                else:
+                    return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
+
+            else:
+                # Agenda is not cheap — choose economic plan
+                return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
     
     def evaluate_plan(self, plan, my_own_stats, stats_summary):
 
