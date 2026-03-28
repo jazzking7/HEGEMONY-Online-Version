@@ -32,16 +32,27 @@ class setup_event_scheduler:
     # MISSION DISTRIBUTION
     def distribute_missions(self, gs, ms):
         # CM
-        miss_set = gs.Mdist.get_mission_set(len(gs.pids), gs.complexity)
-        for index, player in enumerate(gs.pids):
+        num_bots = sum(1 for p in gs.pids if gs.players[p].isBot)
+
+        if num_bots > 0:
+            # Separate bot and human pids, bots get assigned first
+            bot_pids     = [p for p in gs.pids if gs.players[p].isBot]
+            human_pids   = [p for p in gs.pids if not gs.players[p].isBot]
+            ordered_pids = bot_pids + human_pids
+            miss_set     = gs.Mdist.get_mission_set_with_bots(len(gs.pids), num_bots, gs.complexity)
+        else:
+            ordered_pids = gs.pids
+            miss_set     = gs.Mdist.get_mission_set(len(gs.pids), gs.complexity)
+
+        for index, player in enumerate(ordered_pids):
             miss_set[index] = gs.Mdist.initiate_mission(gs, player, miss_set[index])
             if gs.players[player].isBot:
-                gs.players[player].agenda = miss_set[index]
-                gs.players[player].growth_expectation = len(gs.map.territories)//(len(gs.players)+2)
+                gs.players[player].agenda             = miss_set[index]
+                gs.players[player].growth_expectation = len(gs.map.territories) // (len(gs.players) + 2)
 
         # Set up mission trackers for all missions
         gs.Mdist.set_up_mission_trackers(gs, miss_set)
-        gs.Mset = miss_set 
+        gs.Mset = miss_set
 
         # Set up partner for loyalist
         for m in gs.Mset:

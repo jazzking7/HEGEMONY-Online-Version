@@ -1097,7 +1097,7 @@ class Botplayer:
         elif build_type == 'mobbureau':
             t.isBureau = True
             self.gs.server.emit('cityBuildingSFX', room=self.gs.lobby)
-            self.gs.server.emit('update_trty_display', {tid: {'hasEffect': 'bureau'}}, room=self.gs.lobby)
+            self.gs.server.emit('update_trty_display', {tid: {'hasDev': 'bureau'}}, room=self.gs.lobby)
             self.gs.update_TIP(self.uid)
             self.gs.get_SUP()
             self.gs.update_global_status()

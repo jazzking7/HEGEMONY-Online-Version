@@ -205,6 +205,47 @@ class Mission_Distributor:
                 miss_set = []
                 count = 0
 
+    def get_mission_set_with_bots(self, num_p, num_bots, complexity="pioneer"):
+        """
+        Calls get_mission_set (which validates internally) until the
+        resulting valid set contains enough bot-allowed missions.
+        Then returns with bot missions ordered first.
+        """
+        bot_pool = {'Gua', 'Sur', 'Uni', 'Pac', 'Dec', 'War', 'Bon', 'Exp', 'Fan'}
+
+        if complexity == 'beginner':
+            allowed = set(self.beginner)
+        elif complexity == 'intermediate':
+            allowed = set(self.intermediate)
+        elif complexity == 'pro':
+            allowed = set(self.pro)
+        elif complexity == 'master':
+            allowed = set(self.master)
+        else:
+            allowed = set(self.missions)
+
+        valid_bot_missions = bot_pool & allowed
+
+        while True:
+            # get_mission_set already loops until validate_mission_set passes
+            miss_set = self.get_mission_set(num_p, complexity)
+            if miss_set is None:
+                continue
+
+            bot_available = [m for m in miss_set if m in valid_bot_missions]
+
+            if len(bot_available) < num_bots:
+                # Valid set but not enough bot missions — try again
+                continue
+
+            # Enough bot missions found — order them first
+            assigned_bot_missions = random.sample(bot_available, num_bots)
+            remaining_missions    = list(miss_set)
+            for m in assigned_bot_missions:
+                remaining_missions.remove(m)
+
+            return assigned_bot_missions + remaining_missions
+
     def initiate_mission(self, gs, player, name):
         if name == 'Pac':
             return Pacifist(player, gs)

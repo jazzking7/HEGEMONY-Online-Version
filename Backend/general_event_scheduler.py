@@ -122,7 +122,7 @@ class General_Event_Scheduler:
         num_bots = len(bot_players)
 
         # Schedule bot decision timepoints randomly within (num_secs - 10)
-        bot_deadline = num_secs - 10
+        bot_deadline = num_secs - 40
         bot_times = sorted([random.randint(1, bot_deadline) for _ in bot_players])
 
         # Map each bot to its scheduled decision time
