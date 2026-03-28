@@ -121,7 +121,7 @@ class Botplayer:
 
         self.disparity_acceptance = 2
 
-        self.growth_expectation = len(self.gs.map.territories)//(len(self.gs.players)+2)
+        self.growth_expectation = 0
 
         self.uid = None
 
