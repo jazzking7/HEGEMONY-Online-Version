@@ -72,8 +72,41 @@ class Skill_Distributor:
             skill_pool = self.master
             N = 8
         # N = len(skill_pool)
-        print(skill_pool)
+        print(skill_pool)        
         return random.sample(skill_pool, k=N)
+
+    def bot_pool(self):
+        bot_pool = [
+            "Revanchism",
+            "Pandora's Box",
+            "Babylon",
+            "Zealous_Expansion",
+            "Iron_Wall",
+            "Realm_of_Permafrost",
+            "Elitocracy",
+            "Dictator",
+        ]
+        return bot_pool
+    
+    def get_bot_options(self, complexity="pioneer"):
+        skill_pool = self.skill_options
+        N = 9
+        if complexity == 'beginner':
+            skill_pool = self.beginner
+            N = 5
+        elif complexity == 'intermediate':
+            skill_pool = self.intermediate
+            N = 6
+        elif complexity == 'pro':
+            skill_pool = self.pro
+            N = 7
+        elif complexity == 'master':
+            skill_pool = self.master
+            N = 8
+        # N = len(skill_pool)
+        choices = [choice for choice in self.bot_pool() if choice in skill_pool]
+        print(choices)
+        return choices
     
     def get_single_option(self, ):
         return random.choice(self.skill_options)
