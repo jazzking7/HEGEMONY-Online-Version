@@ -535,7 +535,7 @@ class turn_loop_scheduler:
         EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE = atk_player.get_current_game_plan()
 
         # Launch AI deploy as background task so timer can still fire
-        gs.server.start_background_task(self.ai_deploy, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN)
+        gs.server.start_background_task(self.ai_deploy, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE)
 
         wait_for_stage()
         if should_terminate(): return
@@ -595,7 +595,7 @@ class turn_loop_scheduler:
 
         ms.terminated = True
 
-    def ai_deploy(self, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN):
+    def ai_deploy(self, gs, ms, player, token, EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE):
         """Runs in background. Sets ms.stage_completed when done."""
         try:
             atk_player = gs.players[player]
@@ -616,6 +616,7 @@ class turn_loop_scheduler:
     def ai_prepare(self, gs, ms, player, token, MY_OWN_STATS, GLOBAL_AVERAGE):
         try:
             atk_player = gs.players[player]
+            atk_player.war_art_activation(MY_OWN_STATS, GLOBAL_AVERAGE)
             atk_player.make_upgrades(MY_OWN_STATS, GLOBAL_AVERAGE)
             gs.server.sleep(3) 
         finally:

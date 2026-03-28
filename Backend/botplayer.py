@@ -707,10 +707,7 @@ class Botplayer:
                     if not result:
                         break
 
-    def make_upgrades(self, MY_OWN_STATS, GLOBAL_AVERAGE):
-        if self.stars <= 0:
-            self.stars = 0
-            return
+    def war_art_activation(self,MY_OWN_STATS, GLOBAL_AVERAGE):
         # WAR ART RELATED
         if self.skill:
             if self.skill.name == "Realm_of_Permafrost":
@@ -745,9 +742,10 @@ class Botplayer:
                 if self.infrastructure_upgrade < 4:
                     for _ in range(4-self.infrastructure_upgrade):
                         self.skill.activate_effect()
-        
-        # NORMAL UPGRADE
+
+    def make_upgrades(self, MY_OWN_STATS, GLOBAL_AVERAGE):
         if self.stars <= 0:
+            self.stars = 0
             return
 
         my_ind    = MY_OWN_STATS.get('ind_lvl', 0)
