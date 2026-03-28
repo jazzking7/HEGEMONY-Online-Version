@@ -1424,16 +1424,16 @@ class Botplayer:
                 for k in totals:
                     totals[k] += stats[pid][k]
             else:
-                stats = self.gs.get_player_battle_stats(self)
+                battle_stats = self.gs.get_player_battle_stats(self)
                 if self.skill:
                     if self.skill.active and self.skill.intMod:
-                        self.skill.internalStatsMod(stats)
+                        self.skill.internalStatsMod(battle_stats)
                 my_stats = {
                     'num_trty': len(self.territories),
                     'troop_income': self.gs.get_deployable_amt(pid),
                     'total_troop': self.total_troops,
-                    'ind_lvl': stats[0],
-                    'infra_lvl': stats[1],
+                    'ind_lvl': battle_stats[0],
+                    'infra_lvl': battle_stats[1],
                     'num_ley': self.count_ley(self),
                     'PPI': self.PPI
                 }
@@ -1470,8 +1470,9 @@ class Botplayer:
             if t.isCity:            points += 20
 
             if player.name == self.name:
-                if tid in self.get_mission_related_tids():
-                    points += 50
+                if self.get_mission_related_tids():
+                    if tid in self.get_mission_related_tids():
+                        points += 50
 
             if total_troops > 0 and t.troops > total_troops * 0.01:
                 points += (t.troops / total_troops) * 100
@@ -1507,9 +1508,10 @@ class Botplayer:
 
             agenda_importance = 0
             if player.name == self.name:
-                if cont_name == self.get_mission_related_cont():
-                    agenda_importance = 1
-            
+                if self.get_mission_related_cont():
+                    if cont_name == self.get_mission_related_cont():
+                        agenda_importance = 1
+                
             cont_importance = cont_importance + (cont_data["bonus"]) + troop_presence + agenda_importance*100
             held_continents[cont_name] = {
                 "importance": cont_importance,
@@ -1544,7 +1546,7 @@ class Botplayer:
         elif self.agenda.name == "Guardian":
             for tid in self.territories:
                 if self.gs.map.territories[tid].name == self.capital:
-                    return tid
+                    return [tid]
     
     def get_mission_related_cont(self,):
         if self.agenda.name == "Unifier":
@@ -2036,7 +2038,7 @@ class Botplayer:
         #  GET BOTH PLANS
         # ------------------------------------------------------------------ #
 
-        AGENDA_PLAN, AGENDA_SUMMARY, _ = self.get_agenda_plan(
+        (AGENDA_PLAN, AGENDA_SUMMARY), AGENDA_STATUS = self.get_agenda_plan(
             OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE,
             TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE
         )
