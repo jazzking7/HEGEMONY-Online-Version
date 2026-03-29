@@ -1013,7 +1013,7 @@ class Game_State_Manager:
         high_idxs = [i for i, v in enumerate(values) if v >= avg]
 
         if not low_idxs or len(high_idxs) < 2:
-            return random.choices(values, weights=probs, k=1)[0]
+            return probs
 
 
         take_amount = shift_ratio * base_prob
@@ -1025,7 +1025,7 @@ class Game_State_Manager:
         portion_total = sum(portions)
 
         if portion_total == 0:
-            return random.choices(values, weights=probs, k=1)[0]
+            return probs
 
         portion_unit = total_taken / portion_total
 
@@ -1324,16 +1324,16 @@ class Game_State_Manager:
                 reachable_trty.append(h1)
                 if t1 in reachable_trty:
                     atk_stats[4] += 1
-                atkh = True
-                break
+                    atkh = True
+                    break
         for h2 in def_p.territories:
             if self.map.territories[h2].isHall:
                 reachable_trty = self.map.get_reachable_trty(h2, def_p.territories)
                 reachable_trty.append(h2)
                 if t2 in reachable_trty:
                     def_stats[4] += 1
-                defh = True
-                break
+                    defh = True
+                    break
 
         # Stats modifier
         self.apply_skill_related_modification(atk_p, atk_stats, def_p, def_stats)

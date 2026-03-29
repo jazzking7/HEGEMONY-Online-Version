@@ -625,123 +625,174 @@ class turn_loop_scheduler:
 
     def ai_attack(self, gs, ms, player, token, attack_sequence):
         try:
-            atk_player = gs.players[player]
+            atk_player        = gs.players[player]
+            remaining_entries = list(attack_sequence)
 
             def should_stop():
                 return ms.terminated or token != ms.turn_token
 
-            def execute_chain(chain):
-                """
-                Execute a linear chain of steps.
-                Returns False if execution should stop entirely, True otherwise.
-                """
+            def get_remaining_plan_tids():
+                tids = set()
+                def walk(e):
+                    if isinstance(e, list):
+                        for item in e:
+                            if (isinstance(item, list) and len(item) == 3
+                                    and not isinstance(item[0], list)):
+                                tids.add(item[1])
+                            elif isinstance(item, dict) and 'split_from' in item:
+                                walk(item)
+                    elif isinstance(e, dict) and 'split_from' in e:
+                        for branch in e['branches']:
+                            walk(branch)
+                for entry in remaining_entries:
+                    walk(entry)
+                return tids
+
+            def walk_tids(e):
+                """Collect all tid_to from any entry structure."""
+                tids = set()
+                if isinstance(e, list):
+                    for item in e:
+                        if (isinstance(item, list) and len(item) == 3
+                                and not isinstance(item[0], list)):
+                            tids.add(item[1])
+                        elif isinstance(item, dict) and 'split_from' in item:
+                            tids |= walk_tids(item)
+                elif isinstance(e, dict) and 'split_from' in e:
+                    for branch in e['branches']:
+                        tids |= walk_tids(branch)
+                return tids
+
+            def attempt_recovery(tid_from, tid_to, extra_reserved_tids=None):
+                extra_reserved_tids = extra_reserved_tids or set()
+                reserved            = get_remaining_plan_tids() | extra_reserved_tids
+
+                # Try nearby player tiles not reserved for remaining plan
+                nearby_tiles = sorted(
+                    [
+                        nb for nb in gs.map.territories[tid_to].neighbors
+                        if nb in set(atk_player.territories)
+                        and nb != tid_from
+                        and nb not in reserved
+                    ],
+                    key=lambda t: gs.map.territories[t].troops,
+                    reverse=True
+                )
+                
+                for nearby in nearby_tiles:
+                    if should_stop():
+                        return False
+                    extra = gs.map.territories[nearby].troops - 1
+                    if extra <= 0:
+                        continue
+                    gs.handle_battle({
+                        'choice': (nearby, tid_to),
+                        'amount': extra
+                    })
+                    gs.server.sleep(1.5)
+                    if tid_to in atk_player.territories:
+                        return True
+
+                # Try reserves
+                if atk_player.reserves > 0:
+                    deploy_amt = min(atk_player.reserves, 5)
+                    gs.map.territories[tid_from].troops += deploy_amt
+                    atk_player.reserves                -= deploy_amt
+                    atk_player.total_troops            += deploy_amt
+                    gs.server.emit('update_trty_display', {
+                        tid_from: {'troops': gs.map.territories[tid_from].troops}
+                    }, room=gs.lobby)
+                    gs.server.sleep(0.5)
+                    troops_now = gs.map.territories[tid_from].troops - 1
+                    if troops_now > 0:
+                        gs.handle_battle({
+                            'choice': (tid_from, tid_to),
+                            'amount': troops_now
+                        })
+                        gs.server.sleep(1.5)
+                        if tid_to in atk_player.territories:
+                            return True
+
+                return False
+
+            def execute_chain(chain, extra_reserved_tids=None):
+                extra_reserved_tids = extra_reserved_tids or set()
+
                 for item in chain:
                     if should_stop():
                         return False
 
                     if isinstance(item, dict) and 'split_from' in item:
-                        # Split encountered — execute each branch
                         result = execute_split(item)
                         if not result:
                             return False
 
                     elif isinstance(item, list) and len(item) == 3:
-                        # Normal step [from, to, easiness]
                         tid_from, tid_to, easiness = item
 
-                        # -------------------------------------------------- #
-                        #  LEGALITY CHECK
-                        #  Verify the attacking territory is still under control.
-                        #  If not, abort this chain — troops may have been lost
-                        #  in a previous step or another player intervened.
-                        #  FUTURE: could assess remaining troops vs remaining
-                        #  easiness to decide if it's worth continuing.
-                        # -------------------------------------------------- #
+                        # Legality check
                         if tid_from not in atk_player.territories:
-                            # Lost control of attacking tile — stop this chain
                             break
 
-                        # -------------------------------------------------- #
-                        #  TROOP ASSESSMENT
-                        #  FUTURE: check if remaining troops on tid_from are
-                        #  sufficient to continue (e.g. troops > easiness).
-                        #  If not, could abort or deploy reserves before continuing.
-                        # -------------------------------------------------- #
-
-                        # -------------------------------------------------- #
-                        #  EXECUTE ATTACK
-                        # -------------------------------------------------- #
                         troops_available = gs.map.territories[tid_from].troops - 1
                         if troops_available <= 0:
-                            # No troops to send — stop this chain
                             break
 
                         gs.handle_battle({
                             'choice': (tid_from, tid_to),
                             'amount': troops_available
                         })
-
-                        # -------------------------------------------------- #
-                        #  POST-BATTLE ASSESSMENT
-                        #  FUTURE: check if attack succeeded (tid_to now in
-                        #  atk_player.territories). If failed, could decide
-                        #  whether to retry, reroute, or abort the chain.
-                        # -------------------------------------------------- #
-
                         gs.server.sleep(1.5)
+
+                        if tid_to not in atk_player.territories:
+                            recovered = attempt_recovery(
+                                tid_from, tid_to,
+                                extra_reserved_tids=extra_reserved_tids
+                            )
+                            if not recovered:
+                                break
 
                 return True
 
             def execute_split(split_entry):
-                """
-                Execute a split — each branch is executed independently.
-                Branches are already sorted by offense value (highest first).
-                Returns False if execution should stop entirely, True otherwise.
-                FUTURE: could assess troop availability at split_from before
-                deciding how many branches to execute and how to divide troops.
-                """
-                for branch in split_entry['branches']:
+                split_from = split_entry['split_from']
+                branches   = split_entry['branches']
+
+                for idx, branch in enumerate(branches):
                     if should_stop():
                         return False
-
-                    # -------------------------------------------------- #
-                    #  BRANCH LEGALITY CHECK
-                    #  Verify split_from is still under control before
-                    #  launching each branch.
-                    #  FUTURE: could skip low-value branches if troops are
-                    #  insufficient rather than aborting entirely.
-                    # -------------------------------------------------- #
-                    split_from = split_entry['split_from']
                     if split_from not in atk_player.territories:
                         break
 
-                    result = execute_chain(branch)
+                    # Collect tids from future branches so recovery
+                    # doesn't consume troops needed for them
+                    future_reserved = set()
+                    for future_branch in branches[idx + 1:]:
+                        future_reserved |= walk_tids(future_branch)
+
+                    result = execute_chain(branch, extra_reserved_tids=future_reserved)
                     if not result:
                         return False
 
                 return True
 
             # ------------------------------------------------------------------ #
-            #  MAIN EXECUTION LOOP
-            #  Iterate through outer list — each entry is either a flat chain
-            #  (list) or a pure split at a player-owned tile (dict).
-            #  FUTURE: could re-evaluate the plan between chains based on
-            #  how previous chains went (e.g. skip remaining chains if we
-            #  lost too many troops).
+            #  MAIN LOOP
+            #  Pop BEFORE executing so remaining_entries is accurate
             # ------------------------------------------------------------------ #
 
-            for entry in attack_sequence:
+            while remaining_entries:
                 if should_stop():
                     break
 
+                entry = remaining_entries.pop(0)
+
                 if isinstance(entry, dict) and 'split_from' in entry:
-                    # Pure split at player-owned tile
                     result = execute_split(entry)
                     if not result:
                         break
 
                 elif isinstance(entry, list):
-                    # Flat chain or linear steps ending with split dict
                     result = execute_chain(entry)
                     if not result:
                         break

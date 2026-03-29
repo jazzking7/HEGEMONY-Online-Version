@@ -1585,8 +1585,8 @@ class Botplayer:
 
         EXECUTION_PLAN, SUMMARY, UPGRADE_PLAN = self.get_attack_plan(OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE)
 
-        print(OTHER_PLAYER_STATS)
-        print(MY_OWN_STATS)
+        # print(OTHER_PLAYER_STATS)
+        # print(MY_OWN_STATS)
         self.print_attack_plan(EXECUTION_PLAN)
         self.print_upgrade_plan(UPGRADE_PLAN)
         
@@ -1795,6 +1795,7 @@ class Botplayer:
         continent = self.get_easiest_continent()
         if continent:
             targets = [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
+        print(f"{continent} is the target continent")
         if len(targets) > min(9, len(self.gs.map.territories)-len(self.territories)):
             return self.get_attack_sequences(
                     self.territories,
@@ -1836,31 +1837,32 @@ class Botplayer:
 
     def get_agenda_plan(self, OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE):
         if self.agenda.name == "Expansionist":
-            if self.gs.players[self.gs.MTO].name != self.name:
-                self.grudge_targets.append(self.gs.MTO)
-                return self.get_attack_sequences(
-                    self.territories,
-                    [],
-                    len(self.gs.players[self.gs.MTO].territories) - len(self.territories),
-                    None,
-                    self.grudge_targets,
-                    False,
-                    TERRITORIAL_IMPORTANCE,
-                    OTHER_PLAYER_STATS,
-                    MY_OWN_STATS
-                ), "active"
-            else:
-                return self.get_attack_sequences(
-                    self.territories,
-                    [],
-                    min(9, len(self.gs.map.territories)-len(self.territories)),
-                    None,
-                    self.grudge_targets,
-                    True,
-                    TERRITORIAL_IMPORTANCE,
-                    OTHER_PLAYER_STATS,
-                    MY_OWN_STATS
-                ), "passive"
+            if self.gs.MTO:
+                if self.gs.MTO != self.uid:
+                    self.grudge_targets.append(self.gs.MTO)
+                    return self.get_attack_sequences(
+                        self.territories,
+                        [],
+                        len(self.gs.players[self.gs.MTO].territories) - len(self.territories),
+                        None,
+                        self.grudge_targets,
+                        False,
+                        TERRITORIAL_IMPORTANCE,
+                        OTHER_PLAYER_STATS,
+                        MY_OWN_STATS
+                    ), "active"
+                else:
+                    return self.get_attack_sequences(
+                        self.territories,
+                        [],
+                        min(9, len(self.gs.map.territories)-len(self.territories)),
+                        None,
+                        self.grudge_targets,
+                        True,
+                        TERRITORIAL_IMPORTANCE,
+                        OTHER_PLAYER_STATS,
+                        MY_OWN_STATS
+                    ), "passive"
         if self.agenda.name == "Guardian":
             capitalid = None
             for tid, trty in enumerate(self.gs.map.territories):
@@ -1880,7 +1882,7 @@ class Botplayer:
             ), "passive"
         if self.agenda.name == "Unifier":
             targetCont = self.agenda.target_continent
-            randomtid = self.map.conts[targetCont]['trtys'][0]
+            randomtid = self.gs.map.conts[targetCont]['trtys'][0]
             targets = [tid for tid in self.gs.map.conts[targetCont]['trtys'] if tid not in self.territories]
             if len(targets) > 0:
                 return self.get_attack_sequences(
@@ -1921,6 +1923,8 @@ class Botplayer:
                     MY_OWN_STATS
                 ) , "passive"
             else:
+                if self.gs.SUP:
+                    self.grudge_targets = [self.gs.SUP]
                 return self.get_attack_sequences(
                 self.territories,
                 [],
@@ -2053,6 +2057,8 @@ class Botplayer:
         ECONOMIC_CONDITIONS = self.evaluate_plan(ECONOMIC_PLAN, MY_OWN_STATS, ECONOMIC_SUMMARY)
         ECONOMIC_UPGRADE   = self.get_upgrade_plan(ECONOMIC_CONDITIONS)
 
+        return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
+
         # ------------------------------------------------------------------ #
         #  PLAN SELECTION
         # ------------------------------------------------------------------ #
@@ -2074,6 +2080,7 @@ class Botplayer:
 
         if growth_met:
             # Always execute agenda plan
+            print("Agenda Plan Executed")
             return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
 
         else:
@@ -2081,19 +2088,27 @@ class Botplayer:
             agenda_cheap   = is_cheap_status(AGENDA_UPGRADE)
             economic_cheap = is_cheap_status(ECONOMIC_UPGRADE)
 
+            if AGENDA_STATUS == 'passive':
+                print("Economy Plan Executed")
+                return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
+
             if agenda_cheap:
                 # Agenda is safe/acceptable — execute it
+                print("Agenda Plan Executed")
                 return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
 
             elif not agenda_cheap and not economic_cheap:
                 # Both are upgrade or abandon — pick cheapest
                 if upgrade_cost(AGENDA_UPGRADE) <= upgrade_cost(ECONOMIC_UPGRADE):
+                    print("Agenda Plan Executed")
                     return AGENDA_PLAN, AGENDA_SUMMARY, AGENDA_UPGRADE
                 else:
+                    print("Economy Plan Executed")
                     return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
 
             else:
                 # Agenda is not cheap — choose economic plan
+                print("Economy Plan Executed")
                 return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
     
     def evaluate_plan(self, plan, my_own_stats, stats_summary):
