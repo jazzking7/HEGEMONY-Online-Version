@@ -235,7 +235,7 @@ class setup_event_scheduler:
         for player in gs.players:
             options = gs.SDIS.get_options(gs.complexity) if player != gs.Annihilator else gs.SDIS.get_Annihilator_options()
             if gs.players[player].isBot:
-                gs.players[player].skill_options = options
+                gs.players[player].skill_options = gs.SDIS.get_bot_options(gs.complexity)
             gs.server.emit('choose_skill', {'options': options}, room=player)
 
         if gs.hasBot:
