@@ -883,12 +883,26 @@ class Starchaser(Mission):
     def end_game_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
-        return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
+        success = False
+        if len(self.gs.players[self.player].territories) == len(self.gs.map.tnames):
+                success = True
+                for i in range(len(self.gs.map.tnames)):
+                    if i not in self.gs.players[self.player].territories:
+                        success = False
+                        break
+        return self.chase_completed == self.target_chases or success
     
     def end_game_global_peace_checking(self, ):
         if not self.gs.players[self.player].alive:
             return False
-        return self.chase_completed == self.target_chases or len(self.gs.players[self.player].territories) == len(self.gs.map.territories)
+        success = False
+        if len(self.gs.players[self.player].territories) == len(self.gs.map.tnames):
+                success = True
+                for i in range(len(self.gs.map.tnames)):
+                    if i not in self.gs.players[self.player].territories:
+                        success = False
+                        break
+        return self.chase_completed == self.target_chases or success
 
 class Duelist(Mission):
     def __init__(self, player, gs):
