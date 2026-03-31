@@ -158,22 +158,22 @@ class Botplayer:
             if trty in curr_dist:
                 mul = 1 if self.gs.map.territories[trty].isCapital else 0
                 mulc = 1 if self.gs.map.territories[trty].isCity else 0
-                NumF += self.gs.map.territories[trty].troops + (mul * 5) + (mulc * 3)
+                NumF += self.gs.map.territories[trty].troops + (mul * 10) + (mulc * 3)
             else:
                 mul = 1 if self.gs.map.territories[trty].isCapital else 0
                 mulc = 1 if self.gs.map.territories[trty].isCity else 0
-                NumN += self.gs.map.territories[trty].troops + (mul * 5) + (mulc * 3)
+                NumN += self.gs.map.territories[trty].troops + (mul * 10) + (mulc * 3)
         if NumN == 0:
             if setupmode:
                 return math.log(1+NumF)**2 * self.gs.map.conts[cont_name]['bonus']
             else:
                 return -100
-        easiness = math.log(1 + NumF/NumN)
+        easiness = math.log(1 + NumF/min(1,NumN))
 
         # Bonus
         bonus = self.gs.map.conts[cont_name]['bonus']
 
-        score = ( easiness * bonus )
+        score = ( easiness * bonus**(0.7) )
         return score
 
     def choose_territory(self,):
@@ -214,6 +214,7 @@ class Botplayer:
     # Set cities
     def set_cities(self, N):
         locations = self.get_best_territories_to_build(N, "cities")
+        print(locations)
         for location in locations:
             self.gs.map.territories[location].isCity = True
             self.gs.server.emit('update_trty_display', {location: {'hasDev': 'city'}}, room=self.gs.lobby)
@@ -324,6 +325,7 @@ class Botplayer:
         """
         # Step 1: Find the worthy continent
         worthy_cont, _ = self.get_worthy_continent_from_set(tid_list, True)
+        print(worthy_cont)
         if worthy_cont is None:
             return None
 
@@ -1680,6 +1682,20 @@ class Botplayer:
                     elif isinstance(item, dict) and 'branches' in item:
                         total += sum_easiness_recursive(item)
             return total
+        
+        def count_steps_recursive(entry):
+            """Count total number of attack steps in a chain."""
+            total = 0
+            if isinstance(entry, dict) and 'branches' in entry:
+                for branch in entry['branches']:
+                    total += count_steps_recursive(branch)
+            elif isinstance(entry, list):
+                for item in entry:
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        total += 1
+                    elif isinstance(item, dict) and 'branches' in item:
+                        total += count_steps_recursive(item)
+            return total
 
         def deploy_to(tid, amt):
             added = 0
@@ -1727,6 +1743,8 @@ class Botplayer:
                 continue
 
             chain_easiness = sum_easiness_recursive(entry)
+            min_troops     = count_steps_recursive(entry)
+            deploy_amt     = max(math.ceil(chain_easiness), min_troops)
             deploy_to(start_tid, chain_easiness)
 
         # Deploy any residual deployable_amt to the strongest border tile
@@ -1780,7 +1798,7 @@ class Botplayer:
             )
 
             if enemy_troops == 0:
-                continue
+                enemy_troops = 1
 
             ratio = player_troops / enemy_troops
 
@@ -2046,14 +2064,15 @@ class Botplayer:
             OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE,
             TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE
         )
-        AGENDA_PLAN        = self.reduce_splits(AGENDA_PLAN)
+        # AGENDA_PLAN        = self.reduce_splits(AGENDA_PLAN)
         AGENDA_CONDITIONS  = self.evaluate_plan(AGENDA_PLAN, MY_OWN_STATS, AGENDA_SUMMARY)
         AGENDA_UPGRADE     = self.get_upgrade_plan(AGENDA_CONDITIONS)
 
         ECONOMIC_PLAN, ECONOMIC_SUMMARY = self.get_economical_growth(
             TERRITORIAL_IMPORTANCE, OTHER_PLAYER_STATS, MY_OWN_STATS
         )
-        ECONOMIC_PLAN      = self.reduce_splits(ECONOMIC_PLAN)
+        self.print_attack_plan(ECONOMIC_PLAN)
+        # ECONOMIC_PLAN      = self.reduce_splits(ECONOMIC_PLAN)
         ECONOMIC_CONDITIONS = self.evaluate_plan(ECONOMIC_PLAN, MY_OWN_STATS, ECONOMIC_SUMMARY)
         ECONOMIC_UPGRADE   = self.get_upgrade_plan(ECONOMIC_CONDITIONS)
 
@@ -2132,6 +2151,20 @@ class Botplayer:
                     elif isinstance(item, dict) and 'branches' in item:
                         total += sum_easiness_recursive(item)
             return total
+        
+        def count_steps_recursive(entry):
+            """Count total number of attack steps in a chain."""
+            total = 0
+            if isinstance(entry, dict) and 'branches' in entry:
+                for branch in entry['branches']:
+                    total += count_steps_recursive(branch)
+            elif isinstance(entry, list):
+                for item in entry:
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        total += 1
+                    elif isinstance(item, dict) and 'branches' in item:
+                        total += count_steps_recursive(item)
+            return total
 
         total_easiness  = 0.0
         total_available = 0
@@ -2149,7 +2182,9 @@ class Botplayer:
             else:
                 continue
 
-            total_easiness += sum_easiness_recursive(entry)
+            raw_easiness    = sum_easiness_recursive(entry)
+            min_troops      = count_steps_recursive(entry)
+            total_easiness += max(raw_easiness, min_troops)
 
             if start_tid not in start_tids:
                 start_tids.add(start_tid)
@@ -2624,167 +2659,167 @@ class Botplayer:
             if self.gs.players[p].name == self.name:
                 return self.gs.starPrice(base, p)
 
-    def reduce_splits(self, execution_plan):
-        """
-        Goes through the execution plan and reduces unnecessary splits
-        into linear chains where possible.
-        Splits are only kept when territories truly cannot be linearized
-        i.e. they can only reach each other through the split point.
-        """
+    # def reduce_splits(self, execution_plan):
+    #     """
+    #     Goes through the execution plan and reduces unnecessary splits
+    #     into linear chains where possible.
+    #     Splits are only kept when territories truly cannot be linearized
+    #     i.e. they can only reach each other through the split point.
+    #     """
 
-        def are_neighbors(tid_a, tid_b):
-            """Check if two territories are direct map neighbors."""
-            return tid_b in self.gs.map.territories[tid_a].neighbors
+    #     def are_neighbors(tid_a, tid_b):
+    #         """Check if two territories are direct map neighbors."""
+    #         return tid_b in self.gs.map.territories[tid_a].neighbors
 
-        def get_first_tid(branch):
-            """
-            Get the first tid_to in a branch.
-            This is the first territory attacked in this branch.
-            """
-            if isinstance(branch, dict) and 'split_from' in branch:
-                return branch['split_from']
-            if isinstance(branch, list):
-                for item in branch:
-                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
-                        return item[1]
-            return None
+    #     def get_first_tid(branch):
+    #         """
+    #         Get the first tid_to in a branch.
+    #         This is the first territory attacked in this branch.
+    #         """
+    #         if isinstance(branch, dict) and 'split_from' in branch:
+    #             return branch['split_from']
+    #         if isinstance(branch, list):
+    #             for item in branch:
+    #                 if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+    #                     return item[1]
+    #         return None
 
-        def get_last_tid(branch):
-            """
-            Get the last tid_to in a branch.
-            This is the last territory captured.
-            """
-            if isinstance(branch, dict) and 'split_from' in branch:
-                last = None
-                for b in branch['branches']:
-                    last = get_last_tid(b)
-                return last
-            if isinstance(branch, list):
-                for item in reversed(branch):
-                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
-                        return item[1]
-                    elif isinstance(item, dict) and 'split_from' in item:
-                        return get_last_tid(item)
-            return None
+    #     def get_last_tid(branch):
+    #         """
+    #         Get the last tid_to in a branch.
+    #         This is the last territory captured.
+    #         """
+    #         if isinstance(branch, dict) and 'split_from' in branch:
+    #             last = None
+    #             for b in branch['branches']:
+    #                 last = get_last_tid(b)
+    #             return last
+    #         if isinstance(branch, list):
+    #             for item in reversed(branch):
+    #                 if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+    #                     return item[1]
+    #                 elif isinstance(item, dict) and 'split_from' in item:
+    #                     return get_last_tid(item)
+    #         return None
 
-        def get_branch_easiness(branch):
-            """Get easiness of the first step in a branch."""
-            if isinstance(branch, list):
-                for item in branch:
-                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
-                        return item[2]
-            elif isinstance(branch, dict) and 'split_from' in branch:
-                if branch['branches']:
-                    return get_branch_easiness(branch['branches'][0])
-            return float('inf')
+    #     def get_branch_easiness(branch):
+    #         """Get easiness of the first step in a branch."""
+    #         if isinstance(branch, list):
+    #             for item in branch:
+    #                 if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+    #                     return item[2]
+    #         elif isinstance(branch, dict) and 'split_from' in branch:
+    #             if branch['branches']:
+    #                 return get_branch_easiness(branch['branches'][0])
+    #         return float('inf')
 
-        def rewrite_first_step(branch, new_from):
-            """
-            Rewrite the tid_from of the first step in a branch
-            to reflect the actual attacking position after linearization.
-            """
-            if isinstance(branch, list) and branch:
-                new_branch = list(branch)
-                for i, item in enumerate(new_branch):
-                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
-                        new_branch[i] = [new_from, item[1], item[2]]
-                        return new_branch
-            return branch
+    #     def rewrite_first_step(branch, new_from):
+    #         """
+    #         Rewrite the tid_from of the first step in a branch
+    #         to reflect the actual attacking position after linearization.
+    #         """
+    #         if isinstance(branch, list) and branch:
+    #             new_branch = list(branch)
+    #             for i, item in enumerate(new_branch):
+    #                 if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+    #                     new_branch[i] = [new_from, item[1], item[2]]
+    #                     return new_branch
+    #         return branch
 
-        def flatten_split(split_from, branches):
-            """
-            Try to flatten a split into a linear chain.
-            Returns either:
-            - a list of steps (fully or partially linearized)
-            - a dict (pure split, nothing could be merged)
-            """
+    #     def flatten_split(split_from, branches):
+    #         """
+    #         Try to flatten a split into a linear chain.
+    #         Returns either:
+    #         - a list of steps (fully or partially linearized)
+    #         - a dict (pure split, nothing could be merged)
+    #         """
 
-            # Step 1: Recursively reduce nested splits in each branch first
-            reduced_branches = [reduce_chain(branch) for branch in branches]
+    #         # Step 1: Recursively reduce nested splits in each branch first
+    #         reduced_branches = [reduce_chain(branch) for branch in branches]
 
-            # Step 2: Sort by easiness of first step (easiest first)
-            reduced_branches.sort(key=lambda b: get_branch_easiness(b))
+    #         # Step 2: Sort by easiness of first step (easiest first)
+    #         reduced_branches.sort(key=lambda b: get_branch_easiness(b))
 
-            # Step 3: Iteratively try to merge branches into linear chain
-            result_chain = []
-            remaining    = list(reduced_branches)
-            current_tid  = split_from
+    #         # Step 3: Iteratively try to merge branches into linear chain
+    #         result_chain = []
+    #         remaining    = list(reduced_branches)
+    #         current_tid  = split_from
 
-            changed = True
-            while changed and remaining:
-                changed        = False
-                next_remaining = []
+    #         changed = True
+    #         while changed and remaining:
+    #             changed        = False
+    #             next_remaining = []
 
-                for branch in remaining:
-                    first_tid = get_first_tid(branch)
-                    if first_tid is None:
-                        continue
+    #             for branch in remaining:
+    #                 first_tid = get_first_tid(branch)
+    #                 if first_tid is None:
+    #                     continue
 
-                    if are_neighbors(current_tid, first_tid):
-                        # Rewrite first step's tid_from to current_tid
-                        branch = rewrite_first_step(branch, current_tid)
+    #                 if are_neighbors(current_tid, first_tid):
+    #                     # Rewrite first step's tid_from to current_tid
+    #                     branch = rewrite_first_step(branch, current_tid)
 
-                        if isinstance(branch, list):
-                            result_chain.extend(branch)
-                        else:
-                            result_chain.append(branch)
+    #                     if isinstance(branch, list):
+    #                         result_chain.extend(branch)
+    #                     else:
+    #                         result_chain.append(branch)
 
-                        last = get_last_tid(branch)
-                        if last is not None:
-                            current_tid = last
-                        changed = True
-                    else:
-                        next_remaining.append(branch)
+    #                     last = get_last_tid(branch)
+    #                     if last is not None:
+    #                         current_tid = last
+    #                     changed = True
+    #                 else:
+    #                     next_remaining.append(branch)
 
-                remaining = next_remaining
+    #             remaining = next_remaining
 
-            # Step 4: Remaining branches truly need a split
-            if remaining:
-                if result_chain:
-                    result_chain.append({
-                        'split_from': current_tid,
-                        'branches':   remaining
-                    })
-                else:
-                    return {'split_from': split_from, 'branches': reduced_branches}
+    #         # Step 4: Remaining branches truly need a split
+    #         if remaining:
+    #             if result_chain:
+    #                 result_chain.append({
+    #                     'split_from': current_tid,
+    #                     'branches':   remaining
+    #                 })
+    #             else:
+    #                 return {'split_from': split_from, 'branches': reduced_branches}
 
-            return result_chain
+    #         return result_chain
 
-        def reduce_chain(chain):
-            """
-            Walk through a chain and reduce any splits found.
-            """
-            if isinstance(chain, dict) and 'split_from' in chain:
-                return flatten_split(chain['split_from'], chain['branches'])
+    #     def reduce_chain(chain):
+    #         """
+    #         Walk through a chain and reduce any splits found.
+    #         """
+    #         if isinstance(chain, dict) and 'split_from' in chain:
+    #             return flatten_split(chain['split_from'], chain['branches'])
 
-            if not isinstance(chain, list):
-                return chain
+    #         if not isinstance(chain, list):
+    #             return chain
 
-            result = []
-            for item in chain:
-                if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
-                    result.append(item)
-                elif isinstance(item, dict) and 'split_from' in item:
-                    flattened = flatten_split(item['split_from'], item['branches'])
-                    if isinstance(flattened, list):
-                        result.extend(flattened)
-                    else:
-                        result.append(flattened)
-                else:
-                    result.append(item)
+    #         result = []
+    #         for item in chain:
+    #             if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+    #                 result.append(item)
+    #             elif isinstance(item, dict) and 'split_from' in item:
+    #                 flattened = flatten_split(item['split_from'], item['branches'])
+    #                 if isinstance(flattened, list):
+    #                     result.extend(flattened)
+    #                 else:
+    #                     result.append(flattened)
+    #             else:
+    #                 result.append(item)
 
-            return result
+    #         return result
 
-        # ------------------------------------------------------------------ #
-        #  MAIN: Process each entry in execution plan
-        # ------------------------------------------------------------------ #
+    #     # ------------------------------------------------------------------ #
+    #     #  MAIN: Process each entry in execution plan
+    #     # ------------------------------------------------------------------ #
 
-        reduced_plan = []
-        for entry in execution_plan:
-            reduced = reduce_chain(entry)
-            reduced_plan.append(reduced)
+    #     reduced_plan = []
+    #     for entry in execution_plan:
+    #         reduced = reduce_chain(entry)
+    #         reduced_plan.append(reduced)
 
-        return reduced_plan
+    #     return reduced_plan
 
     def get_attack_sequences(
         self,
@@ -2840,7 +2875,10 @@ class Botplayer:
             elif disparity < 0:
                 strength_mult = 1.0 / abs(disparity)
             else:
-                strength_mult = 1.0 + (disparity * 0.5)
+                if effective_troops <= 3:
+                    strength_mult = 1.0 + (disparity * 0.1)
+                else:
+                    strength_mult = 1.0 + (disparity * 0.5)
             return effective_troops * strength_mult
 
         def offense_points(tid):
@@ -2864,77 +2902,11 @@ class Botplayer:
             else:
                 return (g, -o, e)
 
-        def path_cost(path):
-            if minimize_offense:
-                return (
-                    sum(easiness(t) for t in path),
-                    sum(offense_points(t) for t in path)
-                )
-            else:
-                return (sum(easiness(t) for t in path),)
-
         def neighbors_outside(tid):
             return [
                 n for n in self.gs.map.territories[tid].neighbors
                 if n not in player_set
             ]
-
-        # ------------------------------------------------------------------ #
-        #  PATHFINDING
-        # ------------------------------------------------------------------ #
-
-        def find_path(start_tid, goal_tid, pure_easiness=False):
-            def init():
-                if pure_easiness:
-                    return (0.0,)
-                elif minimize_offense:
-                    return (0.0, 0.0)
-                else:
-                    return (0, 0.0)
-
-            def step_cost(nb):
-                if nb in player_set:
-                    return tuple(0 for _ in init())
-                if pure_easiness:
-                    return (easiness(nb),)
-                elif minimize_offense:
-                    return (easiness(nb), offense_points(nb))
-                else:
-                    return (-1 if is_grudge(nb) else 0, -offense_points(nb))
-
-            def add_costs(a, b):
-                return tuple(x + y for x, y in zip(a, b))
-
-            inf_cost   = tuple(float('inf') for _ in init())
-            start_cost = init()
-            dist       = {start_tid: start_cost}
-            prev       = {start_tid: None}
-            heap       = [(start_cost, start_tid)]
-
-            while heap:
-                cost, cur = heapq.heappop(heap)
-                if cost > dist.get(cur, inf_cost):
-                    continue
-                if cur == goal_tid:
-                    path = []
-                    node = cur
-                    while prev[node] is not None:
-                        path.append(node)
-                        node = prev[node]
-                    path.reverse()
-                    return path
-
-                for nb in self.gs.map.territories[cur].neighbors:
-                    if nb in player_set and nb != start_tid:
-                        continue
-                    sc       = step_cost(nb)
-                    new_cost = add_costs(cost, sc)
-                    if new_cost < dist.get(nb, inf_cost):
-                        dist[nb] = new_cost
-                        prev[nb] = cur
-                        heapq.heappush(heap, (new_cost, nb))
-
-            return None
 
         # ------------------------------------------------------------------ #
         #  CANDIDATE STARTING TILES
@@ -2944,98 +2916,91 @@ class Botplayer:
             if strict_mg and mg_set:
                 starts = [t for t in mg_set if t in player_set and neighbors_outside(t)]
                 if starts:
+                    starts.sort(key=lambda t: -self.gs.map.territories[t].troops)
                     return starts
                 return None
+
             starts = [t for t in curr_list if neighbors_outside(t)]
             if mg_set:
-                starts.sort(key=lambda t: (0 if t in mg_set else 1))
+                starts.sort(key=lambda t: (
+                    0 if t in mg_set else 1,
+                    -self.gs.map.territories[t].troops
+                ))
+            else:
+                starts.sort(key=lambda t: -self.gs.map.territories[t].troops)
             return starts
 
         # ------------------------------------------------------------------ #
-        #  BEST START SELECTION
+        #  STEINER TREE
         # ------------------------------------------------------------------ #
 
-        def find_best_path(goal, pure_easiness=False):
-            def search(starts):
-                best_start = None
-                best_path  = None
-                best_cost  = None
-                for s in starts:
-                    path = find_path(s, goal, pure_easiness=pure_easiness)
-                    if path is None:
+        def build_steiner_tree(starts, targets):
+            target_set = set(targets)
+            reached    = set()
+            parent     = {}
+            children   = defaultdict(list)
+            in_tree    = set()  # starts EMPTY
+
+            if minimize_offense:
+                init_cost = (0.0, 0.0)
+            else:
+                init_cost = (0.0,)
+
+            inf_cost = tuple(float('inf') for _ in init_cost)
+
+            def add_costs(a, b):
+                return tuple(x + y for x, y in zip(a, b))
+
+            def step_cost(nb):
+                if minimize_offense:
+                    return (easiness(nb), offense_points(nb))
+                else:
+                    return (easiness(nb),)
+
+            dist = {}
+            heap = []
+
+            sorted_starts = sorted(
+                starts,
+                key=lambda t: -self.gs.map.territories[t].troops
+            )
+
+            for rank, s in enumerate(sorted_starts):
+                penalty    = tuple(rank * 0.5 for _ in init_cost)
+                start_cost = penalty
+                dist[s]    = start_cost
+                parent[s]  = None  # None stops traceback naturally
+                heapq.heappush(heap, (start_cost, s))
+
+            while heap and len(reached) < len(target_set):
+                cost, cur = heapq.heappop(heap)
+
+                if cost > dist.get(cur, inf_cost):
+                    continue
+
+                if cur in target_set and cur not in reached:
+                    reached.add(cur)
+
+                    node = cur
+                    while parent.get(node) is not None:
+                        par = parent[node]
+                        if node not in children[par]:
+                            children[par].append(node)
+                        if par in in_tree:
+                            break
+                        in_tree.add(par)
+                        node = par
+
+                for nb in self.gs.map.territories[cur].neighbors:
+                    if nb in player_set:
                         continue
-                    cost = path_cost(path)
-                    if best_cost is None or cost < best_cost:
-                        best_cost  = cost
-                        best_path  = path
-                        best_start = s
-                return best_start, best_path
+                    nb_cost = add_costs(cost, step_cost(nb))
+                    if nb_cost < dist.get(nb, inf_cost):
+                        dist[nb] = nb_cost
+                        parent[nb] = cur
+                        heapq.heappush(heap, (nb_cost, nb))
 
-            if mg_set:
-                mg_starts = candidate_starts(strict_mg=True)
-                if mg_starts:
-                    best_start, best_path = search(mg_starts)
-                    if best_path is not None:
-                        return best_start, best_path
-            return search(candidate_starts(strict_mg=False))
-
-        # ------------------------------------------------------------------ #
-        #  PATH MERGING
-        # ------------------------------------------------------------------ #
-
-        def merge_paths(entries):
-            changed = True
-
-            while changed:
-                changed = False
-                skip    = set()
-
-                for i in range(len(entries)):
-                    if i in skip:
-                        continue
-
-                    start_i, path_i = entries[i]
-                    combined_i      = [start_i] + path_i
-
-                    for j in range(len(entries)):
-                        if i == j or j in skip:
-                            continue
-
-                        start_j, path_j = entries[j]
-
-                        # Case 1: j fully contained in i
-                        if start_j in combined_i:
-                            idx         = combined_i.index(start_j)
-                            remaining_i = combined_i[idx:]
-                            overlap_len = min(len(path_j), len(remaining_i))
-                            if remaining_i[:overlap_len] == path_j[:overlap_len]:
-                                skip.add(j)
-                                changed = True
-                                continue
-
-                        # Case 2: tail of i connects to head of j
-                        if path_i and path_i[-1] == start_j:
-                            if start_i not in path_j:
-                                entries[i] = (start_i, path_i + path_j)
-                                start_i, path_i = entries[i]
-                                combined_i      = [start_i] + path_i
-                                skip.add(j)
-                                changed = True
-                                continue
-
-                        # Case 3: tail of j connects to head of i
-                        if path_j and path_j[-1] == start_i:
-                            if start_j not in path_i:
-                                entries[i] = (start_j, path_j + path_i)
-                                start_i, path_i = entries[i]
-                                combined_i      = [start_i] + path_i
-                                skip.add(j)
-                                changed = True
-                                continue
-
-                entries = [e for idx, e in enumerate(entries) if idx not in skip]
-
-            return entries
+            return children, reached
 
         # ------------------------------------------------------------------ #
         #  TREE HELPERS
@@ -3048,17 +3013,9 @@ class Botplayer:
             return result
 
         def tree_to_chain(node, children):
-            """
-            Produces:
-            - list of steps (linear, or linear ending with split dict)
-            - split dict (when node immediately splits)
-            - empty list (leaf node, no children — caller handles the step)
-            """
             kids = children.get(node, [])
-
             if not kids:
                 return []
-
             if len(kids) == 1:
                 child = kids[0]
                 step  = [node, child, easiness(child)]
@@ -3067,7 +3024,6 @@ class Botplayer:
                     return [step, rest]
                 else:
                     return [step] + rest
-
             else:
                 kids.sort(
                     key=lambda k: sum(offense_points(t) for t in get_subtree(k, children)),
@@ -3079,10 +3035,11 @@ class Botplayer:
                     rest = tree_to_chain(k, children)
                     if isinstance(rest, dict):
                         branch = [step, rest]
-                    else:
+                    elif isinstance(rest, list):
                         branch = [step] + rest
+                    else:
+                        branch = [step]
                     branches.append(branch)
-
                 return {'split_from': node, 'branches': branches}
 
         # ------------------------------------------------------------------ #
@@ -3093,44 +3050,36 @@ class Botplayer:
         captured_set  = set(curr_list)
 
         if targets:
-            use_pure_easiness = not minimize_offense
+            if mg_set:
+                mg_starts = candidate_starts(strict_mg=True)
+                starts    = mg_starts if mg_starts else candidate_starts(strict_mg=False)
+            else:
+                starts = candidate_starts(strict_mg=False)
 
-            def target_priority(tid):
-                if minimize_offense:
-                    return (easiness(tid), offense_points(tid), 0 if is_grudge(tid) else 1)
-                else:
-                    return (easiness(tid),)
+            if not starts:
+                starts = candidate_starts(strict_mg=False)
 
-            sorted_targets = sorted(set(targets), key=target_priority)
+            children, reached = build_steiner_tree(starts, targets)
 
-            path_map = {}
-            for goal in sorted_targets:
-                if goal in captured_set:
-                    continue
-                best_start, best_path = find_best_path(
-                    goal, pure_easiness=use_pure_easiness
-                )
-                if best_path is not None:
-                    path_map[goal] = (best_start, best_path)
-                    for t in best_path:
-                        captured_set.add(t)
+            if reached:
+                roots = {tid for tid in children if tid in player_set}
 
-            entries = [(start, list(path)) for start, path in path_map.values()]
-            merged  = merge_paths(entries)
+                for root in roots:
+                    result = tree_to_chain(root, children)
+                    if result:
+                        all_sequences.append(result)
 
-            for start_tid, enemy_path in merged:
-                # Build children dict from linear path
-                children = defaultdict(list)
-                prev     = start_tid
-                for t in enemy_path:
-                    children[prev].append(t)
-                    prev = t
-                result = tree_to_chain(start_tid, children)
-                if result:
-                    all_sequences.append(result)
+                def collect_captured(node):
+                    if node not in player_set:
+                        captured_set.add(node)
+                    for child in children.get(node, []):
+                        collect_captured(child)
+
+                for root in roots:
+                    collect_captured(root)
 
         # ------------------------------------------------------------------ #
-        #  MAIN LOGIC — N TILES, NO SPECIFIC TARGETS
+        #  MAIN LOGIC — N TILES
         # ------------------------------------------------------------------ #
 
         else:

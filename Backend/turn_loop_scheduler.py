@@ -649,7 +649,6 @@ class turn_loop_scheduler:
                 return tids
 
             def walk_tids(e):
-                """Collect all tid_to from any entry structure."""
                 tids = set()
                 if isinstance(e, list):
                     for item in e:
@@ -663,11 +662,29 @@ class turn_loop_scheduler:
                         tids |= walk_tids(branch)
                 return tids
 
+            def branch_easiness(branch):
+                """Calculate total easiness of a branch."""
+                total = 0.0
+                def walk(e):
+                    nonlocal total
+                    if isinstance(e, list):
+                        for item in e:
+                            if (isinstance(item, list) and len(item) == 3
+                                    and not isinstance(item[0], list)):
+                                total += item[2]
+                            elif isinstance(item, dict) and 'split_from' in item:
+                                walk(item)
+                    elif isinstance(e, dict) and 'split_from' in e:
+                        for b in e['branches']:
+                            walk(b)
+                walk(branch)
+                return max(total, 1.0)
+
             def attempt_recovery(tid_from, tid_to, extra_reserved_tids=None):
                 extra_reserved_tids = extra_reserved_tids or set()
                 reserved            = get_remaining_plan_tids() | extra_reserved_tids
 
-                # Try nearby player tiles not reserved for remaining plan
+                # Try nearby player tiles bordering tid_to
                 nearby_tiles = sorted(
                     [
                         nb for nb in gs.map.territories[tid_to].neighbors
@@ -678,7 +695,7 @@ class turn_loop_scheduler:
                     key=lambda t: gs.map.territories[t].troops,
                     reverse=True
                 )
-                
+
                 for nearby in nearby_tiles:
                     if should_stop():
                         return False
@@ -715,8 +732,14 @@ class turn_loop_scheduler:
 
                 return False
 
-            def execute_chain(chain, extra_reserved_tids=None):
+            def execute_chain(chain, troop_limit=None, extra_reserved_tids=None):
+                """
+                Execute a chain of attack steps.
+                troop_limit: max troops to send on the FIRST step only (for splits).
+                After first step, all available troops are used.
+                """
                 extra_reserved_tids = extra_reserved_tids or set()
+                first_step          = True
 
                 for item in chain:
                     if should_stop():
@@ -738,13 +761,25 @@ class turn_loop_scheduler:
                         if troops_available <= 0:
                             break
 
+                        # On first step of a split branch, respect troop limit
+                        if first_step and troop_limit is not None:
+                            send = min(troops_available, troop_limit)
+                        else:
+                            send = troops_available
+
+                        first_step = False
+
+                        if send <= 0:
+                            break
+
                         gs.handle_battle({
                             'choice': (tid_from, tid_to),
-                            'amount': troops_available
+                            'amount': send
                         })
                         gs.server.sleep(1.5)
 
                         if tid_to not in atk_player.territories:
+                            # FUTURE: assess whether recovery is worth attempting
                             recovered = attempt_recovery(
                                 tid_from, tid_to,
                                 extra_reserved_tids=extra_reserved_tids
@@ -755,8 +790,31 @@ class turn_loop_scheduler:
                 return True
 
             def execute_split(split_entry):
+                """
+                Execute a split — divide troops proportionally between branches
+                based on each branch's total easiness, then execute each branch.
+                FUTURE: reassess troop allocation based on actual battle outcomes.
+                """
                 split_from = split_entry['split_from']
                 branches   = split_entry['branches']
+
+                if split_from not in atk_player.territories:
+                    return True
+
+                available = gs.map.territories[split_from].troops - 1
+                if available <= 0:
+                    return True
+
+                # Calculate easiness per branch for proportional allocation
+                easiness_per_branch = [branch_easiness(b) for b in branches]
+                total_easiness      = sum(easiness_per_branch)
+
+                # Allocate troops proportionally, minimum 1 per branch
+                import math
+                troop_allocation = []
+                for e in easiness_per_branch:
+                    alloc = max(1, math.ceil((e / total_easiness) * available))
+                    troop_allocation.append(alloc)
 
                 for idx, branch in enumerate(branches):
                     if should_stop():
@@ -764,13 +822,24 @@ class turn_loop_scheduler:
                     if split_from not in atk_player.territories:
                         break
 
+                    actual = gs.map.territories[split_from].troops - 1
+                    if actual <= 0:
+                        break
+
+                    # Use minimum of allocated and what's actually available
+                    send = min(troop_allocation[idx], actual)
+
                     # Collect tids from future branches so recovery
                     # doesn't consume troops needed for them
                     future_reserved = set()
                     for future_branch in branches[idx + 1:]:
                         future_reserved |= walk_tids(future_branch)
 
-                    result = execute_chain(branch, extra_reserved_tids=future_reserved)
+                    result = execute_chain(
+                        branch,
+                        troop_limit=send,
+                        extra_reserved_tids=future_reserved
+                    )
                     if not result:
                         return False
 
