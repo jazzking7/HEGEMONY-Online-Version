@@ -610,7 +610,7 @@ class turn_loop_scheduler:
         finally:
             # Always mark complete even if something errors,
             # so the main loop doesn't hang
-            if not ms.terminated and token == ms.turn_token:
+            if not ms.terminated and token == ms.turn_token and not ms.interrupt:
                 ms.stage_completed = True
 
     def ai_prepare(self, gs, ms, player, token, MY_OWN_STATS, GLOBAL_AVERAGE):
@@ -620,7 +620,7 @@ class turn_loop_scheduler:
             atk_player.make_upgrades(MY_OWN_STATS, GLOBAL_AVERAGE)
             gs.server.sleep(3) 
         finally:
-            if not ms.terminated and token == ms.turn_token:
+            if not ms.terminated and token == ms.turn_token and not ms.interrupt:
                 ms.stage_completed = True
 
     def ai_attack(self, gs, ms, player, token, attack_sequence):
@@ -720,6 +720,13 @@ class turn_loop_scheduler:
                         tid_from: {'troops': gs.map.territories[tid_from].troops}
                     }, room=gs.lobby)
                     gs.server.sleep(0.5)
+                    gs.server.emit('selectionSoundFx', room=gs.lobby)
+                    gs.server.emit('troop_addition_display', {f'{tid_from}': {'tid': tid_from, 'number': deploy_amt}}, room=gs.lobby)
+                    gs.update_LAO(atk_player.uid)
+                    gs.update_player_stats()
+                    gs.get_SUP()
+                    gs.update_global_status()
+                    gs.signal_MTrackers('popu')
                     troops_now = gs.map.territories[tid_from].troops - 1
                     if troops_now > 0:
                         gs.handle_battle({
@@ -867,7 +874,8 @@ class turn_loop_scheduler:
                         break
 
         finally:
-            if not ms.terminated and token == ms.turn_token:
+            atk_player.random_patch(ms, token)
+            if not ms.terminated and token == ms.turn_token and not ms.interrupt:
                 ms.stage_completed = True
 
     def ai_rearrange(self, gs, ms, player, token):
@@ -875,7 +883,7 @@ class turn_loop_scheduler:
             atk_player = gs.players[player]
             atk_player.rearrange_troops(ms, token)
         finally:
-            if not ms.terminated and token == ms.turn_token:
+            if not ms.terminated and token == ms.turn_token and not ms.interrupt:
                 ms.stage_completed = True
 
     # MAIN LOOP FOR TURN BASED EVENTS

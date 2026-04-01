@@ -1132,6 +1132,104 @@ class Botplayer:
 
         return True
 
+    def random_patch(self, ms, token):
+        """
+        Scans all continents for nearly-complete ones (1-2 territories left).
+        If uncontrolled territories have < 3 troops and player has enough
+        nearby troops or reserves, attacks and captures them.
+        """
+        player_set = set(self.territories)
+
+        def should_stop():
+            return ms.interrupt or ms.terminated or token != ms.turn_token
+
+        for cont_name, cont_data in self.gs.map.conts.items():
+            if should_stop():
+                break
+
+            cont_tids    = cont_data['trtys']
+            uncontrolled = [tid for tid in cont_tids if tid not in player_set]
+
+            # Only patch if 1 or 2 territories left
+            if len(uncontrolled) == 0 or len(uncontrolled) > 2:
+                continue
+
+            for tid in uncontrolled:
+                if should_stop():
+                    break
+
+                t = self.gs.map.territories[tid]
+
+                # Only patch if enemy has less than 3 troops
+                if t.troops >= 3:
+                    continue
+
+                # Check direct neighbors controlled by player with spare troops
+                neighbor_stacks = [
+                    nb for nb in t.neighbors
+                    if nb in player_set
+                    and self.gs.map.territories[nb].troops - 1 > 0
+                ]
+
+                if neighbor_stacks:
+                    # Use the neighbor with most troops
+                    best = max(neighbor_stacks, key=lambda nb: self.gs.map.territories[nb].troops)
+                    send = self.gs.map.territories[best].troops - 1
+
+                    print(f"[PATCH] {self.gs.map.territories[best].name} --> {t.name} ({send} troops)")
+
+                    self.gs.handle_battle({
+                        'choice': (best, tid),
+                        'amount': send
+                    })
+                    self.gs.server.sleep(1.5)
+
+                    if tid in self.territories:
+                        player_set = set(self.territories)  # update after capture
+                        print(f"[PATCH] Captured {t.name} ✅")
+                    else:
+                        print(f"[PATCH] Failed to capture {t.name}")
+
+                elif self.reserves >= t.troops * 2:
+                    # Deploy reserves to best neighboring player tile then attack
+                    neighbor_tiles = [nb for nb in t.neighbors if nb in player_set]
+                    if not neighbor_tiles:
+                        continue
+
+                    best      = max(neighbor_tiles, key=lambda nb: self.gs.map.territories[nb].troops)
+                    deploy    = min(self.reserves, t.troops * 2)
+                    self.gs.map.territories[best].troops += deploy
+                    self.reserves                        -= deploy
+                    self.total_troops                    += deploy
+
+                    self.gs.server.emit('selectionSoundFx', room=self.gs.lobby)
+                    self.gs.server.emit('troop_addition_display', {f'{best}': {'tid': best, 'number': deploy}}, room=self.gs.lobby)
+                    self.gs.update_LAO(self.uid)
+                    self.gs.update_player_stats()
+                    self.gs.get_SUP()
+                    self.gs.update_global_status()
+                    self.gs.signal_MTrackers('popu')
+
+                    self.gs.server.emit('update_trty_display', {
+                        best: {'troops': self.gs.map.territories[best].troops}
+                    }, room=self.gs.lobby)
+                    self.gs.server.sleep(0.5)
+
+                    send = self.gs.map.territories[best].troops - 1
+                    print(f"[PATCH] (reserves) {self.gs.map.territories[best].name} --> {t.name} ({send} troops)")
+
+                    self.gs.handle_battle({
+                        'choice': (best, tid),
+                        'amount': send
+                    })
+                    self.gs.server.sleep(1.5)
+
+                    if tid in self.territories:
+                        player_set = set(self.territories)
+                        print(f"[PATCH] Captured {t.name} ✅")
+                    else:
+                        print(f"[PATCH] Failed to capture {t.name}")
+
     # In botplayer
     def rearrange_troops(self, ms, token):
 
