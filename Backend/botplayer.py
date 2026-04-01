@@ -1855,7 +1855,7 @@ class Botplayer:
             chain_easiness = sum_easiness_recursive(entry)
             min_troops     = count_steps_recursive(entry)
             deploy_amt     = max(math.ceil(chain_easiness), min_troops)
-            deploy_to(start_tid, chain_easiness)
+            deploy_to(start_tid, deploy_amt)
 
         # Deploy any residual deployable_amt to the strongest border tile
         if self.deployable_amt > 0:
@@ -3026,7 +3026,17 @@ class Botplayer:
                     strength_mult = 1.0 + (disparity * 0.1)
                 else:
                     strength_mult = 1.0 + (disparity * 0.5)
-            return effective_troops * strength_mult
+                    
+            raw_easiness = effective_troops * strength_mult
+    
+            # Hard cap: single troop territory never costs more than 3
+            # regardless of disparity — 3 troops can always overrun 1
+            if t.troops <= 1:
+                return min(raw_easiness, 3.0)
+            elif t.troops <= 3:
+                return min(raw_easiness, t.troops * 2.0)
+            
+            return raw_easiness
 
         def offense_points(tid):
             for pid, imp_dict in territorial_importance.items():
