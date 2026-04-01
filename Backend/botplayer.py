@@ -151,29 +151,41 @@ class Botplayer:
 
     # Function Used to determine the worthiness of a unconquered territory
     def get_continental_worth_points(self, cont_name, curr_dist, setupmode):
-        # Easiness
-        NumF = 0
-        NumN = 0
+        NumF         = 0
+        NumN         = 0
+        total_trtys  = len(self.gs.map.conts[cont_name]['trtys'])
+        player_trtys = 0
+
         for trty in self.gs.map.conts[cont_name]['trtys']:
+            mul  = 1 if self.gs.map.territories[trty].isCapital else 0
+            mulc = 1 if self.gs.map.territories[trty].isCity else 0
+            val  = self.gs.map.territories[trty].troops + (mul * 10) + (mulc * 3)
             if trty in curr_dist:
-                mul = 1 if self.gs.map.territories[trty].isCapital else 0
-                mulc = 1 if self.gs.map.territories[trty].isCity else 0
-                NumF += self.gs.map.territories[trty].troops + (mul * 10) + (mulc * 3)
+                NumF += val
+                player_trtys += 1
             else:
-                mul = 1 if self.gs.map.territories[trty].isCapital else 0
-                mulc = 1 if self.gs.map.territories[trty].isCity else 0
-                NumN += self.gs.map.territories[trty].troops + (mul * 10) + (mulc * 3)
+                NumN += val
+
         if NumN == 0:
             if setupmode:
-                return math.log(1+NumF)**2 * self.gs.map.conts[cont_name]['bonus']
+                return math.log(1 + NumF) ** 2 * self.gs.map.conts[cont_name]['bonus']
             else:
                 return -100
-        easiness = math.log(1 + NumF/min(1,NumN))
 
-        # Bonus
         bonus = self.gs.map.conts[cont_name]['bonus']
 
-        score = ( easiness * bonus**(0.7) )
+        # Troop ratio — how dominant are you vs enemy
+        troop_ratio = NumF / max(1, NumN)
+
+        # Completion ratio — how close to finishing
+        completion = player_trtys / total_trtys
+
+        # Bonus scaled by sqrt to reduce large continent dominance
+        bonus_score = math.sqrt(bonus)
+
+        # Completion² heavily rewards nearly-done continents
+        score = (math.log(1 + troop_ratio) * bonus_score) * (1 + completion ** 2)
+
         return score
 
     def choose_territory(self,):
@@ -213,7 +225,7 @@ class Botplayer:
     
     # Set cities
     def set_cities(self, N):
-        locations = self.get_best_territories_to_build(N, "cities")
+        locations = self.get_best_territories_to_build(N, "city")
         print(locations)
         for location in locations:
             self.gs.map.territories[location].isCity = True
@@ -1809,30 +1821,63 @@ class Botplayer:
         return best_cont
 
     def get_economical_growth(self, TERRITORIAL_IMPORTANCE, OTHER_PLAYER_STATS, MY_OWN_STATS):
-        targets = []
-        continent = self.get_easiest_continent()
+        targets          = []
+        primary_targets  = set()
+        continent        = self.get_easiest_continent()
+
         if continent:
-            targets = [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
+            targets         = [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
+            primary_targets = set(targets)
+
         print(f"{continent} is the target continent")
-        if len(targets) > min(9, len(self.gs.map.territories)-len(self.territories)):
-            return self.get_attack_sequences(
-                    self.territories,
-                    targets,
-                    None,
-                    None,
-                    self.grudge_targets,
-                    False,
-                    TERRITORIAL_IMPORTANCE,
-                    OTHER_PLAYER_STATS,
-                    MY_OWN_STATS
-                )
+
+        N = min(9, len(self.gs.map.territories) - len(self.territories))
+
+        def sort_by_primary(sequences, primary_tids):
+            """Sort sequences so chains containing primary continent tids come first."""
+            def contains_primary(entry):
+                def walk(e):
+                    if isinstance(e, list):
+                        for item in e:
+                            if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                                if item[1] in primary_tids:
+                                    return True
+                            elif isinstance(item, dict) and 'split_from' in item:
+                                if walk(item):
+                                    return True
+                    elif isinstance(e, dict) and 'split_from' in e:
+                        for branch in e['branches']:
+                            if walk(branch):
+                                return True
+                    return False
+                return walk(entry)
+
+            return sorted(sequences, key=lambda e: (0 if contains_primary(e) else 1))
+
+        if len(targets) >= N:
+            plan, summary = self.get_attack_sequences(
+                self.territories,
+                targets,
+                None,
+                None,
+                self.grudge_targets,
+                False,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+            )
+            plan = sort_by_primary(plan, primary_targets)
+            return plan, summary
+
         else:
-            continent = self.get_easiest_continent(targets)
-            if continent:
-                targets += [tid for tid in self.gs.map.conts[continent]['trtys'] if tid not in self.territories]
-                return self.get_attack_sequences(
+            second_continent = self.get_easiest_continent(targets)
+            if second_continent:
+                targets += [tid for tid in self.gs.map.conts[second_continent]['trtys'] if tid not in self.territories]
+
+            if targets:
+                plan, summary = self.get_attack_sequences(
                     self.territories,
-                    targets[:min(9, len(self.gs.map.territories)-len(self.territories))],
+                    targets[:N],
                     None,
                     None,
                     self.grudge_targets,
@@ -1841,17 +1886,21 @@ class Botplayer:
                     OTHER_PLAYER_STATS,
                     MY_OWN_STATS
                 )
-            return self.get_attack_sequences(
-                    self.territories,
-                    [],
-                    min(9, len(self.gs.map.territories)-len(self.territories)),
-                    None,
-                    self.grudge_targets,
-                    True,
-                    TERRITORIAL_IMPORTANCE,
-                    OTHER_PLAYER_STATS,
-                    MY_OWN_STATS
-                )
+                plan = sort_by_primary(plan, primary_targets)
+                return plan, summary
+
+            plan, summary = self.get_attack_sequences(
+                self.territories,
+                [],
+                N,
+                None,
+                self.grudge_targets,
+                True,
+                TERRITORIAL_IMPORTANCE,
+                OTHER_PLAYER_STATS,
+                MY_OWN_STATS
+            )
+            return plan, summary
 
     def get_agenda_plan(self, OTHER_PLAYER_STATS, MY_OWN_STATS, GLOBAL_AVERAGE, TERRITORIAL_IMPORTANCE, MY_TERRITORIAL_IMPORTANCE):
         if self.agenda.name == "Expansionist":
