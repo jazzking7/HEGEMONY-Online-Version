@@ -2223,7 +2223,7 @@ class Botplayer:
         ECONOMIC_CONDITIONS = self.evaluate_plan(ECONOMIC_PLAN, MY_OWN_STATS, ECONOMIC_SUMMARY)
         ECONOMIC_UPGRADE   = self.get_upgrade_plan(ECONOMIC_CONDITIONS)
 
-        return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
+        # return ECONOMIC_PLAN, ECONOMIC_SUMMARY, ECONOMIC_UPGRADE
 
         # ------------------------------------------------------------------ #
         #  PLAN SELECTION
@@ -2312,6 +2312,36 @@ class Botplayer:
                     elif isinstance(item, dict) and 'branches' in item:
                         total += count_steps_recursive(item)
             return total
+        
+        def count_terminal_1v1_steps(entry):
+            """
+            Count terminal steps where target has exactly 1 troop.
+            Terminal = last step in a chain or branch (no further attacks needed).
+            """
+            count = 0
+
+            if isinstance(entry, dict) and 'branches' in entry:
+                for branch in entry['branches']:
+                    count += count_terminal_1v1_steps(branch)
+
+            elif isinstance(entry, list):
+                # Find the last actual attack step in this list
+                last_step_idx = None
+                for i, item in enumerate(entry):
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        last_step_idx = i
+
+                for i, item in enumerate(entry):
+                    if isinstance(item, list) and len(item) == 3 and not isinstance(item[0], list):
+                        if i == last_step_idx:
+                            # This is the terminal step
+                            tid_to = item[1]
+                            if self.gs.map.territories[tid_to].troops == 1:
+                                count += 1
+                    elif isinstance(item, dict) and 'branches' in item:
+                        count += count_terminal_1v1_steps(item)
+
+            return count
 
         total_easiness  = 0.0
         total_available = 0
@@ -2331,7 +2361,8 @@ class Botplayer:
 
             raw_easiness    = sum_easiness_recursive(entry)
             min_troops      = count_steps_recursive(entry)
-            total_easiness += max(raw_easiness, min_troops)
+            terminal_1v1    = count_terminal_1v1_steps(entry)
+            total_easiness += max(raw_easiness, min_troops) + terminal_1v1
 
             if start_tid not in start_tids:
                 start_tids.add(start_tid)

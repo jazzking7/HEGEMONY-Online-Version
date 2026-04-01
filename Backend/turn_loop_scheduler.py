@@ -740,15 +740,10 @@ class turn_loop_scheduler:
                 return False
 
             def execute_chain(chain, troop_limit=None, extra_reserved_tids=None):
-                """
-                Execute a chain of attack steps.
-                troop_limit: max troops to send on the FIRST step only (for splits).
-                After first step, all available troops are used.
-                """
                 extra_reserved_tids = extra_reserved_tids or set()
                 first_step          = True
 
-                for item in chain:
+                for idx, item in enumerate(chain):
                     if should_stop():
                         return False
 
@@ -760,7 +755,6 @@ class turn_loop_scheduler:
                     elif isinstance(item, list) and len(item) == 3:
                         tid_from, tid_to, easiness = item
 
-                        # Legality check
                         if tid_from not in atk_player.territories:
                             break
 
@@ -768,13 +762,23 @@ class turn_loop_scheduler:
                         if troops_available <= 0:
                             break
 
-                        # On first step of a split branch, respect troop limit
                         if first_step and troop_limit is not None:
                             send = min(troops_available, troop_limit)
                         else:
                             send = troops_available
 
                         first_step = False
+
+                        # Check if terminal step — no more normal attack steps after this
+                        is_terminal = not any(
+                            isinstance(future, list) and len(future) == 3
+                            and not isinstance(future[0], list)
+                            for future in chain[idx + 1:]
+                        )
+
+                        # Terminal 1v1 — send at least 2 troops
+                        if is_terminal and gs.map.territories[tid_to].troops == 1:
+                            send = max(send, min(2, troops_available))
 
                         if send <= 0:
                             break
@@ -786,7 +790,6 @@ class turn_loop_scheduler:
                         gs.server.sleep(1.5)
 
                         if tid_to not in atk_player.territories:
-                            # FUTURE: assess whether recovery is worth attempting
                             recovered = attempt_recovery(
                                 tid_from, tid_to,
                                 extra_reserved_tids=extra_reserved_tids
@@ -874,6 +877,7 @@ class turn_loop_scheduler:
                         break
 
         finally:
+            atk_player.random_patch(ms, token)
             atk_player.random_patch(ms, token)
             if not ms.terminated and token == ms.turn_token and not ms.interrupt:
                 ms.stage_completed = True
