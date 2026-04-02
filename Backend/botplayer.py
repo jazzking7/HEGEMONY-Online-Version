@@ -1197,7 +1197,7 @@ class Botplayer:
                         continue
 
                     best      = max(neighbor_tiles, key=lambda nb: self.gs.map.territories[nb].troops)
-                    deploy    = min(self.reserves, t.troops * 2)
+                    deploy    = min(self.reserves, max(2, t.troops * 2))
                     self.gs.map.territories[best].troops += deploy
                     self.reserves                        -= deploy
                     self.total_troops                    += deploy
@@ -1234,7 +1234,7 @@ class Botplayer:
     def rearrange_troops(self, ms, token):
 
         def should_stop():
-            return ms.terminated or token != ms.turn_token
+            return ms.terminated or token != ms.turn_token or ms.interrupt
 
         # ------------------------------------------------------------------ #
         #  STEP 1: GET TERRITORIAL IMPORTANCE
@@ -1375,6 +1375,14 @@ class Botplayer:
                 for tid in targets
             }
 
+            remainder = total_moveable - sum(allocations.values())
+            for tid in targets:  # already sorted by importance descending
+                if remainder <= 0:
+                    break
+                allocations[tid] += 1
+                remainder -= 1
+
+
             print(f"[REARRANGE] Group {g_idx + 1} targets and allocations:")
             for tid in targets:
                 current = self.gs.map.territories[tid].troops
@@ -1382,7 +1390,7 @@ class Botplayer:
                 print(f"  {self.gs.map.territories[tid].name} | "
                     f"importance: {importance.get(tid, 0):.1f} | "
                     f"current: {current} | allocated: {alloc} | "
-                    f"net need: {alloc - current}")
+                    f"net need: {alloc - max(0, current - 1)}")
 
             # ---------------------------------------------------------- #
             #  CALCULATE NEEDS AND SOURCES
@@ -1397,7 +1405,7 @@ class Botplayer:
                 current = self.gs.map.territories[tid].troops
                 if tid in target_set:
                     alloc   = allocations.get(tid, 0)
-                    deficit = alloc - current
+                    deficit = alloc - max(0, current - 1)
                     if deficit > 0:
                         needs[tid] = deficit
                     elif current - 1 > alloc:
@@ -2178,7 +2186,7 @@ class Botplayer:
                     [],
                     min(9, len(self.gs.map.territories)-len(self.territories)),
                     self.get_main_group(self.agenda.targets[0]),
-                    mission_grudges,
+                    self.grudge_targets,
                     True,
                     TERRITORIAL_IMPORTANCE,
                     OTHER_PLAYER_STATS,
