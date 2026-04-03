@@ -520,16 +520,16 @@ class turn_loop_scheduler:
         self.reinforcement(gs, player)
 
         if atk_player.hijacked:
-            for player in self.gs.players:
-                currp = self.gs.players[player]
+            for player in gs.players:
+                currp = gs.players[player]
                 if currp.skill.name == "Loan Shark":
-                    if self.uid in currp.skill.loan_list:
-                        if self.total_troops > self.stars*10:
-                            currp.skill.handle_payment(self.uid, 'troops')
-                            currp.skill.handle_payment(self.uid, 'sepauth')
+                    if atk_player.uid in currp.skill.loan_list:
+                        if atk_player.total_troops > atk_player.stars*10:
+                            currp.skill.handle_payment(atk_player.uid, 'troops')
+                            currp.skill.handle_payment(atk_player.uid, 'sepauth')
                         else:
-                            currp.skill.handle_payment(self.uid, 'sepauth')
-                            currp.skill.handle_payment(self.uid, 'troops')
+                            currp.skill.handle_payment(atk_player.uid, 'sepauth')
+                            currp.skill.handle_payment(atk_player.uid, 'troops')
                         break
 
         EXECUTION_PLAN, UPGRADE_PLAN, MY_OWN_STATS, GLOBAL_AVERAGE = atk_player.get_current_game_plan()
