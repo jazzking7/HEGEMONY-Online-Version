@@ -846,7 +846,7 @@ class Game_State_Manager:
                         return True
         return False
 
-    def get_deployable_amt(self, player):
+    def get_deployable_amt(self, player, turn_based=False):
         bonus = 0
         t_score = 0
         p = self.players[player]
@@ -905,14 +905,15 @@ class Game_State_Manager:
                     perma = math.ceil(bonus*0.6) + 2
                 else:
                     perma = math.ceil(bonus*0.6) + t_score//(divider+2)
-                hidden_troops = max(0, normal - perma)
-                p.reserves += hidden_troops
-                self.update_private_status(player)
-                self.server.emit('show_notification_right', {
-                                'message': f'+{hidden_troops} Reserves',
-                                'duration': 3000,
-                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
-                            }, room=player)
+                if turn_based:
+                    hidden_troops = max(0, normal - perma)
+                    p.reserves += hidden_troops
+                    self.update_private_status(player)
+                    self.server.emit('show_notification_right', {
+                                    'message': f'+{hidden_troops} Reserves',
+                                    'duration': 3000,
+                                    "text_color": "#1E40AF", "bg_color": "#BFDBFE"
+                                }, room=player)
                 return perma
         if self.in_ice_age:
             if t_score < (divider+2) * 2:
