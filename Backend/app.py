@@ -222,6 +222,58 @@ def update_lobby_settings(data):
         lobbies[lobby_id]['minplayer'] = int(data['minplayer']) if data['minplayer'] != "any" else "any"
     socketio.emit('update_lobby', data, room=lobby_id)
 
+@socketio.on('start_quick_game')
+def start_quick_game(data):
+    print('start quick game', data)
+    sid = request.sid
+    username = data.get('username')
+    print(f'{username} is creating a lobby')    # TODO delete me
+    lobby_code = generate_unique_code(5)
+    players[request.sid] = {
+        'username': username,
+        'lobby_id': lobby_code
+    }
+    join_room(lobby_code)
+    # TODO populate lobbies dict better
+    lobbies[lobby_code] = {
+        'host': sid,
+        'players': [sid],
+        'game_started': False,
+        'minplayer': "4"
+    }
+
+    print(lobbies)
+
+    # Setup lobby settings ## TO BE UPDATED
+    lobby = lobbies[lobby_code]
+    lobby['game_started'] = True
+    time_settings = [
+        60,
+        60,
+        180
+    ]
+    lobby['setup_mode'] = "all_manuel"
+    print(lobby)
+    print(time_settings)
+
+    # TEMP START GAME SEQUENCE | FOR TESTING ONLY
+    lobby['waitlist'] = []
+    lobby['map_name'] = "88world"
+    player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
+    lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), time_settings, lobby['minplayer'], socketio, lobby_code)
+    lobby['gsm'].Mdist = MDIS
+    lobby['gsm'].egt = EGT
+    lobby['gsm'].SDIS = SDIS
+    lobby['gsm'].complexity = "beginner"
+    lobby['gsm'].doctrineOn = False
+
+    socketio.emit('quick_game_started', room=lobby_code)
+
+    # MAIN ENTRY POINT
+    lobby['gsm'].GES.main_flow.start()
+    print("GAME LAUNCHED")
+
+
 @socketio.on('start_game')
 def startGame(data):
     sid = request.sid

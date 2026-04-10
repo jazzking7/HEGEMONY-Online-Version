@@ -252,6 +252,71 @@
   .hegemony-main-menu .justify-content-center {
     justify-content: center;
   }
+
+  .play-card .card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Inputs */
+.menu-input {
+  height: 50px;
+  font-size: 1rem;
+  padding: 0 1rem;
+  background: rgba(20, 30, 50, 0.55);
+  border: 1px solid rgba(100, 120, 180, 0.28);
+  color: #fff;
+  transition: all 0.25s ease;
+}
+
+.menu-input:focus {
+  border-color: rgba(120, 140, 200, 0.6);
+  background: rgba(30, 40, 60, 0.7);
+}
+
+/* Hero button (main action) */
+.btn-hero {
+  height: 60px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 18px rgba(120, 140, 200, 0.18);
+}
+
+/* Secondary section */
+.sub-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 0.2rem;
+}
+
+/* Lobby row */
+.lobby-row {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 0.6rem;
+}
+
+/* Buttons */
+.btn-join,
+.btn-secondary-action {
+  height: 50px;
+  font-size: 0.95rem;
+}
+
+/* Make secondary slightly less dominant */
+.btn-secondary-action {
+  opacity: 0.9;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .lobby-row {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 
 <div class="hegemony-main-menu">
@@ -265,20 +330,35 @@
     <!-- Main Content Grid -->
     <div class="content-grid">
       <!-- Play Game Card -->
-      <div class="game-card">
-        <h4>Play Game</h4>
-        <div class="card-content">
-          <div class="input-group">
-            <span class="input-group-text">Nickname</span>
-            <input id="nickname" class="form-control" type="text" placeholder="Enter a nickname..." />
+     <div class="game-card play-card">
+      <h4>Play Game</h4>
+
+      <div class="card-content">
+
+        <!-- Nickname (lightweight, not dominant) -->
+        <input id="nickname" class="form-control menu-input" type="text" placeholder="Enter your nickname..." />
+
+        <!-- Primary Action -->
+        <button id="btn_quick_play" class="btn btn-primary btn-hero w-100">
+          ▶ Play Instantly vs Bots
+        </button>
+
+        <!-- Secondary Actions -->
+        <div class="sub-actions">
+
+          <div class="lobby-row">
+            <input id="joinLobbyCode" class="form-control menu-input" type="text" placeholder="Lobby ID" />
+            <button id="btn_joinLobby" class="btn btn-primary btn-join">Join</button>
           </div>
-          <div class="input-group">
-            <input id="joinLobbyCode" class="form-control" type="text" placeholder="Lobby ID" />
-            <button id="btn_joinLobby" class="btn btn-primary">Join Lobby</button>
-          </div>
-          <button id="btn_createLobby" class="space btn btn-primary w-100">Create Lobby</button>
+
+          <button id="btn_createLobby" class="btn btn-primary btn-secondary-action w-100">
+            Create Multiplayer Lobby
+          </button>
+
         </div>
+
       </div>
+    </div>
 
       <!-- Right Column -->
       <div class="right-column">

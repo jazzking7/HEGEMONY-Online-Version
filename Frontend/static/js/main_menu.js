@@ -9,6 +9,22 @@ $(document).ready(function() {
             return invalidChars.test(name);
         }    
 
+        $('#btn_quick_play').click(function() {
+            let username = $('#nickname').val().trim();
+            if (username === '') {
+                popup("Must enter a name!", 1000);
+                return;
+            } else if (username.length > 12) {
+                popup("Name longer than 12 characters!", 1000);
+                return;
+            } else if (hasInvalidSelectorChars(username)) {
+                popup("Name containing unrecognized special characters!", 2000);
+                return
+            }
+            console.log('start quick game');
+            socket.emit('start_quick_game', {'username': username});
+        });
+
         $('#btn_createLobby').click(function() {
         let username = $('#nickname').val().trim();
         if (username === '') {
