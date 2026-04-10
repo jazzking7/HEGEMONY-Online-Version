@@ -179,4 +179,29 @@ $(document).ready(function() {
         });
     });
 
+    // start game
+    socket.on('quick_game_started', function() {
+        console.log('quick game started');
+        
+        loadPage('game')
+            .then(() => {
+                return unloadScript('page_script');
+            })
+            .then(() => {
+                // return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
+                return loadScript('/static/js/game.js', 'page_script');
+
+            })
+            .then(() => {
+                socket.off('lobby_data');
+                socket.off('update_lobby');
+                socket.off('game_started');
+                console.log('game.js script loaded successfully');
+                // Additional logic after loading game.js if needed
+            })
+            .catch((error) => {
+                console.error('Error loading page or script:', error);
+            });
+    });
+
 });
