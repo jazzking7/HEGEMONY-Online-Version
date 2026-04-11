@@ -8,6 +8,7 @@ from elimination_tracker import *
 from end_game_tracker import *
 import string
 from botplayer import *
+from datetime import datetime
 
 class Player:
 
@@ -567,6 +568,10 @@ class Game_State_Manager:
     def game_over(self):
         winners = self.Mdist.determine_winners(self)
         self._emit_game_over(winners)
+        
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open("user_logs.txt", "a") as f:
+            f.write(f"Game {self.lobby} ended at {timestamp}\n")
 
     def global_peace_game_over(self):
         winners = self.Mdist.determine_gp_winners(self)

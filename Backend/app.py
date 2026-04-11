@@ -244,6 +244,10 @@ def start_quick_game(data):
 
     print(lobbies)
 
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("user_logs.txt", "a") as f:
+        f.write(f"Client with socket ID {request.sid} started a quick game in {lobby_code} at {timestamp}\n")
+
     # Setup lobby settings ## TO BE UPDATED
     lobby = lobbies[lobby_code]
     lobby['game_started'] = True
@@ -279,6 +283,10 @@ def startGame(data):
     sid = request.sid
     lobby_id = players[sid]['lobby_id']
     lobby = lobbies[lobby_id]
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("user_logs.txt", "a") as f:
+        f.write(f"Client with socket ID {request.sid} started a game in {lobby_id} at {timestamp}\n")
 
     # Safeguard
     if lobby['host'] != sid:
