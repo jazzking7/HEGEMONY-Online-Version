@@ -928,6 +928,12 @@ socket.on('update_trty_display', function(data){
   }
 });
 
+// territory cache rebuild when color changes
+socket.on('rebuild_mapshape_cache', function(){
+  territoryCacheReady = false;
+  buildTerritoryCache();
+});
+
 // CHANGING CLICK EVENTS
 socket.on('change_click_event', function(data){
   if (data.event == 'settle_capital'){

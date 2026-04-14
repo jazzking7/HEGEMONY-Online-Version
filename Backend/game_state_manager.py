@@ -471,6 +471,8 @@ class Game_State_Manager:
         
         # Territory
         self.server.emit('update_trty_display', all_trty_updates, room=pid)
+        self.server.emit('rebuild_mapshape_cache', room=self.lobby)
+
 
         # Global overview
         self.update_global_status()
@@ -1435,6 +1437,7 @@ class Game_State_Manager:
             atk_p.territories.append(t2)
             self.server.emit('update_player_territories', {'list': atk_p.territories}, room=a_pid)
             self.server.emit('update_trty_display', {t2:{'color': atk_p.color}}, room=self.lobby)
+            self.server.emit('rebuild_mapshape_cache', room=self.lobby)
             # Defender lost territory
             def_p.territories.remove(t2)
             self.server.emit('update_player_territories', {'list': def_p.territories}, room=d_pid)

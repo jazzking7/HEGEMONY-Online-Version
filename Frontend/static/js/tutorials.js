@@ -1576,6 +1576,11 @@ socket.on('update_trty_display', function(data){
   }
 });
 
+socket.on('rebuild_mapshape_cache', function(){
+  territoryCacheReady = false;
+  buildTerritoryCache();
+});
+
 // CLEAR SELECTION WINDOWS
 socket.on('clear_view', function(){
   $('#control_panel, #control_mechanism, #middle_display, #proceed_next_stage').hide();

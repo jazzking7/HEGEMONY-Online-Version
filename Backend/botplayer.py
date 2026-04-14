@@ -212,6 +212,7 @@ class Botplayer:
 
         for trty in self.territories:
             self.gs.server.emit('update_trty_display', {trty: {'color': self.color, 'troops': 1}}, room=self.gs.lobby)
+        self.gs.server.emit('rebuild_mapshape_cache', room=self.gs.lobby)
         self.gs.GES.selected += 1
 
     # Set Capital

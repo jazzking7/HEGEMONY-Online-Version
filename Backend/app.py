@@ -580,6 +580,7 @@ def update_dist_choice(data):
     socketio.emit('update_player_territories', {'list': gsm.players[pid].territories}, room=pid)
     for trty in gsm.players[pid].territories:
         socketio.emit('update_trty_display', {trty: {'color': gsm.players[pid].color, 'troops': 1}}, room=gsm.lobby)
+    socketio.emit('rebuild_mapshape_cache', room=gsm.lobby)
     gsm.GES.selected += 1
 
 @socketio.on('send_capital_choice')

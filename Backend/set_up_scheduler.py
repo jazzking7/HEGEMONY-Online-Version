@@ -124,7 +124,8 @@ class setup_event_scheduler:
         # UPDATE TRTY VIEW
         for dist in gs.aval_choices:
             for trty in gs.aval_choices[dist]:
-                gs.server.emit('update_trty_display', {trty:{'color': dist}}, room=gs.lobby) 
+                gs.server.emit('update_trty_display', {trty:{'color': dist}}, room=gs.lobby)
+        gs.server.emit('rebuild_mapshape_cache', room=gs.lobby)
         # NOTIF EVENT ONE BY ONE
         for player in gs.players:
 
@@ -155,7 +156,8 @@ class setup_event_scheduler:
                 gs.server.emit('update_player_territories', {'list': gs.players[player].territories}, room=player)
                 del gs.aval_choices[random_key]
                 for trty in random_dist:
-                    gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby) 
+                    gs.server.emit('update_trty_display', {trty:{'color': gs.players[player].color, 'troops': 1}}, room=gs.lobby)
+                gs.server.emit('rebuild_mapshape_cache', room=gs.lobby) 
                 gs.server.emit('clear_view', room=player)
         gs.aval_choices = []
         gs.send_player_list()

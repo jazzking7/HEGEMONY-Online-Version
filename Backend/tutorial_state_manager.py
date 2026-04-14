@@ -134,6 +134,7 @@ class Tutorial_Manager:
                 self.server.emit('update_trty_display', {trty:{'color': "#4169E1", 'troops': 1}}, room=player) 
             for trty in range(len(self.map.territories)//2, len(self.map.territories)):
                 self.server.emit('update_trty_display', {trty:{'color': "#FFDE21", 'troops': 1}}, room=player) 
+            self.server.emit('rebuild_mapshape_cache', room=player)
             self.server.emit('set_new_announcement', {'async': True, "msg": "Basic Gameplay"}, room=player)
             self.server.emit('show_territories', room=player)
             return
@@ -223,6 +224,7 @@ class Tutorial_Manager:
         elif stage == 14:
             self.server.emit('update_trty_display', {7:{'troops': "1"}}, room=player)
             self.server.emit('update_trty_display', {25:{'troops': "55", 'color': "#4169E1"}}, room=player)
+            self.server.emit('rebuild_mapshape_cache', room=player)
             self.server.emit('rearrangement_tutorial', room=player)
             self.server.emit('change_click_event_tutorial', {'event': 'rearrangement_tutorial'}, room=player)
             return
