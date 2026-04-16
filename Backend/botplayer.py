@@ -2857,8 +2857,10 @@ class Botplayer:
         opt = self.agenda.end_game_global_peace_checking()
         if opt:
             self.gs.GES.summit_voter['y'] += 1
+            opt = 'y'
         else:
             self.gs.GES.summit_voter['n'] += 1
+            opt = 'n'
         self.gs.server.emit('s_voting_fb', {'opt': opt, 'name': self.name}, room=self.gs.lobby)
         self.gs.GES.selected += 1
     # def reduce_splits(self, execution_plan):
