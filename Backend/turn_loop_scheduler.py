@@ -1014,9 +1014,11 @@ class turn_loop_scheduler:
                             gs.server.emit('update_trty_display', {index: {'hasEffect': 'gone'}}, room=gs.lobby)
 
                 # Dangerous Mission announcement
+                fl, fs = True, True
                 for miss in gs.Mset:
                     if miss.name == "Loyalist":
-                        if ms.round == 3:
+                        if ms.round == 3 and fl:
+                            fl = False
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit('show_notification_center', {
                                 'message': 'PRESENCE OF LOYALISTS DETECTED! PROCEED WITH CAUTION!',
@@ -1034,7 +1036,8 @@ class turn_loop_scheduler:
                             }, room=gs.lobby)
                             gs.server.sleep(5)
                     if miss.name == "Survivalist":
-                        if ms.round == 5:
+                        if ms.round == 5 and fs:
+                            fs = False
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
                             gs.server.emit('show_notification_center', {
                                 'message': 'PRESENCE OF SURVIVALIST DETECTED! PROCEED WITH CAUTION!',

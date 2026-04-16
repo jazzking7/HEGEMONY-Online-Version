@@ -246,7 +246,10 @@ class General_Event_Scheduler:
                     self.gs.server.emit('signal_hide_btns', room=sup)
                 else:
                     self.gs.server.emit('set_new_announcement', {'async': True, 'msg': f'{self.gs.players[sup].name} is setting a Doctrine.'}, room=self.gs.lobby)
-            self.selection_time_out(60, 1)
+            if self.gs.players[sup].isBot:
+                self.selection_time_out(5, 1)
+            else:
+                self.selection_time_out(60, 1)
             if not self.interrupt: # game over left overs
                 if not self.selected:
                     self.gs.apply_doctrine(random.choice(options))
