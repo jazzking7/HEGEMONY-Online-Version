@@ -149,6 +149,8 @@ class General_Event_Scheduler:
                         bot.deploy_troops()
                     elif event == "get_skill":
                         bot.choose_skill()
+                    elif event == "gp":
+                        bot.make_gp_decision()
                     if self.selected >= count:
                         break
 
@@ -539,7 +541,10 @@ class General_Event_Scheduler:
                 self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} has proposed a global ceasefire. The game ends immediately if nobody refuse."}, room=player)
                 self.gs.server.emit('summit_voting', room=player)
         self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
-        self.selection_time_out(60, c)
+        if self.gs.hasBot:
+            self.selection_time_out_with_bot(60, c, 'gp')
+        else:
+            self.selection_time_out(60, c)
         self.gs.server.emit('signal_show_btns', room=self.gs.lobby)
         if self.summit_voter['n']:
             self.gs.players[pid].num_global_cease -= 1

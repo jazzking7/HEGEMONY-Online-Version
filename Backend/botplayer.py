@@ -2853,6 +2853,14 @@ class Botplayer:
             if self.gs.players[p].name == self.name:
                 return self.gs.starPrice(base, p)
 
+    def make_gp_decision(self, ):
+        opt = self.agenda.end_game_global_peace_checking()
+        if opt:
+            self.gs.GES.summit_voter['y'] += 1
+        else:
+            self.gs.GES.summit_voter['n'] += 1
+        self.gs.server.emit('s_voting_fb', {'opt': opt, 'name': self.name}, room=self.gs.lobby)
+        self.gs.GES.selected += 1
     # def reduce_splits(self, execution_plan):
     #     """
     #     Goes through the execution plan and reduces unnecessary splits
