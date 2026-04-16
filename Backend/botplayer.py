@@ -989,6 +989,13 @@ class Botplayer:
         star_cost: only used for troop_conversion
         """
 
+        if self.gs.in_ice_age:
+            if self.skill:
+                if self.skill.name != 'Realm_of_Permafrost':
+                    return
+                elif not self.skill.active:
+                    return
+
         # ------------------------------------------------------------------ #
         #  PRICE CALCULATION
         # ------------------------------------------------------------------ #
