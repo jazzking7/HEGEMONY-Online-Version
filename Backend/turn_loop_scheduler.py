@@ -719,9 +719,9 @@ class turn_loop_scheduler:
                     gs.server.emit('update_trty_display', {
                         tid_from: {'troops': gs.map.territories[tid_from].troops}
                     }, room=gs.lobby)
-                    gs.server.sleep(0.5)
                     gs.server.emit('selectionSoundFx', room=gs.lobby)
                     gs.server.emit('troop_addition_display', {f'{tid_from}': {'tid': tid_from, 'number': deploy_amt}}, room=gs.lobby)
+                    gs.server.sleep(0.5)
                     gs.update_LAO(atk_player.uid)
                     gs.update_player_stats()
                     gs.get_SUP()

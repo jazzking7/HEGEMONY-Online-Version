@@ -158,6 +158,7 @@ class Tutorial_Manager:
         elif stage == 4:
             self.server.emit('update_trty_display', {7:{'troops': "1"}}, room=player)
             self.server.emit('update_trty_display', {25:{'troops': "10", 'color': "#4169E1"}}, room=player)
+            self.server.emit('rebuild_mapshape_cache', room=player)
             #self.server.emit('pick_color', room=player)
             self.server.emit('rearrangement_tutorial', room=player)
             self.server.emit('change_click_event_tutorial', {'event': 'rearrangement_tutorial'}, room=player)
