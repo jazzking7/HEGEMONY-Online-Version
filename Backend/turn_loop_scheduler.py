@@ -520,8 +520,8 @@ class turn_loop_scheduler:
         self.reinforcement(gs, player)
 
         if atk_player.hijacked:
-            for player in gs.players:
-                currp = gs.players[player]
+            for existplayer in gs.players:
+                currp = gs.players[existplayer]
                 if currp.skill.name == "Loan Shark":
                     if atk_player.uid in currp.skill.loan_list:
                         if atk_player.total_troops > atk_player.stars*10:
