@@ -473,8 +473,8 @@ class PixiMapRenderer {
 
     this.clickableIndicators = new Map();
     this.clickableAnimTime = 0;
-    this.clickableMaxOffset = 30;
-    this.clickableSpeed = 0.06;
+    this.clickableMaxOffset = 18;
+    this.clickableSpeed = 0.005;
 
     this.dragging = false;
     this.dragMoved = false;
@@ -544,10 +544,10 @@ class PixiMapRenderer {
     this.clickablesLayer.roundPixels = true;
 
     this.overlayLayer.addChild(this.targetCaptureOverlay);
-    this.overlayLayer.addChild(this.otherHighlightOverlay);
-    this.overlayLayer.addChild(this.toHighlightOverlay);
     this.overlayLayer.addChild(this.hoverOverlay);
     this.overlayLayer.addChild(this.clickablesLayer);
+    this.overlayLayer.addChild(this.otherHighlightOverlay);
+    this.overlayLayer.addChild(this.toHighlightOverlay);
 
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
@@ -661,12 +661,6 @@ class PixiMapRenderer {
     if (extras[0].status === "fulfilled") this.seaRoutes = extras[0].value;
     if (extras[1].status === "fulfilled") this.contBorders = extras[1].value;
     if (extras[2].status === "fulfilled") this.contBonusBoxes = extras[2].value;
-
-    console.log("Pixi map loaded:", {
-      mapName: this.mapName,
-      territories: this.territories.length,
-      seaRoutes: this.seaRoutes.length
-    });
   }
 
   async loadContinentData(mapName, contNum) {
