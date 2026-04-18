@@ -435,12 +435,15 @@ class PixiMapRenderer {
     this.world = null;
     this.baseLayer = null;
     this.seaRouteLayer = null;
+    this.contBorderLayer = null;
     this.overlayLayer = null;
     this.backgroundSprite = null;
 
     this.iconTextures = null;
     this.seaRouteDotsGraphics = null;
     this.seaRouteLinesGraphics = null;
+    this.contBorderGraphics = null;
+    this.contBonusBoxLayer = null;
 
     this.hoverOverlay = null;
     this.targetCaptureOverlay = null;
@@ -474,7 +477,9 @@ class PixiMapRenderer {
     this.clickableIndicators = new Map();
     this.clickableAnimTime = 0;
     this.clickableMaxOffset = 18;
-    this.clickableSpeed = 0.005;
+    this.clickableSpeed = 0.0028;
+
+    this.showContBorders = false;
 
     this.dragging = false;
     this.dragMoved = false;
@@ -525,6 +530,7 @@ class PixiMapRenderer {
     this.world = new PIXI.Container();
     this.baseLayer = new PIXI.Container();
     this.seaRouteLayer = new PIXI.Container();
+    this.contBorderLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
 
     this.hoverOverlay = new PIXI.Graphics();
@@ -533,9 +539,16 @@ class PixiMapRenderer {
     this.toHighlightOverlay = new PIXI.Graphics();
     this.clickablesLayer = new PIXI.Container();
 
+    this.contBorderGraphics = new PIXI.Graphics();
+    this.contBonusBoxLayer = new PIXI.Container();
+    this.contBorderLayer.addChild(this.contBorderGraphics);
+    this.contBorderLayer.addChild(this.contBonusBoxLayer);
+    this.contBorderLayer.visible = false;
+
     this.world.roundPixels = true;
     this.baseLayer.roundPixels = true;
     this.seaRouteLayer.roundPixels = true;
+    this.contBorderLayer.roundPixels = true;
     this.overlayLayer.roundPixels = true;
     this.hoverOverlay.roundPixels = true;
     this.targetCaptureOverlay.roundPixels = true;
@@ -552,6 +565,7 @@ class PixiMapRenderer {
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
     this.world.addChild(this.overlayLayer);
+    this.world.addChild(this.contBorderLayer);
     this.app.stage.addChild(this.world);
 
     this.app.renderer.on("resize", (width, height) => {
@@ -564,6 +578,7 @@ class PixiMapRenderer {
     await this.loadMapComponents();
     this.buildMap();
     this.buildSeaRouteGraphics();
+    this.buildContinentBorderGraphics();
     this.setupDragAndZoom();
     this.fitWorldToMap();
     this.updateViewModeFromZoom(true);
@@ -753,6 +768,89 @@ class PixiMapRenderer {
     this.seaRouteLayer.addChild(this.seaRouteDotsGraphics);
   }
 
+  buildContinentBorderGraphics() {
+    this.drawContinentBorders();
+    this.drawContinentBonusBoxes();
+    this.contBorderLayer.visible = this.showContBorders;
+  }
+
+  drawContinentBorders() {
+    if (!this.contBorderGraphics) return;
+
+    this.contBorderGraphics.clear();
+
+    if (!this.contBorders || !this.contBorders.length) return;
+
+    for (let i = 0; i < this.contBorders.length; i++) {
+      const border = this.contBorders[i];
+      if (!border || !border.length) continue;
+
+      const pts = [];
+      for (let j = 0; j < border.length; j++) {
+        pts.push(border[j].x, border[j].y);
+      }
+
+      this.contBorderGraphics.poly(pts);
+      this.contBorderGraphics.fill({
+        color: 0x808080,
+        alpha: 100 / 255
+      });
+      this.contBorderGraphics.stroke({
+        color: 0x000000,
+        width: 4,
+        alpha: 1,
+        join: "round"
+      });
+    }
+  }
+
+  drawContinentBonusBoxes() {
+    if (!this.contBonusBoxLayer) return;
+
+    this.contBonusBoxLayer.removeChildren();
+
+    if (!this.contBonusBoxes || !this.contBonusBoxes.length) return;
+
+    for (let i = 0; i < this.contBonusBoxes.length; i++) {
+      const bonus = this.contBonusBoxes[i];
+      if (!bonus) continue;
+
+      const box = new PIXI.Container();
+      box.roundPixels = true;
+
+      const bg = new PIXI.Graphics();
+      bg.rect(bonus.x, bonus.y, bonus.dx, bonus.dy);
+      bg.fill(0xffffff);
+      bg.stroke({
+        color: 0x000000,
+        width: 1,
+        alpha: 1,
+        join: "miter"
+      });
+
+      const text = new PIXI.Text({
+        text: bonus.message || "",
+        style: new PIXI.TextStyle({
+          fontFamily: "Urbanist",
+          fontSize: 15,
+          fill: 0x000000,
+          fontWeight: "700",
+          align: "center"
+        })
+      });
+
+      text.anchor.set(0.5);
+      text.resolution = 2;
+      text.roundPixels = true;
+      text.x = Math.round(bonus.cx);
+      text.y = Math.round(bonus.cy);
+
+      box.addChild(bg);
+      box.addChild(text);
+      this.contBonusBoxLayer.addChild(box);
+    }
+  }
+
   drawSeaRouteCoordinates(gfx) {
     gfx.clear();
 
@@ -825,12 +923,8 @@ class PixiMapRenderer {
   }
 
   getHighlightContrastColor(id) {
-    const trty = this.territories[id];
-    if (!trty) return 0x000000;
-
     const view = this.territoryViews[id];
     if (!view) return 0x000000;
-
     return view.isDarkFill() ? 0xf5f5f5 : 0x000000;
   }
 
@@ -947,9 +1041,7 @@ class PixiMapRenderer {
     for (const id of nextIds) {
       if (!this.clickableIndicators.has(id)) {
         const indicator = this.createClickableIndicator(id);
-        if (indicator) {
-          this.clickableIndicators.set(id, indicator);
-        }
+        if (indicator) this.clickableIndicators.set(id, indicator);
       } else {
         const indicator = this.clickableIndicators.get(id);
         const trty = this.territories[id];
@@ -1025,6 +1117,19 @@ class PixiMapRenderer {
     this.otherHighlight = this.normalizeIdArray(ids);
     this.otherHighlightSet = new Set(this.otherHighlight);
     this.refreshOtherHighlightOverlay();
+  }
+
+  setShowContBorders(value) {
+    this.showContBorders = !!value;
+    if (this.contBorderLayer) {
+        this.contBorderLayer.visible = this.showContBorders;
+        this.world.removeChild(this.contBorderLayer);
+        this.world.addChild(this.contBorderLayer);
+    }
+  }
+
+  toggleContBorders() {
+    this.setShowContBorders(!this.showContBorders);
   }
 
   clearToHighLight() {
@@ -1130,28 +1235,24 @@ class PixiMapRenderer {
       this.world.y = worldStart.y + dy;
     });
 
-    this.app.canvas.addEventListener(
-      "wheel",
-      (e) => {
-        e.preventDefault();
+    this.app.canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
 
-        const oldScale = this.world.scale.x;
-        const factor = e.deltaY < 0 ? 1.1 : 0.9;
-        const newScale = Math.max(0.08, Math.min(6, oldScale * factor));
+      const oldScale = this.world.scale.x;
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      const newScale = Math.max(0.08, Math.min(6, oldScale * factor));
 
-        const mouse = new PIXI.Point(e.offsetX, e.offsetY);
-        const worldPosBefore = this.world.toLocal(mouse);
+      const mouse = new PIXI.Point(e.offsetX, e.offsetY);
+      const worldPosBefore = this.world.toLocal(mouse);
 
-        this.world.scale.set(newScale);
+      this.world.scale.set(newScale);
 
-        const screenPosAfter = this.world.toGlobal(worldPosBefore);
-        this.world.x += mouse.x - screenPosAfter.x;
-        this.world.y += mouse.y - screenPosAfter.y;
+      const screenPosAfter = this.world.toGlobal(worldPosBefore);
+      this.world.x += mouse.x - screenPosAfter.x;
+      this.world.y += mouse.y - screenPosAfter.y;
 
-        this.updateViewModeFromZoom(false);
-      },
-      { passive: false }
-    );
+      this.updateViewModeFromZoom(false);
+    }, { passive: false });
   }
 
   updateViewModeFromZoom(force = false) {
