@@ -233,13 +233,13 @@ class TerritoryView {
     this.viewMode = mode;
 
     if (mode === "far") {
-        this.nameText.visible = false;
-        this.troopText.visible = true;
-        this.iconLayer.visible = false;
-        this.capitalLayer.visible = false;
-        this.refreshTextStyles();
-        this.layoutFar();
-        return;
+      this.nameText.visible = false;
+      this.troopText.visible = true;
+      this.iconLayer.visible = false;
+      this.capitalLayer.visible = false;
+      this.refreshTextStyles();
+      this.layoutFar();
+      return;
     }
 
     this.nameText.visible = true;
@@ -248,7 +248,7 @@ class TerritoryView {
     this.capitalLayer.visible = true;
     this.refreshTextStyles();
     this.layoutNear();
-    }
+  }
 
   makeInteractive() {
     const pts = this.getFlatPoints();
@@ -294,6 +294,7 @@ class TerritoryView {
       let devKey = "city";
       if (this.data.devImg === "megacity") devKey = "megacity";
       if (this.data.devImg === "nexus") devKey = "nexus";
+      if (this.data.devImg === "bureau") devKey = "bureau";
 
       dev.texture = this.textures[devKey];
       dev.x = this.data.ds.x;
@@ -327,18 +328,18 @@ class TerritoryView {
     }
 
     if (this.data.leylineImg && this.data.cs) {
-    const tex = this.textures.leyline;
-    const baseW = tex.orig ? tex.orig.width : tex.width;
-    const baseH = tex.orig ? tex.orig.height : tex.height;
-    const targetH = this.data.cs.dy;
-    const scaledW = baseW * (targetH / baseH);
+      const tex = this.textures.leyline;
+      const baseW = tex.orig ? tex.orig.width : tex.width;
+      const baseH = tex.orig ? tex.orig.height : tex.height;
+      const targetH = this.data.cs.dy;
+      const scaledW = baseW * (targetH / baseH);
 
-    leyline.texture = tex;
-    leyline.x = this.data.cs.x;
-    leyline.y = this.data.cs.y;
-    leyline.width = scaledW;
-    leyline.height = targetH;
-    leyline.visible = true;
+      leyline.texture = tex;
+      leyline.x = this.data.cs.x;
+      leyline.y = this.data.cs.y;
+      leyline.width = scaledW;
+      leyline.height = targetH;
+      leyline.visible = true;
     }
   }
 
@@ -364,7 +365,7 @@ class TerritoryView {
       this.data.isCapital = capitalState.isCapital;
     }
 
-    if (this.data.capital_color == null && "capital_color" in capitalState) {
+    if ("capital_color" in capitalState) {
       this.data.capital_color = capitalState.capital_color;
     }
 
@@ -388,7 +389,7 @@ class TerritoryView {
     const innerRadius = starSize / 4;
 
     const fillColor = this.toPixiColor(this.data.capital_color || "#ffffff");
-    const luminance = this.getBrightnessFromColorValue(this.data.color || "#ffffff");
+    const luminance = this.getBrightnessFromColorValue(this.data.capital_color || "#ffffff");
     const strokeColor = luminance < 100 ? 0xf5f5f5 : 0x000000;
     const pts = this.createStarPoints(centerX, centerY, outerRadius, innerRadius, 5);
 
@@ -440,7 +441,12 @@ class PixiMapRenderer {
     this.iconTextures = null;
     this.seaRouteDotsGraphics = null;
     this.seaRouteLinesGraphics = null;
+
     this.hoverOverlay = null;
+    this.targetCaptureOverlay = null;
+    this.otherHighlightOverlay = null;
+    this.toHighlightOverlay = null;
+    this.clickablesLayer = null;
 
     this.mapProperties = null;
     this.territories = [];
@@ -454,6 +460,24 @@ class PixiMapRenderer {
 
     this.hoveredTerritoryId = null;
     this.hoverPulseTime = 0;
+
+    this.toHighLight = [];
+    this.clickables = [];
+    this.targetsToCapture = [];
+    this.otherHighlight = [];
+
+    this.toHighlightSet = new Set();
+    this.clickablesSet = new Set();
+    this.targetsToCaptureSet = new Set();
+    this.otherHighlightSet = new Set();
+
+    this.clickableIndicators = new Map();
+    this.clickableAnimTime = 0;
+    this.clickableMaxOffset = 30;
+    this.clickableSpeed = 0.06;
+
+    this.dragging = false;
+    this.dragMoved = false;
   }
 
   async init() {
@@ -480,15 +504,15 @@ class PixiMapRenderer {
     this.container.innerHTML = "";
     this.container.appendChild(this.app.canvas);
 
-    const bgTexture = await PIXI.Assets.load('/static/Assets/Background/background.svg');
+    const bgTexture = await PIXI.Assets.load("/static/Assets/Background/background.svg");
     this.iconTextures = {
-      city: await PIXI.Assets.load('/static/Assets/Dev/city.png'),
-      megacity: await PIXI.Assets.load('/static/Assets/Dev/megacity.png'),
-      nexus: await PIXI.Assets.load('/static/Assets/Dev/transhub.png'),
-      fort: await PIXI.Assets.load('/static/Assets/Insig/fort.png'),
-      hall: await PIXI.Assets.load('/static/Assets/Insig/CAD.png'),
-      leyline: await PIXI.Assets.load('/static/Assets/Insig/leyline.png'),
-      bureau: await PIXI.Assets.load('/static/Assets/Insig/mobbureau.png')
+      city: await PIXI.Assets.load("/static/Assets/Dev/city.png"),
+      megacity: await PIXI.Assets.load("/static/Assets/Dev/megacity.png"),
+      nexus: await PIXI.Assets.load("/static/Assets/Dev/transhub.png"),
+      fort: await PIXI.Assets.load("/static/Assets/Insig/fort.png"),
+      hall: await PIXI.Assets.load("/static/Assets/Insig/CAD.png"),
+      leyline: await PIXI.Assets.load("/static/Assets/Insig/leyline.png"),
+      bureau: await PIXI.Assets.load("/static/Assets/Insig/mobbureau.png")
     };
 
     this.backgroundSprite = new PIXI.Sprite(bgTexture);
@@ -502,15 +526,28 @@ class PixiMapRenderer {
     this.baseLayer = new PIXI.Container();
     this.seaRouteLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
+
     this.hoverOverlay = new PIXI.Graphics();
+    this.targetCaptureOverlay = new PIXI.Graphics();
+    this.otherHighlightOverlay = new PIXI.Graphics();
+    this.toHighlightOverlay = new PIXI.Graphics();
+    this.clickablesLayer = new PIXI.Container();
 
     this.world.roundPixels = true;
     this.baseLayer.roundPixels = true;
     this.seaRouteLayer.roundPixels = true;
     this.overlayLayer.roundPixels = true;
     this.hoverOverlay.roundPixels = true;
+    this.targetCaptureOverlay.roundPixels = true;
+    this.otherHighlightOverlay.roundPixels = true;
+    this.toHighlightOverlay.roundPixels = true;
+    this.clickablesLayer.roundPixels = true;
 
+    this.overlayLayer.addChild(this.targetCaptureOverlay);
+    this.overlayLayer.addChild(this.otherHighlightOverlay);
+    this.overlayLayer.addChild(this.toHighlightOverlay);
     this.overlayLayer.addChild(this.hoverOverlay);
+    this.overlayLayer.addChild(this.clickablesLayer);
 
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
@@ -530,9 +567,11 @@ class PixiMapRenderer {
     this.setupDragAndZoom();
     this.fitWorldToMap();
     this.updateViewModeFromZoom(true);
+    this.refreshAllOverlays();
 
     this.app.ticker.add((ticker) => {
       this.updateHoverPulse(ticker.deltaMS);
+      this.updateClickableAnimation(ticker.deltaMS);
     });
   }
 
@@ -687,6 +726,7 @@ class PixiMapRenderer {
           }
         },
         onClick: (id) => {
+          if (this.dragMoved) return;
           console.log("clicked territory:", id, this.territories[id]?.name);
         }
       });
@@ -779,36 +819,234 @@ class PixiMapRenderer {
     }
   }
 
-  drawHoverOverlay() {
-    this.hoverOverlay.clear();
-
-    if (this.hoveredTerritoryId == null) return;
-
-    const trty = this.territories[this.hoveredTerritoryId];
-    if (!trty || !trty.outline || !trty.outline.length) return;
-
-    const s = 1 + 0.3 * Math.sin(this.hoverPulseTime);
-    const width = 2.5 * s;
-    const alpha = 220 / 255;
+  getTerritoryFlatPoints(id) {
+    const trty = this.territories[id];
+    if (!trty || !trty.outline || !trty.outline.length) return [];
 
     const pts = [];
     for (let i = 0; i < trty.outline.length; i++) {
       pts.push(trty.outline[i].x, trty.outline[i].y);
     }
+    return pts;
+  }
 
-    this.hoverOverlay.poly(pts);
-    this.hoverOverlay.stroke({
-      color: 0xffffff,
+  getHighlightContrastColor(id) {
+    const trty = this.territories[id];
+    if (!trty) return 0x000000;
+
+    const view = this.territoryViews[id];
+    if (!view) return 0x000000;
+
+    return view.isDarkFill() ? 0xf5f5f5 : 0x000000;
+  }
+
+  drawPolygonOutline(gfx, points, color, width, alpha = 1) {
+    if (!points || !points.length) return;
+    gfx.poly(points);
+    gfx.stroke({
+      color,
       width,
       alpha,
       join: "round"
     });
   }
 
+  drawHoverOverlay() {
+    this.hoverOverlay.clear();
+
+    if (this.hoveredTerritoryId == null) return;
+
+    const pts = this.getTerritoryFlatPoints(this.hoveredTerritoryId);
+    if (!pts.length) return;
+
+    const s = 1 + 0.3 * Math.sin(this.hoverPulseTime);
+    const width = 2.5 * s;
+    const alpha = 220 / 255;
+
+    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, width, alpha);
+  }
+
   updateHoverPulse(deltaMS) {
     if (this.hoveredTerritoryId == null) return;
     this.hoverPulseTime += deltaMS * 0.01;
     this.drawHoverOverlay();
+  }
+
+  refreshTargetsToCaptureOverlay() {
+    this.targetCaptureOverlay.clear();
+
+    for (const id of this.targetsToCaptureSet) {
+      const pts = this.getTerritoryFlatPoints(id);
+      if (!pts.length) continue;
+
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 7, 70 / 255);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 4, 1);
+    }
+  }
+
+  refreshOtherHighlightOverlay() {
+    this.otherHighlightOverlay.clear();
+
+    for (const id of this.otherHighlightSet) {
+      const pts = this.getTerritoryFlatPoints(id);
+      if (!pts.length) continue;
+
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0x000000, 4, 1);
+    }
+  }
+
+  refreshToHighlightOverlay() {
+    this.toHighlightOverlay.clear();
+
+    for (const id of this.toHighlightSet) {
+      const pts = this.getTerritoryFlatPoints(id);
+      if (!pts.length) continue;
+
+      const color = this.getHighlightContrastColor(id);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, color, 4, 1);
+    }
+  }
+
+  createClickableIndicator(id) {
+    const trty = this.territories[id];
+    if (!trty || !trty.cps) return null;
+
+    const g = new PIXI.Graphics();
+    g.eventMode = "none";
+    g.roundPixels = true;
+
+    const halfBase = 10;
+    const topY = -17.3205;
+    const bottomY = 0;
+
+    g.poly([
+      -halfBase, topY,
+       halfBase, topY,
+       0,        bottomY
+    ]);
+    g.fill(0xff0000);
+    g.stroke({
+      color: 0x000000,
+      width: 2,
+      join: "round"
+    });
+
+    g.x = Math.round(trty.cps.x);
+    g.y = Math.round(trty.cps.y);
+    g.baseY = Math.round(trty.cps.y);
+
+    this.clickablesLayer.addChild(g);
+    return g;
+  }
+
+  refreshClickables() {
+    const nextIds = this.clickablesSet;
+
+    for (const [id, indicator] of this.clickableIndicators.entries()) {
+      if (!nextIds.has(id)) {
+        this.clickablesLayer.removeChild(indicator);
+        indicator.destroy();
+        this.clickableIndicators.delete(id);
+      }
+    }
+
+    for (const id of nextIds) {
+      if (!this.clickableIndicators.has(id)) {
+        const indicator = this.createClickableIndicator(id);
+        if (indicator) {
+          this.clickableIndicators.set(id, indicator);
+        }
+      } else {
+        const indicator = this.clickableIndicators.get(id);
+        const trty = this.territories[id];
+        if (indicator && trty && trty.cps) {
+          indicator.x = Math.round(trty.cps.x);
+          indicator.baseY = Math.round(trty.cps.y);
+        }
+      }
+    }
+
+    this.clickablesLayer.visible = this.clickablesSet.size > 0;
+  }
+
+  updateClickableAnimation(deltaMS) {
+    if (this.clickableIndicators.size === 0) return;
+
+    this.clickableAnimTime += deltaMS * this.clickableSpeed;
+
+    const normalized = (Math.sin(this.clickableAnimTime) + 1) * 0.5;
+    const offset = normalized * this.clickableMaxOffset;
+
+    for (const indicator of this.clickableIndicators.values()) {
+      indicator.y = Math.round(indicator.baseY + offset);
+    }
+  }
+
+  refreshAllOverlays() {
+    this.refreshTargetsToCaptureOverlay();
+    this.refreshOtherHighlightOverlay();
+    this.refreshToHighlightOverlay();
+    this.refreshClickables();
+    this.drawHoverOverlay();
+  }
+
+  normalizeIdArray(ids) {
+    if (!Array.isArray(ids)) return [];
+
+    const max = this.territories.length;
+    const seen = new Set();
+    const out = [];
+
+    for (let i = 0; i < ids.length; i++) {
+      const n = Number(ids[i]);
+      if (!Number.isInteger(n)) continue;
+      if (n < 0 || n >= max) continue;
+      if (seen.has(n)) continue;
+      seen.add(n);
+      out.push(n);
+    }
+
+    return out;
+  }
+
+  setToHighLight(ids = []) {
+    this.toHighLight = this.normalizeIdArray(ids);
+    this.toHighlightSet = new Set(this.toHighLight);
+    this.refreshToHighlightOverlay();
+  }
+
+  setClickables(ids = []) {
+    this.clickables = this.normalizeIdArray(ids);
+    this.clickablesSet = new Set(this.clickables);
+    this.refreshClickables();
+  }
+
+  setTargetsToCapture(ids = []) {
+    this.targetsToCapture = this.normalizeIdArray(ids);
+    this.targetsToCaptureSet = new Set(this.targetsToCapture);
+    this.refreshTargetsToCaptureOverlay();
+  }
+
+  setOtherHighlight(ids = []) {
+    this.otherHighlight = this.normalizeIdArray(ids);
+    this.otherHighlightSet = new Set(this.otherHighlight);
+    this.refreshOtherHighlightOverlay();
+  }
+
+  clearToHighLight() {
+    this.setToHighLight([]);
+  }
+
+  clearClickables() {
+    this.setClickables([]);
+  }
+
+  clearTargetsToCapture() {
+    this.setTargetsToCapture([]);
+  }
+
+  clearOtherHighlight() {
+    this.setOtherHighlight([]);
   }
 
   getMapBounds() {
@@ -857,7 +1095,6 @@ class PixiMapRenderer {
   }
 
   setupDragAndZoom() {
-    let dragging = false;
     let dragStart = null;
     let worldStart = null;
 
@@ -865,23 +1102,38 @@ class PixiMapRenderer {
     this.app.stage.hitArea = this.app.screen;
 
     this.app.stage.on("pointerdown", (e) => {
-      dragging = true;
+      this.dragging = true;
+      this.dragMoved = false;
       dragStart = e.global.clone();
       worldStart = new PIXI.Point(this.world.x, this.world.y);
     });
 
     this.app.stage.on("pointerup", () => {
-      dragging = false;
+      this.dragging = false;
+      requestAnimationFrame(() => {
+        this.dragMoved = false;
+      });
     });
 
     this.app.stage.on("pointerupoutside", () => {
-      dragging = false;
+      this.dragging = false;
+      requestAnimationFrame(() => {
+        this.dragMoved = false;
+      });
     });
 
     this.app.stage.on("pointermove", (e) => {
-      if (!dragging) return;
-      this.world.x = worldStart.x + (e.global.x - dragStart.x);
-      this.world.y = worldStart.y + (e.global.y - dragStart.y);
+      if (!this.dragging) return;
+
+      const dx = e.global.x - dragStart.x;
+      const dy = e.global.y - dragStart.y;
+
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+        this.dragMoved = true;
+      }
+
+      this.world.x = worldStart.x + dx;
+      this.world.y = worldStart.y + dy;
     });
 
     this.app.canvas.addEventListener(
@@ -924,7 +1176,12 @@ class PixiMapRenderer {
   setTerritoryColor(id, color) {
     const view = this.territoryViews[id];
     if (!view) return;
+
     view.setColor(color);
+
+    if (this.toHighlightSet.has(id)) {
+      this.refreshToHighlightOverlay();
+    }
   }
 
   setTerritoryTroops(id, troops) {
