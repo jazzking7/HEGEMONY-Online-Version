@@ -1,7 +1,8 @@
 class TerritoryView {
-  constructor(data, id, callbacks = {}) {
+  constructor(data, id, textures, callbacks = {}) {
     this.data = data;
     this.id = id;
+    this.textures = textures;
     this.onHover = callbacks.onHover || null;
     this.onOut = callbacks.onOut || null;
     this.onClick = callbacks.onClick || null;
@@ -12,58 +13,94 @@ class TerritoryView {
     this.base = new PIXI.Graphics();
     this.border = new PIXI.Graphics();
     this.hit = new PIXI.Graphics();
+    this.iconLayer = new PIXI.Container();
+    this.capitalLayer = new PIXI.Container();
+    this.capitalGraphic = new PIXI.Graphics();
 
-    const textFill = this.getTextFill();
-
-    this.nameStyle = new PIXI.TextStyle({
+    this.nameStyleDark = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 12,
-      fill: textFill,
+      fill: 0x000000,
       fontWeight: "700",
       align: "left"
     });
 
-    this.troopNearStyle = new PIXI.TextStyle({
+    this.nameStyleLight = new PIXI.TextStyle({
+      fontFamily: "Urbanist",
+      fontSize: 12,
+      fill: 0xf5f5f5,
+      fontWeight: "700",
+      align: "left"
+    });
+
+    this.troopNearStyleDark = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 16,
-      fill: textFill,
+      fill: 0x000000,
       fontWeight: "700",
       align: "left"
     });
 
-    this.troopFarStyle = new PIXI.TextStyle({
+    this.troopNearStyleLight = new PIXI.TextStyle({
+      fontFamily: "Urbanist",
+      fontSize: 16,
+      fill: 0xf5f5f5,
+      fontWeight: "700",
+      align: "left"
+    });
+
+    this.troopFarStyleDark = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 35,
-      fill: textFill,
+      fill: 0x000000,
+      fontWeight: "700",
+      align: "left"
+    });
+
+    this.troopFarStyleLight = new PIXI.TextStyle({
+      fontFamily: "Urbanist",
+      fontSize: 35,
+      fill: 0xf5f5f5,
       fontWeight: "700",
       align: "left"
     });
 
     this.nameText = new PIXI.Text({
       text: this.data.name || "",
-      style: this.nameStyle
+      style: this.nameStyleDark
     });
 
     this.troopText = new PIXI.Text({
       text: this.data.troops != null ? String(this.data.troops) : "",
-      style: this.troopNearStyle
+      style: this.troopNearStyleDark
     });
 
-    const textRes = 2;
-    this.nameText.resolution = textRes;
-    this.troopText.resolution = textRes;
+    this.nameText.resolution = 2;
+    this.troopText.resolution = 2;
     this.nameText.roundPixels = true;
     this.troopText.roundPixels = true;
 
+    this.devSprite = null;
+    this.insigSprite = null;
+    this.hallSprite = null;
+    this.leylineSprite = null;
+
+    this.capitalLayer.addChild(this.capitalGraphic);
+
     this.container.addChild(this.base);
     this.container.addChild(this.border);
+    this.container.addChild(this.iconLayer);
+    this.container.addChild(this.capitalLayer);
     this.container.addChild(this.hit);
     this.container.addChild(this.nameText);
     this.container.addChild(this.troopText);
 
-    this.draw();
+    this.drawPolygon();
+    this.refreshTextStyles();
+    this.layoutForMode("near");
     this.makeInteractive();
-    this.applyViewMode("near");
+    this.syncIcons();
+    this.setCapitalState({});
   }
 
   getFlatPoints() {
@@ -79,9 +116,7 @@ class TerritoryView {
     if (typeof colorValue === "number") return colorValue;
 
     if (typeof colorValue === "string") {
-      if (colorValue.startsWith("#")) {
-        return parseInt(colorValue.slice(1), 16);
-      }
+      if (colorValue.startsWith("#")) return parseInt(colorValue.slice(1), 16);
 
       const named = {
         white: 0xffffff,
@@ -101,27 +136,19 @@ class TerritoryView {
     return 0xffffff;
   }
 
-  isDarkFill() {
-    const c = this.toPixiColor(this.data.color || "#ffffff");
+  getBrightnessFromColorValue(colorValue) {
+    const c = this.toPixiColor(colorValue || "#ffffff");
     const r = (c >> 16) & 255;
     const g = (c >> 8) & 255;
     const b = c & 255;
-    const brightness = (0.299 * r) + (0.587 * g) + (0.114 * b);
-    return brightness < 128;
+    return (0.299 * r) + (0.587 * g) + (0.114 * b);
   }
 
-  getTextFill() {
-    return this.isDarkFill() ? 0xf5f5f5 : 0x000000;
+  isDarkFill() {
+    return this.getBrightnessFromColorValue(this.data.color || "#ffffff") < 128;
   }
 
-  updateTextFill() {
-    const fill = this.getTextFill();
-    this.nameStyle.fill = fill;
-    this.troopNearStyle.fill = fill;
-    this.troopFarStyle.fill = fill;
-  }
-
-  draw() {
+  drawPolygon() {
     const pts = this.getFlatPoints();
     const fillColor = this.toPixiColor(this.data.color || "#ffffff");
 
@@ -143,24 +170,80 @@ class TerritoryView {
       color: 0xffffff,
       alpha: 0.001
     });
+  }
 
-    this.updateTextFill();
+  refreshTextStyles() {
+    const darkFill = this.isDarkFill();
+
+    if (darkFill) {
+      if (this.nameText.style !== this.nameStyleLight) {
+        this.nameText.style = this.nameStyleLight;
+      }
+      if (this.viewMode === "far") {
+        if (this.troopText.style !== this.troopFarStyleLight) {
+          this.troopText.style = this.troopFarStyleLight;
+        }
+      } else {
+        if (this.troopText.style !== this.troopNearStyleLight) {
+          this.troopText.style = this.troopNearStyleLight;
+        }
+      }
+    } else {
+      if (this.nameText.style !== this.nameStyleDark) {
+        this.nameText.style = this.nameStyleDark;
+      }
+      if (this.viewMode === "far") {
+        if (this.troopText.style !== this.troopFarStyleDark) {
+          this.troopText.style = this.troopFarStyleDark;
+        }
+      } else {
+        if (this.troopText.style !== this.troopNearStyleDark) {
+          this.troopText.style = this.troopNearStyleDark;
+        }
+      }
+    }
   }
 
   layoutNear() {
     if (this.data.ns) {
-      this.nameText.position.set(Math.round(this.data.ns.x), Math.round(this.data.ns.y - 12));
+      this.nameText.position.set(
+        Math.round(this.data.ns.x),
+        Math.round(this.data.ns.y - 12)
+      );
     }
 
     if (this.data.ts) {
-      this.troopText.position.set(Math.round(this.data.ts.x), Math.round(this.data.ts.y - 16));
+      this.troopText.position.set(
+        Math.round(this.data.ts.x),
+        Math.round(this.data.ts.y - 16)
+      );
     }
   }
 
   layoutFar() {
     if (this.data.cps) {
-      this.troopText.position.set(Math.round(this.data.cps.x), Math.round(this.data.cps.y - 35));
+      this.troopText.position.set(
+        Math.round(this.data.cps.x),
+        Math.round(this.data.cps.y - 35)
+      );
     }
+  }
+
+  layoutForMode(mode) {
+    this.viewMode = mode;
+
+    if (mode === "far") {
+      this.nameText.visible = false;
+      this.troopText.visible = true;
+      this.refreshTextStyles();
+      this.layoutFar();
+      return;
+    }
+
+    this.nameText.visible = true;
+    this.troopText.visible = true;
+    this.refreshTextStyles();
+    this.layoutNear();
   }
 
   makeInteractive() {
@@ -183,9 +266,138 @@ class TerritoryView {
     });
   }
 
+  ensureSprite(slotName, textureKey) {
+    if (!this[slotName]) {
+      this[slotName] = new PIXI.Sprite(this.textures[textureKey]);
+      this[slotName].visible = false;
+      this.iconLayer.addChild(this[slotName]);
+    }
+    return this[slotName];
+  }
+
+  syncIcons() {
+    const dev = this.ensureSprite("devSprite", "city");
+    const insig = this.ensureSprite("insigSprite", "fort");
+    const hall = this.ensureSprite("hallSprite", "hall");
+    const leyline = this.ensureSprite("leylineSprite", "leyline");
+
+    dev.visible = false;
+    insig.visible = false;
+    hall.visible = false;
+    leyline.visible = false;
+
+    if (this.data.devImg && this.data.ds) {
+      let devKey = "city";
+      if (this.data.devImg === "megacity") devKey = "megacity";
+      if (this.data.devImg === "nexus") devKey = "nexus";
+
+      dev.texture = this.textures[devKey];
+      dev.x = this.data.ds.x;
+      dev.y = this.data.ds.y;
+      dev.width = this.data.ds.dx;
+      dev.height = this.data.ds.dy;
+      dev.visible = true;
+    }
+
+    if (this.data.insig && this.data.is) {
+      let insigKey = "fort";
+      if (this.data.insig === "bureau") insigKey = "bureau";
+      if (this.data.insig === "hall") insigKey = "hall";
+      if (this.data.insig === "leyline") insigKey = "leyline";
+
+      insig.texture = this.textures[insigKey];
+      insig.x = this.data.is.x;
+      insig.y = this.data.is.y;
+      insig.width = this.data.is.dx;
+      insig.height = this.data.is.dy;
+      insig.visible = true;
+    }
+
+    if (this.data.hallImg && this.data.cs) {
+      hall.texture = this.textures.hall;
+      hall.x = this.data.cs.x;
+      hall.y = this.data.cs.y;
+      hall.width = this.data.cs.dx;
+      hall.height = this.data.cs.dy;
+      hall.visible = true;
+    }
+
+    if (this.data.leylineImg && this.data.cs) {
+      const tex = this.textures.leyline;
+      const scale = this.data.cs.dy / tex.height;
+
+      leyline.texture = tex;
+      leyline.x = this.data.cs.x;
+      leyline.y = this.data.cs.y;
+      leyline.width = tex.width * scale;
+      leyline.height = this.data.cs.dy;
+      leyline.visible = true;
+    }
+  }
+
+  createStarPoints(centerX, centerY, outerRadius, innerRadius, numPoints = 5) {
+    const pts = [];
+    const angleStep = Math.PI / numPoints;
+    let angle = -Math.PI / 2;
+
+    for (let i = 0; i < numPoints * 2; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      pts.push(
+        centerX + Math.cos(angle) * radius,
+        centerY + Math.sin(angle) * radius
+      );
+      angle += angleStep;
+    }
+
+    return pts;
+  }
+
+  setCapitalState(capitalState = {}) {
+    if ("isCapital" in capitalState) {
+      this.data.isCapital = capitalState.isCapital;
+    }
+
+    if (this.data.capital_color == null && "capital_color" in capitalState) {
+      this.data.capital_color = capitalState.capital_color;
+    }
+
+    if (this.data.capital_color == null) {
+      this.data.capital_color = "#ffffff";
+    }
+
+    this.capitalGraphic.clear();
+
+    if (!this.data.isCapital || !this.data.cs) return;
+
+    const x = this.data.cs.x;
+    const y = this.data.cs.y;
+    const w = this.data.cs.dx;
+    const h = this.data.cs.dy;
+
+    const centerX = x + w / 2;
+    const centerY = y + h / 2;
+    const starSize = Math.min(w, h) * 0.8;
+    const outerRadius = starSize / 2;
+    const innerRadius = starSize / 4;
+
+    const fillColor = this.toPixiColor(this.data.capital_color || "#ffffff");
+    const luminance = this.getBrightnessFromColorValue(this.data.color || "#ffffff");
+    const strokeColor = luminance < 100 ? 0xf5f5f5 : 0x000000;
+    const pts = this.createStarPoints(centerX, centerY, outerRadius, innerRadius, 5);
+
+    this.capitalGraphic.poly(pts);
+    this.capitalGraphic.fill(fillColor);
+    this.capitalGraphic.stroke({
+      color: strokeColor,
+      width: 2,
+      join: "round"
+    });
+  }
+
   setColor(color) {
     this.data.color = color;
-    this.draw();
+    this.drawPolygon();
+    this.refreshTextStyles();
   }
 
   setTroops(value) {
@@ -193,25 +405,12 @@ class TerritoryView {
     this.troopText.text = value != null ? String(value) : "";
   }
 
-  applyViewMode(mode) {
-    this.viewMode = mode;
-
-    if (mode === "far") {
-      this.nameText.visible = false;
-      this.troopText.visible = true;
-      if (this.troopText.style !== this.troopFarStyle) {
-        this.troopText.style = this.troopFarStyle;
-      }
-      this.layoutFar();
-      return;
-    }
-
-    this.nameText.visible = true;
-    this.troopText.visible = true;
-    if (this.troopText.style !== this.troopNearStyle) {
-      this.troopText.style = this.troopNearStyle;
-    }
-    this.layoutNear();
+  setIcons(iconState = {}) {
+    if ("devImg" in iconState) this.data.devImg = iconState.devImg;
+    if ("insig" in iconState) this.data.insig = iconState.insig;
+    if ("hallImg" in iconState) this.data.hallImg = iconState.hallImg;
+    if ("leylineImg" in iconState) this.data.leylineImg = iconState.leylineImg;
+    this.syncIcons();
   }
 }
 
@@ -231,6 +430,7 @@ class PixiMapRenderer {
     this.overlayLayer = null;
     this.backgroundSprite = null;
 
+    this.iconTextures = null;
     this.seaRouteDotsGraphics = null;
     this.seaRouteLinesGraphics = null;
     this.hoverOverlay = null;
@@ -274,6 +474,16 @@ class PixiMapRenderer {
     this.container.appendChild(this.app.canvas);
 
     const bgTexture = await PIXI.Assets.load('/static/Assets/Background/background.svg');
+    this.iconTextures = {
+      city: await PIXI.Assets.load('/static/Assets/Dev/city.png'),
+      megacity: await PIXI.Assets.load('/static/Assets/Dev/megacity.png'),
+      nexus: await PIXI.Assets.load('/static/Assets/Dev/transhub.png'),
+      fort: await PIXI.Assets.load('/static/Assets/Insig/fort.png'),
+      hall: await PIXI.Assets.load('/static/Assets/Insig/CAD.png'),
+      leyline: await PIXI.Assets.load('/static/Assets/Insig/leyline.png'),
+      bureau: await PIXI.Assets.load('/static/Assets/Insig/mobbureau.png')
+    };
+
     this.backgroundSprite = new PIXI.Sprite(bgTexture);
     this.backgroundSprite.x = 0;
     this.backgroundSprite.y = 0;
@@ -382,9 +592,9 @@ class PixiMapRenderer {
           cs: capitalSpaces[i],
           ds: devSpaces[i],
           is: insigSpaces[i],
-          troops: "1",
+          troops: "",
           color: "#ffffff",
-          capital_color: "#ffffff",
+          capital_color: null,
           isCapital: false,
           devImg: null,
           insig: null,
@@ -458,7 +668,7 @@ class PixiMapRenderer {
     for (let i = 0; i < this.territories.length; i++) {
       const territory = this.territories[i];
 
-      const view = new TerritoryView(territory, i, {
+      const view = new TerritoryView(territory, i, this.iconTextures, {
         onHover: (id) => {
           this.hoveredTerritoryId = id;
           this.drawHoverOverlay();
@@ -700,7 +910,7 @@ class PixiMapRenderer {
     this.viewMode = nextMode;
 
     for (let i = 0; i < this.territoryViews.length; i++) {
-      this.territoryViews[i].applyViewMode(this.viewMode);
+      this.territoryViews[i].layoutForMode(this.viewMode);
     }
   }
 
@@ -714,6 +924,18 @@ class PixiMapRenderer {
     const view = this.territoryViews[id];
     if (!view) return;
     view.setTroops(troops);
+  }
+
+  setTerritoryIcons(id, iconState) {
+    const view = this.territoryViews[id];
+    if (!view) return;
+    view.setIcons(iconState);
+  }
+
+  setTerritoryCapital(id, capitalState) {
+    const view = this.territoryViews[id];
+    if (!view) return;
+    view.setCapitalState(capitalState);
   }
 }
 
