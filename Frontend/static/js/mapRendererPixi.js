@@ -233,18 +233,22 @@ class TerritoryView {
     this.viewMode = mode;
 
     if (mode === "far") {
-      this.nameText.visible = false;
-      this.troopText.visible = true;
-      this.refreshTextStyles();
-      this.layoutFar();
-      return;
+        this.nameText.visible = false;
+        this.troopText.visible = true;
+        this.iconLayer.visible = false;
+        this.capitalLayer.visible = false;
+        this.refreshTextStyles();
+        this.layoutFar();
+        return;
     }
 
     this.nameText.visible = true;
     this.troopText.visible = true;
+    this.iconLayer.visible = true;
+    this.capitalLayer.visible = true;
     this.refreshTextStyles();
     this.layoutNear();
-  }
+    }
 
   makeInteractive() {
     const pts = this.getFlatPoints();
@@ -323,15 +327,18 @@ class TerritoryView {
     }
 
     if (this.data.leylineImg && this.data.cs) {
-      const tex = this.textures.leyline;
-      const scale = this.data.cs.dy / tex.height;
+    const tex = this.textures.leyline;
+    const baseW = tex.orig ? tex.orig.width : tex.width;
+    const baseH = tex.orig ? tex.orig.height : tex.height;
+    const targetH = this.data.cs.dy;
+    const scaledW = baseW * (targetH / baseH);
 
-      leyline.texture = tex;
-      leyline.x = this.data.cs.x;
-      leyline.y = this.data.cs.y;
-      leyline.width = tex.width * scale;
-      leyline.height = this.data.cs.dy;
-      leyline.visible = true;
+    leyline.texture = tex;
+    leyline.x = this.data.cs.x;
+    leyline.y = this.data.cs.y;
+    leyline.width = scaledW;
+    leyline.height = targetH;
+    leyline.visible = true;
     }
   }
 
