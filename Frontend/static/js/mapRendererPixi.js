@@ -11,7 +11,6 @@ class TerritoryView {
 
     this.base = new PIXI.Graphics();
     this.border = new PIXI.Graphics();
-    this.hover = new PIXI.Graphics();
     this.hit = new PIXI.Graphics();
 
     const textFill = this.getTextFill();
@@ -56,11 +55,8 @@ class TerritoryView {
     this.nameText.roundPixels = true;
     this.troopText.roundPixels = true;
 
-    this.hover.visible = false;
-
     this.container.addChild(this.base);
     this.container.addChild(this.border);
-    this.container.addChild(this.hover);
     this.container.addChild(this.hit);
     this.container.addChild(this.nameText);
     this.container.addChild(this.troopText);
@@ -136,15 +132,9 @@ class TerritoryView {
     this.border.clear();
     this.border.poly(pts);
     this.border.stroke({
-      color: 0x666666,
-      width: 1.5
-    });
-
-    this.hover.clear();
-    this.hover.poly(pts);
-    this.hover.stroke({
-      color: 0xffffff,
-      width: 4
+      color: 0x7a95a3,
+      width: 3.2,
+      join: "round"
     });
 
     this.hit.clear();
@@ -181,12 +171,10 @@ class TerritoryView {
     this.hit.hitArea = new PIXI.Polygon(pts);
 
     this.hit.on("pointerover", () => {
-      this.hover.visible = true;
       if (this.onHover) this.onHover(this.id);
     });
 
     this.hit.on("pointerout", () => {
-      this.hover.visible = false;
       if (this.onOut) this.onOut(this.id);
     });
 
@@ -240,10 +228,12 @@ class PixiMapRenderer {
     this.world = null;
     this.baseLayer = null;
     this.seaRouteLayer = null;
+    this.overlayLayer = null;
     this.backgroundSprite = null;
 
     this.seaRouteDotsGraphics = null;
     this.seaRouteLinesGraphics = null;
+    this.hoverOverlay = null;
 
     this.mapProperties = null;
     this.territories = [];
@@ -254,6 +244,9 @@ class PixiMapRenderer {
     this.territoryViews = [];
     this.zoomThreshold = 0.4;
     this.viewMode = "near";
+
+    this.hoveredTerritoryId = null;
+    this.hoverPulseTime = 0;
   }
 
   async init() {
@@ -291,13 +284,20 @@ class PixiMapRenderer {
     this.world = new PIXI.Container();
     this.baseLayer = new PIXI.Container();
     this.seaRouteLayer = new PIXI.Container();
+    this.overlayLayer = new PIXI.Container();
+    this.hoverOverlay = new PIXI.Graphics();
 
     this.world.roundPixels = true;
     this.baseLayer.roundPixels = true;
     this.seaRouteLayer.roundPixels = true;
+    this.overlayLayer.roundPixels = true;
+    this.hoverOverlay.roundPixels = true;
+
+    this.overlayLayer.addChild(this.hoverOverlay);
 
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
+    this.world.addChild(this.overlayLayer);
     this.app.stage.addChild(this.world);
 
     this.app.renderer.on("resize", (width, height) => {
@@ -313,6 +313,10 @@ class PixiMapRenderer {
     this.setupDragAndZoom();
     this.fitWorldToMap();
     this.updateViewModeFromZoom(true);
+
+    this.app.ticker.add((ticker) => {
+      this.updateHoverPulse(ticker.deltaMS);
+    });
   }
 
   async loadJson(path) {
@@ -455,8 +459,16 @@ class PixiMapRenderer {
       const territory = this.territories[i];
 
       const view = new TerritoryView(territory, i, {
-        onHover: () => {},
-        onOut: () => {},
+        onHover: (id) => {
+          this.hoveredTerritoryId = id;
+          this.drawHoverOverlay();
+        },
+        onOut: (id) => {
+          if (this.hoveredTerritoryId === id) {
+            this.hoveredTerritoryId = null;
+            this.hoverOverlay.clear();
+          }
+        },
         onClick: (id) => {
           console.log("clicked territory:", id, this.territories[id]?.name);
         }
@@ -548,6 +560,38 @@ class PixiMapRenderer {
       gfx.circle(x, y, radius);
       gfx.fill(color);
     }
+  }
+
+  drawHoverOverlay() {
+    this.hoverOverlay.clear();
+
+    if (this.hoveredTerritoryId == null) return;
+
+    const trty = this.territories[this.hoveredTerritoryId];
+    if (!trty || !trty.outline || !trty.outline.length) return;
+
+    const s = 1 + 0.3 * Math.sin(this.hoverPulseTime);
+    const width = 2.5 * s;
+    const alpha = 220 / 255;
+
+    const pts = [];
+    for (let i = 0; i < trty.outline.length; i++) {
+      pts.push(trty.outline[i].x, trty.outline[i].y);
+    }
+
+    this.hoverOverlay.poly(pts);
+    this.hoverOverlay.stroke({
+      color: 0xffffff,
+      width,
+      alpha,
+      join: "round"
+    });
+  }
+
+  updateHoverPulse(deltaMS) {
+    if (this.hoveredTerritoryId == null) return;
+    this.hoverPulseTime += deltaMS * 0.01;
+    this.drawHoverOverlay();
   }
 
   getMapBounds() {
