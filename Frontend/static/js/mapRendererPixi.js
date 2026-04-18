@@ -239,7 +239,11 @@ class PixiMapRenderer {
     this.app = null;
     this.world = null;
     this.baseLayer = null;
+    this.seaRouteLayer = null;
     this.backgroundSprite = null;
+
+    this.seaRouteDotsGraphics = null;
+    this.seaRouteLinesGraphics = null;
 
     this.mapProperties = null;
     this.territories = [];
@@ -286,11 +290,14 @@ class PixiMapRenderer {
 
     this.world = new PIXI.Container();
     this.baseLayer = new PIXI.Container();
+    this.seaRouteLayer = new PIXI.Container();
 
     this.world.roundPixels = true;
     this.baseLayer.roundPixels = true;
+    this.seaRouteLayer.roundPixels = true;
 
     this.world.addChild(this.baseLayer);
+    this.world.addChild(this.seaRouteLayer);
     this.app.stage.addChild(this.world);
 
     this.app.renderer.on("resize", (width, height) => {
@@ -302,6 +309,7 @@ class PixiMapRenderer {
 
     await this.loadMapComponents();
     this.buildMap();
+    this.buildSeaRouteGraphics();
     this.setupDragAndZoom();
     this.fitWorldToMap();
     this.updateViewModeFromZoom(true);
@@ -456,6 +464,89 @@ class PixiMapRenderer {
 
       this.territoryViews.push(view);
       this.baseLayer.addChild(view.container);
+    }
+  }
+
+  buildSeaRouteGraphics() {
+    if (this.seaRouteDotsGraphics) {
+      this.seaRouteLayer.removeChild(this.seaRouteDotsGraphics);
+      this.seaRouteDotsGraphics.destroy();
+      this.seaRouteDotsGraphics = null;
+    }
+
+    if (this.seaRouteLinesGraphics) {
+      this.seaRouteLayer.removeChild(this.seaRouteLinesGraphics);
+      this.seaRouteLinesGraphics.destroy();
+      this.seaRouteLinesGraphics = null;
+    }
+
+    this.seaRouteLinesGraphics = new PIXI.Graphics();
+    this.seaRouteDotsGraphics = new PIXI.Graphics();
+
+    this.drawSeaRouteLines(this.seaRouteLinesGraphics);
+    this.drawSeaRouteCoordinates(this.seaRouteDotsGraphics);
+
+    this.seaRouteLayer.addChild(this.seaRouteLinesGraphics);
+    this.seaRouteLayer.addChild(this.seaRouteDotsGraphics);
+  }
+
+  drawSeaRouteCoordinates(gfx) {
+    gfx.clear();
+
+    const fillColor = 0x22d3ee;
+    const radius = 5;
+
+    for (let i = 0; i < this.territories.length; i++) {
+      const trty = this.territories[i];
+      if (!trty.srcs || !trty.srcs.length) continue;
+
+      for (let j = 0; j < trty.srcs.length; j++) {
+        const src = trty.srcs[j];
+        gfx.circle(src.x, src.y, radius);
+        gfx.fill(fillColor);
+      }
+    }
+  }
+
+  drawSeaRouteLines(gfx) {
+    gfx.clear();
+
+    const dotColor = 0xc8c8c8;
+    const radius = 2.5;
+    const dotSpacing = 6;
+
+    for (let i = 0; i < this.seaRoutes.length; i++) {
+      const route = this.seaRoutes[i];
+      this.drawDottedRouteToGraphics(
+        gfx,
+        route.x1,
+        route.y1,
+        route.x2,
+        route.y2,
+        dotSpacing,
+        radius,
+        dotColor
+      );
+    }
+  }
+
+  drawDottedRouteToGraphics(gfx, x1, y1, x2, y2, dotSpacing = 6, radius = 2.5, color = 0xc8c8c8) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lineLength = Math.sqrt(dx * dx + dy * dy);
+
+    if (lineLength <= 0) {
+      gfx.circle(x1, y1, radius);
+      gfx.fill(color);
+      return;
+    }
+
+    for (let i = 0; i <= lineLength; i += dotSpacing * 2) {
+      const t = i / lineLength;
+      const x = x1 + dx * t;
+      const y = y1 + dy * t;
+      gfx.circle(x, y, radius);
+      gfx.fill(color);
     }
   }
 
