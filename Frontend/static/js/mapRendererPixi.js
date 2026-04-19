@@ -1429,7 +1429,7 @@ class PixiMapRenderer {
   }
 
     buildIronWallTexture() {
-    const size = 220;
+    const size = 150;
     const g = new PIXI.Graphics();
 
     const center = size / 2;
@@ -1438,7 +1438,7 @@ class PixiMapRenderer {
     const hexH = Math.sqrt(3) * hexRadius;
 
     for (let q = -rings; q <= rings; q++) {
-      for (let r = -rings; r <= rings; r++) {
+        for (let r = -rings; r <= rings; r++) {
         const s = -q - r;
         const dist = Math.max(Math.abs(q), Math.abs(r), Math.abs(s));
         if (dist > rings) continue;
@@ -1448,66 +1448,66 @@ class PixiMapRenderer {
 
         const pts = [];
         for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI * 2 / 6) * i;
-          pts.push(
+            const angle = (Math.PI * 2 / 6) * i;
+            pts.push(
             x + hexRadius * Math.cos(angle),
             y + hexRadius * Math.sin(angle)
-          );
+            );
         }
 
         g.poly(pts);
         g.stroke({
-          color: 0xbeebff,
-          alpha: 120 / 255,
-          width: 3,
-          join: "round"
+            color: 0xbeebff,
+            alpha: 170 / 255,
+            width: 3,
+            join: "round"
         });
-      }
+        }
     }
 
-    g.circle(center, center, size * 0.45);
+    g.circle(center, center, size * 0.38);
     g.fill({
-      color: 0x7fdfff,
-      alpha: 0.06
+        color: 0xbeebff,
+        alpha: 0.045
     });
 
-    g.circle(center, center, size * 0.45);
+    g.circle(center, center, size * 0.38);
     g.stroke({
-      color: 0xdaf6ff,
-      alpha: 0.28,
-      width: 2,
-      join: "round"
+        color: 0xbeebff,
+        alpha: 170 / 255,
+        width: 2,
+        join: "round"
     });
 
     this.ironWallTexture = this.app.renderer.generateTexture({
-      target: g,
-      resolution: 2
+        target: g,
+        resolution: 2
     });
 
     g.destroy();
-  }
+    }
 
-  createIronWallSpriteForTerritory(tid) {
+    createIronWallSpriteForTerritory(tid) {
     const trty = this.territories[tid];
     if (!trty || !trty.cps || !this.ironWallTexture) return null;
 
     const sprite = new PIXI.Sprite(this.ironWallTexture);
     sprite.anchor.set(0.5);
     sprite.eventMode = "none";
-    sprite.blendMode = "screen";
-    sprite.alpha = 0.42;
+    sprite.blendMode = "normal";
+    sprite.alpha = 0.78;
     sprite.x = Math.round(trty.cps.x);
     sprite.y = Math.round(trty.cps.y);
 
     const size = 110;
     sprite.width = size;
     sprite.height = size;
-    sprite.baseAlpha = 0.42;
+    sprite.baseAlpha = 0.78;
     sprite.phase = Math.random() * Math.PI * 2;
 
     this.effectLayer.addChild(sprite);
     return sprite;
-  }
+    }
 
   setIronWallShields(ids = []) {
     const next = new Set(this.normalizeIdArray(ids));
@@ -1597,39 +1597,41 @@ class PixiMapRenderer {
   }
 
   spawnParticleBurst(x, y, opts = {}) {
-    const count = opts.count ?? 32;
-    const power = opts.power ?? 260;
-    const color = opts.color ?? 0xffa64d;
-    const sizeMin = opts.sizeMin ?? 3;
-    const sizeMax = opts.sizeMax ?? 6;
-    const lifeMin = opts.lifeMin ?? 260;
-    const lifeMax = opts.lifeMax ?? 520;
-    const drag = opts.drag ?? 0.985;
-    const upward = opts.upward ?? 0;
+  const count = opts.count ?? 48;
+  const power = opts.power ?? 300;
+  const color = opts.color ?? 0xffa64d;
+  const sizeMin = opts.sizeMin ?? 3;
+  const sizeMax = opts.sizeMax ?? 7;
+  const lifeMin = opts.lifeMin ?? 420;
+  const lifeMax = opts.lifeMax ?? 820;
+  const drag = opts.drag ?? 0.985;
+  const upward = opts.upward ?? 0;
+  const additive = opts.additive ?? true;
 
-    for (let i = 0; i < count; i++) {
-      const g = this.getEffectGraphicFromPool();
-      const angle = Math.random() * Math.PI * 2;
-      const speed = power * (0.7 + 0.3 * Math.random());
+  for (let i = 0; i < count; i++) {
+    const g = this.getEffectGraphicFromPool();
+    const angle = Math.random() * Math.PI * 2;
+    const speed = power * (0.7 + 0.3 * Math.random());
 
-      this.activeEffects.push({
-        type: "particle",
-        g,
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - upward,
-        elapsed: 0,
-        duration: lifeMin + Math.random() * (lifeMax - lifeMin),
-        size: sizeMin + Math.random() * (sizeMax - sizeMin),
-        color,
-        alpha0: 1,
-        drag,
-        grow: 0.985,
-        filled: true
-      });
-    }
+    this.activeEffects.push({
+      type: "particle",
+      g,
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - upward,
+      elapsed: 0,
+      duration: lifeMin + Math.random() * (lifeMax - lifeMin),
+      size: sizeMin + Math.random() * (sizeMax - sizeMin),
+      color,
+      alpha0: 1,
+      drag,
+      grow: 0.985,
+      filled: true,
+      additive
+    });
   }
+}
 
   spawnSmokeBurst(x, y, opts = {}) {
     const count = opts.count ?? 12;
@@ -1667,41 +1669,104 @@ class PixiMapRenderer {
     }
   }
 
-  spawnExplosionAt(x, y, opts = {}) {
-    const power = opts.power ?? 260;
-    const sparks = opts.sparks ?? 36;
-    const smoke = opts.smoke ?? 12;
-    const withRing = opts.withRing ?? true;
+  spawnEmberBurst(x, y, opts = {}) {
+  const count = opts.count ?? 18;
+  const color = opts.color ?? 0xc8b4a0;
+  const lifeMin = opts.lifeMin ?? 1000;
+  const lifeMax = opts.lifeMax ?? 1800;
+  const sizeMin = opts.sizeMin ?? 5;
+  const sizeMax = opts.sizeMax ?? 10;
+  const speedMin = opts.speedMin ?? 18;
+  const speedMax = opts.speedMax ?? 55;
 
-    this.spawnParticleBurst(x, y, {
-      count: sparks,
-      power,
-      color: 0xffa646,
-      sizeMin: 3,
-      sizeMax: 7,
-      lifeMin: 200,
-      lifeMax: 520,
-      drag: 0.985,
-      upward: 0
+  for (let i = 0; i < count; i++) {
+    const g = this.getEffectGraphicFromPool();
+
+    this.activeEffects.push({
+      type: "particle",
+      g,
+      x,
+      y,
+      vx: (Math.random() * 2 - 1) * speedMax,
+      vy: -(speedMin + Math.random() * (speedMax - speedMin)),
+      elapsed: 0,
+      duration: lifeMin + Math.random() * (lifeMax - lifeMin),
+      size: sizeMin + Math.random() * (sizeMax - sizeMin),
+      color,
+      alpha0: 0.45,
+      drag: 0.97,
+      grow: 1.006,
+      filled: true,
+      additive: false
     });
-
-    this.spawnSmokeBurst(x, y, {
-      count: smoke,
-      color: 0x5f5f5f
-    });
-
-    if (withRing) {
-      this.spawnRingEffect(x, y, {
-        life: 600,
-        r0: 0,
-        r1: 120,
-        w0: 14,
-        w1: 2,
-        color: 0xffd27a,
-        a0: 180
-      });
-    }
   }
+}
+
+  spawnExplosionAt(x, y, opts = {}) {
+  const power = opts.power ?? 300;
+  const sparks = opts.sparks ?? 52;
+  const smoke = opts.smoke ?? 16;
+  const embers = opts.embers ?? 10;
+  const withRing = opts.withRing ?? true;
+
+  // main hot burst
+  this.spawnParticleBurst(x, y, {
+    count: sparks,
+    power,
+    color: 0xffa646,
+    sizeMin: 3,
+    sizeMax: 7,
+    lifeMin: opts.sparkLifeMin ?? 420,
+    lifeMax: opts.sparkLifeMax ?? 820,
+    drag: 0.985,
+    upward: 0,
+    additive: true
+  });
+
+  // smaller bright core to increase punch
+  this.spawnParticleBurst(x, y, {
+    count: Math.floor(sparks * 0.35),
+    power: power * 0.55,
+    color: 0xffd27a,
+    sizeMin: 2,
+    sizeMax: 5,
+    lifeMin: 180,
+    lifeMax: 360,
+    drag: 0.982,
+    upward: 0,
+    additive: true
+  });
+
+  // smoke body
+  this.spawnSmokeBurst(x, y, {
+    count: smoke,
+    color: 0x5f5f5f,
+    lifeMin: opts.smokeLifeMin ?? 900,
+    lifeMax: opts.smokeLifeMax ?? 1600,
+    sizeMin: 9,
+    sizeMax: 16,
+    growMin: 18,
+    growMax: 30
+  });
+
+  // lingering embers
+  this.spawnEmberBurst(x, y, {
+    count: embers,
+    color: 0xc8b4a0
+  });
+
+  if (withRing) {
+    this.spawnRingEffect(x, y, {
+      life: opts.ringLife ?? 1000,
+      r0: 0,
+      r1: 120,
+      w0: 14,
+      w1: 2,
+      color: 0xffd27a,
+      a0: 180
+    });
+  }
+}
 
   explodeAtTerritory(tid, opts = {}) {
     if (tid == null || tid < 0 || tid >= this.territories.length) return;
@@ -1712,39 +1777,56 @@ class PixiMapRenderer {
     this.addScreenShake(10, 220);
   }
 
-  megaExplodeAtTerritory(tid, opts = {}) {
-    if (tid == null || tid < 0 || tid >= this.territories.length) return;
-    const c = this.territories[tid]?.cps;
-    if (!c) return;
+ megaExplodeAtTerritory(tid, opts = {}) {
+  if (tid == null || tid < 0 || tid >= this.territories.length) return;
+  const c = this.territories[tid]?.cps;
+  if (!c) return;
 
-    const rings = opts.rings ?? 3;
-    const ringGap = opts.ringGap ?? 160;
-    const basePower = opts.basePower ?? 480;
-    const sparks = opts.sparks ?? 160;
-    const smoke = opts.smoke ?? 120;
+  const rings = opts.rings ?? 3;
+  const ringGap = opts.ringGap ?? 160;
+  const basePower = opts.basePower ?? 520;
+  const sparks = opts.sparks ?? 180;
+  const smoke = opts.smoke ?? 130;
+  const embers = opts.embers ?? 40;
 
-    this.triggerFlash(0.86, 120);
-    this.addScreenShake(24, 600);
+  this.triggerFlash(0.86, 120);
+  this.addScreenShake(24, 600);
 
-    this.spawnExplosionAt(c.x, c.y, {
-      power: basePower,
-      sparks,
-      smoke,
-      withRing: false
+  this.spawnExplosionAt(c.x, c.y, {
+    power: basePower,
+    sparks,
+    smoke,
+    embers,
+    withRing: false,
+    sparkLifeMin: 520,
+    sparkLifeMax: 980,
+    smokeLifeMin: 1200,
+    smokeLifeMax: 2000
+  });
+
+  for (let k = 0; k < rings; k++) {
+    this.spawnRingEffect(c.x, c.y, {
+      life: 700 + k * 140,
+      r0: k * ringGap,
+      r1: (k + 1) * ringGap + 140,
+      w0: 22,
+      w1: 2,
+      color: 0xffd278,
+      a0: 200
     });
-
-    for (let k = 0; k < rings; k++) {
-      this.spawnRingEffect(c.x, c.y, {
-        life: 700 + k * 140,
-        r0: k * ringGap,
-        r1: (k + 1) * ringGap + 140,
-        w0: 22,
-        w1: 2,
-        color: 0xffd278,
-        a0: 200
-      });
-    }
   }
+
+  this.spawnEmberBurst(c.x, c.y, {
+    count: embers,
+    color: 0xc8b4a0,
+    lifeMin: 1200,
+    lifeMax: 2000,
+    sizeMin: 8,
+    sizeMax: 14,
+    speedMin: 5,
+    speedMax: 30
+  });
+}
 
   clusterExplodeAtTerritory(tid, count = 5, radius = 80) {
     if (tid == null || tid < 0 || tid >= this.territories.length) return;
@@ -1824,6 +1906,7 @@ class PixiMapRenderer {
 
         const alpha = fx.alpha0 * (1 - t);
 
+        g.blendMode = fx.additive ? "add" : "normal";
         g.circle(fx.x, fx.y, fx.size);
         if (fx.filled) {
           g.fill({
