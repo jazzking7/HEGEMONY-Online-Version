@@ -1577,8 +1577,7 @@ socket.on('update_trty_display', function(data){
 });
 
 socket.on('rebuild_mapshape_cache', function(){
-  territoryCacheReady = false;
-  buildTerritoryCache();
+
 });
 
 // CLEAR SELECTION WINDOWS
