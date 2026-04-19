@@ -1602,8 +1602,8 @@ class PixiMapRenderer {
   const color = opts.color ?? 0xffa64d;
   const sizeMin = opts.sizeMin ?? 3;
   const sizeMax = opts.sizeMax ?? 7;
-  const lifeMin = opts.lifeMin ?? 420;
-  const lifeMax = opts.lifeMax ?? 820;
+  const lifeMin = opts.lifeMin ?? 600;
+  const lifeMax = opts.lifeMax ?? 1000;
   const drag = opts.drag ?? 0.985;
   const upward = opts.upward ?? 0;
   const additive = opts.additive ?? true;
@@ -1774,7 +1774,7 @@ class PixiMapRenderer {
     if (!c) return;
 
     this.spawnExplosionAt(c.x, c.y, opts);
-    this.addScreenShake(10, 220);
+   // this.addScreenShake(10, 220);
   }
 
  megaExplodeAtTerritory(tid, opts = {}) {
