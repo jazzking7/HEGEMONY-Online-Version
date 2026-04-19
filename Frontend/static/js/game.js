@@ -930,8 +930,8 @@ socket.on('update_trty_display', function(data){
 
 // territory cache rebuild when color changes
 socket.on('rebuild_mapshape_cache', function(){
-  territoryCacheReady = false;
-  buildTerritoryCache();
+  // territoryCacheReady = false;
+  // buildTerritoryCache();
 });
 
 // CHANGING CLICK EVENTS
