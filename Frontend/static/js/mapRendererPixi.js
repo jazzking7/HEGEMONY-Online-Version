@@ -436,6 +436,7 @@ class PixiMapRenderer {
     this.contBorderLayer = null;
     this.overlayLayer = null;
     this.effectLayer = null;
+    this.explosionLayer = null;
     this.floatingTextLayer = null;
     this.backgroundSprite = null;
 
@@ -577,6 +578,7 @@ class PixiMapRenderer {
     this.contBorderLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
     this.effectLayer = new PIXI.Container();
+    this.explosionLayer = new PIXI.Container();
     this.floatingTextLayer = new PIXI.Container();
 
     this.flashOverlay = new PIXI.Graphics();
@@ -612,6 +614,7 @@ class PixiMapRenderer {
     this.overlayLayer.addChild(this.otherHighlightOverlay);
     this.overlayLayer.addChild(this.toHighlightOverlay);
 
+    this.effectLayer.addChild(this.explosionLayer);
     this.effectLayer.addChild(this.floatingTextLayer);
 
     this.flashOverlay.visible = false;
@@ -1562,7 +1565,7 @@ class PixiMapRenderer {
       g.eventMode = "none";
       g.roundPixels = true;
       g.visible = false;
-      this.effectLayer.addChild(g);
+      this.explosionLayer.addChild(g);
     }
 
     g.visible = true;
