@@ -487,6 +487,24 @@ class PixiMapRenderer {
     this.popupPool = [];
     this.activePopups = [];
 
+    this.ironWallTexture = null;
+    this.ironWallSprites = new Map();
+    this.ironWallSet = new Set();
+
+    this.effectPool = [];
+    this.activeEffects = [];
+
+    this.flashOverlay = null;
+    this.flashTime = 0;
+    this.flashDuration = 0;
+    this.flashMaxAlpha = 0;
+
+    this.screenShakeTime = 0;
+    this.screenShakeDuration = 0;
+    this.screenShakeMagnitude = 0;
+    this.baseWorldX = 0;
+    this.baseWorldY = 0;
+
     this.casualtyTextStyle = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 35,
@@ -561,6 +579,8 @@ class PixiMapRenderer {
     this.effectLayer = new PIXI.Container();
     this.floatingTextLayer = new PIXI.Container();
 
+    this.flashOverlay = new PIXI.Graphics();
+
     this.hoverOverlay = new PIXI.Graphics();
     this.targetCaptureOverlay = new PIXI.Graphics();
     this.otherHighlightOverlay = new PIXI.Graphics();
@@ -594,6 +614,9 @@ class PixiMapRenderer {
 
     this.effectLayer.addChild(this.floatingTextLayer);
 
+    this.flashOverlay.visible = false;
+    this.app.stage.addChild(this.flashOverlay);
+
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
     this.world.addChild(this.overlayLayer);
@@ -614,6 +637,9 @@ class PixiMapRenderer {
     this.buildContinentBorderGraphics();
     this.setupDragAndZoom();
     this.fitWorldToMap();
+    this.baseWorldX = this.world.x;
+    this.baseWorldY = this.world.y;
+    this.buildIronWallTexture();
     this.updateViewModeFromZoom(true);
     this.refreshAllOverlays();
 
@@ -621,10 +647,14 @@ class PixiMapRenderer {
       this.updateHoverPulse(ticker.deltaMS);
       this.updateClickableAnimation(ticker.deltaMS);
       this.updateFloatingTexts(ticker.deltaMS);
+      this.updateIronWallEffects(ticker.deltaMS);
+      this.updateEffects(ticker.deltaMS);
+      this.updateFlashOverlay(ticker.deltaMS);
+      this.updateScreenShake(ticker.deltaMS);
     });
   }
 
-  async loadJson(path) {
+    async loadJson(path) {
     const res = await fetch(path);
     if (!res.ok) {
       throw new Error(`Failed to load ${path}: ${res.status}`);
@@ -1129,7 +1159,7 @@ class PixiMapRenderer {
     return out;
   }
 
-  getPopupTextFromPool() {
+    getPopupTextFromPool() {
     let textObj = this.popupPool.pop();
 
     if (!textObj) {
@@ -1327,6 +1357,9 @@ class PixiMapRenderer {
 
     this.world.y =
       this.app.screen.height / 2 - (bounds.minY + mapHeight / 2) * scale;
+
+    this.baseWorldX = this.world.x;
+    this.baseWorldY = this.world.y;
   }
 
   setupDragAndZoom() {
@@ -1369,6 +1402,8 @@ class PixiMapRenderer {
 
       this.world.x = worldStart.x + dx;
       this.world.y = worldStart.y + dy;
+      this.baseWorldX = this.world.x;
+      this.baseWorldY = this.world.y;
     });
 
     this.app.canvas.addEventListener("wheel", (e) => {
@@ -1386,12 +1421,483 @@ class PixiMapRenderer {
       const screenPosAfter = this.world.toGlobal(worldPosBefore);
       this.world.x += mouse.x - screenPosAfter.x;
       this.world.y += mouse.y - screenPosAfter.y;
+      this.baseWorldX = this.world.x;
+      this.baseWorldY = this.world.y;
 
       this.updateViewModeFromZoom(false);
     }, { passive: false });
   }
 
-  updateViewModeFromZoom(force = false) {
+    buildIronWallTexture() {
+    const size = 220;
+    const g = new PIXI.Graphics();
+
+    const center = size / 2;
+    const hexRadius = 10;
+    const rings = 1;
+    const hexH = Math.sqrt(3) * hexRadius;
+
+    for (let q = -rings; q <= rings; q++) {
+      for (let r = -rings; r <= rings; r++) {
+        const s = -q - r;
+        const dist = Math.max(Math.abs(q), Math.abs(r), Math.abs(s));
+        if (dist > rings) continue;
+
+        const x = center + hexRadius * 1.5 * q;
+        const y = center + hexH * (r + q / 2);
+
+        const pts = [];
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI * 2 / 6) * i;
+          pts.push(
+            x + hexRadius * Math.cos(angle),
+            y + hexRadius * Math.sin(angle)
+          );
+        }
+
+        g.poly(pts);
+        g.stroke({
+          color: 0xbeebff,
+          alpha: 120 / 255,
+          width: 3,
+          join: "round"
+        });
+      }
+    }
+
+    g.circle(center, center, size * 0.45);
+    g.fill({
+      color: 0x7fdfff,
+      alpha: 0.06
+    });
+
+    g.circle(center, center, size * 0.45);
+    g.stroke({
+      color: 0xdaf6ff,
+      alpha: 0.28,
+      width: 2,
+      join: "round"
+    });
+
+    this.ironWallTexture = this.app.renderer.generateTexture({
+      target: g,
+      resolution: 2
+    });
+
+    g.destroy();
+  }
+
+  createIronWallSpriteForTerritory(tid) {
+    const trty = this.territories[tid];
+    if (!trty || !trty.cps || !this.ironWallTexture) return null;
+
+    const sprite = new PIXI.Sprite(this.ironWallTexture);
+    sprite.anchor.set(0.5);
+    sprite.eventMode = "none";
+    sprite.blendMode = "screen";
+    sprite.alpha = 0.42;
+    sprite.x = Math.round(trty.cps.x);
+    sprite.y = Math.round(trty.cps.y);
+
+    const size = 110;
+    sprite.width = size;
+    sprite.height = size;
+    sprite.baseAlpha = 0.42;
+    sprite.phase = Math.random() * Math.PI * 2;
+
+    this.effectLayer.addChild(sprite);
+    return sprite;
+  }
+
+  setIronWallShields(ids = []) {
+    const next = new Set(this.normalizeIdArray(ids));
+
+    for (const [tid, sprite] of this.ironWallSprites.entries()) {
+      if (!next.has(tid)) {
+        this.effectLayer.removeChild(sprite);
+        sprite.destroy();
+        this.ironWallSprites.delete(tid);
+      }
+    }
+
+    for (const tid of next) {
+      if (!this.ironWallSprites.has(tid)) {
+        const sprite = this.createIronWallSpriteForTerritory(tid);
+        if (sprite) this.ironWallSprites.set(tid, sprite);
+      }
+    }
+
+    this.ironWallSet = next;
+  }
+
+  clearIronWallShields() {
+    this.setIronWallShields([]);
+  }
+
+  updateIronWallEffects(deltaMS) {
+    if (!this.ironWallSprites.size) return;
+
+    const t = performance.now() * 0.0025;
+
+    for (const [tid, sprite] of this.ironWallSprites.entries()) {
+      const trty = this.territories[tid];
+      if (!trty || !trty.cps) continue;
+
+      sprite.x = Math.round(trty.cps.x);
+      sprite.y = Math.round(trty.cps.y);
+
+      const pulse = 0.88 + 0.12 * Math.sin(t + sprite.phase);
+      sprite.alpha = sprite.baseAlpha * pulse;
+
+      const scalePulse = 1 + 0.025 * Math.sin(t * 1.4 + sprite.phase);
+      sprite.scale.set(scalePulse);
+    }
+  }
+
+  getEffectGraphicFromPool() {
+    let g = this.effectPool.pop();
+
+    if (!g) {
+      g = new PIXI.Graphics();
+      g.eventMode = "none";
+      g.roundPixels = true;
+      g.visible = false;
+      this.effectLayer.addChild(g);
+    }
+
+    g.visible = true;
+    g.alpha = 1;
+    g.scale.set(1);
+    return g;
+  }
+
+  releaseEffectGraphic(g) {
+    g.clear();
+    g.visible = false;
+    this.effectPool.push(g);
+  }
+
+  spawnRingEffect(x, y, opts = {}) {
+    const ring = this.getEffectGraphicFromPool();
+
+    this.activeEffects.push({
+      type: "ring",
+      g: ring,
+      x,
+      y,
+      elapsed: 0,
+      duration: opts.life ?? 700,
+      r0: opts.r0 ?? 0,
+      r1: opts.r1 ?? 140,
+      w0: opts.w0 ?? 14,
+      w1: opts.w1 ?? 2,
+      color: opts.color ?? 0xffd278,
+      a0: opts.a0 ?? 180
+    });
+  }
+
+  spawnParticleBurst(x, y, opts = {}) {
+    const count = opts.count ?? 32;
+    const power = opts.power ?? 260;
+    const color = opts.color ?? 0xffa64d;
+    const sizeMin = opts.sizeMin ?? 3;
+    const sizeMax = opts.sizeMax ?? 6;
+    const lifeMin = opts.lifeMin ?? 260;
+    const lifeMax = opts.lifeMax ?? 520;
+    const drag = opts.drag ?? 0.985;
+    const upward = opts.upward ?? 0;
+
+    for (let i = 0; i < count; i++) {
+      const g = this.getEffectGraphicFromPool();
+      const angle = Math.random() * Math.PI * 2;
+      const speed = power * (0.7 + 0.3 * Math.random());
+
+      this.activeEffects.push({
+        type: "particle",
+        g,
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - upward,
+        elapsed: 0,
+        duration: lifeMin + Math.random() * (lifeMax - lifeMin),
+        size: sizeMin + Math.random() * (sizeMax - sizeMin),
+        color,
+        alpha0: 1,
+        drag,
+        grow: 0.985,
+        filled: true
+      });
+    }
+  }
+
+  spawnSmokeBurst(x, y, opts = {}) {
+    const count = opts.count ?? 12;
+    const color = opts.color ?? 0x5a5a5a;
+    const speedMin = opts.speedMin ?? 30;
+    const speedMax = opts.speedMax ?? 90;
+    const sizeMin = opts.sizeMin ?? 8;
+    const sizeMax = opts.sizeMax ?? 16;
+    const growMin = opts.growMin ?? 16;
+    const growMax = opts.growMax ?? 26;
+    const lifeMin = opts.lifeMin ?? 600;
+    const lifeMax = opts.lifeMax ?? 1100;
+
+    for (let i = 0; i < count; i++) {
+      const g = this.getEffectGraphicFromPool();
+      const angle = Math.random() * Math.PI * 2;
+      const speed = speedMin + Math.random() * (speedMax - speedMin);
+
+      this.activeEffects.push({
+        type: "smoke",
+        g,
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 20,
+        elapsed: 0,
+        duration: lifeMin + Math.random() * (lifeMax - lifeMin),
+        size: sizeMin + Math.random() * (sizeMax - sizeMin),
+        color,
+        alpha0: 0.5,
+        drag: 0.96,
+        grow: 1 + ((growMin + Math.random() * (growMax - growMin)) / 1000),
+        filled: true
+      });
+    }
+  }
+
+  spawnExplosionAt(x, y, opts = {}) {
+    const power = opts.power ?? 260;
+    const sparks = opts.sparks ?? 36;
+    const smoke = opts.smoke ?? 12;
+    const withRing = opts.withRing ?? true;
+
+    this.spawnParticleBurst(x, y, {
+      count: sparks,
+      power,
+      color: 0xffa646,
+      sizeMin: 3,
+      sizeMax: 7,
+      lifeMin: 200,
+      lifeMax: 520,
+      drag: 0.985,
+      upward: 0
+    });
+
+    this.spawnSmokeBurst(x, y, {
+      count: smoke,
+      color: 0x5f5f5f
+    });
+
+    if (withRing) {
+      this.spawnRingEffect(x, y, {
+        life: 600,
+        r0: 0,
+        r1: 120,
+        w0: 14,
+        w1: 2,
+        color: 0xffd27a,
+        a0: 180
+      });
+    }
+  }
+
+  explodeAtTerritory(tid, opts = {}) {
+    if (tid == null || tid < 0 || tid >= this.territories.length) return;
+    const c = this.territories[tid]?.cps;
+    if (!c) return;
+
+    this.spawnExplosionAt(c.x, c.y, opts);
+    this.addScreenShake(10, 220);
+  }
+
+  megaExplodeAtTerritory(tid, opts = {}) {
+    if (tid == null || tid < 0 || tid >= this.territories.length) return;
+    const c = this.territories[tid]?.cps;
+    if (!c) return;
+
+    const rings = opts.rings ?? 3;
+    const ringGap = opts.ringGap ?? 160;
+    const basePower = opts.basePower ?? 480;
+    const sparks = opts.sparks ?? 160;
+    const smoke = opts.smoke ?? 120;
+
+    this.triggerFlash(0.86, 120);
+    this.addScreenShake(24, 600);
+
+    this.spawnExplosionAt(c.x, c.y, {
+      power: basePower,
+      sparks,
+      smoke,
+      withRing: false
+    });
+
+    for (let k = 0; k < rings; k++) {
+      this.spawnRingEffect(c.x, c.y, {
+        life: 700 + k * 140,
+        r0: k * ringGap,
+        r1: (k + 1) * ringGap + 140,
+        w0: 22,
+        w1: 2,
+        color: 0xffd278,
+        a0: 200
+      });
+    }
+  }
+
+  clusterExplodeAtTerritory(tid, count = 5, radius = 80) {
+    if (tid == null || tid < 0 || tid >= this.territories.length) return;
+    const c = this.territories[tid]?.cps;
+    if (!c) return;
+
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = radius * (0.3 + Math.random() * 0.7);
+      const x = c.x + Math.cos(a) * r;
+      const y = c.y + Math.sin(a) * r;
+
+      this.spawnExplosionAt(x, y, {
+        power: 180 + Math.random() * 120,
+        sparks: 24 + Math.floor(Math.random() * 18),
+        smoke: 10 + Math.floor(Math.random() * 6),
+        withRing: i % 2 === 0
+      });
+    }
+
+    this.addScreenShake(14, 400);
+  }
+
+  lineBlastBetweenTerritories(tidA, tidB, steps = 6) {
+    const a = this.territories[tidA]?.cps;
+    const b = this.territories[tidB]?.cps;
+    if (!a || !b) return;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = a.x + (b.x - a.x) * t;
+      const y = a.y + (b.y - a.y) * t;
+
+      this.spawnExplosionAt(x, y, {
+        power: 260,
+        sparks: 36,
+        smoke: 12,
+        withRing: i % 2 === 0
+      });
+    }
+
+    this.addScreenShake(16, 300);
+  }
+
+  updateEffects(deltaMS) {
+    if (!this.activeEffects.length) return;
+
+    const dt = deltaMS / 1000;
+
+    for (let i = this.activeEffects.length - 1; i >= 0; i--) {
+      const fx = this.activeEffects[i];
+      fx.elapsed += deltaMS;
+
+      const t = Math.min(1, fx.elapsed / fx.duration);
+      const g = fx.g;
+
+      g.clear();
+
+      if (fx.type === "ring") {
+        const radius = fx.r0 + (fx.r1 - fx.r0) * t;
+        const width = fx.w0 + (fx.w1 - fx.w0) * t;
+        const alpha = (fx.a0 / 255) * (1 - t);
+
+        g.circle(fx.x, fx.y, radius);
+        g.stroke({
+          color: fx.color,
+          alpha,
+          width,
+          join: "round"
+        });
+      } else {
+        fx.x += fx.vx * dt;
+        fx.y += fx.vy * dt;
+        fx.vx *= fx.drag;
+        fx.vy *= fx.drag;
+        fx.size *= fx.grow;
+
+        const alpha = fx.alpha0 * (1 - t);
+
+        g.circle(fx.x, fx.y, fx.size);
+        if (fx.filled) {
+          g.fill({
+            color: fx.color,
+            alpha
+          });
+        }
+      }
+
+      if (fx.elapsed >= fx.duration) {
+        this.activeEffects.splice(i, 1);
+        this.releaseEffectGraphic(g);
+      }
+    }
+  }
+
+  triggerFlash(alpha = 0.8, duration = 120) {
+    this.flashTime = 0;
+    this.flashDuration = duration;
+    this.flashMaxAlpha = alpha;
+    this.flashOverlay.visible = true;
+  }
+
+  updateFlashOverlay(deltaMS) {
+    if (!this.flashOverlay || this.flashDuration <= 0) return;
+
+    this.flashTime += deltaMS;
+    const t = Math.min(1, this.flashTime / this.flashDuration);
+    const alpha = this.flashMaxAlpha * (1 - t);
+
+    this.flashOverlay.clear();
+
+    if (alpha <= 0.001) {
+      this.flashOverlay.visible = false;
+      this.flashDuration = 0;
+      return;
+    }
+
+    this.flashOverlay.visible = true;
+    this.flashOverlay.rect(0, 0, this.app.screen.width, this.app.screen.height);
+    this.flashOverlay.fill({
+      color: 0xffffff,
+      alpha
+    });
+  }
+
+  addScreenShake(magnitude = 10, duration = 220) {
+    this.screenShakeMagnitude = magnitude;
+    this.screenShakeDuration = duration;
+    this.screenShakeTime = 0;
+  }
+
+  updateScreenShake(deltaMS) {
+    if (this.screenShakeDuration <= 0) {
+      this.world.x = this.baseWorldX;
+      this.world.y = this.baseWorldY;
+      return;
+    }
+
+    this.screenShakeTime += deltaMS;
+    const t = Math.min(1, this.screenShakeTime / this.screenShakeDuration);
+    const strength = this.screenShakeMagnitude * (1 - t);
+
+    this.world.x = this.baseWorldX + (Math.random() * 2 - 1) * strength;
+    this.world.y = this.baseWorldY + (Math.random() * 2 - 1) * strength;
+
+    if (t >= 1) {
+      this.screenShakeDuration = 0;
+      this.world.x = this.baseWorldX;
+      this.world.y = this.baseWorldY;
+    }
+  }
+
+    updateViewModeFromZoom(force = false) {
     const scale = this.world.scale.x;
     const nextMode = scale < this.zoomThreshold ? "far" : "near";
 
