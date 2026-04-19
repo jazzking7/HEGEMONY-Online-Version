@@ -306,9 +306,7 @@ class TerritoryView {
 
     if (this.data.insig && this.data.is) {
       let insigKey = "fort";
-      if (this.data.insig === "bureau") insigKey = "bureau";
-      if (this.data.insig === "hall") insigKey = "hall";
-      if (this.data.insig === "leyline") insigKey = "leyline";
+      if (this.data.insig === "radioactive") insigKey = "radioactive";
 
       insig.texture = this.textures[insigKey];
       insig.x = this.data.is.x;
@@ -541,10 +539,11 @@ class PixiMapRenderer {
       city: await PIXI.Assets.load("/static/Assets/Dev/city.png"),
       megacity: await PIXI.Assets.load("/static/Assets/Dev/megacity.png"),
       nexus: await PIXI.Assets.load("/static/Assets/Dev/transhub.png"),
+      bureau: await PIXI.Assets.load("/static/Assets/Insig/mobbureau.png"),
       fort: await PIXI.Assets.load("/static/Assets/Insig/fort.png"),
+      radioactive: await PIXI.Assets.load("/static/Assets/Insig/radio.png"),
       hall: await PIXI.Assets.load("/static/Assets/Insig/CAD.png"),
-      leyline: await PIXI.Assets.load("/static/Assets/Insig/leyline.png"),
-      bureau: await PIXI.Assets.load("/static/Assets/Insig/mobbureau.png")
+      leyline: await PIXI.Assets.load("/static/Assets/Insig/leyline.png")
     };
 
     this.backgroundSprite = new PIXI.Sprite(bgTexture);
