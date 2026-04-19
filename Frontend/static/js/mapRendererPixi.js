@@ -437,6 +437,8 @@ class PixiMapRenderer {
     this.seaRouteLayer = null;
     this.contBorderLayer = null;
     this.overlayLayer = null;
+    this.effectLayer = null;
+    this.floatingTextLayer = null;
     this.backgroundSprite = null;
 
     this.iconTextures = null;
@@ -483,6 +485,31 @@ class PixiMapRenderer {
 
     this.dragging = false;
     this.dragMoved = false;
+
+    this.popupPool = [];
+    this.activePopups = [];
+
+    this.casualtyTextStyle = new PIXI.TextStyle({
+      fontFamily: "Urbanist",
+      fontSize: 35,
+      fontWeight: "700",
+      fill: 0x8b0000,
+      stroke: 0xffffff,
+      strokeThickness: 1,
+      lineJoin: "round",
+      align: "center"
+    });
+
+    this.additionTextStyle = new PIXI.TextStyle({
+      fontFamily: "Urbanist",
+      fontSize: 35,
+      fontWeight: "700",
+      fill: 0x27a567,
+      stroke: 0xffffff,
+      strokeThickness: 1,
+      lineJoin: "round",
+      align: "center"
+    });
   }
 
   async init() {
@@ -532,6 +559,8 @@ class PixiMapRenderer {
     this.seaRouteLayer = new PIXI.Container();
     this.contBorderLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
+    this.effectLayer = new PIXI.Container();
+    this.floatingTextLayer = new PIXI.Container();
 
     this.hoverOverlay = new PIXI.Graphics();
     this.targetCaptureOverlay = new PIXI.Graphics();
@@ -550,6 +579,8 @@ class PixiMapRenderer {
     this.seaRouteLayer.roundPixels = true;
     this.contBorderLayer.roundPixels = true;
     this.overlayLayer.roundPixels = true;
+    this.effectLayer.roundPixels = true;
+    this.floatingTextLayer.roundPixels = true;
     this.hoverOverlay.roundPixels = true;
     this.targetCaptureOverlay.roundPixels = true;
     this.otherHighlightOverlay.roundPixels = true;
@@ -562,10 +593,13 @@ class PixiMapRenderer {
     this.overlayLayer.addChild(this.otherHighlightOverlay);
     this.overlayLayer.addChild(this.toHighlightOverlay);
 
+    this.effectLayer.addChild(this.floatingTextLayer);
+
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
     this.world.addChild(this.overlayLayer);
     this.world.addChild(this.contBorderLayer);
+    this.world.addChild(this.effectLayer);
     this.app.stage.addChild(this.world);
 
     this.app.renderer.on("resize", (width, height) => {
@@ -587,6 +621,7 @@ class PixiMapRenderer {
     this.app.ticker.add((ticker) => {
       this.updateHoverPulse(ticker.deltaMS);
       this.updateClickableAnimation(ticker.deltaMS);
+      this.updateFloatingTexts(ticker.deltaMS);
     });
   }
 
@@ -1095,6 +1130,106 @@ class PixiMapRenderer {
     return out;
   }
 
+  getPopupTextFromPool() {
+    let textObj = this.popupPool.pop();
+
+    if (!textObj) {
+      textObj = new PIXI.Text({
+        text: "",
+        style: this.casualtyTextStyle
+      });
+      textObj.anchor.set(0.5);
+      textObj.resolution = 2;
+      textObj.roundPixels = true;
+      textObj.eventMode = "none";
+      textObj.visible = false;
+      this.floatingTextLayer.addChild(textObj);
+    }
+
+    textObj.visible = true;
+    textObj.alpha = 1;
+    textObj.scale.set(1);
+    return textObj;
+  }
+
+  releasePopupText(textObj) {
+    textObj.visible = false;
+    this.activePopups = this.activePopups.filter((p) => p.text !== textObj);
+    this.popupPool.push(textObj);
+  }
+
+  spawnFloatingText(tid, value, kind = "casualty") {
+    const trty = this.territories[tid];
+    if (!trty || !trty.cps || value == null || value <= 0) return;
+
+    const textObj = this.getPopupTextFromPool();
+    const isCasualty = kind === "casualty";
+
+    textObj.style = isCasualty ? this.casualtyTextStyle : this.additionTextStyle;
+    textObj.text = `${isCasualty ? "-" : "+"}${value}`;
+    textObj.x = Math.round(trty.cps.x);
+    textObj.y = Math.round(trty.cps.y);
+
+    this.activePopups.push({
+      text: textObj,
+      baseX: trty.cps.x,
+      baseY: trty.cps.y,
+      elapsed: 0,
+      duration: 1500,
+      floatDistance: 12,
+      popAmount: 0.18
+    });
+  }
+
+  updateFloatingTexts(deltaMS) {
+    if (!this.activePopups.length) return;
+
+    for (let i = this.activePopups.length - 1; i >= 0; i--) {
+      const popup = this.activePopups[i];
+      popup.elapsed += deltaMS;
+
+      const t = Math.min(1, popup.elapsed / popup.duration);
+      const easeOut = 1 - Math.pow(1 - t, 3);
+      const fade = t < 0.65 ? 1 : 1 - ((t - 0.65) / 0.35);
+
+      popup.text.x = Math.round(popup.baseX);
+      popup.text.y = Math.round(popup.baseY - popup.floatDistance * easeOut);
+      popup.text.alpha = Math.max(0, fade);
+
+      const scale =
+        t < 0.18
+          ? 1 + popup.popAmount * (t / 0.18)
+          : 1 + popup.popAmount * (1 - ((t - 0.18) / 0.82));
+
+      popup.text.scale.set(scale);
+
+      if (popup.elapsed >= popup.duration) {
+        const textObj = popup.text;
+        this.activePopups.splice(i, 1);
+        textObj.visible = false;
+        this.popupPool.push(textObj);
+      }
+    }
+  }
+
+  showCasualties(entries = []) {
+    if (!Array.isArray(entries)) return;
+    for (let i = 0; i < entries.length; i++) {
+      const item = entries[i];
+      if (!item) continue;
+      this.spawnFloatingText(item.tid, Number(item.number) || 0, "casualty");
+    }
+  }
+
+  showAdditions(entries = []) {
+    if (!Array.isArray(entries)) return;
+    for (let i = 0; i < entries.length; i++) {
+      const item = entries[i];
+      if (!item) continue;
+      this.spawnFloatingText(item.tid, Number(item.number) || 0, "addition");
+    }
+  }
+
   setToHighLight(ids = []) {
     this.toHighLight = this.normalizeIdArray(ids);
     this.toHighlightSet = new Set(this.toHighLight);
@@ -1122,9 +1257,11 @@ class PixiMapRenderer {
   setShowContBorders(value) {
     this.showContBorders = !!value;
     if (this.contBorderLayer) {
-        this.contBorderLayer.visible = this.showContBorders;
-        this.world.removeChild(this.contBorderLayer);
-        this.world.addChild(this.contBorderLayer);
+      this.contBorderLayer.visible = this.showContBorders;
+      this.world.removeChild(this.contBorderLayer);
+      this.world.addChild(this.contBorderLayer);
+      this.world.removeChild(this.effectLayer);
+      this.world.addChild(this.effectLayer);
     }
   }
 
