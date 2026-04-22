@@ -221,7 +221,7 @@ class General_Event_Scheduler:
         self.lock.acquire()
         if not self.interrupt:
             self.interrupt = True
-            curr = any(self.gs.players[p].connected for p in self.gs.players)
+            curr = any(self.gs.players[p].connected and not self.gs.players[p].isBot for p in self.gs.players)
             if not curr:
                 self.lock.release()
                 print("Lobby Deleted")
