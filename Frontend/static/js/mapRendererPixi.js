@@ -427,6 +427,7 @@ class PixiMapRenderer {
     this.tnames = options.tnames || [];
     this.tneighbors = options.tneighbors || [];
     this.landlocked = options.landlocked || [];
+    this.onTerritoryClick = options.onTerritoryClick || null;
 
     this.container = null;
     this.app = null;
@@ -802,8 +803,10 @@ class PixiMapRenderer {
           }
         },
         onClick: (id) => {
-          if (this.dragMoved) return;
-          console.log("clicked territory:", id, this.territories[id]?.name);
+        if (this.dragMoved) return;
+        if (this.onTerritoryClick) {
+            this.onTerritoryClick(id);
+        }
         }
       });
 
@@ -2023,6 +2026,10 @@ class PixiMapRenderer {
     const view = this.territoryViews[id];
     if (!view) return;
     view.setCapitalState(capitalState);
+  }
+
+  setTerritoryClickHandler(handler) {
+    this.onTerritoryClick = typeof handler === "function" ? handler : null;
   }
 }
 
