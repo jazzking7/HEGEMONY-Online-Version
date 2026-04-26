@@ -178,7 +178,7 @@ $(document).ready(function() {
             })
             .then(() => {
                 // return loadScript(URL_FRONTEND + 'static/js/game.js', 'page_script');
-                return loadScript('/static/js/game.js', 'page_script');
+                return loadScript('/static/js/gameRun.js', 'page_script');
 
             })
             .then(() => {

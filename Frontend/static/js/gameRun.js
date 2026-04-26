@@ -475,6 +475,11 @@ class NotificationManager {
 // Initialize notification manager
 const notificationManager = new NotificationManager();
 
+let pixiRenderer = null;
+let territories = [];
+let toHighLight = [];
+let clickables = [];
+
 $(document).ready(async function() {
   // Hide control buttons
   $('#btn-diplomatic, #btn-sep-auth, #btn-skill, #btn-reserve, #btn-debt').hide();
@@ -512,14 +517,17 @@ $(document).ready(async function() {
   );
 
   // Show continent border toggle
-  $('#btn_show_cont').click(function() {
-      showContBorders = !showContBorders;
-      if (showContBorders) {
+    $('#btn_show_cont').click(function() {
+        if (!pixiRenderer) return;
+
+        pixiRenderer.toggleContBorders();
+
+        if (pixiRenderer.showContBorders) {
         $(this).addClass('active');
-      } else {
+        } else {
         $(this).removeClass('active');
-      }
-  });
+        }
+    });
 
   // Click propagation prevention
   $('#overlay_sections .card').on('click mousemove', function(event) {
@@ -558,33 +566,41 @@ $(document).ready(async function() {
       event.stopPropagation();
   });
 
+  await initializeLibraries();
 
-  async function tryLoadSketch() {
-      // GAME_SKETCH LOGIC IS LOADED HERE WITH p5.js
-      initializeLibraries();
+  // Initiate the Map Renderer
 
+    async function initializePixiRenderer() {
+    pixiRenderer = new PixiMapRenderer({
+        containerId: "canvasContainer",
+        mapName: game_settings.map,
+        tnames: game_settings.tnames,
+        tneighbors: game_settings.tneighbors,
+        landlocked: game_settings.landlocked,
+        onTerritoryClick: handlePixiTerritoryClick
+    });
+
+    await pixiRenderer.init();
+    window.pixiRenderer = pixiRenderer;
+
+    territories = pixiRenderer.territories;
+    window.territories = territories;
+
+    socket.emit('confirm_map_loaded');
+    }
+
+  async function tryLoadRenderer() {
+    await initializePixiRenderer();
   }
 
-  tryLoadSketch();
+  tryLoadRenderer();
 
 });
 
-// function loadLibraries() {
-//   return new Promise((resolve) => {
-//     $.getScript(`${URL_FRONTEND}static/js/p5.js`, function() {
-//       $.getScript(`${URL_FRONTEND}static/js/p5.sound.js`, function() {
-//         resolve();
-//       });
-//     });
-//   });
-// }
-
 function loadLibraries() {
   return new Promise((resolve) => {
-    $.getScript(`/static/js/p5.js`, function() {
-      $.getScript(`/static/js/p5.sound.js`, function() {
+    $.getScript(`/static/js/pixi.js`, function() {
         resolve();
-      });
     });
   });
 }
@@ -872,7 +888,9 @@ socket.on('update_player_territories', function(data){
 
 // update target display
 socket.on('mod_targets_to_capture', function(data){
-  targetsToCapture = data.targets;
+  if (pixiRenderer) {
+    pixiRenderer.setTargetsToCapture(data.targets || []);
+  }
 });
 
 // UPDATE TERRITORIAL DISPLAY
@@ -885,45 +903,59 @@ socket.on('mod_targets_to_capture', function(data){
 // property name must matches the property name used in game_sketch.js for display territory
 // hasDev is used for loading different images for development
 socket.on('update_trty_display', function(data){
-  // Go through each territory (tid)
-  for (tid in data){
-    // Get the changed property list of the territory (tid)
-    let changes = data[tid];
-    // Update the property one by one
-    for (field in changes){
-      // Dev property -> CITY | MEGACITY | TRANSPORT HUB
-      if (field == 'hasDev'){
-        if (changes[field] == 'city'){
-          territories[tid].devImg = cityImage;
-        } else if (changes[field] == 'megacity'){
-          territories[tid].devImg = megacityImage;
-        } else if (changes[field] == 'nexus') {
-          territories[tid].devImg = nexusImage;
-        } else if (changes[field] == 'bureau') {
-          territories[tid].devImg = bureauImage;
+  if (!pixiRenderer) return;
+
+  for (const tid in data) {
+    const id = Number(tid);
+    const changes = data[tid];
+
+    if (!pixiRenderer.territories[id]) continue;
+
+    const iconState = {};
+    const capitalState = {};
+
+    for (const field in changes) {
+      const value = changes[field];
+
+      if (field === 'hasDev') {
+        if (value === 'city' || value === 'megacity' || value === 'nexus' || value === 'bureau') {
+          iconState.devImg = value;
         } else {
-          territories[tid].devImg = null;
+          iconState.devImg = null;
         }
-      // Skill effects
-      } else if (field == 'hasEffect') {
-        if (changes[field] == 'nuke') {
-          territories[tid].insig = radioImage;
-        } else if (changes[field] == 'fort') {
-          territories[tid].insig = fortImage;
-        } else if (changes[field] == 'hall') {
-          territories[tid].hallImg = hallImage;
-        } else if (changes[field] == 'leyline') {
-          territories[tid].leylineImg = leylineImage;
-        } else if (changes[field] == 'leylineGone') {
-          territories[tid].leylineImg = null;
+      } else if (field === 'hasEffect') {
+        if (value === 'nuke') {
+          iconState.insig = 'radioactive';
+        } else if (value === 'fort') {
+          iconState.insig = 'fort';
+        } else if (value === 'hall') {
+          iconState.hallImg = true;
+        } else if (value === 'leyline') {
+          iconState.leylineImg = true;
+        } else if (value === 'leylineGone') {
+          iconState.leylineImg = false;
         } else {
-          territories[tid].insig = null;
+          iconState.insig = null;
         }
+      } else if (field === 'color') {
+        pixiRenderer.setTerritoryColor(id, value);
+      } else if (field === 'troops') {
+        pixiRenderer.setTerritoryTroops(id, value);
+      } else if (field === 'isCapital') {
+        capitalState.isCapital = value;
+      } else if (field === 'capital_color') {
+        capitalState.capital_color = value;
+      } else {
+        pixiRenderer.territories[id][field] = value;
       }
-      // Other properties -> Standard property
-       else {
-        territories[tid][field] = changes[field];
-      }
+    }
+
+    if (Object.keys(iconState).length > 0) {
+      pixiRenderer.setTerritoryIcons(id, iconState);
+    }
+
+    if (Object.keys(capitalState).length > 0) {
+      pixiRenderer.setTerritoryCapital(id, capitalState);
     }
   }
 });
@@ -994,8 +1026,12 @@ socket.on('change_click_event', function(data){
 socket.on('clear_view', function(){
   $('#control_panel, #control_mechanism, #middle_display, #proceed_next_stage').hide();
   toHighLight = [];
-  otherHighlight = [];
   clickables = [];
+  if (pixiRenderer) {
+    pixiRenderer.clearToHighLight();
+    pixiRenderer.clearOtherHighlight();
+    pixiRenderer.clearClickables();
+  }
 });
 
 // show buttons
@@ -1123,16 +1159,21 @@ socket.on('GAME_OVER', function(data) {
 
 // add sync click event
 socket.on('add_tid_to_otherHighlight', function(data){
-  otherHighlight.push(data.tid);
+  if (!pixiRenderer) return;
+  const next = [...pixiRenderer.otherHighlight, data.tid];
+  pixiRenderer.setOtherHighlight(next);
 });
 
 socket.on('remove_tid_from_otherHighlight', function(data){
-  let toRemove = [data.tid];
-  otherHighlight = otherHighlight.filter(item => !toRemove.includes(item));
+  if (!pixiRenderer) return;
+  const next = pixiRenderer.otherHighlight.filter(item => item !== data.tid);
+  pixiRenderer.setOtherHighlight(next);
 });
 
 socket.on('clear_otherHighlight', function(){
-  otherHighlight = [];
+  if (pixiRenderer) {
+    pixiRenderer.clearOtherHighlight();
+  }
 });
 
 // Socket.io handlers
@@ -1225,23 +1266,23 @@ socket.on('playSFX', function(data){
 
 // Explosion
 socket.on('explosion_animation', function(data){
-    explodeAtTerritory(data.tid, { power: 320, sparks: 56, smoke: 20, withRing: true });
+  if (pixiRenderer) {
+    pixiRenderer.explodeAtTerritory(data.tid, { power: 320, sparks: 56, smoke: 20, withRing: true });
+  }
 });
 
 // Nuke
 socket.on('nuke_animation', function(data){
-    var tid = data.tid;
-    if (tid == null || tid < 0 || tid >= territories.length) return;
-    const c = territories[tid].cps;   // world coords
-    spawnMegaNuke(c.x, c.y);
+  if (pixiRenderer) {
+    pixiRenderer.megaExplodeAtTerritory(data.tid);
+  }
 });
 
 // Missile
 socket.on('arsenal_animation', function(data){
-    var tid = data.tid;
-    if (tid == null || tid < 0 || tid >= territories.length) return;
-    const c = territories[tid].cps; 
-    spawnCluster(c.x, c.y, 5, 100);
+  if (pixiRenderer) {
+    pixiRenderer.clusterExplodeAtTerritory(data.tid, 5, 100);
+  }
 });
 
 
@@ -1521,6 +1562,7 @@ socket.on('choose_territorial_distribution', function(data){
             }
             tmptid ++;
           }
+          syncPixiSelections();
 
           document.getElementById('control_panel').style.display = 'flex';
           $('#control_confirm').off('click').on('click', function(){
@@ -1528,12 +1570,14 @@ socket.on('choose_territorial_distribution', function(data){
             socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
             document.getElementById('middle_display').style.display = 'none';
             toHighLight = []; 
+            syncPixiSelections();
           });
           $('#control_cancel').off('click').on('click' , function(){
             document.getElementById('control_panel').style.display = 'none';
             disabled = false;
             btn_dist.style.border = "none";
             toHighLight = [];
+            syncPixiSelections();
             playRefuse();
           });
         }
@@ -1545,19 +1589,24 @@ socket.on('choose_territorial_distribution', function(data){
 // Set capital
 function settle_capital(tid){
   toHighLight = [];
+  syncPixiSelections();
   document.getElementById('control_panel').style.display = 'none';
   if (player_territories.includes(tid)){
     toHighLight.push(tid);
+    syncPixiSelections();
+
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#control_confirm').off('click').on('click', function(){
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_capital_choice', {'choice': toHighLight[0], 'tid': tid});
       toHighLight = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
+      syncPixiSelections();
       playRefuse();
     });
   }
@@ -1572,6 +1621,7 @@ function settle_cities(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == 2){
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
@@ -1579,10 +1629,12 @@ function settle_cities(tid){
         document.getElementById('control_panel').style.display = 'none';
         socket.emit('send_city_choices', {'choice': toHighLight});
         toHighLight = [];
+        syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click' , function(){
         document.getElementById('control_panel').style.display = 'none';
         toHighLight = [];
+        syncPixiSelections();
         playRefuse();
         });
     }
@@ -1594,6 +1646,7 @@ socket.on('settle_result', function(data){
   if (data.resp){
     currEvent = null;
     toHighLight = [];
+    syncPixiSelections();
   } else {
     popup("NOT YOUR TERRITORY!", 1000);
   }
@@ -1790,24 +1843,22 @@ socket.on('nuclear_explosion', function(){
 
 // casualty display
 socket.on('battle_casualties', function(data){
-
-  for (tdis in data) {
-    casualties.push(data[tdis]);
+  if (!pixiRenderer) return;
+  const entries = [];
+  for (const tid in data) {
+    entries.push(data[tid]);
   }
-
-  dis_cas = true;
-  cas_count = 30;
+  pixiRenderer.showCasualties(entries);
 });
 
 // addition display
 socket.on('troop_addition_display', function(data){
-
-  for (tdis in data) {
-    additions.push(data[tdis]);
+  if (!pixiRenderer) return;
+  const entries = [];
+  for (const tid in data) {
+    entries.push(data[tid]);
   }
-
-  dis_add = true;
-  add_count = 30;
+  pixiRenderer.showAdditions(entries);
 });
 
 // Display and update how many troops are deployable. Used both in initial deployment and turn-based troop deployment
@@ -1825,6 +1876,7 @@ socket.on('preparation', function(){
     currEvent = null;
     toHighLight = [];
     clickables = [];
+    syncPixiSelections();
   });
 });
 
@@ -1844,6 +1896,7 @@ socket.on('conquest', function(){
       currEvent = null;
       toHighLight = [];
       clickables = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){
       document.getElementById('control_panel').style.display = 'none';
@@ -1864,16 +1917,19 @@ socket.on('rearrangement', function(){
     currEvent = null;
     toHighLight = [];
     clickables = [];
+    syncPixiSelections();
   });
 });
 
 // Click function that handles troop deployment (for initial and turn-based troop deployment)
 function troop_deployment(tid){
   toHighLight = [];
+  syncPixiSelections();
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('control_mechanism').style.display = 'none';
   if (player_territories.includes(tid)){
     toHighLight.push(tid);
+    syncPixiSelections();
     
     // Sync clicks
     socket.emit('add_click_sync', {'tid': tid});
@@ -1921,6 +1977,7 @@ function troop_deployment(tid){
     document.getElementById('control_mechanism').style.display = 'none';
     socket.emit('send_troop_update', {'choice': toHighLight[0], 'amount': troopInput.value});
     toHighLight = [];
+    syncPixiSelections();
 
     curr_slider = '';
     curr_slider_val = '';
@@ -1934,6 +1991,7 @@ function troop_deployment(tid){
       document.getElementById('control_mechanism').style.display = 'none';
       document.getElementById('control_panel').style.display = 'none';
       toHighLight = [];
+      syncPixiSelections();
       playRefuse();
 
       curr_slider = '';
@@ -1951,6 +2009,7 @@ socket.on('troop_result', function(data){
     popup("NOT YOUR TERRITORY!", 1000);
   } else {
     toHighLight = [];
+    syncPixiSelections();
     deployable = 0;
     currEvent = null;
   }
@@ -1963,8 +2022,10 @@ function conquest(tid){
     document.getElementById('control_mechanism').style.display = 'none';
     $('#proceed_next_stage').show();
     clickables = [];
+    syncPixiSelections()
     if (toHighLight.length){
       toHighLight = [];
+      syncPixiSelections();
       // clear sync clicks
       socket.emit('clear_otherHighlights');
     }
@@ -1977,15 +2038,18 @@ function conquest(tid){
     socket.emit('add_click_sync', {'tid': tid});
 
     clickables = territories[tid].neighbors.filter(tmp_id => territories[tid].color !== territories[tmp_id].color);
+    syncPixiSelections();
     
   } else if (clickables.includes(tid)){
     if (toHighLight.length != 2){
       toHighLight.push(tid);
+      syncPixiSelections();
       // Sync clicks
       socket.emit('add_click_sync', {'tid': tid});
     }
     if (toHighLight.length == 2){
       toHighLight[1] = tid;
+      syncPixiSelections();
       // Sync clicks
       socket.emit('clear_otherHighlights');
       for (trty of toHighLight){
@@ -2038,6 +2102,7 @@ function conquest(tid){
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
+        syncPixiSelections();
         
         curr_slider = '';
         curr_slider_val = '';
@@ -2051,6 +2116,7 @@ function conquest(tid){
         // Sync clicks
         socket.emit('clear_otherHighlights');
         clickables = [];
+        syncPixiSelections();
 
         curr_slider = '';
         curr_slider_val = '';
@@ -2063,19 +2129,24 @@ function conquest(tid){
 
 // Update clickables to include the reachable territories for rearrangement
 socket.on('update_clickables', function(data){
-  clickables = data.trtys;
-})
+    clickables = (data.trtys || []).map(Number);
+  if (pixiRenderer) {
+    pixiRenderer.setClickables(data.trtys || []);
+  }
+});
 
 // Click function that handles rearrangement
 function rearrange(tid){
   if (clickables.includes(tid) && tid != toHighLight[0]){
     if (toHighLight.length != 2){
       toHighLight.push(tid);
+      syncPixiSelections();
       // Sync clicks
       socket.emit('add_click_sync', {'tid': tid});
     }
     if (toHighLight.length == 2){
       toHighLight[1] = tid;
+      syncPixiSelections();
       // Sync clicks
       socket.emit('clear_otherHighlights');
       for (trty of toHighLight){
@@ -2128,6 +2199,7 @@ function rearrange(tid){
         toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
+        syncPixiSelections();
 
         curr_slider = '';
         curr_slider_val = '';
@@ -2139,6 +2211,7 @@ function rearrange(tid){
         toHighLight = [];
         socket.emit('clear_otherHighlights');
         clickables = [];
+        syncPixiSelections();
 
         curr_slider = '';
         curr_slider_val = '';
@@ -2151,15 +2224,18 @@ function rearrange(tid){
     document.getElementById('control_mechanism').style.display = 'none';
     $('#proceed_next_stage').show();
     clickables = [];
+    syncPixiSelections()
     if (territories[tid].troops == 1){
       popup("NOT ENOUGH TROOPS TO TRANSFER!", 1000);
       return;
     }
     if (toHighLight.length){
       toHighLight = [];
+      syncPixiSelections();
       socket.emit('clear_otherHighlights');
     }
     toHighLight.push(tid);
+    syncPixiSelections();
     socket.emit('add_click_sync', {'tid': tid});
     socket.emit("get_reachable_trty", {'choice': tid})
   }  
@@ -2175,6 +2251,7 @@ socket.on('concurr_terminate_event_setup', function(data){
     currEvent = null;
     toHighLight = [];
     clickables = [];
+    syncPixiSelections();
   });
 });
 
@@ -2191,6 +2268,7 @@ socket.on('async_terminate_button_setup', function(){
       currEvent = null;
       toHighLight = [];
       clickables = [];
+      syncPixiSelections();
     });
 });
 
@@ -2209,6 +2287,7 @@ socket.on('set_forts', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 socket.on('set_hall', function(data){
@@ -2216,6 +2295,7 @@ socket.on('set_hall', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 socket.on('set_nexus', function(data){
@@ -2223,6 +2303,7 @@ socket.on('set_nexus', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 socket.on('set_leyline', function(data){
@@ -2230,6 +2311,7 @@ socket.on('set_leyline', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 socket.on('set_bureau', function(data){
@@ -2237,6 +2319,7 @@ socket.on('set_bureau', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 socket.on('land_survey', function(data){
@@ -2244,6 +2327,7 @@ socket.on('land_survey', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.flist;
+  syncPixiSelections();
 })
 
 // Set and display the city amount for megacity settlement event
@@ -2252,6 +2336,7 @@ socket.on('raise_megacities', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.clist;
+  syncPixiSelections();
 })
 
 // Warning during city settlement
@@ -2262,10 +2347,12 @@ socket.on('update_settle_status', function(data){
 // Click function for reserve deployment
 function deploy_reserves(tid){
   toHighLight = [];
+  syncPixiSelections();
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('control_mechanism').style.display = 'none';
   if (player_territories.includes(tid)){
     toHighLight.push(tid);
+    syncPixiSelections();
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
 
@@ -2309,6 +2396,7 @@ function deploy_reserves(tid){
     document.getElementById('control_mechanism').style.display = 'none';
     socket.emit('send_reserves_deployed', {'choice': toHighLight[0], 'amount': troopInput.value});
     toHighLight = [];
+    syncPixiSelections();
     curr_slider = '';
     curr_slider_val = '';
     });
@@ -2316,6 +2404,7 @@ function deploy_reserves(tid){
       document.getElementById('control_panel').style.display = 'none';
       document.getElementById('control_mechanism').style.display = 'none';
       toHighLight = [];
+      syncPixiSelections();
       curr_slider = '';
       curr_slider_val = '';
     });
@@ -2331,6 +2420,7 @@ function build_cities(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         document.getElementById('control_mechanism').style.display = 'none';
@@ -2339,10 +2429,12 @@ function build_cities(tid){
           $('#control_panel').hide();
           socket.emit('settle_cities', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2356,6 +2448,7 @@ function raise_megacities(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         document.getElementById('control_mechanism').style.display = 'none';
@@ -2364,10 +2457,12 @@ function raise_megacities(tid){
           $('#control_panel').hide();
           socket.emit('settle_megacities', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2381,6 +2476,7 @@ function set_forts(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         document.getElementById('control_mechanism').style.display = 'none';
@@ -2389,10 +2485,12 @@ function set_forts(tid){
           $('#control_panel').hide();
           socket.emit('settle_forts', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2406,6 +2504,7 @@ function set_hall(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         document.getElementById('control_mechanism').style.display = 'none';
@@ -2414,10 +2513,12 @@ function set_hall(tid){
           $('#control_panel').hide();
           socket.emit('settle_hall', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2431,6 +2532,7 @@ function set_nexus(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         document.getElementById('control_mechanism').style.display = 'none';
@@ -2439,10 +2541,12 @@ function set_nexus(tid){
           $('#control_panel').hide();
           socket.emit('settle_nexus', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2456,6 +2560,7 @@ function set_leyline(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         $('#control_panel').show();
@@ -2463,10 +2568,12 @@ function set_leyline(tid){
           $('#control_panel').hide();
           socket.emit('settle_leyline', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2480,6 +2587,7 @@ function set_bureau(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         $('#control_panel').show();
@@ -2487,10 +2595,12 @@ function set_bureau(tid){
           $('#control_panel').hide();
           socket.emit('settle_bureau', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2504,6 +2614,7 @@ function land_survey(tid){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
     }
+    syncPixiSelections();
     if (toHighLight.length == city_amt){
         $('#control_panel').hide();
         $('#control_panel').show();
@@ -2511,10 +2622,12 @@ function land_survey(tid){
           $('#control_panel').hide();
           socket.emit('land_survey', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -2530,6 +2643,7 @@ btn_diplomatic.off('click').click(function () {
   $('#control_mechanism').hide();
   clickables = []
   toHighLight = []
+  syncPixiSelections();
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = `
   <div class="flex items-center justify-between relative">
@@ -2692,6 +2806,7 @@ btn_sep_auth.onclick = function () {
   $('#control_mechanism').hide();
   clickables = []
   toHighLight = []
+  syncPixiSelections();
   document.getElementById('middle_display').style.display = 'flex';
   // clear title
   document.getElementById('middle_title').innerHTML = "";
@@ -3213,6 +3328,7 @@ btn_skill.onclick = function () {
   $('#control_mechanism').hide();
   clickables = []
   toHighLight = []
+  syncPixiSelections();
   document.getElementById('middle_display').style.display = 'flex';
   document.getElementById('middle_title').innerHTML = "";
    // Grab the special authority amt of the user
@@ -3403,6 +3519,7 @@ btn_reserves.onclick = function () {
   $('#control_mechanism').hide();
   clickables = []
   toHighLight = []
+  syncPixiSelections();
   socket.emit('send_async_event', {'name': "R_D"});
 
 }
@@ -3411,6 +3528,7 @@ function establish_pillars(tid){
   if(player_territories.includes(tid)){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
+      syncPixiSelections();
     }
     if (toHighLight.length != 0){
         $('#control_panel').hide();
@@ -3420,10 +3538,12 @@ function establish_pillars(tid){
           $('#control_panel').hide();
           socket.emit('settle_pillars', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -3433,6 +3553,7 @@ function build_free_leyline_crosses(tid){
   if(player_territories.includes(tid)){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
+      syncPixiSelections();
     }
     if (toHighLight.length != 0){
         $('#control_panel').hide();
@@ -3441,10 +3562,12 @@ function build_free_leyline_crosses(tid){
           $('#control_panel').hide();
           socket.emit('build_free_leyline_crosses', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -3457,6 +3580,7 @@ function build_free_cities(tid){
   if(player_territories.includes(tid)){
     if (!toHighLight.includes(tid)){
       toHighLight.push(tid);
+      syncPixiSelections();
     }
     if (toHighLight.length != 0){
         $('#control_panel').hide();
@@ -3465,10 +3589,12 @@ function build_free_cities(tid){
           $('#control_panel').hide();
           socket.emit('build_free_cities', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -3479,12 +3605,14 @@ socket.on('launch_orbital_strike', function(data){
   clickables = [];
   toHighLight = [];
   clickables = data.targets;
+  syncPixiSelections();
 });
 
 function launch_orbital_strike(tid){
   if(!player_territories.includes(tid)){
     if (!toHighLight.includes(tid) && clickables.includes(tid)){
       toHighLight.push(tid);
+      syncPixiSelections();
     }
     if (toHighLight.length != 0){
         $('#control_panel').hide();
@@ -3493,10 +3621,12 @@ function launch_orbital_strike(tid){
           $('#control_panel').hide();
           socket.emit('strike_targets', {'choice': toHighLight});
           toHighLight = [];
+          syncPixiSelections();
         });
         $('#control_cancel').off('click').on('click', function(){playRefuse();
           $('#control_panel').hide();
           toHighLight = [];
+          syncPixiSelections();
         });
     }
   }
@@ -3506,6 +3636,7 @@ function launch_orbital_strike(tid){
 socket.on('paratrooper_attack', function(){
   clickables = [];
   toHighLight = [];
+  syncPixiSelections();
 });
 
 // Function to grab the reserve amt for the user
@@ -3522,19 +3653,24 @@ function paratrooper_attack(tid){
     if (toHighLight.length){
       toHighLight = [];
       clickables = [];
+      syncPixiSelections();
     }
     toHighLight.push(tid);
+    syncPixiSelections();
     get_reachable_airspace(tid).then(spaces => {
       clickables = spaces
+      syncPixiSelections();
     }).catch(error => {
       console.error("Error getting reserve amount:", error); });
   } else if (!player_territories.includes(tid)){
     if (clickables.includes(tid)){
       if (toHighLight.length != 2){
         toHighLight.push(tid);
+        syncPixiSelections();
       }
       if (toHighLight.length == 2){
         toHighLight[1] = tid;
+        syncPixiSelections();
 
         document.getElementById('control_panel').style.display = 'none';
         document.getElementById('control_panel').style.display = 'flex';
@@ -3581,6 +3717,7 @@ function paratrooper_attack(tid){
           socket.emit('send_battle_stats_AS', {'choice': toHighLight, 'amount': troopInput.value});
           toHighLight = [];
           clickables = [];
+          syncPixiSelections();
           $('#proceed_next_stage').show();
         });
         $('#control_cancel').off('click').on('click' , function(){playRefuse();
@@ -3588,6 +3725,7 @@ function paratrooper_attack(tid){
           document.getElementById('control_mechanism').style.display = 'none';
           toHighLight = [];
           clickables = [];
+          syncPixiSelections();
           $('#proceed_next_stage').show();
         });
      }
@@ -3599,12 +3737,14 @@ function paratrooper_attack(tid){
 socket.on('corrupt_territory', function(data){
   clickables = data.targets;
   toHighLight = [];
+  syncPixiSelections();
 });
 
 function corrupt_territory(tid){
   toHighLight = [];
   document.getElementById('control_panel').style.display = 'none';
   toHighLight.push(tid);
+  syncPixiSelections();
   document.getElementById('control_panel').style.display = 'none';
   document.getElementById('control_panel').style.display = 'flex';
   $('#proceed_next_stage').hide();
@@ -3612,11 +3752,13 @@ function corrupt_territory(tid){
     document.getElementById('control_panel').style.display = 'none';
     socket.emit('send_corrupt_territory', {'choice': toHighLight[0]});
     toHighLight = [];
+    syncPixiSelections();
   });
   $('#control_cancel').off('click').on('click' , function(){playRefuse();
     document.getElementById('control_panel').style.display = 'none';
     $('#proceed_next_stage').show();
     toHighLight = [];
+    syncPixiSelections();
   });
 }
 
@@ -3737,6 +3879,7 @@ socket.on('arsenal_controls', function(data) {
     clickables = data.targets;
     minefields_amount = data.limits;
     toHighLight = [];
+    syncPixiSelections();
   });
 
   function set_minefields(tid){
@@ -3748,6 +3891,7 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > minefields_amount) {
         toHighLight.shift();
     }
+    syncPixiSelections();
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -3755,11 +3899,13 @@ socket.on('arsenal_controls', function(data) {
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_minefield_choices', {'choices': toHighLight});
       toHighLight = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
+      syncPixiSelections();
     });
   }
 
@@ -3767,6 +3913,7 @@ socket.on('arsenal_controls', function(data) {
   socket.on('set_underground_silo', function(data){
     clickables = data.targets;
     toHighLight = [];
+    syncPixiSelections();
   });
 
   function set_underground_silo(tid){
@@ -3776,6 +3923,7 @@ socket.on('arsenal_controls', function(data) {
     toHighLight = [];
     document.getElementById('control_panel').style.display = 'none';
     toHighLight.push(tid);
+    syncPixiSelections();
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -3783,11 +3931,13 @@ socket.on('arsenal_controls', function(data) {
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_silo_location', {'choice': toHighLight[0]});
       toHighLight = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
+      syncPixiSelections();
     });
   }
 
@@ -3796,6 +3946,7 @@ socket.on('arsenal_controls', function(data) {
     clickables = data.targets;
     US_usages = data.usages;
     toHighLight = [];
+    syncPixiSelections();
   });
 
   // launching from silo
@@ -3808,6 +3959,7 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > US_usages) {
         toHighLight.shift();
     }
+    syncPixiSelections();
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -3815,11 +3967,13 @@ socket.on('arsenal_controls', function(data) {
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_missile_targets', {'choices': toHighLight});
       toHighLight = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
+      syncPixiSelections();
     });
   }
 
@@ -3828,6 +3982,7 @@ socket.on('arsenal_controls', function(data) {
     clickables = data.targets;
     US_usages = data.usages;
     toHighLight = [];
+    syncPixiSelections();
   });
 
   // orbital strike
@@ -3840,6 +3995,7 @@ socket.on('arsenal_controls', function(data) {
     if (toHighLight.length > US_usages) {
         toHighLight.shift();
     }
+    syncPixiSelections();
     document.getElementById('control_panel').style.display = 'none';
     document.getElementById('control_panel').style.display = 'flex';
     $('#proceed_next_stage').hide();
@@ -3847,11 +4003,13 @@ socket.on('arsenal_controls', function(data) {
       document.getElementById('control_panel').style.display = 'none';
       socket.emit('send_orbital_targets', {'choices': toHighLight});
       toHighLight = [];
+      syncPixiSelections();
     });
     $('#control_cancel').off('click').on('click' , function(){playRefuse();
       document.getElementById('control_panel').style.display = 'none';
       $('#proceed_next_stage').show();
       toHighLight = [];
+      syncPixiSelections();
     });
   }
 
@@ -4058,6 +4216,7 @@ socket.on('show_debt_button', function(){
     $('#control_mechanism').hide();
     clickables = []
     toHighLight = []
+    syncPixiSelections();
     // Ensure middle_display, middle_title, and middle_content are visible and cleared
     let middleDisplay = $('#middle_display');
     let middleTitle = $('#middle_title');
@@ -4506,81 +4665,85 @@ function mouseDragged() {
   }
 }
 
-// CLICK FUNCTION ON TERRITORY
-function mouseClicked() {
-  if(mouseX <= width && mouseY <= height && !isMouseOverOverlay()){
-    if(isMouseInsidePolygon(mouseX, mouseY, hover_over.pts)){
-      let tid = hover_over.id;
-      if (currEvent){
-        playTap();
-        currEvent(tid);
-      } 
+function isPixiClickBlocked(event) {
+  if (!event) return false;
+
+  const selectors = [
+    '#overlay_sections .card',
+    '#overlay_sections .bottom-action-button',
+    '#proceed_next_stage',
+    '#control_panel',
+    '#control_mechanism',
+    '#your_stats',
+    '#global_overview',
+    '#tracker',
+    '#event_announcement',
+    '#middle_display',
+    '#laplace_info_display',
+    '#player_info',
+    '#game-chatbox'
+  ];
+
+  const x = event.clientX;
+  const y = event.clientY;
+
+  for (const selector of selectors) {
+    const els = document.querySelectorAll(selector);
+
+    for (const el of els) {
+      const style = window.getComputedStyle(el);
+
+      if (
+        style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        style.pointerEvents === 'none'
+      ) {
+        continue;
+      }
+
+      const rect = el.getBoundingClientRect();
+
+      if (
+        x >= rect.left &&
+        x <= rect.right &&
+        y >= rect.top &&
+        y <= rect.bottom
+      ) {
+        return true;
+      }
     }
+  }
+
+  return false;
+}
+
+// CLICK FUNCTION ON TERRITORY
+function handlePixiTerritoryClick(tid) {
+  if (isPixiClickBlocked(currEvent)) return;
+  if (currEvent) {
+    playTap();
+    currEvent(tid);
   }
 }
 
   // TO BE UPDATED
-function keyPressed(){
-  // if (key === 'c'){
-  //   displayScaleFactor = 1.0;
-  // }
+document.addEventListener('keydown', function(event) {
+  const key = event.key.toLowerCase();
 
-  // shortcut for fast max deployment
-  if (key === 'a'){
-    if (curr_slider && curr_slider_val) {
+  if (event.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+    return;
+  }
 
-      let $slider = $(curr_slider);
-      let $sliderValue = $(curr_slider_val);
-
-      $slider.val($slider.attr('max'));
-      $sliderValue.text($slider.attr('max'));
-
-      let slider = document.getElementById('control_slider');
-      const percentage = (($slider.attr('max') - slider.min) / (slider.max - slider.min)) * 100;
-      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
-    }
+  if (key === 'a') {
+    setSliderShortcut('max');
   }
 
   if (key === 's') {
-    if (curr_slider && curr_slider_val) {
-  
-      let $slider = $(curr_slider);
-      let $sliderValue = $(curr_slider_val);
-      let maxVal = parseInt($slider.attr('max'), 10);
-      let halfMax = Math.round(maxVal / 2);
-
-      if (halfMax < 1) {
-        halfMax = 1;
-      }
-  
-      $slider.val(halfMax);
-      $sliderValue.text(halfMax);
-
-      let slider = document.getElementById('control_slider');
-      const percentage = ((halfMax - slider.min) / (slider.max - slider.min)) * 100;
-      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
-    }
+    setSliderShortcut('half');
   }
 
   if (key === 'd') {
-    if (curr_slider && curr_slider_val) {
-  
-      let $slider = $(curr_slider);
-      let $sliderValue = $(curr_slider_val);
-      let maxVal = parseInt($slider.attr('max'), 10);
-      let thirdMax = Math.round(maxVal / 3);
-
-      if (thirdMax < 1) {
-        thirdMax = 1;
-      }
-  
-      $slider.val(thirdMax);
-      $sliderValue.text(thirdMax);
-
-      let slider = document.getElementById('control_slider');
-      const percentage = ((thirdMax - slider.min) / (slider.max - slider.min)) * 100;
-      slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
-    }
+    setSliderShortcut('third');
   }
 
   if (key === 'g') {
@@ -4606,18 +4769,54 @@ function keyPressed(){
       }
     }
   }
+});
 
+function setSliderShortcut(mode) {
+  if (!curr_slider || !curr_slider_val) return;
+
+  const $slider = $(curr_slider);
+  const $sliderValue = $(curr_slider_val);
+  const slider = document.querySelector(curr_slider);
+
+  if (!$slider.length || !$sliderValue.length || !slider) return;
+
+  const minVal = parseInt($slider.attr('min'), 10) || 1;
+  const maxVal = parseInt($slider.attr('max'), 10) || minVal;
+
+  let value = maxVal;
+
+  if (mode === 'half') {
+    value = Math.round(maxVal / 2);
+  }
+
+  if (mode === 'third') {
+    value = Math.round(maxVal / 3);
+  }
+
+  if (value < minVal) {
+    value = minVal;
+  }
+
+  $slider.val(value);
+  $sliderValue.text(value);
+
+  const percentage = ((value - minVal) / (maxVal - minVal)) * 100;
+
+  slider.style.background = `linear-gradient(to right, rgb(34, 211, 238) 0%, rgb(34, 211, 238) ${percentage}%, rgb(51, 65, 85) ${percentage}%, rgb(51, 65, 85) 100%)`;
 }
-
 
 // Iron Dome
 
 socket.on('ironDomeOn', function(data){
-  ironDomeOn = data.tids;
+  if (pixiRenderer) {
+    pixiRenderer.setIronWallShields((data.tids || []).map(Number));
+  }
 });
 
-socket.on('ironDomeOff', function(data){
-  ironDomeOn = [];
+socket.on('ironDomeOff', function(){
+  if (pixiRenderer) {
+    pixiRenderer.clearIronWallShields();
+  }
 });
 
 
@@ -4744,3 +4943,9 @@ socket.on('rage_mode_off', function() {
 
 // Initialize on load
 createRageModeOverlay();
+
+function syncPixiSelections() {
+  if (!pixiRenderer) return;
+  pixiRenderer.setToHighLight(toHighLight);
+  pixiRenderer.setClickables(clickables);
+}
