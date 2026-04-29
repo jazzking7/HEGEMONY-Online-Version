@@ -507,6 +507,22 @@ class PixiMapRenderer {
     this.baseWorldX = 0;
     this.baseWorldY = 0;
 
+    this.attackArrowLayer = null;
+    this.attackArrowGlow = null;
+    this.attackArrowBody = null;
+    this.attackArrowHead = null;
+
+    this.attackArrow = {
+      active: false,
+      fromId: null,
+      toId: null,
+      elapsed: 0
+    };
+
+    this.attackArrowCycleMS = 767;
+    this.attackArrowFlightMS = 567;
+    this.attackArrowPulseMS = 267;
+
     this.casualtyTextStyle = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 35,
@@ -609,11 +625,29 @@ class PixiMapRenderer {
     this.toHighlightOverlay.roundPixels = true;
     this.clickablesLayer.roundPixels = true;
 
+    this.attackArrowLayer = new PIXI.Container();
+    this.attackArrowGlow = new PIXI.Graphics();
+    this.attackArrowBody = new PIXI.Graphics();
+    this.attackArrowHead = new PIXI.Graphics();
+
+    this.attackArrowLayer.eventMode = "none";
+    this.attackArrowLayer.roundPixels = true;
+    this.attackArrowGlow.roundPixels = true;
+    this.attackArrowBody.roundPixels = true;
+    this.attackArrowHead.roundPixels = true;
+
+    this.attackArrowGlow.blendMode = "add";
+    this.attackArrowBody.blendMode = "add";
+    this.attackArrowLayer.addChild(this.attackArrowGlow);
+    this.attackArrowLayer.addChild(this.attackArrowBody);
+    this.attackArrowLayer.addChild(this.attackArrowHead);
+
     this.overlayLayer.addChild(this.targetCaptureOverlay);
     this.overlayLayer.addChild(this.hoverOverlay);
     this.overlayLayer.addChild(this.clickablesLayer);
     this.overlayLayer.addChild(this.otherHighlightOverlay);
     this.overlayLayer.addChild(this.toHighlightOverlay);
+    this.overlayLayer.addChild(this.attackArrowLayer);
 
     this.effectLayer.addChild(this.explosionLayer);
     this.effectLayer.addChild(this.floatingTextLayer);
@@ -650,6 +684,7 @@ class PixiMapRenderer {
     this.app.ticker.add((ticker) => {
       this.updateHoverPulse(ticker.deltaMS);
       this.updateClickableAnimation(ticker.deltaMS);
+      this.updateAttackArrow(ticker.deltaMS);
       this.updateFloatingTexts(ticker.deltaMS);
       this.updateIronWallEffects(ticker.deltaMS);
       this.updateEffects(ticker.deltaMS);
@@ -1137,6 +1172,280 @@ class PixiMapRenderer {
       indicator.y = Math.round(indicator.baseY + offset);
     }
   }
+
+    getTerritoryCp(id) {
+    const trty = this.territories[id];
+    if (!trty || !trty.cps) return null;
+    return {
+      x: Number(trty.cps.x),
+      y: Number(trty.cps.y)
+    };
+  }
+
+  quadraticPoint(p0, p1, p2, t) {
+    const mt = 1 - t;
+    return {
+      x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+      y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y
+    };
+  }
+
+  quadraticTangent(p0, p1, p2, t) {
+    return {
+      x: 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x),
+      y: 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y)
+    };
+  }
+
+  buildAttackArrowCurve(fromId, toId) {
+    const from = this.getTerritoryCp(fromId);
+    const to = this.getTerritoryCp(toId);
+    if (!from || !to) return null;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1) return null;
+    const nx = -dy / len;
+    const ny =  dx / len;
+    const scale = Math.max(0.5, Math.min(1.4, len / 360));
+    const midX = (from.x + to.x) * 0.5;
+    const midY = (from.y + to.y) * 0.5;
+    // arcLift fixed at 110, clamped so very short arrows still arc
+    const arcLift = Math.max(20, Math.min(110, len * 0.20));
+    const p0 = { x: from.x, y: from.y };
+    const p2 = { x: to.x,   y: to.y   };
+    const p1 = {
+      x: midX + nx * arcLift * 0.06,
+      y: midY - arcLift
+    };
+    return { p0, p1, p2, len, scale };
+  }
+
+  drawQuadSegment(gfx, a, b, width, color, alpha) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.001) return;
+
+    const nx = -dy / len;
+    const ny = dx / len;
+    const hw = width * 0.5;
+
+    gfx.poly([
+      a.x + nx * hw, a.y + ny * hw,
+      b.x + nx * hw, b.y + ny * hw,
+      b.x - nx * hw, b.y - ny * hw,
+      a.x - nx * hw, a.y - ny * hw
+    ]);
+    gfx.fill({ color, alpha });
+  }
+
+  drawAttackBlock(a, b, width, opts = {}) {
+    const {
+        outlineColor = 0x062f40,
+        glowColor = 0x62efff,
+        bodyColor = 0x1fcdf0,
+        coreColor = 0xd8fbff,
+        outlineAlpha = 0.5,
+        glowAlpha = 0.35,
+        bodyAlpha = 0.72,
+        coreAlpha = 0.18
+    } = opts;
+
+    this.drawQuadSegment(this.attackArrowGlow, a, b, width + 5, outlineColor, outlineAlpha);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, width + 2.5, glowColor, glowAlpha);
+    this.drawQuadSegment(this.attackArrowBody, a, b, width, bodyColor, bodyAlpha);
+    this.drawQuadSegment(this.attackArrowHead, a, b, Math.max(1.5, width * 0.28), coreColor, coreAlpha);
+  }
+
+  drawArrowHead(gfx, tip, tangent, length, width, color, alpha) {
+    const mag = Math.hypot(tangent.x, tangent.y);
+    if (mag < 0.001) return;
+
+    const ux = tangent.x / mag;
+    const uy = tangent.y / mag;
+    const nx = -uy;
+    const ny = ux;
+    const halfW = width * 0.5;
+
+    const baseX = tip.x - ux * length;
+    const baseY = tip.y - uy * length;
+
+    gfx.poly([
+      tip.x, tip.y,
+      baseX + nx * halfW, baseY + ny * halfW,
+      baseX - nx * halfW, baseY - ny * halfW
+    ]);
+    gfx.fill({ color, alpha });
+  }
+
+  setAttackArrow(fromId, toId) {
+    const from = Number(fromId);
+    const to = Number(toId);
+
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) {
+      this.clearAttackArrow();
+      return;
+    }
+
+    if (!this.buildAttackArrowCurve(from, to)) {
+      this.clearAttackArrow();
+      return;
+    }
+
+    const changed = this.attackArrow.fromId !== from || this.attackArrow.toId !== to;
+
+    this.attackArrow.active = true;
+    this.attackArrow.fromId = from;
+    this.attackArrow.toId = to;
+
+    if (changed) {
+      this.attackArrow.elapsed = 0;
+    }
+
+    this.drawAttackArrow();
+  }
+
+  clearAttackArrow() {
+    this.attackArrow.active = false;
+    this.attackArrow.fromId = null;
+    this.attackArrow.toId = null;
+    this.attackArrow.elapsed = 0;
+
+    if (this.attackArrowGlow) this.attackArrowGlow.clear();
+    if (this.attackArrowBody) this.attackArrowBody.clear();
+    if (this.attackArrowHead) this.attackArrowHead.clear();
+  }
+
+  updateAttackArrow(deltaMS) {
+    if (!this.attackArrow.active) return;
+    this.attackArrow.elapsed += deltaMS;
+    this.drawAttackArrow();
+  }
+
+  drawAttackArrow() {
+  this.attackArrowGlow.clear();
+  this.attackArrowBody.clear();
+  this.attackArrowHead.clear();
+  if (!this.attackArrow.active) return;
+
+  const curve = this.buildAttackArrowCurve(this.attackArrow.fromId, this.attackArrow.toId);
+  if (!curve) return;
+
+  const { p0, p1, p2, len, scale } = curve;
+  const cycle = this.attackArrow.elapsed % this.attackArrowCycleMS;
+
+  const hot    = 0xe8fdff;
+  const bright = 0x7df3ff;
+  const mid    = 0x22d3ee;
+  const deep   = 0x0b7fa2;
+  const core   = 0x052d3d;
+
+  const srcPt = this.quadraticPoint(p0, p1, p2, 0);
+  const tgtPt = this.quadraticPoint(p0, p1, p2, 1);
+
+  // Source emitter - fixed sizes
+  const srcPulse = 0.5 + 0.5 * Math.sin(this.attackArrow.elapsed * 0.0085);
+  this.attackArrowGlow.circle(srcPt.x, srcPt.y, 12 + srcPulse * 3);
+  this.attackArrowGlow.stroke({ color: bright, width: Math.max(1.4, 2.4 * scale), alpha: 0.38, join: "round" });
+  this.attackArrowGlow.circle(srcPt.x, srcPt.y,  5 + srcPulse * 1);
+  this.attackArrowGlow.stroke({ color: mid, width: Math.max(1, 1.6 * scale), alpha: 0.75, join: "round" });
+  this.attackArrowHead.circle(srcPt.x, srcPt.y, 3);
+  this.attackArrowHead.fill({ color: hot, alpha: 0.9 });
+
+  // Impact pulse
+  if (cycle >= this.attackArrowFlightMS && cycle <= this.attackArrowFlightMS + this.attackArrowPulseMS) {
+    const pulseT = (cycle - this.attackArrowFlightMS) / this.attackArrowPulseMS;
+    const eased  = 1 - Math.pow(1 - pulseT, 2.5);
+    for (let i = 0; i < 4; i++) {
+      const r = 7 + eased * (22 + i * 15);
+      const a = Math.max(0, (0.5 - i * 0.09) * (1 - pulseT));
+      this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, r);
+      this.attackArrowGlow.stroke({ color: i % 2 === 0 ? bright : mid, width: Math.max(1, (2.8 - i * 0.4) * scale), alpha: a, join: "round" });
+    }
+    const outerR = 35 + eased * 55;
+    this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, outerR);
+    this.attackArrowGlow.stroke({ color: mid, width: Math.max(1.5, 3 * scale), alpha: Math.max(0, 0.18 * (1 - pulseT)), join: "round" });
+    this.attackArrowHead.circle(tgtPt.x, tgtPt.y, 4 + eased * 4);
+    this.attackArrowHead.fill({ color: hot, alpha: Math.max(0, 0.88 * (1 - pulseT)) });
+    return;
+  }
+
+  if (cycle > this.attackArrowFlightMS) return;
+
+  const headT = Math.max(0.03, Math.min(1, cycle / this.attackArrowFlightMS));
+
+  // Guide glow - 28 steps, fixed width 5
+  const GUIDE = 28;
+  for (let i = 0; i < GUIDE; i++) {
+    const t0 = 0.04 + 0.88 * i / GUIDE;
+    const t1 = 0.04 + 0.88 * (i + 0.4) / GUIDE;
+    if (t0 > headT + 0.14) continue;
+    const a = this.quadraticPoint(p0, p1, p2, t0);
+    const b = this.quadraticPoint(p0, p1, p2, t1);
+    const prox = Math.max(0, 1 - Math.abs(headT - t0) * 3.5);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, 3, deep, 0.028 + prox * 0.07);
+  }
+
+  // Segmented tail - fixed sizes
+  const SEG_COUNT = 14;
+  const tGap = 12 / len;
+  const tLen = 20 / len;
+  const tClr = 16 / len;
+  const wMax = 8;
+
+  for (let i = 0; i < SEG_COUNT; i++) {
+    const tailIdx  = i / Math.max(1, SEG_COUNT - 1);
+    const segFront = headT - tClr - i * tGap;
+    const segBack  = segFront - tLen * (1 - tailIdx * 0.35);
+    if (segFront <= 0) continue;
+    const a = this.quadraticPoint(p0, p1, p2, Math.max(0, segBack));
+    const b = this.quadraticPoint(p0, p1, p2, Math.max(0.001, Math.min(0.985, segFront)));
+    const appearFade = Math.min(1, headT * 4);
+    const tailFade   = Math.max(0.15, 1 - tailIdx * 0.82);
+    const w          = wMax * (1 - tailIdx * 0.52);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, w + 4, core,   0.55 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, w + 2, bright, 0.30 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowBody, a, b, w,     mid,    0.86 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowHead, a, b, w * 0.3, hot,  0.22 * tailFade * appearFade);
+  }
+
+  // Arrow head - fixed sizes
+  const tip     = this.quadraticPoint(p0, p1, p2, headT);
+  const tangent = this.quadraticTangent(p0, p1, p2, headT);
+  const HL = 20;
+  const HW = 18;
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 3, HW + 3, core,   0.72);
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 2, HW + 2, deep,   0.52);
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 1, HW + 1, bright, 0.40);
+  this.drawArrowHead(this.attackArrowHead, tip, tangent, HL,     HW,     mid, 0.98);
+  this.drawArrowHead(this.attackArrowHead, tip, tangent, HL * 0.7, HW * 0.46, hot, 0.35);
+  const mag = Math.hypot(tangent.x, tangent.y);
+  if (mag > 0.001) {
+    const ux = tangent.x / mag;
+    const uy = tangent.y / mag;
+    const nx = -uy;
+    const ny = ux;
+    const bx = tip.x - ux * HL * 0.7;
+    const by = tip.y - uy * HL * 0.7;
+    this.attackArrowHead.poly([
+      bx + nx * HW * 0.16, by + ny * HW * 0.16,
+      bx + nx * HW * 0.38, by + ny * HW * 0.38,
+      tip.x - ux * HL * 0.16 + nx * HW * 0.04,
+      tip.y - uy * HL * 0.16 + ny * HW * 0.04
+    ]);
+    this.attackArrowHead.fill({ color: hot, alpha: 0.24 });
+  }
+
+  // Warmup rings - fixed sizes
+  if (headT > 0.82) {
+    const wu = (headT - 0.82) / 0.18;
+    for (let i = 0; i < 3; i++) {
+      this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, 7 + i * 8);
+      this.attackArrowGlow.stroke({ color: i % 2 === 0 ? mid : bright, width: Math.max(1, 2 * scale), alpha: (0.12 + wu * 0.24) * scale * (1 - i * 0.28), join: "round" });
+    }
+  }
+}
 
   refreshAllOverlays() {
     this.refreshTargetsToCaptureOverlay();
