@@ -10,7 +10,9 @@ class TerritoryView {
 
     this.container = new PIXI.Container();
 
+    this.territoryGlow = new PIXI.Graphics();
     this.base = new PIXI.Graphics();
+    this.surfaceTint = new PIXI.Graphics();
     this.border = new PIXI.Graphics();
     this.hit = new PIXI.Graphics();
     this.iconLayer = new PIXI.Container();
@@ -66,8 +68,8 @@ class TerritoryView {
     });
 
     this.nameText = new PIXI.Text({
-      text: this.data.name || "",
-      style: this.nameStyleDark
+    text: (this.data.name || "").toUpperCase(),
+    style: this.nameStyleDark
     });
 
     this.troopText = new PIXI.Text({
@@ -87,7 +89,9 @@ class TerritoryView {
 
     this.capitalLayer.addChild(this.capitalGraphic);
 
+    this.container.addChild(this.territoryGlow);
     this.container.addChild(this.base);
+    this.container.addChild(this.surfaceTint);
     this.container.addChild(this.border);
     this.container.addChild(this.iconLayer);
     this.container.addChild(this.capitalLayer);
@@ -148,28 +152,72 @@ class TerritoryView {
     return this.getBrightnessFromColorValue(this.data.color || "#ffffff") < 128;
   }
 
+  clamp01(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  mixColors(a, b, t) {
+    t = this.clamp01(t);
+    const ar = (a >> 16) & 255;
+    const ag = (a >> 8) & 255;
+    const ab = a & 255;
+    const br = (b >> 16) & 255;
+    const bg = (b >> 8) & 255;
+    const bb = b & 255;
+    const r = Math.round(ar + (br - ar) * t);
+    const g = Math.round(ag + (bg - ag) * t);
+    const bl = Math.round(ab + (bb - ab) * t);
+    return (r << 16) | (g << 8) | bl;
+  }
+
+  getFactionAccentColor(fillColor) {
+    const bright = this.getBrightnessFromColorValue(fillColor);
+    return bright < 85 ? this.mixColors(fillColor, 0xffffff, 0.62) : this.mixColors(fillColor, 0xffffff, 0.32);
+  }
+
   drawPolygon() {
     const pts = this.getFlatPoints();
-    const fillColor = this.toPixiColor(this.data.color || "#ffffff");
+    const fc = this.toPixiColor(this.data.color || "#ffffff");
+    const accentColor = this.getFactionAccentColor(fc);
+    const darkEdge = this.mixColors(fc, 0x000000, 0.62);
+    const deepShadow = this.mixColors(fc, 0x000000, 0.80);
+    const softLight = this.mixColors(fc, 0xffffff, 0.18);
 
+    this.territoryGlow.clear();
     this.base.clear();
-    this.base.poly(pts);
-    this.base.fill(fillColor);
-
+    this.surfaceTint.clear();
     this.border.clear();
+
+    this.territoryGlow.poly(pts);
+    this.territoryGlow.stroke({ color: accentColor, width: 5.5, alpha: 0.08, join: "round" });
+
+    this.territoryGlow.poly(pts);
+    this.territoryGlow.stroke({ color: 0x000000, width: 3.6, alpha: 0.34, join: "round" });
+
+    this.base.poly(pts);
+    this.base.fill({ color: fc, alpha: 0.90 });
+
+    this.base.poly(pts);
+    this.base.stroke({ color: deepShadow, width: 2.2, alpha: 0.38, join: "round" });
+
+    this.surfaceTint.poly(pts);
+    this.surfaceTint.fill({ color: 0xffffff, alpha: this.isDarkFill() ? 0.03 : 0.015 });
+
+    this.surfaceTint.poly(pts);
+    this.surfaceTint.stroke({ color: softLight, width: 0.8, alpha: 0.14, join: "round" });
+
     this.border.poly(pts);
-    this.border.stroke({
-      color: 0x7a95a3,
-      width: 3.2,
-      join: "round"
-    });
+    this.border.stroke({ color: 0x05070b, width: 3.2, alpha: 0.88, join: "round" });
+
+    this.border.poly(pts);
+    this.border.stroke({ color: darkEdge, width: 1.8, alpha: 0.92, join: "round" });
+
+    this.border.poly(pts);
+    this.border.stroke({ color: accentColor, width: 0.85, alpha: 0.82, join: "round" });
 
     this.hit.clear();
     this.hit.poly(pts);
-    this.hit.fill({
-      color: 0xffffff,
-      alpha: 0.001
-    });
+    this.hit.fill({ color: 0xffffff, alpha: 0.001 });
   }
 
   refreshTextStyles() {
@@ -594,6 +642,7 @@ class PixiMapRenderer {
     this.seaRouteLayer = new PIXI.Container();
     this.contBorderLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
+    this.overlayLayer.sortableChildren = true;
     this.effectLayer = new PIXI.Container();
     this.explosionLayer = new PIXI.Container();
     this.floatingTextLayer = new PIXI.Container();
@@ -625,6 +674,9 @@ class PixiMapRenderer {
     this.toHighlightOverlay.roundPixels = true;
     this.clickablesLayer.roundPixels = true;
 
+    this.otherHighlightOverlay.blendMode = "normal";
+    this.toHighlightOverlay.blendMode = "normal";
+
     this.attackArrowLayer = new PIXI.Container();
     this.attackArrowGlow = new PIXI.Graphics();
     this.attackArrowBody = new PIXI.Graphics();
@@ -642,12 +694,19 @@ class PixiMapRenderer {
     this.attackArrowLayer.addChild(this.attackArrowBody);
     this.attackArrowLayer.addChild(this.attackArrowHead);
 
+    this.targetCaptureOverlay.zIndex = 10;
+    this.clickablesLayer.zIndex = 20;
+    this.attackArrowLayer.zIndex = 30;
+    this.otherHighlightOverlay.zIndex = 70;
+    this.toHighlightOverlay.zIndex = 80;
+    this.hoverOverlay.zIndex = 90;
+
     this.overlayLayer.addChild(this.targetCaptureOverlay);
-    this.overlayLayer.addChild(this.hoverOverlay);
     this.overlayLayer.addChild(this.clickablesLayer);
+    this.overlayLayer.addChild(this.attackArrowLayer);
     this.overlayLayer.addChild(this.otherHighlightOverlay);
     this.overlayLayer.addChild(this.toHighlightOverlay);
-    this.overlayLayer.addChild(this.attackArrowLayer);
+    this.overlayLayer.addChild(this.hoverOverlay);
 
     this.effectLayer.addChild(this.explosionLayer);
     this.effectLayer.addChild(this.floatingTextLayer);
@@ -657,8 +716,8 @@ class PixiMapRenderer {
 
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
-    this.world.addChild(this.overlayLayer);
     this.world.addChild(this.contBorderLayer);
+    this.world.addChild(this.overlayLayer);
     this.world.addChild(this.effectLayer);
     this.app.stage.addChild(this.world);
 
@@ -1052,11 +1111,10 @@ class PixiMapRenderer {
     const pts = this.getTerritoryFlatPoints(this.hoveredTerritoryId);
     if (!pts.length) return;
 
-    const s = 1 + 0.3 * Math.sin(this.hoverPulseTime);
-    const width = 2.5 * s;
-    const alpha = 220 / 255;
+    const pulse = 0.5 + 0.5 * Math.sin(this.hoverPulseTime);
 
-    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, width, alpha);
+    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, 8 + pulse * 2.5, 0.16 + pulse * 0.08);
+    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, 3 + pulse * 0.7, 0.92);
   }
 
   updateHoverPulse(deltaMS) {
@@ -1072,8 +1130,10 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 7, 70 / 255);
-      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 4, 1);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffe6a3, 16, 0.12);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffd86b, 11, 0.26);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffb300, 6.5, 0.86);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffffff, 1.8, 0.94);
     }
   }
 
@@ -1084,7 +1144,9 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0x000000, 4, 1);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 11, 0.10);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 7, 0.22);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 4, 0.92);
     }
   }
 
@@ -1095,8 +1157,9 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      const color = this.getHighlightContrastColor(id);
-      this.drawPolygonOutline(this.toHighlightOverlay, pts, color, 4, 1);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 11, 0.10);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 7, 0.22);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 4, 0.92);
     }
   }
 
@@ -1335,11 +1398,11 @@ class PixiMapRenderer {
   const { p0, p1, p2, len, scale } = curve;
   const cycle = this.attackArrow.elapsed % this.attackArrowCycleMS;
 
-  const hot    = 0xe8fdff;
-  const bright = 0x7df3ff;
-  const mid    = 0x22d3ee;
-  const deep   = 0x0b7fa2;
-  const core   = 0x052d3d;
+  const hot    = 0xfff0b8;
+    const bright = 0xffc247;
+    const mid    = 0xff4a32;
+    const deep   = 0xb31422;
+    const core   = 0x210508;
 
   const srcPt = this.quadraticPoint(p0, p1, p2, 0);
   const tgtPt = this.quadraticPoint(p0, p1, p2, 1);
@@ -1604,6 +1667,8 @@ class PixiMapRenderer {
       this.contBorderLayer.visible = this.showContBorders;
       this.world.removeChild(this.contBorderLayer);
       this.world.addChild(this.contBorderLayer);
+      this.world.removeChild(this.overlayLayer);
+      this.world.addChild(this.overlayLayer);
       this.world.removeChild(this.effectLayer);
       this.world.addChild(this.effectLayer);
     }
@@ -2316,6 +2381,14 @@ class PixiMapRenderer {
 
     if (this.toHighlightSet.has(id)) {
       this.refreshToHighlightOverlay();
+    }
+
+    if (this.otherHighlightSet.has(id)) {
+      this.refreshOtherHighlightOverlay();
+    }
+
+    if (this.targetsToCaptureSet.has(id)) {
+      this.refreshTargetsToCaptureOverlay();
     }
   }
 

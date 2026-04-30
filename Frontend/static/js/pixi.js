@@ -2327,7 +2327,7 @@ fn mainFragment(
 `||r===`\r
 `}const rB=/^\s*$/;function iB(r,t){const e=[];let i=t.lines[0],n="",s=[],a=0;return r.forEach(o=>{const l=rB.test(o),u=fh(o),c=n.length===0&&l;l&&!u&&c||(u||(n+=o),s.push(o),n.length>=i.length&&(e.push({line:n,chars:s}),s=[],n="",a++,i=t.lines[a]))}),e}function n1(r){var t,e;const{text:i,style:n,chars:s}=r,a=n,o=St.measureText(i,a);if(o.runsByLine&&o.runsByLine.length>0)return nB(o,a,s,i);const l=St.graphemeSegmenter(i),u=iB(l,o),c=a.align,h=o.lineWidths.reduce((F,R)=>Math.max(F,R),0),p=(t=a._fill)==null?void 0:t.fill,f=(e=a._stroke)==null?void 0:e.fill,m=p instanceof $t,g=f instanceof $t,_=m||g,y=m&&p.textureSpace==="local"||g&&f.textureSpace==="local",b=o.width,x=o.height,v=a.clone();v.align="left";let w=0,T=0;if(v.trim){const{frame:F,canvasAndContext:R}=ye.getCanvasAndContext({text:i,style:a,resolution:1});ye.returnCanvasAndContext(R),w=-F.x,T=-F.y,v.trim=!1}const P=[],E=[],M=[];let C=0,A=0;const G=y?{width:b,height:x}:null;return u.forEach((F,R)=>{const B=new dt({label:`line-${R}`});B.y=C+T,E.push(B);const O=o.lineWidths[R];let I=i1(c,O,h),L=new dt({label:"word"});L.x=I+w;const j=St._context;j.font=v._fontString,St.experimentalLetterSpacingSupported&&(j.letterSpacing="0px",j.textLetterSpacing="0px");let J=F.line,K=j.measureText(J).width;if(F.chars.forEach(N=>{if(fh(N))return;J=J.slice(N.length);const k=J.length>0?j.measureText(J).width:0,$=K-k;if(K=k,$!==0)if(N===" ")L.children.length>0&&(M.push(L),B.addChild(L)),I+=$+a.letterSpacing,L=new dt({label:"word"}),L.x=I+w;else{let z=v;_&&(z=v.clone(),z._gradientOffset={x:-I,y:-C},G&&(z._gradientBounds=G));let rt;A<s.length?(rt=s[A++],rt.text=N,rt.style=z,rt.setFromMatrix(U.IDENTITY),rt.x=I-L.x+w):rt=new Wi({text:N,style:z,x:I-L.x+w}),P.push(rt),L.addChild(rt),I+=$+a.letterSpacing}}),L.children.length>0&&(M.push(L),B.addChild(L)),c==="justify"&&a.wordWrap&&R<u.length-1){const N=B.children,k=N.length-1;if(k>0){const $=(h-O)/k;for(let z=1;z<N.length;z++)N[z].x+=z*$}}C+=o.lineHeight}),{chars:P,lines:E,words:M}}function nB(r,t,e,i){const{runsByLine:n}=r,s=t.align,a=r.lineWidths.reduce((m,g)=>Math.max(m,g),0);let o=0,l=0;if(t.trim){const{frame:m,canvasAndContext:g}=ye.getCanvasAndContext({text:i,style:t,resolution:1});ye.returnCanvasAndContext(g),o=-m.x,l=-m.y}const u=[],c=[],h=[];let p=0,f=0;return n.forEach((m,g)=>{var _,y,b,x;const v=new dt({label:`line-${g}`});v.y=p+l,c.push(v);const w=r.lineWidths[g];let T=i1(s,w,a),P=new dt({label:"word"});P.x=T+o;for(const M of m){const C=M.style,A=(_=C._fill)==null?void 0:_.fill,G=(y=C._stroke)==null?void 0:y.fill,F=A instanceof $t,R=G instanceof $t,B=F||R,O=F&&A.textureSpace==="local"||R&&G.textureSpace==="local",I=St.graphemeSegmenter(M.text),L=C.clone();L.align="left",L.wordWrap=!1,L.trim&&(L.trim=!1),L.tagStyles=void 0,L._lineHeight=0;const j=St._context;j.font=L._fontString,St.experimentalLetterSpacingSupported&&(j.letterSpacing="0px",j.textLetterSpacing="0px");let J=M.text,K=j.measureText(J).width;const N=T,k=K,$=St.measureFont(L._fontString),z=C.lineHeight||$.fontSize,rt=O?{width:k,height:z}:null;for(const _t of I){J=J.slice(_t.length);const et=J.length>0?j.measureText(J).width:0,st=K-et;if(K=et,!fh(_t)&&st!==0)if(_t===" ")P.children.length>0&&(h.push(P),v.addChild(P)),T+=st+C.letterSpacing,P=new dt({label:"word"}),P.x=T+o;else{let nt=L;B&&(nt=L.clone(),O?(nt._gradientOffset={x:-(T-N),y:0},nt._gradientBounds=rt):nt._gradientOffset={x:-(T-N),y:0});let ot;f<e.length?(ot=e[f++],ot.text=_t,ot.style=nt,ot.setFromMatrix(U.IDENTITY),ot.x=T-P.x+o):ot=new Wi({text:_t,style:nt,x:T-P.x+o}),u.push(ot),P.addChild(ot),T+=st+C.letterSpacing}}}if(P.children.length>0&&(h.push(P),v.addChild(P)),s==="justify"&&t.wordWrap&&g<n.length-1){const M=v.children,C=M.length-1;if(C>0){const A=(a-w)/C;for(let G=1;G<M.length;G++)M[G].x+=G*A}}const E=(x=(b=r.lineHeights)==null?void 0:b[g])!=null?x:r.lineHeight;p+=E}),{chars:u,lines:c,words:h}}var sB=Object.defineProperty,aB=Object.defineProperties,oB=Object.getOwnPropertyDescriptors,s1=Object.getOwnPropertySymbols,lB=Object.prototype.hasOwnProperty,uB=Object.prototype.propertyIsEnumerable,a1=(r,t,e)=>t in r?sB(r,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):r[t]=e,Ji=(r,t)=>{for(var e in t||(t={}))lB.call(t,e)&&a1(r,e,t[e]);if(s1)for(var e of s1(t))uB.call(t,e)&&a1(r,e,t[e]);return r},cB=(r,t)=>aB(r,oB(t));const o1=class Pa extends ph{constructor(t){const e=Ji(Ji({},Pa.defaultOptions),t);super(e)}static from(t,e){const i=cB(Ji(Ji({},Pa.defaultOptions),e),{text:t.text,style:new jt(t.style)}),n=new Pa(Ji({},i)),s=t.anchor;return(s.x!==0||s.y!==0)&&n.pivot.set(n.width*s.x,n.height*s.y),n}splitFn(){return n1({text:this._originalText,style:this._style,chars:this._canReuseChars?this.chars:[]})}};o1.defaultOptions={autoSplit:!0,lineAnchor:0,wordAnchor:0,charAnchor:0};let hB=o1;const l1=["align","breakWords","cssOverrides","fontVariant","fontWeight","leading","letterSpacing","lineHeight","padding","textBaseline","trim","whiteSpace","wordWrap","wordWrapWidth","fontFamily","fontStyle","fontSize"];function dB(r){const t=[];let e=0;for(let i=0;i<l1.length;i++){const n=`_${l1[i]}`;t[e++]=r[n]}return e=u1(r._fill,t,e),e=fB(r._stroke,t,e),e=mB(r.dropShadow,t,e),e=pB(r.filters,t,e),t.join("-")}function pB(r,t,e){if(!r)return e;for(const i of r)t[e++]=i.uid;return e}function u1(r,t,e){var i;return r&&(t[e++]=r.color,t[e++]=r.alpha,t[e++]=(i=r.fill)==null?void 0:i.styleKey),e}function fB(r,t,e){return r&&(e=u1(r,t,e),t[e++]=r.width,t[e++]=r.alignment,t[e++]=r.cap,t[e++]=r.join,t[e++]=r.miterLimit),e}function mB(r,t,e){return r&&(t[e++]=r.alpha,t[e++]=r.angle,t[e++]=r.blur,t[e++]=r.distance,t[e++]=tt.shared.setValue(r.color).toNumber()),e}async function gB(r,t,e=200){const i=await t.extract.base64(r);t.type!==It.CANVAS&&await t.encoder.commandFinished;const n=e;console.log(`logging texture ${r.source.width}px ${r.source.height}px`);const s=["font-size: 1px;",`padding: ${n}px 300px;`,`background: url(${i}) no-repeat;`,"background-size: contain;"].join(" ");console.log("%c ",s)}var _B=Object.defineProperty,yB=Object.defineProperties,bB=Object.getOwnPropertyDescriptors,c1=Object.getOwnPropertySymbols,vB=Object.prototype.hasOwnProperty,xB=Object.prototype.propertyIsEnumerable,h1=(r,t,e)=>t in r?_B(r,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):r[t]=e,d1=(r,t)=>{for(var e in t||(t={}))vB.call(t,e)&&h1(r,e,t[e]);if(c1)for(var e of c1(t))xB.call(t,e)&&h1(r,e,t[e]);return r},TB=(r,t)=>yB(r,bB(t));const SB=["#000080","#228B22","#8B0000","#4169E1","#008080","#800000","#9400D3","#FF8C00","#556B2F","#8B008B"];let wB=0;function p1(r,t=0,e={color:"#000000"}){r.renderGroup&&(e.color=SB[wB++]);let i="";for(let a=0;a<t;a++)i+="    ";let n=r.label;!n&&r instanceof pe&&(n=`sprite:${r.texture.label}`);let s=`%c ${i}|- ${n} (worldX:${r.worldTransform.tx}, relativeRenderX:${r.relativeGroupTransform.tx}, renderX:${r.groupTransform.tx}, localX:${r.x})`;r.renderGroup&&(s+=" (RenderGroup)"),r.filters&&(s+="(*filters)"),console.log(s,`color:${e.color}; font-weight:bold;`),t++;for(let a=0;a<r.children.length;a++){const o=r.children[a];p1(o,t,d1({},e))}}function f1(r,t=0,e={index:0,color:"#000000"}){let i="";for(let s=0;s<t;s++)i+="    ";const n=`%c ${i}- ${e.index}: ${r.root.label} worldX:${r.worldTransform.tx}`;console.log(n,`color:${e.color}; font-weight:bold;`),t++;for(let s=0;s<r.renderGroupChildren.length;s++){const a=r.renderGroupChildren[s];f1(a,t,TB(d1({},e),{index:s}))}}return d.AbstractBitmapFont=pu,d.AbstractBitmapTextPipe=gu,d.AbstractRenderer=Mr,d.AbstractSplitText=ph,d.AbstractText=ws,d.AbstractTextSystem=cu,d.AccessibilitySystem=ip,d.AlphaFilter=IC,d.AlphaMask=Za,d.AlphaMaskPipe=Us,d.AnimatedSprite=Xi,d.Application=Of,d.ApplicationInitHook=Uo,d.Assets=Fi,d.AssetsClass=Yg,d.BLEND_TO_NPM=im,d.BREAKING_SPACES=ib,d.BREAKING_SPACES_SET=nb,d.BREAK_AFTER_CHARS=ob,d.BREAK_AFTER_CHARS_SET=lb,d.BUFFER_TYPE=Yi,d.BackgroundLoader=Bf,d.BackgroundSystem=yv,d.Batch=um,d.BatchGeometry=fm,d.BatchTextureArray=sm,d.BatchableGraphics=Vn,d.BatchableHTMLText=Kb,d.BatchableMesh=gs,d.BatchableSprite=zi,d.BatchableText=xb,d.Batcher=pm,d.BatcherPipe=Ds,d.BigPool=Et,d.BindGroup=Pe,d.BindGroupSystem=Ic,d.BitmapFont=ZT,d.BitmapFontManager=Jr,d.BitmapText=xu,d.BitmapTextGraphics=Rb,d.BitmapTextPipe=vu,d.BlendModeFilter=PC,d.BlendModePipe=Hs,d.BlurFilter=W_,d.BlurFilterPass=cs,d.Bounds=Mt,d.BrowserAdapter=dp,d.Buffer=Yt,d.BufferImageSource=dn,d.BufferResource=ea,d.BufferUsage=at,d.CLEAR=Kt,d.COLLAPSIBLE_SPACES=sb,d.COLLAPSIBLE_SPACES_SET=ab,d.Cache=it,d.CanvasBatchAdaptor=av,d.CanvasBitmapTextPipe=_u,d.CanvasColorMaskPipe=Iu,d.CanvasContextSystem=Uu,d.CanvasFilterSystem=co,d.CanvasGraphicsAdaptor=Lu,d.CanvasGraphicsContextSystem=fy,d.CanvasGraphicsPipe=Kl,d.CanvasLimitsSystem=$u,d.CanvasNineSliceSpritePipe=hh,d.CanvasObserver=Xa,d.CanvasParticleContainerAdaptor=ST,d.CanvasParticleContainerPipe=oh,d.CanvasPool=me,d.CanvasPoolClass=Op,d.CanvasRenderTargetAdaptor=Qv,d.CanvasRenderTargetSystem=ic,d.CanvasRenderer=rx,d.CanvasRendererTextSystem=hu,d.CanvasSource=fe,d.CanvasStencilMaskPipe=Fu,d.CanvasTextGenerator=ye,d.CanvasTextMetrics=St,d.CanvasTextPipe=uu,d.CanvasTextSystem=du,d.CanvasTextureSystem=nc,d.CanvasTilingSpritePipe=Jl,d.Circle=wn,d.Color=tt,d.ColorMask=Qa,d.ColorMaskPipe=Bu,d.ColorMatrixFilter=ZC,d.CompressedSource=Di,d.Container=dt,d.CubeTexture=la,d.CubeTextureSource=ei,d.Culler=x_,d.CullerPlugin=T_,d.CustomRenderPipe=$s,d.D3D10_RESOURCE_DIMENSION=Fl,d.D3DFMT=qt,d.DATA_URI=$w,d.DDS=Z,d.DEG_TO_RAD=Qh,d.DEPRECATED_SCALE_MODES=Qc,d.DEPRECATED_WRAP_MODES=Zc,d.DOMAdapter=H,d.DOMContainer=p2,d.DOMPipe=Wa,d.DRAW_MODES=nG,d.DXGI_FORMAT=Bl,d.DXGI_TO_TEXTURE_FORMAT=Zt,d.DefaultBatcher=zn,d.DefaultShader=tl,d.DisplacementFilter=nM,d.DynamicBitmapFont=fu,d.Ellipse=Pn,d.EventBoundary=lp,d.EventEmitter=Nt,d.EventSystem=Ya,d.EventsTicker=we,d.ExtensionType=S,d.ExternalSource=vG,d.ExtractSystem=xv,d.FOURCC_TO_TEXTURE_FORMAT=Dl,d.FederatedContainer=hp,d.FederatedEvent=Tr,d.FederatedMouseEvent=hi,d.FederatedPointerEvent=ae,d.FederatedWheelEvent=rr,d.FillGradient=$t,d.FillPattern=Xr,d.Filter=Ee,d.FilterEffect=oi,d.FilterPipe=ho,d.FilterSystem=Ao,d.FontStylePromiseCache=Bs,d.GAUSSIAN_VALUES=Nl,d.GCManagedHash=Ut,d.GCSystem=Gv,d.GL_FORMATS=Js,d.GL_INTERNAL_FORMAT=l_,d.GL_TARGETS=ta,d.GL_TYPES=ct,d.GL_WRAP_MODES=lx,d.GPUTextureGpuData=Vc,d.GenerateTextureSystem=Yu,d.Geometry=nr,d.GlBackBufferSystem=mx,d.GlBatchAdaptor=Ru,d.GlBuffer=ix,d.GlBufferSystem=sc,d.GlColorMaskSystem=cc,d.GlContextSystem=ox,d.GlEncoderSystem=hc,d.GlGeometryGpuData=hx,d.GlGeometrySystem=lc,d.GlGraphicsAdaptor=Oc,d.GlLimitsSystem=dc,d.GlMeshAdaptor=Gc,d.GlParticleContainerAdaptor=RT,d.GlParticleContainerPipe=lh,d.GlProgram=Wt,d.GlProgramData=Px,d.GlRenderTarget=gx,d.GlRenderTargetAdaptor=Sx,d.GlRenderTargetSystem=bc,d.GlShaderSystem=wc,d.GlStateSystem=kx,d.GlStencilSystem=pc,d.GlTexture=Ec,d.GlTextureSystem=Rc,d.GlUboSystem=yc,d.GlUniformGroupSystem=Pc,d.GlobalResourceRegistry=qe,d.GlobalUniformSystem=qu,d.GpuBatchAdaptor=Ou,d.GpuBlendModesToPixi=Ht,d.GpuBufferData=s0,d.GpuBufferSystem=Bc,d.GpuColorMaskSystem=Fc,d.GpuDeviceSystem=sa,d.GpuEncoderSystem=Dc,d.GpuGraphicsAdaptor=Kc,d.GpuGraphicsContext=qm,d.GpuLimitsSystem=Uc,d.GpuMeshAdapter=qc,d.GpuMipmapGenerator=T0,d.GpuParticleContainerAdaptor=OT,d.GpuParticleContainerPipe=uh,d.GpuProgram=Xt,d.GpuRenderTarget=m0,d.GpuRenderTargetAdaptor=g0,d.GpuRenderTargetSystem=Xc,d.GpuShaderSystem=jc,d.GpuStateSystem=Hc,d.GpuStencilModesToPixi=Ue,d.GpuStencilSystem=$c,d.GpuTextureSystem=Yc,d.GpuUboSystem=kc,d.GpuUniformBatchPipe=Lc,d.Graphics=hr,d.GraphicsContext=kt,d.GraphicsContextRenderData=Zm,d.GraphicsContextSystem=Zn,d.GraphicsGpuData=my,d.GraphicsPath=ge,d.GraphicsPipe=ql,d.HTMLText=iv,d.HTMLTextPipe=Eu,d.HTMLTextRenderData=wu,d.HTMLTextStyle=Is,d.HTMLTextSystem=Cu,d.HelloSystem=Ys,d.IGLUniformData=QO,d.ImageSource=ke,d.InstructionSet=cn,d.KTX=Pt,d.Loader=Wf,d.LoaderParserPriority=te,d.MaskEffectManager=an,d.MaskEffectManagerClass=nd,d.MaskFilter=hy,d.Matrix=U,d.Mesh=Kr,d.MeshGeometry=ze,d.MeshGpuData=Zl,d.MeshPipe=Ql,d.MeshPlane=uI,d.MeshRope=yI,d.MeshSimple=PI,d.NEWLINES=eb,d.NEWLINES_SET=rb,d.NEWLINE_MATCH_REGEX=cb,d.NEWLINE_SPLIT_REGEX=ub,d.NOOP=Da,d.NineSliceGeometry=Ke,d.NineSlicePlane=HI,d.NineSliceSprite=qT,d.NineSliceSpriteGpuData=zT,d.NineSliceSpritePipe=dh,d.NoiseFilter=cM,d.ObservablePoint=bt,d.PI_2=qh,d.Particle=OI,d.ParticleBuffer=ET,d.ParticleContainer=UI,d.ParticleContainerPipe=Zi,d.ParticleShader=MT,d.PassthroughFilter=df,d.PerspectiveMesh=rI,d.PerspectivePlaneGeometry=iT,d.PipelineSystem=Nc,d.PlaneGeometry=ca,d.Point=lt,d.Polygon=Er,d.Pool=Jh,d.PoolGroupClass=td,d.PrepareBase=py,d.PrepareQueue=Tb,d.PrepareSystem=sv,d.PrepareUpload=nv,d.QuadGeometry=$y,d.RAD_TO_DEG=Zh,d.Rectangle=ut,d.RenderContainer=AG,d.RenderGroup=pn,d.RenderGroupPipe=Ls,d.RenderGroupSystem=ju,d.RenderLayer=XG,d.RenderTarget=Ks,d.RenderTargetSystem=Zs,d.RenderTexture=Vs,d.RenderableGCSystem=$v,d.RendererInitHook=$o,d.RendererType=It,d.ResizePlugin=ko,d.Resolver=$e,d.RopeGeometry=mT,d.RoundedRectangle=An,d.SCALE_MODES=aG,d.STENCIL_MODES=wt,d.SVGDefsCollector=k0,d.SVGParser=fg,d.SchedulerSystem=Zu,d.ScissorMask=MR,d.SdfShader=Db,d.Shader=ee,d.ShaderStage=Le,d.ShapePath=sg,d.SharedRenderPipes=rc,d.SharedSystems=qs,d.SplitBitmapText=eB,d.SplitText=hB,d.Sprite=pe,d.SpritePipe=js,d.Spritesheet=Ka,d.State=Vt,d.StencilMask=Ja,d.StencilMaskPipe=Du,d.SystemRunner=Bo,d.TEXTURE_FORMAT_BLOCK_SIZE=n_,d.Text=Wi,d.TextStyle=jt,d.Texture=D,d.TextureGCSystem=kv,d.TextureMatrix=Ua,d.TexturePool=vt,d.TexturePoolClass=Fd,d.TextureSource=ft,d.TextureStyle=Jt,d.TextureUvs=xG,d.Ticker=Ot,d.TickerListener=gn,d.TickerPlugin=Lo,d.TilingSprite=Vy,d.TilingSpriteGpuData=Xy,d.TilingSpritePipe=ru,d.TilingSpriteShader=Uy,d.Transform=My,d.Triangle=oo,d.UNIFORM_TO_ARRAY_SETTERS=Fx,d.UNIFORM_TO_SINGLE_SETTERS=Bx,d.UNIFORM_TYPES_MAP=Zp,d.UNIFORM_TYPES_VALUES=go,d.UPDATE_BLEND=mn,d.UPDATE_COLOR=ci,d.UPDATE_PRIORITY=Te,d.UPDATE_TRANSFORM=JS,d.UPDATE_VISIBLE=xr,d.UboBatch=a0,d.UboSystem=fc,d.UniformGroup=At,d.VERSION=Ai,d.VideoSource=wr,d.ViewContainer=Se,d.ViewSystem=Kv,d.ViewableBuffer=or,d.WGSL_ALIGN_SIZE_DATA=Ki,d.WGSL_TO_STD40_SIZE=mc,d.WRAP_MODES=sG,d.WebGLRenderer=n0,d.WebGPURenderer=C0,d.WorkerManager=wl,d.accessibilityTarget=np,d.addBits=Vo,d.addMaskBounds=xn,d.addMaskLocalBounds=Tn,d.addProgramDefines=Fp,d.alphaFrag=R_,d.alphaWgsl=kl,d.appendSVGPath=vl,d.applyMatrix=Ly,d.applyProjectiveTransformationToPlane=Q0,d.applyStyleParams=Mc,d.assignWithIgnore=fn,d.autoDetectEnvironment=mw,d.autoDetectRenderer=Af,d.autoDetectSource=H2,d.basisTranscoderUrls=ss,d.bgr2rgb=xe,d.bitmapFontCachePlugin=Gf,d.bitmapFontTextParser=Dn,d.bitmapFontXMLParser=No,d.bitmapFontXMLStringParser=Xo,d.bitmapTextSplit=QT,d.blendTemplateFrag=S_,d.blendTemplateVert=w_,d.blendTemplateWgsl=P_,d.blockDataMap=zc,d.blurTemplateWgsl=$_,d.boundsPool=ve,d.browserExt=xC,d.buildAdaptiveBezier=cl,d.buildAdaptiveQuadratic=Jm,d.buildArc=pl,d.buildArcTo=tg,d.buildArcToSvg=rg,d.buildCircle=kr,d.buildContextBatches=Ym,d.buildEllipse=Bm,d.buildGeometryFromPath=$G,d.buildLine=qn,d.buildPixelLine=$m,d.buildPolygon=km,d.buildRectangle=Lm,d.buildRoundedRectangle=Fm,d.buildSVGFillAttributes=X0,d.buildSVGPath=Ye,d.buildSVGStrokeAttributes=j0,d.buildSimpleUvs=rl,d.buildTriangle=Nm,d.buildUvs=el,d.cacheAsTextureMixin=ed,d.cacheTextureArray=Ff,d.calculatePathArea=hg,d.calculateProjection=qv,d.canUseNewCanvasBlendModes=so,d.canvasTextSplit=n1,d.canvasUtils=Q,d.checkChildrenDidChange=Ia,d.checkDataUrl=ar,d.checkExtension=le,d.checkForNestedPattern=ug,d.checkMaxIfStatementsInShader=Wo,d.childrenHelperMixin=rd,d.cleanArray=Cv,d.cleanHash=Av,d.clearList=zs,d.closePointEps=il,d.collapseNewlines=Ms,d.collapseSpaces=Cs,d.collectAllRenderables=CG,d.collectRenderablesMixin=id,d.color32BitToUniform=Yr,d.colorBit=Ln,d.colorBitGl=Nn,d.colorMatrixFilterFrag=V_,d.colorMatrixFilterWgsl=jl,d.colorToUniform=vM,d.compareModeToGlCompare=Wx,d.compileHighShader=ym,d.compileHighShaderGl=bm,d.compileHighShaderGlProgram=Dr,d.compileHighShaderGpuProgram=Fr,d.compileHooks=Yo,d.compileInputs=Ko,d.compileOutputs=_m,d.compileShader=vc,d.compute2DProjection=rT,d.convertFormatIfRequired=uC,d.convertToList=oe,d.copySearchParams=bn,d.createGlUploadCubeTextureResource=jx,d.createGpuUploadCubeTextureResource=v0,d.createIdFromString=Ar,d.createIndicesForQuads=sh,d.createLevelBuffers=xA,d.createLevelBuffersFromKTX=cC,d.createStringVariations=mp,d.createTexture=He,d.createUboElementsSTD40=_x,d.createUboElementsWGSL=c0,d.createUboSyncFunction=gc,d.createUboSyncFunctionSTD40=Tx,d.createUboSyncFunctionWGSL=d0,d.crossOrigin=Lg,d.cullingMixin=Kh,d.curveEps=nl,d.defaultFilterVert=bi,d.defaultValue=Tc,d.definedProps=he,d.deprecation=Mi,d.detectAvif=Df,d.detectBasis=rA,d.detectCompressed=_C,d.detectDefaults=$f,d.detectMp4=kf,d.detectOgv=Lf,d.detectVideoAlphaMode=eo,d.detectWebm=Nf,d.detectWebp=Xf,d.determineCrossOrigin=Xg,d.displacementFrag=q_,d.displacementVert=Z_,d.displacementWgsl=Hl,d.earcut=vf,d.effectsMixin=ld,d.ensureAttributes=oc,d.ensureIsBuffer=Eo,d.ensurePrecision=Dp,d.ensureTextOptions=Ps,d.executeInstructions=ks,d.extensions=X,d.extractAttributesFromGlProgram=Cx,d.extractAttributesFromGpuProgram=Vp,d.extractFontFamilies=qb,d.extractStructAndGroups=Rn,d.extractSubpaths=cg,d.extractSvgUrlId=_l,d.fastCopy=$n,d.findMixin=ud,d.fontStringFromTextStyle=Zr,d.formatShader=ER,d.fragmentGPUTemplate=Sm,d.fragmentGlTemplate=Pm,d.generateArraySyncSTD40=xx,d.generateArraySyncWGSL=h0,d.generateBlurFragSource=F_,d.generateBlurGlProgram=U_,d.generateBlurProgram=k_,d.generateBlurVertSource=D_,d.generateGPULayout=wR,d.generateGpuLayoutGroups=Yp,d.generateLayout=PR,d.generateLayoutHash=Kp,d.generateParticleUpdateFunction=wT,d.generateProgram=Ix,d.generateShaderSyncCode=wx,d.generateTextStyleKey=dB,d.generateTextureBatchBit=Xn,d.generateTextureBatchBitGl=jn,d.generateTextureMatrix=ol,d.generateUniformsSync=Dx,d.getAdjustedBlendModeBlend=Ir,d.getAttributeInfoFromFormat=Ie,d.getBatchSamplersUniformGroup=Hn,d.getBitmapTextLayout=Os,d.getCanvasBoundingBox=Jy,d.getCanvasFillStyle=pr,d.getCanvasTexture=tc,d.getCharacterGroups=ou,d.getDefaultUniformValue=Qp,d.getFastGlobalBounds=SG,d.getFastGlobalBoundsMixin=hd,d.getFillInstructionData=mE,d.getFontCss=Jb,d.getFontFamilyName=Zf,d.getGeometryBounds=pf,d.getGlTypeFromFormat=cx,d.getGlobalBounds=li,d.getGlobalMixin=fd,d.getGlobalRenderableBounds=lo,d.getLocalBounds=un,d.getMaxFragmentPrecision=Bp,d.getMaxMiterRatio=wg,d.getMaxTexturesPerBatch=nm,d.getOrientationOfPoints=Dm,d.getPlainText=KM,d.getPo2TextureFromSource=Cn,d.getResolutionOfUrl=je,d.getSVGUrl=tv,d.getSupportedCompressedTextureFormats=Il,d.getSupportedGPUCompressedTextureFormats=Ol,d.getSupportedGlCompressedTextureFormats=Rl,d.getSupportedTextureFormats=Ui,d.getTemporaryCanvasFromImage=ev,d.getTestContext=fo,d.getTextureBatchBindGroup=Un,d.getTextureDefaultMatrix=EI,d.getTextureFormatFromKTXTexture=pC,d.getUboData=Mx,d.getUniformData=Rx,d.getUrlExtension=yp,d.glFormatToGPUFormat=b_,d.glUploadBufferImageResource=Lx,d.glUploadCompressedTextureResource=Nx,d.glUploadImageResource=Ac,d.glUploadVideoResource=Hx,d.globalUniformsBit=Em,d.globalUniformsBitGl=Am,d.globalUniformsUBOBitGl=OP,d.gpuFormatToBasisTranscoderFormat=SA,d.gpuFormatToKTXBasisTranscoderFormat=mC,d.gpuUploadBufferImageResource=_0,d.gpuUploadCompressedTextureResource=y0,d.gpuUploadImageResource=Wc,d.gpuUploadVideoResource=x0,d.graphicsContextToSvg=UG,d.groupD8=W,d.hasCachedCanvasTexture=EO,d.hasTagMarkup=As,d.hasTagStyles=Es,d.hslWgsl=_M,d.hslgl=EC,d.hslgpu=AC,d.injectBits=qo,d.insertVersion=Up,d.isBreakAfterChar=su,d.isBreakingSpace=Qt,d.isCanvasFilterCapable=uo,d.isCollapsibleSpace=nu,d.isMobile=qd,d.isNewline=Hi,d.isPow2=Ba,d.isRenderingToScreen=Zv,d.isSafari=Au,d.isSingleItem=fi,d.isWebGLSupported=Pi,d.isWebGPUSupported=Ei,d.ktxTranscoderUrls=as,d.loadBasis=vA,d.loadBasisOnWorker=e_,d.loadBitmapFont=If,d.loadDDS=UA,d.loadEnvironmentExtensions=Mo,d.loadFontAsBase64=Zb,d.loadFontCSS=Qb,d.loadImageBitmap=Dg,d.loadJson=Vf,d.loadKTX=ZA,d.loadKTX2=lC,d.loadKTX2onWorker=m_,d.loadSVGImage=rv,d.loadSvg=Og,d.loadTextures=Pl,d.loadTxt=Yf,d.loadVideoTextures=jg,d.loadWebFont=Qf,d.localUniformBit=qr,d.localUniformBitGl=vs,d.localUniformBitGroup2=By,d.localUniformMSDFBit=Gb,d.localUniformMSDFBitGl=Ib,d.log2=MS,d.logDebugTexture=gB,d.logProgramError=Gx,d.logRenderGroupScene=f1,d.logScene=p1,d.mSDFBit=Bb,d.mSDFBitGl=Fb,d.mapCanvasBlendModesToPixi=cv,d.mapFormatToGlFormat=Vx,d.mapFormatToGlInternalFormat=qx,d.mapFormatToGlType=Zx,d.mapGlToVertexFormat=Ax,d.mapSize=r3,d.mapType=Sc,d.mapViewDimensionToGlTarget=Qx,d.mapWebGLBlendModesToPixi=Ux,d.maskFrag=ay,d.maskVert=oy,d.maskWgsl=Vl,d.matrixPool=Dt,d.measureHtmlText=Pu,d.measureMixin=gd,d.measureTaggedText=hb,d.migrateFragmentFromV7toV8=t3,d.mipmapScaleModeToGlFilter=zx,d.multiplyColors=ui,d.multiplyHexColors=Oe,d.nextPow2=Ze,d.noiseFrag=ey,d.noiseWgsl=zl,d.nonCompressedFormats=Qg,d.normalizeExtensionPriority=ni,d.onRenderMixin=_d,d.parseDDS=s_,d.parseFunctionBody=TG,d.parseKTX=u_,d.parseSVGDefinitions=og,d.parseSVGFloatAttribute=Tt,d.parseSVGPath=tm,d.parseSVGStyle=bl,d.parseTaggedText=iu,d.particleData=ch,d.particlesFrag=AT,d.particlesVert=CT,d.particlesWgsl=ah,d.passthroughFrag=hf,d.passthroughWgsl=Po,d.path=zt,d.pointInTriangle=ao,d.preloadVideo=Ng,d.removeItems=Ga,d.removeStructAndGroupDuplicates=qp,d.resetUids=TS,d.resolveCharacters=Ab,d.resolveCompressedTextureUrl=gC,d.resolveJsonUrl=Hg,d.resolveTextureUrl=Ml,d.resourceToTexture=Cp,d.roundPixelsBit=Ur,d.roundPixelsBitGl=$r,d.roundedShapeArc=ig,d.roundedShapeQuadraticCurve=ng,d.sayHello=Bv,d.scaleModeToGlFilter=Cc,d.setBasisTranscoderPath=hA,d.setKTXTranscoderPath=JA,d.setPositions=ky,d.setProgramName=$p,d.setUvs=Ny,d.shapeBuilders=Ne,d.sortMixin=yd,d.spritesheetAsset=xp,d.squaredDistanceToLineSegment=mi,d.stripVersion=kp,d.styleAttributes=yl,d.testImageFormat=jo,d.testVideoFormat=Ci,d.textStyleToCSS=kb,d.textureBit=ov,d.textureBitGl=lv,d.textureFrom=Mp,d.tilingBit=Fy,d.tilingBitGl=Dy,d.toFillStyle=Xe,d.toLocalGlobalMixin=bd,d.toStrokeStyle=Bi,d.tokenize=au,d.tokenizeTaggedRuns=pb,d.transformVertices=Wn,d.triangulateWithHoles=sl,d.trimRight=Ce,d.uboSyncFunctionsSTD40=_c,d.uboSyncFunctionsWGSL=vx,d.uid=ht,d.uniformParsers=We,d.unpremultiplyAlpha=b3,d.unsafeEvalSupported=Ro,d.updateLocalTransform=MG,d.updateQuadBounds=qa,d.updateRenderGroupTransform=dv,d.updateRenderGroupTransforms=Nu,d.updateTextBounds=Rs,d.updateTransformAndChildren=Xu,d.updateTransformBackwards=ln,d.updateWorldTransform=RG,d.v8_0_0=zo,d.v8_3_4=yP,d.validFormats=os,d.validateRenderables=fv,d.vertexGPUTemplate=Tm,d.vertexGlTemplate=wm,d.vkFormatToGPUFormat=v_,d.warn=ue,d.wordWrap=mb,d.wordWrapTaggedLines=db,d.wrapModeToGlAddress=na,d})({});
 //# sourceMappingURL=pixi.min.js.map
-
+// GAME RENDERER BELOW
 class TerritoryView {
   constructor(data, id, textures, callbacks = {}) {
     this.data = data;
@@ -2340,7 +2340,9 @@ class TerritoryView {
 
     this.container = new PIXI.Container();
 
+    this.territoryGlow = new PIXI.Graphics();
     this.base = new PIXI.Graphics();
+    this.surfaceTint = new PIXI.Graphics();
     this.border = new PIXI.Graphics();
     this.hit = new PIXI.Graphics();
     this.iconLayer = new PIXI.Container();
@@ -2396,8 +2398,8 @@ class TerritoryView {
     });
 
     this.nameText = new PIXI.Text({
-      text: this.data.name || "",
-      style: this.nameStyleDark
+    text: (this.data.name || "").toUpperCase(),
+    style: this.nameStyleDark
     });
 
     this.troopText = new PIXI.Text({
@@ -2417,7 +2419,9 @@ class TerritoryView {
 
     this.capitalLayer.addChild(this.capitalGraphic);
 
+    this.container.addChild(this.territoryGlow);
     this.container.addChild(this.base);
+    this.container.addChild(this.surfaceTint);
     this.container.addChild(this.border);
     this.container.addChild(this.iconLayer);
     this.container.addChild(this.capitalLayer);
@@ -2478,28 +2482,72 @@ class TerritoryView {
     return this.getBrightnessFromColorValue(this.data.color || "#ffffff") < 128;
   }
 
+  clamp01(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  mixColors(a, b, t) {
+    t = this.clamp01(t);
+    const ar = (a >> 16) & 255;
+    const ag = (a >> 8) & 255;
+    const ab = a & 255;
+    const br = (b >> 16) & 255;
+    const bg = (b >> 8) & 255;
+    const bb = b & 255;
+    const r = Math.round(ar + (br - ar) * t);
+    const g = Math.round(ag + (bg - ag) * t);
+    const bl = Math.round(ab + (bb - ab) * t);
+    return (r << 16) | (g << 8) | bl;
+  }
+
+  getFactionAccentColor(fillColor) {
+    const bright = this.getBrightnessFromColorValue(fillColor);
+    return bright < 85 ? this.mixColors(fillColor, 0xffffff, 0.62) : this.mixColors(fillColor, 0xffffff, 0.32);
+  }
+
   drawPolygon() {
     const pts = this.getFlatPoints();
-    const fillColor = this.toPixiColor(this.data.color || "#ffffff");
+    const fc = this.toPixiColor(this.data.color || "#ffffff");
+    const accentColor = this.getFactionAccentColor(fc);
+    const darkEdge = this.mixColors(fc, 0x000000, 0.62);
+    const deepShadow = this.mixColors(fc, 0x000000, 0.80);
+    const softLight = this.mixColors(fc, 0xffffff, 0.18);
 
+    this.territoryGlow.clear();
     this.base.clear();
-    this.base.poly(pts);
-    this.base.fill(fillColor);
-
+    this.surfaceTint.clear();
     this.border.clear();
+
+    this.territoryGlow.poly(pts);
+    this.territoryGlow.stroke({ color: accentColor, width: 5.5, alpha: 0.08, join: "round" });
+
+    this.territoryGlow.poly(pts);
+    this.territoryGlow.stroke({ color: 0x000000, width: 3.6, alpha: 0.34, join: "round" });
+
+    this.base.poly(pts);
+    this.base.fill({ color: fc, alpha: 0.90 });
+
+    this.base.poly(pts);
+    this.base.stroke({ color: deepShadow, width: 2.2, alpha: 0.38, join: "round" });
+
+    this.surfaceTint.poly(pts);
+    this.surfaceTint.fill({ color: 0xffffff, alpha: this.isDarkFill() ? 0.03 : 0.015 });
+
+    this.surfaceTint.poly(pts);
+    this.surfaceTint.stroke({ color: softLight, width: 0.8, alpha: 0.14, join: "round" });
+
     this.border.poly(pts);
-    this.border.stroke({
-      color: 0x7a95a3,
-      width: 3.2,
-      join: "round"
-    });
+    this.border.stroke({ color: 0x05070b, width: 3.2, alpha: 0.88, join: "round" });
+
+    this.border.poly(pts);
+    this.border.stroke({ color: darkEdge, width: 1.8, alpha: 0.92, join: "round" });
+
+    this.border.poly(pts);
+    this.border.stroke({ color: accentColor, width: 0.85, alpha: 0.82, join: "round" });
 
     this.hit.clear();
     this.hit.poly(pts);
-    this.hit.fill({
-      color: 0xffffff,
-      alpha: 0.001
-    });
+    this.hit.fill({ color: 0xffffff, alpha: 0.001 });
   }
 
   refreshTextStyles() {
@@ -2837,6 +2885,22 @@ class PixiMapRenderer {
     this.baseWorldX = 0;
     this.baseWorldY = 0;
 
+    this.attackArrowLayer = null;
+    this.attackArrowGlow = null;
+    this.attackArrowBody = null;
+    this.attackArrowHead = null;
+
+    this.attackArrow = {
+      active: false,
+      fromId: null,
+      toId: null,
+      elapsed: 0
+    };
+
+    this.attackArrowCycleMS = 767;
+    this.attackArrowFlightMS = 567;
+    this.attackArrowPulseMS = 267;
+
     this.casualtyTextStyle = new PIXI.TextStyle({
       fontFamily: "Urbanist",
       fontSize: 35,
@@ -2908,6 +2972,7 @@ class PixiMapRenderer {
     this.seaRouteLayer = new PIXI.Container();
     this.contBorderLayer = new PIXI.Container();
     this.overlayLayer = new PIXI.Container();
+    this.overlayLayer.sortableChildren = true;
     this.effectLayer = new PIXI.Container();
     this.explosionLayer = new PIXI.Container();
     this.floatingTextLayer = new PIXI.Container();
@@ -2939,11 +3004,39 @@ class PixiMapRenderer {
     this.toHighlightOverlay.roundPixels = true;
     this.clickablesLayer.roundPixels = true;
 
+    this.otherHighlightOverlay.blendMode = "normal";
+    this.toHighlightOverlay.blendMode = "normal";
+
+    this.attackArrowLayer = new PIXI.Container();
+    this.attackArrowGlow = new PIXI.Graphics();
+    this.attackArrowBody = new PIXI.Graphics();
+    this.attackArrowHead = new PIXI.Graphics();
+
+    this.attackArrowLayer.eventMode = "none";
+    this.attackArrowLayer.roundPixels = true;
+    this.attackArrowGlow.roundPixels = true;
+    this.attackArrowBody.roundPixels = true;
+    this.attackArrowHead.roundPixels = true;
+
+    this.attackArrowGlow.blendMode = "add";
+    this.attackArrowBody.blendMode = "add";
+    this.attackArrowLayer.addChild(this.attackArrowGlow);
+    this.attackArrowLayer.addChild(this.attackArrowBody);
+    this.attackArrowLayer.addChild(this.attackArrowHead);
+
+    this.targetCaptureOverlay.zIndex = 10;
+    this.clickablesLayer.zIndex = 20;
+    this.attackArrowLayer.zIndex = 30;
+    this.otherHighlightOverlay.zIndex = 70;
+    this.toHighlightOverlay.zIndex = 80;
+    this.hoverOverlay.zIndex = 90;
+
     this.overlayLayer.addChild(this.targetCaptureOverlay);
-    this.overlayLayer.addChild(this.hoverOverlay);
     this.overlayLayer.addChild(this.clickablesLayer);
+    this.overlayLayer.addChild(this.attackArrowLayer);
     this.overlayLayer.addChild(this.otherHighlightOverlay);
     this.overlayLayer.addChild(this.toHighlightOverlay);
+    this.overlayLayer.addChild(this.hoverOverlay);
 
     this.effectLayer.addChild(this.explosionLayer);
     this.effectLayer.addChild(this.floatingTextLayer);
@@ -2953,8 +3046,8 @@ class PixiMapRenderer {
 
     this.world.addChild(this.baseLayer);
     this.world.addChild(this.seaRouteLayer);
-    this.world.addChild(this.overlayLayer);
     this.world.addChild(this.contBorderLayer);
+    this.world.addChild(this.overlayLayer);
     this.world.addChild(this.effectLayer);
     this.app.stage.addChild(this.world);
 
@@ -2980,6 +3073,7 @@ class PixiMapRenderer {
     this.app.ticker.add((ticker) => {
       this.updateHoverPulse(ticker.deltaMS);
       this.updateClickableAnimation(ticker.deltaMS);
+      this.updateAttackArrow(ticker.deltaMS);
       this.updateFloatingTexts(ticker.deltaMS);
       this.updateIronWallEffects(ticker.deltaMS);
       this.updateEffects(ticker.deltaMS);
@@ -3347,11 +3441,10 @@ class PixiMapRenderer {
     const pts = this.getTerritoryFlatPoints(this.hoveredTerritoryId);
     if (!pts.length) return;
 
-    const s = 1 + 0.3 * Math.sin(this.hoverPulseTime);
-    const width = 2.5 * s;
-    const alpha = 220 / 255;
+    const pulse = 0.5 + 0.5 * Math.sin(this.hoverPulseTime);
 
-    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, width, alpha);
+    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, 8 + pulse * 2.5, 0.16 + pulse * 0.08);
+    this.drawPolygonOutline(this.hoverOverlay, pts, 0xffffff, 3 + pulse * 0.7, 0.92);
   }
 
   updateHoverPulse(deltaMS) {
@@ -3367,8 +3460,10 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 7, 70 / 255);
-      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffbf00, 4, 1);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffe6a3, 16, 0.12);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffd86b, 11, 0.26);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffb300, 6.5, 0.86);
+      this.drawPolygonOutline(this.targetCaptureOverlay, pts, 0xffffff, 1.8, 0.94);
     }
   }
 
@@ -3379,7 +3474,9 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0x000000, 4, 1);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 11, 0.10);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 7, 0.22);
+      this.drawPolygonOutline(this.otherHighlightOverlay, pts, 0xffffff, 4, 0.92);
     }
   }
 
@@ -3390,8 +3487,9 @@ class PixiMapRenderer {
       const pts = this.getTerritoryFlatPoints(id);
       if (!pts.length) continue;
 
-      const color = this.getHighlightContrastColor(id);
-      this.drawPolygonOutline(this.toHighlightOverlay, pts, color, 4, 1);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 11, 0.10);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 7, 0.22);
+      this.drawPolygonOutline(this.toHighlightOverlay, pts, 0xffffff, 4, 0.92);
     }
   }
 
@@ -3467,6 +3565,280 @@ class PixiMapRenderer {
       indicator.y = Math.round(indicator.baseY + offset);
     }
   }
+
+    getTerritoryCp(id) {
+    const trty = this.territories[id];
+    if (!trty || !trty.cps) return null;
+    return {
+      x: Number(trty.cps.x),
+      y: Number(trty.cps.y)
+    };
+  }
+
+  quadraticPoint(p0, p1, p2, t) {
+    const mt = 1 - t;
+    return {
+      x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+      y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y
+    };
+  }
+
+  quadraticTangent(p0, p1, p2, t) {
+    return {
+      x: 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x),
+      y: 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y)
+    };
+  }
+
+  buildAttackArrowCurve(fromId, toId) {
+    const from = this.getTerritoryCp(fromId);
+    const to = this.getTerritoryCp(toId);
+    if (!from || !to) return null;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1) return null;
+    const nx = -dy / len;
+    const ny =  dx / len;
+    const scale = Math.max(0.5, Math.min(1.4, len / 360));
+    const midX = (from.x + to.x) * 0.5;
+    const midY = (from.y + to.y) * 0.5;
+    // arcLift fixed at 110, clamped so very short arrows still arc
+    const arcLift = Math.max(20, Math.min(110, len * 0.20));
+    const p0 = { x: from.x, y: from.y };
+    const p2 = { x: to.x,   y: to.y   };
+    const p1 = {
+      x: midX + nx * arcLift * 0.06,
+      y: midY - arcLift
+    };
+    return { p0, p1, p2, len, scale };
+  }
+
+  drawQuadSegment(gfx, a, b, width, color, alpha) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 0.001) return;
+
+    const nx = -dy / len;
+    const ny = dx / len;
+    const hw = width * 0.5;
+
+    gfx.poly([
+      a.x + nx * hw, a.y + ny * hw,
+      b.x + nx * hw, b.y + ny * hw,
+      b.x - nx * hw, b.y - ny * hw,
+      a.x - nx * hw, a.y - ny * hw
+    ]);
+    gfx.fill({ color, alpha });
+  }
+
+  drawAttackBlock(a, b, width, opts = {}) {
+    const {
+        outlineColor = 0x062f40,
+        glowColor = 0x62efff,
+        bodyColor = 0x1fcdf0,
+        coreColor = 0xd8fbff,
+        outlineAlpha = 0.5,
+        glowAlpha = 0.35,
+        bodyAlpha = 0.72,
+        coreAlpha = 0.18
+    } = opts;
+
+    this.drawQuadSegment(this.attackArrowGlow, a, b, width + 5, outlineColor, outlineAlpha);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, width + 2.5, glowColor, glowAlpha);
+    this.drawQuadSegment(this.attackArrowBody, a, b, width, bodyColor, bodyAlpha);
+    this.drawQuadSegment(this.attackArrowHead, a, b, Math.max(1.5, width * 0.28), coreColor, coreAlpha);
+  }
+
+  drawArrowHead(gfx, tip, tangent, length, width, color, alpha) {
+    const mag = Math.hypot(tangent.x, tangent.y);
+    if (mag < 0.001) return;
+
+    const ux = tangent.x / mag;
+    const uy = tangent.y / mag;
+    const nx = -uy;
+    const ny = ux;
+    const halfW = width * 0.5;
+
+    const baseX = tip.x - ux * length;
+    const baseY = tip.y - uy * length;
+
+    gfx.poly([
+      tip.x, tip.y,
+      baseX + nx * halfW, baseY + ny * halfW,
+      baseX - nx * halfW, baseY - ny * halfW
+    ]);
+    gfx.fill({ color, alpha });
+  }
+
+  setAttackArrow(fromId, toId) {
+    const from = Number(fromId);
+    const to = Number(toId);
+
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from === to) {
+      this.clearAttackArrow();
+      return;
+    }
+
+    if (!this.buildAttackArrowCurve(from, to)) {
+      this.clearAttackArrow();
+      return;
+    }
+
+    const changed = this.attackArrow.fromId !== from || this.attackArrow.toId !== to;
+
+    this.attackArrow.active = true;
+    this.attackArrow.fromId = from;
+    this.attackArrow.toId = to;
+
+    if (changed) {
+      this.attackArrow.elapsed = 0;
+    }
+
+    this.drawAttackArrow();
+  }
+
+  clearAttackArrow() {
+    this.attackArrow.active = false;
+    this.attackArrow.fromId = null;
+    this.attackArrow.toId = null;
+    this.attackArrow.elapsed = 0;
+
+    if (this.attackArrowGlow) this.attackArrowGlow.clear();
+    if (this.attackArrowBody) this.attackArrowBody.clear();
+    if (this.attackArrowHead) this.attackArrowHead.clear();
+  }
+
+  updateAttackArrow(deltaMS) {
+    if (!this.attackArrow.active) return;
+    this.attackArrow.elapsed += deltaMS;
+    this.drawAttackArrow();
+  }
+
+  drawAttackArrow() {
+  this.attackArrowGlow.clear();
+  this.attackArrowBody.clear();
+  this.attackArrowHead.clear();
+  if (!this.attackArrow.active) return;
+
+  const curve = this.buildAttackArrowCurve(this.attackArrow.fromId, this.attackArrow.toId);
+  if (!curve) return;
+
+  const { p0, p1, p2, len, scale } = curve;
+  const cycle = this.attackArrow.elapsed % this.attackArrowCycleMS;
+
+  const hot    = 0xfff0b8;
+    const bright = 0xffc247;
+    const mid    = 0xff4a32;
+    const deep   = 0xb31422;
+    const core   = 0x210508;
+
+  const srcPt = this.quadraticPoint(p0, p1, p2, 0);
+  const tgtPt = this.quadraticPoint(p0, p1, p2, 1);
+
+  // Source emitter - fixed sizes
+  const srcPulse = 0.5 + 0.5 * Math.sin(this.attackArrow.elapsed * 0.0085);
+  this.attackArrowGlow.circle(srcPt.x, srcPt.y, 12 + srcPulse * 3);
+  this.attackArrowGlow.stroke({ color: bright, width: Math.max(1.4, 2.4 * scale), alpha: 0.38, join: "round" });
+  this.attackArrowGlow.circle(srcPt.x, srcPt.y,  5 + srcPulse * 1);
+  this.attackArrowGlow.stroke({ color: mid, width: Math.max(1, 1.6 * scale), alpha: 0.75, join: "round" });
+  this.attackArrowHead.circle(srcPt.x, srcPt.y, 3);
+  this.attackArrowHead.fill({ color: hot, alpha: 0.9 });
+
+  // Impact pulse
+  if (cycle >= this.attackArrowFlightMS && cycle <= this.attackArrowFlightMS + this.attackArrowPulseMS) {
+    const pulseT = (cycle - this.attackArrowFlightMS) / this.attackArrowPulseMS;
+    const eased  = 1 - Math.pow(1 - pulseT, 2.5);
+    for (let i = 0; i < 4; i++) {
+      const r = 7 + eased * (22 + i * 15);
+      const a = Math.max(0, (0.5 - i * 0.09) * (1 - pulseT));
+      this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, r);
+      this.attackArrowGlow.stroke({ color: i % 2 === 0 ? bright : mid, width: Math.max(1, (2.8 - i * 0.4) * scale), alpha: a, join: "round" });
+    }
+    const outerR = 35 + eased * 55;
+    this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, outerR);
+    this.attackArrowGlow.stroke({ color: mid, width: Math.max(1.5, 3 * scale), alpha: Math.max(0, 0.18 * (1 - pulseT)), join: "round" });
+    this.attackArrowHead.circle(tgtPt.x, tgtPt.y, 4 + eased * 4);
+    this.attackArrowHead.fill({ color: hot, alpha: Math.max(0, 0.88 * (1 - pulseT)) });
+    return;
+  }
+
+  if (cycle > this.attackArrowFlightMS) return;
+
+  const headT = Math.max(0.03, Math.min(1, cycle / this.attackArrowFlightMS));
+
+  // Guide glow - 28 steps, fixed width 5
+  const GUIDE = 28;
+  for (let i = 0; i < GUIDE; i++) {
+    const t0 = 0.04 + 0.88 * i / GUIDE;
+    const t1 = 0.04 + 0.88 * (i + 0.4) / GUIDE;
+    if (t0 > headT + 0.14) continue;
+    const a = this.quadraticPoint(p0, p1, p2, t0);
+    const b = this.quadraticPoint(p0, p1, p2, t1);
+    const prox = Math.max(0, 1 - Math.abs(headT - t0) * 3.5);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, 3, deep, 0.028 + prox * 0.07);
+  }
+
+  // Segmented tail - fixed sizes
+  const SEG_COUNT = 14;
+  const tGap = 12 / len;
+  const tLen = 20 / len;
+  const tClr = 16 / len;
+  const wMax = 8;
+
+  for (let i = 0; i < SEG_COUNT; i++) {
+    const tailIdx  = i / Math.max(1, SEG_COUNT - 1);
+    const segFront = headT - tClr - i * tGap;
+    const segBack  = segFront - tLen * (1 - tailIdx * 0.35);
+    if (segFront <= 0) continue;
+    const a = this.quadraticPoint(p0, p1, p2, Math.max(0, segBack));
+    const b = this.quadraticPoint(p0, p1, p2, Math.max(0.001, Math.min(0.985, segFront)));
+    const appearFade = Math.min(1, headT * 4);
+    const tailFade   = Math.max(0.15, 1 - tailIdx * 0.82);
+    const w          = wMax * (1 - tailIdx * 0.52);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, w + 4, core,   0.55 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowGlow, a, b, w + 2, bright, 0.30 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowBody, a, b, w,     mid,    0.86 * tailFade * appearFade);
+    this.drawQuadSegment(this.attackArrowHead, a, b, w * 0.3, hot,  0.22 * tailFade * appearFade);
+  }
+
+  // Arrow head - fixed sizes
+  const tip     = this.quadraticPoint(p0, p1, p2, headT);
+  const tangent = this.quadraticTangent(p0, p1, p2, headT);
+  const HL = 20;
+  const HW = 18;
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 3, HW + 3, core,   0.72);
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 2, HW + 2, deep,   0.52);
+  this.drawArrowHead(this.attackArrowGlow, tip, tangent, HL + 1, HW + 1, bright, 0.40);
+  this.drawArrowHead(this.attackArrowHead, tip, tangent, HL,     HW,     mid, 0.98);
+  this.drawArrowHead(this.attackArrowHead, tip, tangent, HL * 0.7, HW * 0.46, hot, 0.35);
+  const mag = Math.hypot(tangent.x, tangent.y);
+  if (mag > 0.001) {
+    const ux = tangent.x / mag;
+    const uy = tangent.y / mag;
+    const nx = -uy;
+    const ny = ux;
+    const bx = tip.x - ux * HL * 0.7;
+    const by = tip.y - uy * HL * 0.7;
+    this.attackArrowHead.poly([
+      bx + nx * HW * 0.16, by + ny * HW * 0.16,
+      bx + nx * HW * 0.38, by + ny * HW * 0.38,
+      tip.x - ux * HL * 0.16 + nx * HW * 0.04,
+      tip.y - uy * HL * 0.16 + ny * HW * 0.04
+    ]);
+    this.attackArrowHead.fill({ color: hot, alpha: 0.24 });
+  }
+
+  // Warmup rings - fixed sizes
+  if (headT > 0.82) {
+    const wu = (headT - 0.82) / 0.18;
+    for (let i = 0; i < 3; i++) {
+      this.attackArrowGlow.circle(tgtPt.x, tgtPt.y, 7 + i * 8);
+      this.attackArrowGlow.stroke({ color: i % 2 === 0 ? mid : bright, width: Math.max(1, 2 * scale), alpha: (0.12 + wu * 0.24) * scale * (1 - i * 0.28), join: "round" });
+    }
+  }
+}
 
   refreshAllOverlays() {
     this.refreshTargetsToCaptureOverlay();
@@ -3625,6 +3997,8 @@ class PixiMapRenderer {
       this.contBorderLayer.visible = this.showContBorders;
       this.world.removeChild(this.contBorderLayer);
       this.world.addChild(this.contBorderLayer);
+      this.world.removeChild(this.overlayLayer);
+      this.world.addChild(this.overlayLayer);
       this.world.removeChild(this.effectLayer);
       this.world.addChild(this.effectLayer);
     }
@@ -4337,6 +4711,14 @@ class PixiMapRenderer {
 
     if (this.toHighlightSet.has(id)) {
       this.refreshToHighlightOverlay();
+    }
+
+    if (this.otherHighlightSet.has(id)) {
+      this.refreshOtherHighlightOverlay();
+    }
+
+    if (this.targetsToCaptureSet.has(id)) {
+      this.refreshTargetsToCaptureOverlay();
     }
   }
 

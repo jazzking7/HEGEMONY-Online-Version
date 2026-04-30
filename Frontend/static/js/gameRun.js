@@ -1031,6 +1031,7 @@ socket.on('clear_view', function(){
     pixiRenderer.clearToHighLight();
     pixiRenderer.clearOtherHighlight();
     pixiRenderer.clearClickables();
+    pixiRenderer.clearAttackArrow();
   }
 });
 
@@ -4948,4 +4949,9 @@ function syncPixiSelections() {
   if (!pixiRenderer) return;
   pixiRenderer.setToHighLight(toHighLight);
   pixiRenderer.setClickables(clickables);
+  if (currEvent === conquest && toHighLight.length === 2) {
+    pixiRenderer.setAttackArrow(toHighLight[0], toHighLight[1]);
+  } else {
+    pixiRenderer.clearAttackArrow();
+  }
 }
