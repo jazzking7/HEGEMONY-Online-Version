@@ -1911,7 +1911,7 @@ socket.on('conquest', function(){
 // Show the button that ends the rearrangement stage
 socket.on('rearrangement', function(){
   $('#proceed_next_stage').show();
-  $('#proceed_next_stage .button-text').text('Finish Rearrangement');
+  $('#proceed_next_stage .button-text').text('End Turn');
   $('#proceed_next_stage').off('click').on('click', () => {
     $('#proceed_next_stage').hide();
     socket.emit("terminate_rearrangement_stage");
