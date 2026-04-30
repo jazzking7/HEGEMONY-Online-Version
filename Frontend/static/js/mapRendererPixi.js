@@ -82,6 +82,12 @@ class TerritoryView {
     this.nameText.roundPixels = true;
     this.troopText.roundPixels = true;
 
+    this.nameText.eventMode = "none";
+    this.troopText.eventMode = "none";
+    this.iconLayer.eventMode = "none";
+    this.capitalLayer.eventMode = "none";
+    this.capitalGraphic.eventMode = "none";
+
     this.devSprite = null;
     this.insigSprite = null;
     this.hallSprite = null;
@@ -95,9 +101,9 @@ class TerritoryView {
     this.container.addChild(this.border);
     this.container.addChild(this.iconLayer);
     this.container.addChild(this.capitalLayer);
-    this.container.addChild(this.hit);
     this.container.addChild(this.nameText);
     this.container.addChild(this.troopText);
+    this.container.addChild(this.hit);
 
     this.drawPolygon();
     this.refreshTextStyles();
@@ -322,6 +328,7 @@ class TerritoryView {
     if (!this[slotName]) {
       this[slotName] = new PIXI.Sprite(this.textures[textureKey]);
       this[slotName].visible = false;
+      this[slotName].eventMode = "none";
       this.iconLayer.addChild(this[slotName]);
     }
     return this[slotName];
