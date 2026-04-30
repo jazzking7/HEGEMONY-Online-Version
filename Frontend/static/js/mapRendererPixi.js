@@ -925,6 +925,9 @@ class PixiMapRenderer {
     this.seaRouteLinesGraphics = new PIXI.Graphics();
     this.seaRouteDotsGraphics = new PIXI.Graphics();
 
+    this.seaRouteLinesGraphics.blendMode = "normal";
+    this.seaRouteDotsGraphics.blendMode = "normal";
+
     this.drawSeaRouteLines(this.seaRouteLinesGraphics);
     this.drawSeaRouteCoordinates(this.seaRouteDotsGraphics);
 
@@ -1018,8 +1021,9 @@ class PixiMapRenderer {
   drawSeaRouteCoordinates(gfx) {
     gfx.clear();
 
-    const fillColor = 0x22d3ee;
-    const radius = 5;
+    const outerGlow = 0x2bd7ee;
+    const nodeColor = 0x53e6ff;
+    const coreColor = 0xf7fbff;
 
     for (let i = 0; i < this.territories.length; i++) {
       const trty = this.territories[i];
@@ -1027,18 +1031,24 @@ class PixiMapRenderer {
 
       for (let j = 0; j < trty.srcs.length; j++) {
         const src = trty.srcs[j];
-        gfx.circle(src.x, src.y, radius);
-        gfx.fill(fillColor);
+
+        gfx.circle(src.x, src.y, 9);
+        gfx.fill({ color: outerGlow, alpha: 0.12 });
+
+        gfx.circle(src.x, src.y, 6);
+        gfx.fill({ color: outerGlow, alpha: 0.24 });
+
+        gfx.circle(src.x, src.y, 4.3);
+        gfx.fill({ color: nodeColor, alpha: 0.92 });
+
+        gfx.circle(src.x, src.y, 1.9);
+        gfx.fill({ color: coreColor, alpha: 0.96 });
       }
     }
   }
 
   drawSeaRouteLines(gfx) {
     gfx.clear();
-
-    const dotColor = 0xc8c8c8;
-    const radius = 2.5;
-    const dotSpacing = 6;
 
     for (let i = 0; i < this.seaRoutes.length; i++) {
       const route = this.seaRoutes[i];
@@ -1048,30 +1058,74 @@ class PixiMapRenderer {
         route.y1,
         route.x2,
         route.y2,
-        dotSpacing,
-        radius,
-        dotColor
+        7,
+        2.15,
+        0xe9edf2
       );
     }
   }
 
-  drawDottedRouteToGraphics(gfx, x1, y1, x2, y2, dotSpacing = 6, radius = 2.5, color = 0xc8c8c8) {
+  drawDottedRouteToGraphics(gfx, x1, y1, x2, y2, dotSpacing = 7, radius = 2.15, color = 0xe9edf2) {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const lineLength = Math.sqrt(dx * dx + dy * dy);
 
+    gfx.moveTo(x1, y1);
+    gfx.lineTo(x2, y2);
+    gfx.stroke({
+      color: 0xffffff,
+      width: 6,
+      alpha: 0.10,
+      cap: "round",
+      join: "round"
+    });
+
+    gfx.moveTo(x1, y1);
+    gfx.lineTo(x2, y2);
+    gfx.stroke({
+      color: 0x8da0b3,
+      width: 3.6,
+      alpha: 0.10,
+      cap: "round",
+      join: "round"
+    });
+
     if (lineLength <= 0) {
+      gfx.circle(x1, y1, radius + 2.8);
+      gfx.fill({ color: 0xffffff, alpha: 0.06 });
+
+      gfx.circle(x1, y1, radius + 0.8);
+      gfx.fill({ color: 0x6f7f8d, alpha: 0.22 });
+
       gfx.circle(x1, y1, radius);
-      gfx.fill(color);
+      gfx.fill({ color, alpha: 0.92 });
+
+      gfx.circle(x1, y1, Math.max(0.85, radius * 0.42));
+      gfx.fill({ color: 0xffffff, alpha: 0.88 });
       return;
     }
 
-    for (let i = 0; i <= lineLength; i += dotSpacing * 2) {
+    const step = dotSpacing * 2.2;
+    const outerGlow = 0xffffff;
+    const shadowColor = 0x647381;
+    const bodyColor = 0xd9e0e7;
+
+    for (let i = 0; i <= lineLength; i += step) {
       const t = i / lineLength;
       const x = x1 + dx * t;
       const y = y1 + dy * t;
+
+      gfx.circle(x, y, radius + 2.8);
+      gfx.fill({ color: outerGlow, alpha: 0.05 });
+
+      gfx.circle(x, y, radius + 0.8);
+      gfx.fill({ color: shadowColor, alpha: 0.22 });
+
       gfx.circle(x, y, radius);
-      gfx.fill(color);
+      gfx.fill({ color: bodyColor, alpha: 0.94 });
+
+      gfx.circle(x, y, Math.max(0.85, radius * 0.42));
+      gfx.fill({ color, alpha: 0.92 });
     }
   }
 
