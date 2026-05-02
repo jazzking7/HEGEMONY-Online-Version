@@ -1981,7 +1981,7 @@ html, body {
 .victor-crown {
     font-size: 2.5rem;
     margin-bottom: 0.25rem;
-    animation: crown-spin 4s linear infinite;
+    /* animation: crown-spin 4s linear infinite; */
 }
 
 @keyframes crown-spin {

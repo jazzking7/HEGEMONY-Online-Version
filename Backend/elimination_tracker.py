@@ -38,8 +38,19 @@ class Elimination_tracker:
             # flush concurrent event
             gs.GES.flush_concurrent_event(d_pid)
             # take away the victim's resources
+
+            # Warmonger first kill bonus
+            wbonus = 0
+            for mission in gs.Mset:
+                if mission.player == a_pid:
+                    if mission.name == "Warmonger":
+                        if d_pid not in mission.kill_list:
+                            wbonus = 1
+                            mission.kill_list.append(d_pid)
+                            break
+                            
             attacker.reserves += victim.reserves
-            attacker.stars += victim.stars
+            attacker.stars += victim.stars + 5*wbonus
             gs.server.emit('show_notification_right', {
                                 'message': f'+{victim.reserves} Reserves',
                                 'duration': 3000,
@@ -95,6 +106,16 @@ class Elimination_tracker:
                             gs.server.emit('debt_off', room=d_pid)                           
             # flush concurrent event
             gs.GES.flush_concurrent_event(d_pid)
+
+            wbonus = 0
+            for mission in gs.Mset:
+                if mission.player == a_pid:
+                    if mission.name == "Warmonger":
+                        if d_pid not in mission.kill_list:
+                            wbonus = 1
+                            mission.kill_list.append(d_pid)
+                            break
+
             # take away the victim's resources
             attacker.reserves += victim.reserves
             gs.server.emit('show_notification_right', {
@@ -104,7 +125,7 @@ class Elimination_tracker:
                             }, room=a_pid)
             # check for opportunist bonus        
             bonus = 15 if any(mission.name == 'Opportunist' and mission.player == d_pid for mission in gs.Mset) else 0
-            attacker.stars += victim.stars + bonus
+            attacker.stars += victim.stars + bonus + 5*wbonus
             gs.server.emit('show_notification_right', {
                                 'message': f'+ {victim.stars+bonus}☆',
                                 'duration': 3000,
