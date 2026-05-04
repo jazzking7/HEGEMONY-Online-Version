@@ -148,6 +148,7 @@ class Warmonger(Mission):
         self.death_count = 0
         self.objective = f"Kill {self.goal_count} players."
         self.priority = "B class | Can win with non-conflicting B classes"
+        self.kill_list = []
 
     def check_conditions(self, ):
         if not self.gs.players[self.player].alive:
