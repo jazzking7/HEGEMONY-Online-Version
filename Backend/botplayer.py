@@ -2855,10 +2855,6 @@ class Botplayer:
 
     def make_gp_decision(self, ):
         if not self.alive:
-            self.gs.GES.summit_voter['y'] += 1
-            opt = 'y'
-            self.gs.server.emit('s_voting_fb', {'opt': opt, 'name': self.name}, room=self.gs.lobby)
-            self.gs.GES.selected += 1
             return
         opt = self.agenda.end_game_global_peace_checking()
         if opt:
