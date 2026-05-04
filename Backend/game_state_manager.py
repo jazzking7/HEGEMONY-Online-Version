@@ -229,9 +229,17 @@ class Game_State_Manager:
             self.applied_doctrine = doctrine
             if doctrine == "Peace Above All":
                 self.peaceFirst = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, not making any conquests max out your chance of getting more stars. The more territories you conquer, the less star you will receive."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Prosperity of the Saints":
                 self.copro = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, C-class Agenda holders each receives 1☆ extra at the end of their turn."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Self-Preservation: Authority":
                 self.players[self.SUP].stars += 1
@@ -241,6 +249,10 @@ class Game_State_Manager:
                                 'duration': 3000,
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
                             }, room=self.SUP)
+                self.server.emit('update_doctrine_info', 
+                                 {'name': "Self-Preservation",
+                                   'description': f"{self.players[self.SUP].name} chose to give themselves 1☆."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Self-Preservation: Population":
                 self.players[self.SUP].reserves += 7
@@ -250,12 +262,24 @@ class Game_State_Manager:
                                 'duration': 3000,
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=self.SUP)
+                self.server.emit('update_doctrine_info', 
+                                 {'name': "Self-Preservation",
+                                   'description': f"{self.players[self.SUP].name} chose to give themselves 7 Reserves."},
+                                     room=self.lobby)
                 return
             elif doctrine == "War Art Suspension":
                 self.suspension = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, nobody can activate their War Art."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Continental Embargo":
                 self.embargo = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, nobody can receive Continental Bonus."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Philanthropist":
                 weakest = self.SUP
@@ -277,17 +301,37 @@ class Game_State_Manager:
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=weakest)
                 self.update_private_status(weakest)
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"{self.players[weakest].name} has received 1☆ and 7 Reserves."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Hyperinflation":
                 self.inflation = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, everything cost 1☆ extra."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Stability":
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"No special effect, everything proceeds as normal."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Anarchy":
                 self.anarchy = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, all attackers get +1 Damage Multiplier."},
+                                     room=self.lobby)
                 return
             elif doctrine == "Turtle Shield":
                 self.turtle = True
+                self.server.emit('update_doctrine_info', 
+                                 {'name': doctrine,
+                                   'description': f"In this Round, all defenders get +15% Nullification Rate."},
+                                     room=self.lobby)
                 return
             
     def init_land_exploration(self,):

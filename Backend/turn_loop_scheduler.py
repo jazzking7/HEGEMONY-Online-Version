@@ -1052,6 +1052,9 @@ class turn_loop_scheduler:
                                 'duration': 3000,
                                 "text_color": "#000000", "bg_color": "#6987D5"
                             }, room=gs.lobby)
+                    gs.server.emit('update_doctrine_info', 
+                                 {'name': None},
+                                     room=self.lobby)
                     gs.server.sleep(3)
                     gs.applied_doctrine = None
                     gs.peaceFirst = False
