@@ -39,6 +39,8 @@ let in_debt = false;
 
 let playCountdown = false;
 
+let currentDoctrineDescription = null;
+
 const phaseMap = {
     'DEPLOY': { index: 1, class: 'phase-deploy', label: 'REINFORCEMENT' },
     'PREPARE': { index: 2, class: 'phase-prepare', label: 'PREPARATION' },
@@ -562,6 +564,23 @@ $(document).ready(async function() {
     event.stopPropagation();
   });
 
+  $('#currentDoctrineInfo').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
+  $('#currentDoctrineInfo').on('mouseenter', function() {
+    if (currentDoctrineDescription) {
+      tacticalTooltip.show(this, {
+        title: $('#currentDoctrineName').text(),
+        description: currentDoctrineDescription
+      });
+    }
+  });
+
+  $('#currentDoctrineInfo').on('mouseleave mousedown', function() {
+    tacticalTooltip.hide();
+  });
+
   $('#middle_display').on('click mousemove wheel', function(event) {
       event.stopPropagation();
   });
@@ -879,6 +898,31 @@ socket.on('private_overview', function(data){
   $('#curr_nul_rate').text(data.curr_nul_rate);
   $('#curr_dmg_mul').text(data.curr_dmg_mul);
   $('#curr_min_roll').text(data.curr_min_roll)
+});
+
+socket.on('update_doctrine_info', function(data) {
+  const doctrineInfo = $('#currentDoctrineInfo');
+  const doctrineName = $('#currentDoctrineName');
+
+  if (!data || data.name === null) {
+    currentDoctrineDescription = null;
+    doctrineName.text('');
+    doctrineInfo.hide().removeClass('has-description');
+    tacticalTooltip.hide();
+    return;
+  }
+
+  doctrineName.text(data.name);
+  doctrineInfo.show();
+
+  if (data.description !== null && data.description !== undefined && String(data.description).trim() !== '') {
+    currentDoctrineDescription = data.description;
+    doctrineInfo.addClass('has-description');
+  } else {
+    currentDoctrineDescription = null;
+    doctrineInfo.removeClass('has-description');
+    tacticalTooltip.hide();
+  }
 });
 
 // update player territory list

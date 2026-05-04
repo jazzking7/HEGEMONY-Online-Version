@@ -104,6 +104,83 @@ html, body {
     color: rgb(167, 243, 208);
 }
 
+#currentDoctrineInfo {
+    position: absolute;
+    top: 1%;
+    left: 10rem;
+    min-width: 180px;
+    max-width: 260px;
+    padding: 0.45rem 0.85rem;
+
+    background-color: rgba(15, 23, 42, 0.68);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    backdrop-filter: blur(4px);
+
+    font-family: 'Rajdhani', sans-serif;
+    z-index: 30;
+
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+#currentDoctrineInfo::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 10px;
+    height: 10px;
+    border-top: 1px solid rgba(34, 211, 238, 0.75);
+    border-left: 1px solid rgba(34, 211, 238, 0.75);
+    pointer-events: none;
+}
+
+#currentDoctrineInfo::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    border-bottom: 1px solid rgba(34, 211, 238, 0.75);
+    border-right: 1px solid rgba(34, 211, 238, 0.75);
+    pointer-events: none;
+}
+
+#currentDoctrineInfo.has-description {
+    cursor: help;
+}
+
+#currentDoctrineInfo.has-description:hover {
+    background-color: rgba(34, 211, 238, 0.1);
+    border-color: rgba(34, 211, 238, 0.85);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.28);
+}
+
+.current-doctrine-label {
+    color: rgb(148, 163, 184);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+}
+
+.current-doctrine-name {
+    color: rgb(34, 211, 238);
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    line-height: 1.1;
+    text-transform: uppercase;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    text-shadow: 0 0 10px rgba(34, 211, 238, 0.55);
+}
 
 
 
