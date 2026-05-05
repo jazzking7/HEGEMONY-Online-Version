@@ -749,7 +749,7 @@ html, body {
     font-size: 0.72rem;
     font-style: italic;
     line-height: 1.4;
-    margin-top: 0.4rem;
+    /* margin-top: 0.4rem; */
 }
 
 .losing_condition .mission-description {
