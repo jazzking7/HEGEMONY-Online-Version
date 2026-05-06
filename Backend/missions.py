@@ -846,6 +846,15 @@ class Starchaser(Mission):
         if self.curr_target in self.gs.players[self.player].territories:
             self.round = -1
             self.chase_completed += 1
+
+            self.gs.players[self.player].stars += 1
+            self.gs.update_private_status(self.player)
+            self.gs.server.emit('show_notification_right', {
+                                'message': f'+ 1☆',
+                                'duration': 3000,
+                                "text_color": "#B45309", "bg_color": "#FDE68A"
+                            }, room=self.player)
+
             self.update_tracker_view({'targets': {self.gs.map.territories[self.curr_target].name: 's'}})
             self.update_tracker_view({'misProgBar': [self.chase_completed, self.target_chases],
             'misProgDesp': f'{self.chase_completed}/{self.target_chases} chases completed',})
