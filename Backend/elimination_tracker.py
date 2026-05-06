@@ -57,7 +57,7 @@ class Elimination_tracker:
                                 "text_color": "#1E40AF", "bg_color": "#BFDBFE"
                             }, room=a_pid)
             gs.server.emit('show_notification_right', {
-                                'message': f'+ {victim.stars}☆',
+                                'message': f'+ {victim.stars + 5*wbonus}☆',
                                 'duration': 3000,
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
                             }, room=a_pid)
@@ -127,7 +127,7 @@ class Elimination_tracker:
             bonus = 15 if any(mission.name == 'Opportunist' and mission.player == d_pid for mission in gs.Mset) else 0
             attacker.stars += victim.stars + bonus + 5*wbonus
             gs.server.emit('show_notification_right', {
-                                'message': f'+ {victim.stars+bonus}☆',
+                                'message': f'+ {victim.stars + bonus + 5*wbonus}☆',
                                 'duration': 3000,
                                 "text_color": "#B45309", "bg_color": "#FDE68A"
                             }, room=a_pid)
