@@ -1045,7 +1045,24 @@ class turn_loop_scheduler:
                                 "text_color": "#D9534F", "bg_color": "#F0AD4E"
                             }, room=gs.lobby)
                             gs.server.sleep(5)
-                
+                    if miss.name == "Bounty_Hunter" and 3 < ms.round <= 7:
+                        for bttarget in miss.target_players:
+                            if miss.reported.get(bttarget, False):
+                                continue
+
+                            should_report = ms.round == 7 or random.randint(1, 100) > 60
+
+                            if should_report:
+                                gs.server.emit('playSFX', {"sfx": "alarm"}, room=bttarget)
+                                gs.server.emit('show_notification_center', {
+                                    'message': 'YOU ARE THE TARGET OF A BOUNTY-HUNTER!',
+                                    'duration': 5000,
+                                    "text_color": "#D9534F",
+                                    "bg_color": "#F0AD4E"
+                                }, room=bttarget)
+
+                                miss.reported[bttarget] = True
+                                    
                 if gs.doctrineOn and gs.applied_doctrine:
                     gs.server.emit('show_notification_center', {
                                 'message': 'Doctrine is deactivated',

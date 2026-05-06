@@ -264,6 +264,7 @@ class Bounty_Hunter(Mission):
     def __init__(self, player, gs):
         super().__init__("Bounty_Hunter", player, gs)
         self.target_players = None
+        self.reported = {}
         numt = 0
         nump = len(gs.pids)
         self.objective = "Kill the designated players."
