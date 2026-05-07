@@ -1511,7 +1511,7 @@ class Game_State_Manager:
             if self.SMset:
                 for m in self.SMset:
                     if m.name == "Gambler" and m.player == a_pid:
-                        if atk_amt < def_amt:
+                        if atk_amt < def_amt or (atk_amt == 1 and def_amt == 1):
                             m.check_conditions(def_amt)
                     if m.name == 'Guardian' and m.player == d_pid and trty_def.isCapital and def_p.alive and def_p.capital == trty_def.name:
                         m.signal_mission_failure()
