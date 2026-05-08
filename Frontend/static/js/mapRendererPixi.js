@@ -574,6 +574,35 @@ class PixiMapRenderer {
       elapsed: 0
     };
 
+    this.explosionAlertLayer = null;
+    this.explosionAlertContainer = null;
+    this.explosionAlertBubble = null;
+    this.explosionAlertText = null;
+    this.explosionAlertHit = null;
+
+    this.explosionAlert = {
+      active: false,
+      targetX: 0,
+      targetY: 0,
+      elapsed: 0,
+      holdAfterEnd: 3000,
+      endElapsed: 0,
+      explosionEnded: false,
+      estimatedExplosionDuration: 1200,
+      jumpTime: 0,
+      radius: 24
+    };
+
+    this.cameraTween = {
+      active: false,
+      elapsed: 0,
+      duration: 650,
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0
+    };
+
     this.attackArrowCycleMS = 767;
     this.attackArrowFlightMS = 567;
     this.attackArrowPulseMS = 267;
@@ -728,6 +757,9 @@ class PixiMapRenderer {
     this.world.addChild(this.effectLayer);
     this.app.stage.addChild(this.world);
 
+    this.buildExplosionAlertBubble();
+    this.app.stage.addChild(this.explosionAlertLayer);
+
     this.app.renderer.on("resize", (width, height) => {
       if (this.backgroundSprite) {
         this.backgroundSprite.width = width;
@@ -755,6 +787,8 @@ class PixiMapRenderer {
       this.updateIronWallEffects(ticker.deltaMS);
       this.updateEffects(ticker.deltaMS);
       this.updateFlashOverlay(ticker.deltaMS);
+      this.updateCameraTween(ticker.deltaMS);
+      this.updateExplosionAlert(ticker.deltaMS);
       this.updateScreenShake(ticker.deltaMS);
     });
   }
@@ -1845,6 +1879,10 @@ class PixiMapRenderer {
       this.world.y = worldStart.y + dy;
       this.baseWorldX = this.world.x;
       this.baseWorldY = this.world.y;
+
+      if (this.explosionAlert.active) {
+        this.positionExplosionAlertBubble();
+      }
     });
 
     this.app.canvas.addEventListener("wheel", (e) => {
@@ -1866,7 +1904,260 @@ class PixiMapRenderer {
       this.baseWorldY = this.world.y;
 
       this.updateViewModeFromZoom(false);
+
+      if (this.explosionAlert.active) {
+        this.positionExplosionAlertBubble();
+      }
     }, { passive: false });
+  }
+
+
+  buildExplosionAlertBubble() {
+    this.explosionAlertLayer = new PIXI.Container();
+    this.explosionAlertLayer.eventMode = "passive";
+    this.explosionAlertLayer.visible = false;
+    this.explosionAlertLayer.zIndex = 9999;
+
+    this.explosionAlertContainer = new PIXI.Container();
+    this.explosionAlertContainer.eventMode = "static";
+    this.explosionAlertContainer.cursor = "pointer";
+
+    this.explosionAlertBubble = new PIXI.Graphics();
+    this.explosionAlertHit = new PIXI.Graphics();
+
+    this.explosionAlertText = new PIXI.Text({
+      text: "!",
+      style: new PIXI.TextStyle({
+        fontFamily: "Urbanist",
+        fontSize: 34,
+        fill: 0xffffff,
+        fontWeight: "900",
+        align: "center",
+        stroke: 0x06131d,
+        strokeThickness: 3
+      })
+    });
+
+    this.explosionAlertText.anchor.set(0.5);
+    this.explosionAlertText.resolution = 2;
+    this.explosionAlertText.roundPixels = true;
+    this.explosionAlertText.eventMode = "none";
+
+    this.explosionAlertContainer.addChild(this.explosionAlertHit);
+    this.explosionAlertContainer.addChild(this.explosionAlertBubble);
+    this.explosionAlertContainer.addChild(this.explosionAlertText);
+
+    this.explosionAlertContainer.on("pointertap", () => {
+      if (!this.explosionAlert.active) return;
+
+      const targetX = this.explosionAlert.targetX;
+      const targetY = this.explosionAlert.targetY;
+
+      this.hideExplosionAlert();
+      this.smoothCenterOnWorldPoint(targetX, targetY, 650);
+    });
+
+    this.explosionAlertLayer.addChild(this.explosionAlertContainer);
+  }
+
+  getComfortViewRect() {
+    const w = this.app.screen.width;
+    const h = this.app.screen.height;
+
+    return {
+      left: w * 0.2,
+      right: w * 0.8,
+      top: h * 0.2,
+      bottom: h * 0.8,
+      cx: w * 0.5,
+      cy: h * 0.5
+    };
+  }
+
+  isScreenPointInsideComfortView(x, y) {
+    const r = this.getComfortViewRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  }
+
+  worldPointToScreen(x, y) {
+    return this.world.toGlobal(new PIXI.Point(x, y));
+  }
+
+  getAlertPositionForScreenPoint(screenX, screenY) {
+    const r = this.getComfortViewRect();
+    let dx = screenX - r.cx;
+    let dy = screenY - r.cy;
+
+    if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+      dx = 1;
+      dy = 0;
+    }
+
+    const tx = dx > 0 ? (r.right - r.cx) / dx : dx < 0 ? (r.left - r.cx) / dx : Infinity;
+    const ty = dy > 0 ? (r.bottom - r.cy) / dy : dy < 0 ? (r.top - r.cy) / dy : Infinity;
+    const t = Math.min(Math.abs(tx), Math.abs(ty));
+
+    return {
+      x: r.cx + dx * t,
+      y: r.cy + dy * t,
+      angle: Math.atan2(dy, dx)
+    };
+  }
+
+  drawExplosionAlertBubble(angle, pulse = 0) {
+    const g = this.explosionAlertBubble;
+    const hit = this.explosionAlertHit;
+    const radius = this.explosionAlert.radius;
+    const tailLength = 18;
+    const tailWidth = 14;
+
+    const ux = Math.cos(angle);
+    const uy = Math.sin(angle);
+    const nx = -uy;
+    const ny = ux;
+
+    const baseX = ux * radius * 0.72;
+    const baseY = uy * radius * 0.72;
+    const tipX = ux * (radius + tailLength);
+    const tipY = uy * (radius + tailLength);
+
+    g.clear();
+    hit.clear();
+
+    hit.circle(0, 0, radius + 16);
+    hit.fill({ color: 0xffffff, alpha: 0.001 });
+
+    this.explosionAlertContainer.hitArea = new PIXI.Circle(0, 0, radius + 16);
+
+    g.poly([
+      tipX,
+      tipY,
+      baseX + nx * tailWidth * 0.5,
+      baseY + ny * tailWidth * 0.5,
+      baseX - nx * tailWidth * 0.5,
+      baseY - ny * tailWidth * 0.5
+    ]);
+    g.fill({ color: 0xff3348, alpha: 0.95 });
+    g.stroke({ color: 0xffffff, width: 2, alpha: 0.9, join: "round" });
+
+    g.circle(0, 0, radius + pulse * 2);
+    g.fill({ color: 0xff3348, alpha: 0.96 });
+
+    g.circle(0, 0, radius + 5 + pulse * 3);
+    g.stroke({ color: 0xffedf0, width: 3, alpha: 0.38, join: "round" });
+
+    g.circle(0, 0, radius);
+    g.stroke({ color: 0xffffff, width: 2, alpha: 0.95, join: "round" });
+  }
+
+  showExplosionAlertAtWorldPoint(x, y, estimatedExplosionDuration = 1200) {
+    const p = this.worldPointToScreen(x, y);
+
+    if (this.isScreenPointInsideComfortView(p.x, p.y)) {
+      this.hideExplosionAlert();
+      return;
+    }
+
+    this.explosionAlert.active = true;
+    this.explosionAlert.targetX = x;
+    this.explosionAlert.targetY = y;
+    this.explosionAlert.elapsed = 0;
+    this.explosionAlert.endElapsed = 0;
+    this.explosionAlert.explosionEnded = false;
+    this.explosionAlert.estimatedExplosionDuration = estimatedExplosionDuration;
+    this.explosionAlert.jumpTime = 0;
+
+    this.explosionAlertLayer.visible = true;
+    this.positionExplosionAlertBubble();
+  }
+
+  positionExplosionAlertBubble() {
+    if (!this.explosionAlert.active) return;
+
+    const p = this.worldPointToScreen(
+      this.explosionAlert.targetX,
+      this.explosionAlert.targetY
+    );
+
+    if (this.isScreenPointInsideComfortView(p.x, p.y)) {
+      this.hideExplosionAlert();
+      return;
+    }
+
+    const pos = this.getAlertPositionForScreenPoint(p.x, p.y);
+    const jump = Math.sin(this.explosionAlert.jumpTime) * 5;
+    const pulse = 0.5 + 0.5 * Math.sin(this.explosionAlert.jumpTime * 1.4);
+
+    this.explosionAlertContainer.x = Math.round(pos.x);
+    this.explosionAlertContainer.y = Math.round(pos.y + jump);
+
+    this.drawExplosionAlertBubble(pos.angle, pulse);
+  }
+
+  updateExplosionAlert(deltaMS) {
+    if (!this.explosionAlert.active) return;
+
+    this.explosionAlert.elapsed += deltaMS;
+    this.explosionAlert.jumpTime += deltaMS * 0.012;
+
+    if (!this.explosionAlert.explosionEnded && this.explosionAlert.elapsed >= this.explosionAlert.estimatedExplosionDuration) {
+      this.explosionAlert.explosionEnded = true;
+      this.explosionAlert.endElapsed = 0;
+    }
+
+    if (this.explosionAlert.explosionEnded) {
+      this.explosionAlert.endElapsed += deltaMS;
+      if (this.explosionAlert.endElapsed >= this.explosionAlert.holdAfterEnd) {
+        this.hideExplosionAlert();
+        return;
+      }
+    }
+
+    this.positionExplosionAlertBubble();
+  }
+
+  hideExplosionAlert() {
+    this.explosionAlert.active = false;
+    if (this.explosionAlertLayer) {
+      this.explosionAlertLayer.visible = false;
+    }
+  }
+
+  smoothCenterOnWorldPoint(x, y, duration = 650) {
+    const scale = this.world.scale.x;
+
+    this.cameraTween.active = true;
+    this.cameraTween.elapsed = 0;
+    this.cameraTween.duration = duration;
+    this.cameraTween.startX = this.baseWorldX;
+    this.cameraTween.startY = this.baseWorldY;
+    this.cameraTween.endX = this.app.screen.width * 0.5 - x * scale;
+    this.cameraTween.endY = this.app.screen.height * 0.5 - y * scale;
+  }
+
+  updateCameraTween(deltaMS) {
+    if (!this.cameraTween.active) return;
+
+    this.cameraTween.elapsed += deltaMS;
+
+    const t = Math.min(1, this.cameraTween.elapsed / this.cameraTween.duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+
+    const x = this.cameraTween.startX + (this.cameraTween.endX - this.cameraTween.startX) * eased;
+    const y = this.cameraTween.startY + (this.cameraTween.endY - this.cameraTween.startY) * eased;
+
+    this.world.x = x;
+    this.world.y = y;
+    this.baseWorldX = x;
+    this.baseWorldY = y;
+
+    if (t >= 1) {
+      this.cameraTween.active = false;
+    }
+  }
+
+  notifyExplosionAtWorldPoint(x, y, duration = 1200) {
+    this.showExplosionAlertAtWorldPoint(x, y, duration);
   }
 
     buildIronWallTexture() {
@@ -2215,6 +2506,7 @@ class PixiMapRenderer {
     if (!c) return;
 
     this.spawnExplosionAt(c.x, c.y, opts);
+    this.notifyExplosionAtWorldPoint(c.x, c.y, opts.alertDuration ?? 1200);
    // this.addScreenShake(10, 220);
   }
 
@@ -2245,6 +2537,8 @@ class PixiMapRenderer {
     smokeLifeMax: 2000
   });
 
+  this.notifyExplosionAtWorldPoint(c.x, c.y, opts.alertDuration ?? 2200);
+
   for (let k = 0; k < rings; k++) {
     this.spawnRingEffect(c.x, c.y, {
       life: 700 + k * 140,
@@ -2274,6 +2568,8 @@ class PixiMapRenderer {
     const c = this.territories[tid]?.cps;
     if (!c) return;
 
+    this.notifyExplosionAtWorldPoint(c.x, c.y, 1800);
+
     for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;
       const r = radius * (0.3 + Math.random() * 0.7);
@@ -2295,6 +2591,8 @@ class PixiMapRenderer {
     const a = this.territories[tidA]?.cps;
     const b = this.territories[tidB]?.cps;
     if (!a || !b) return;
+
+    this.notifyExplosionAtWorldPoint(b.x, b.y, 1700);
 
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
