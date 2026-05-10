@@ -212,35 +212,47 @@
         <span class="header-text">YOUR STATS</span>
     </div>
     <div class="panel-content">
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="special_authority">
             <span class="stat-label">SPECIAL AUTHORITY</span>
             <span id="curr_special_auth" class="stat-value stat-gold">0</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="reserves">
             <span class="stat-label">RESERVES</span>
             <span id="curr_reserves" class="stat-value stat-green">0</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="industrial_level">
             <span class="stat-label">INDUSTRIAL LVL</span>
             <span id="curr_indus" class="stat-value stat-blue">6</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="infrastructure_level">
             <span class="stat-label">INFRASTRUCTURE LVL</span>
             <span id="curr_infra" class="stat-value stat-cyan">3</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="minimum_roll">
             <span class="stat-label">MINIMUM ROLL</span>
             <span id="curr_min_roll" class="stat-value stat-purple">1</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="nullification_rate">
             <span class="stat-label">NULLIFICATION RATE</span>
             <span id="curr_nul_rate" class="stat-value stat-red">0</span>
         </div>
-        <div class="stat-row">
+        <div class="stat-row" data-stat-key="damage_multiplier">
             <span class="stat-label">DAMAGE MULTIPLIER</span>
             <span id="curr_dmg_mul" class="stat-value stat-orange">1</span>
         </div>
     </div>
+</div>
+
+<div id="stat_info_display">
+    <div class="laplace-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="laplace-icon">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span id="stat-info-header-text" class="laplace-header-text">STAT DETAILS</span>
+    </div>
+    <div id="stat-info-content" class="laplace-content"></div>
 </div>
 
 <!-- Global Overview - No Header -->

@@ -713,8 +713,122 @@ function isColorDark(hexColor) {
 }
 
 
+const yourStatsInfoData = {
+  special_authority: {
+    title: 'Special Authority',
+    description: 'The only in-game currency, gain through making successful conquests. The more conquests you make in a turn, the higher the chance to receive more. Can be used to build structures, upgrade stats and activate War Art.'
+  },
+  reserves: {
+    title: 'Reserves',
+    description: 'Troops on stand-by, you can deploy them anytime at your turn.'
+  },
+  industrial_level: {
+    title: 'Industrial Level',
+    description: 'Industrial Level is the max roll of your dice in battles. Can be upgraded by controlling lot of cities. When you control 3 cities, Industrial Level is increased by 1, for every 2 more cities controlled, Industrial Level is increased by 1.'
+  },
+  infrastructure_level: {
+    title: 'Infrastructure Level',
+    description: 'Infrastructure Level is the max number of dice you can roll at a time during battles. Can be upgraded using Special Authority.'
+  },
+  minimum_roll: {
+    title: 'Minimum Roll',
+    description: 'Minimum Roll is the lowest roll of your dice in battles. Can be upgraded using certain War Arts or locally upgraded by building forts.'
+  },
+  nullification_rate: {
+    title: 'Nullification Rate',
+    description: 'Nullification Rate is the percentage chance that incoming damage gets negated in defensive battles. Can increase in battle when using certain War Arts or locally upgraded by building forts.'
+  },
+  damage_multiplier: {
+    title: 'Damage Multiplier',
+    description: 'Damage Multiplier increases damage dealt to the enemies during battles.'
+  }
+};
+
+function hideYourStatInfo() {
+  $('#stat_info_display').hide();
+  $('#stat-info-content').empty();
+  $('#your_stats .stat-row').removeClass('active-stat-row');
+}
+
+function positionYourStatInfo(rowElement) {
+  const popout = document.getElementById('stat_info_display');
+  if (!popout) return;
+
+  const rowRect = rowElement.getBoundingClientRect();
+  const statsRect = document.getElementById('your_stats').getBoundingClientRect();
+  const popRect = popout.getBoundingClientRect();
+  const gap = 10;
+
+  let left = statsRect.left - popRect.width - gap;
+  if (left < 10) {
+    left = statsRect.right + gap;
+  }
+
+  let top = rowRect.top + (rowRect.height / 2) - (popRect.height / 2);
+  top = Math.max(10, Math.min(top, window.innerHeight - popRect.height - 10));
+  left = Math.max(10, Math.min(left, window.innerWidth - popRect.width - 10));
+
+  popout.style.top = `${top}px`;
+  popout.style.left = `${left}px`;
+}
+
+function showYourStatInfo(rowElement, statKey) {
+  const statInfo = yourStatsInfoData[statKey];
+  if (!statInfo) return;
+
+  $('#your_stats .stat-row').removeClass('active-stat-row');
+  $(rowElement).addClass('active-stat-row');
+
+  $('#stat-info-header-text').text(statInfo.title.toUpperCase());
+
+  const $content = $('#stat-info-content');
+  $content.empty();
+
+  const $item = $('<div></div>').addClass('laplace-info-item');
+  $('<div></div>').addClass('laplace-field-name').text(statInfo.title).appendTo($item);
+  $('<div></div>').addClass('laplace-field-value').text(statInfo.description).appendTo($item);
+  $content.append($item);
+
+  $('#stat_info_display').css({
+    'display': 'block'
+  });
+
+  positionYourStatInfo(rowElement);
+}
+
+$('#your_stats').on('click', '.stat-row', function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  showYourStatInfo(this, $(this).data('stat-key'));
+});
+
+$('#your_stats').on('click', function(event) {
+  event.stopPropagation();
+  if (!$(event.target).closest('.stat-row').length) {
+    hideYourStatInfo();
+  }
+});
+
+$('#stat_info_display').on('click mousemove wheel', function(event) {
+  event.stopPropagation();
+});
+
+window.addEventListener('click', function(event) {
+  const popout = document.getElementById('stat_info_display');
+  if (!popout || popout.style.display === 'none') return;
+
+  if (
+    !event.target.closest('#stat_info_display') &&
+    !event.target.closest('#your_stats .stat-row')
+  ) {
+    hideYourStatInfo();
+  }
+}, true);
+
+window.addEventListener('resize', hideYourStatInfo);
+
 // Prevent click and scroll propagation for laplace display
-$('#laplace_info_display').on('click mousemove wheel', function(event) {
+$('#laplace_info_display, #stat_info_display').on('click mousemove wheel', function(event) {
     event.stopPropagation();
 });
 
@@ -4725,6 +4839,7 @@ function isPixiClickBlocked(event) {
     '#event_announcement',
     '#middle_display',
     '#laplace_info_display',
+    '#stat_info_display',
     '#player_info',
     '#game-chatbox'
   ];

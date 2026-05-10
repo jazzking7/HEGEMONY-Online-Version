@@ -184,7 +184,8 @@ html, body {
 
 
 
-#laplace_info_display {
+#laplace_info_display,
+#stat_info_display {
     display: none;
     font-family: 'Rajdhani', sans-serif;
     position: absolute;
@@ -199,6 +200,13 @@ html, body {
     box-shadow: 0 4px 6px rgba(34, 211, 238, 0.2);
     
     z-index: 20;
+}
+
+#stat_info_display {
+    width: 280px;
+    max-width: 280px;
+    transform: none;
+    z-index: 35;
 }
 
 .laplace-header {
@@ -1347,6 +1355,16 @@ html, body {
 .stat-row:hover {
     background: rgba(30, 41, 59, 0.5);
     border-left-color: rgba(34, 211, 238, 0.8);
+}
+
+#your_stats .stat-row {
+    cursor: pointer;
+}
+
+#your_stats .stat-row.active-stat-row {
+    background: rgba(34, 211, 238, 0.12);
+    border-left-color: rgba(251, 191, 36, 0.9);
+    box-shadow: inset 0 0 12px rgba(34, 211, 238, 0.12);
 }
 
 .stat-label {
