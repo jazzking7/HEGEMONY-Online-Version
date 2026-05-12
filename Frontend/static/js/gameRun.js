@@ -1594,7 +1594,8 @@ socket.on('set_new_announcement', function(data) {
         const phaseInfo = phaseMap[phase];
         
         if (phaseInfo) {
-            // Update phase boxes
+            // Update phase boxes — suppress standby animation on all boxes
+            phaseIndicators.addClass('phase-active');
             $('.phase-box').removeClass('completed active');
             
             $('.phase-box').each(function(index) {
@@ -1614,6 +1615,7 @@ socket.on('set_new_announcement', function(data) {
             `);
         } else {
             // Fallback for unknown phases
+            phaseIndicators.removeClass('phase-active');
             phaseIndicators.hide();
             announcement.html(`<div class="async-message">${data.msg || phase}</div>`);
         }

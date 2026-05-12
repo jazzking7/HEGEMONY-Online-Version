@@ -500,6 +500,45 @@ html, body {
     transition: all 0.3s;
 }
 
+/* ── STANDBY animation: on by default, each box has its own colour + delay ── */
+@keyframes standby-box-flash {
+    0%, 100%       { background: rgba(71, 85, 105, 0.5); border-color: rgba(100, 116, 139, 0.6); box-shadow: none; }
+    8.33%, 16.67%  { background: var(--sb-bg); border-color: var(--sb-border); box-shadow: 0 0 12px var(--sb-glow), inset 0 0 8px var(--sb-glow); }
+}
+
+.phase-box[data-phase="1"] {
+    --sb-bg:     rgba(34, 211, 238, 0.45);
+    --sb-border: rgba(34, 211, 238, 0.9);
+    --sb-glow:   rgba(34, 211, 238, 0.55);
+}
+.phase-box[data-phase="2"] {
+    --sb-bg:     rgba(59, 130, 246, 0.45);
+    --sb-border: rgba(59, 130, 246, 0.9);
+    --sb-glow:   rgba(59, 130, 246, 0.55);
+}
+.phase-box[data-phase="3"] {
+    --sb-bg:     rgba(239, 68, 68, 0.45);
+    --sb-border: rgba(239, 68, 68, 0.9);
+    --sb-glow:   rgba(239, 68, 68, 0.55);
+}
+.phase-box[data-phase="4"] {
+    --sb-bg:     rgba(251, 191, 36, 0.45);
+    --sb-border: rgba(251, 191, 36, 0.9);
+    --sb-glow:   rgba(251, 191, 36, 0.55);
+}
+
+/* Only animate during STANDBY (parent lacks .phase-active) */
+#phase_indicators:not(.phase-active) .phase-box[data-phase="1"] { animation: standby-box-flash 1.2s linear infinite 0s; }
+#phase_indicators:not(.phase-active) .phase-box[data-phase="2"] { animation: standby-box-flash 1.2s linear infinite 0.3s; }
+#phase_indicators:not(.phase-active) .phase-box[data-phase="3"] { animation: standby-box-flash 1.2s linear infinite 0.6s; }
+#phase_indicators:not(.phase-active) .phase-box[data-phase="4"] { animation: standby-box-flash 1.2s linear infinite 0.9s; }
+
+/* Cancel standby animation once a real phase is active */
+.phase-box.completed,
+.phase-box.active {
+    animation: none;
+}
+
 .phase-box.completed {
     background: rgba(239, 68, 68, 0.4);
     border-color: rgba(239, 68, 68, 0.8);
