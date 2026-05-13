@@ -1699,51 +1699,68 @@ function hexToRgb(hex) {
 // Choose territorial distribution
 socket.on('choose_territorial_distribution', function(data){
   document.getElementById('middle_display').style.display = 'flex';
+
   let dist_choices = document.getElementById('middle_content');
   dist_choices.innerHTML = ``;
-  let disabled = false;
+
+  let selectedBtn = null;
+  let selectedChoice = null;
+
   for (let trty_dist in data.options){
     let btn_dist = document.createElement("button");
-      btn_dist.className = 'btn';
-      btn_dist.style.width = '2vw';
-      btn_dist.style.height = '2vw';
-      btn_dist.style.backgroundColor = trty_dist;
-      btn_dist.style.border = 'none';
-      btn_dist.style.margin = '1px';
-      btn_dist.onclick = function(){
-        if (!disabled){
-          disabled = true;
-          btn_dist.style.border = '2px solid';
-          btn_dist.style.borderColor = 'red';
 
-          let tmptid = 0;
-          for (terri of territories) {
-            if (terri.color == trty_dist){
-              toHighLight.push(tmptid);
-            }
-            tmptid ++;
-          }
-          syncPixiSelections();
+    btn_dist.className = 'btn';
+    btn_dist.style.width = '2vw';
+    btn_dist.style.height = '2vw';
+    btn_dist.style.backgroundColor = trty_dist;
+    btn_dist.style.border = 'none';
+    btn_dist.style.margin = '1px';
 
-          document.getElementById('control_panel').style.display = 'flex';
-          $('#control_confirm').off('click').on('click', function(){
-            document.getElementById('control_panel').style.display = 'none';
-            socket.emit('send_dist_choice', {'choice': rgbToHex(btn_dist.style.backgroundColor)})
-            document.getElementById('middle_display').style.display = 'none';
-            toHighLight = []; 
-            syncPixiSelections();
-          });
-          $('#control_cancel').off('click').on('click' , function(){
-            document.getElementById('control_panel').style.display = 'none';
-            disabled = false;
-            btn_dist.style.border = "none";
-            toHighLight = [];
-            syncPixiSelections();
-            playRefuse();
-          });
+    btn_dist.onclick = function(){
+      if (selectedBtn) {
+        selectedBtn.style.border = 'none';
+      }
+
+      selectedBtn = btn_dist;
+      selectedChoice = trty_dist;
+
+      btn_dist.style.border = '2px solid red';
+
+      toHighLight = [];
+      let tmptid = 0;
+      for (terri of territories) {
+        if (terri.color == trty_dist){
+          toHighLight.push(tmptid);
         }
-      };
-      dist_choices.appendChild(btn_dist);
+        tmptid++;
+      }
+      
+      syncPixiSelections();
+
+      document.getElementById('control_panel').style.display = 'flex';
+      $('#control_confirm').off('click').on('click', function(){
+        if (!selectedChoice) return;
+        document.getElementById('control_panel').style.display = 'none';
+        socket.emit('send_dist_choice', {
+          'choice': rgbToHex(selectedBtn.style.backgroundColor)
+        });
+        document.getElementById('middle_display').style.display = 'none';
+        toHighLight = [];
+        syncPixiSelections();
+      });
+      $('#control_cancel').off('click').on('click', function(){
+        document.getElementById('control_panel').style.display = 'none';
+        if (selectedBtn) {
+          selectedBtn.style.border = 'none';
+        }
+        selectedBtn = null;
+        selectedChoice = null;
+        toHighLight = [];
+        syncPixiSelections();
+        playRefuse();
+      });
+    };
+    dist_choices.appendChild(btn_dist);
   }
 });
 
