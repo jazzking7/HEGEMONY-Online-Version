@@ -5133,3 +5133,8 @@ function syncPixiSelections() {
     pixiRenderer.clearAttackArrow();
   }
 }
+
+// quicksetup
+socket.on('quick_setup_highlight_on', function(){
+  pixiRenderer.setToHighLight(player_territories);
+});

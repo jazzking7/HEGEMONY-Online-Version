@@ -256,7 +256,7 @@ def start_quick_game(data):
         60,
         180
     ]
-    lobby['setup_mode'] = "all_manuel"
+    lobby['setup_mode'] = "quicksetup"
     print(lobby)
     print(time_settings)
 
