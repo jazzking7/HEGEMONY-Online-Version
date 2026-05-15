@@ -182,7 +182,7 @@ class General_Event_Scheduler:
         return
 
     def run_setup_events(self,):
-        self.gs.server.sleep(15)
+        self.gs.server.sleep(8)
         self.gs.server.emit('set_new_announcement', {'async': True, 'msg': "Loading resources..."}, room=self.gs.lobby)
         self.gs.server.sleep(2)
         for event in self.SES:
