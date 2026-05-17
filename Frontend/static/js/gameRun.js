@@ -477,6 +477,125 @@ class NotificationManager {
 // Initialize notification manager
 const notificationManager = new NotificationManager();
 
+class NarrationLayer {
+  constructor() {
+    this.logs = [];
+    this.currentFilter = 'all';
+    this.maxLogs = 80;
+
+    this.$banner = $('#event_banner');
+    this.$subtitle = $('#event_subtitle_bar');
+    this.$logPanel = $('#event_log_panel');
+    this.$logList = $('#event_log_list');
+
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    $('#event_log_toggle').on('click', () => {
+      this.$logPanel.toggleClass('collapsed');
+    });
+
+    $('.event-log-filters button').on('click', (event) => {
+      this.currentFilter = $(event.currentTarget).data('filter') || 'all';
+      this.renderLogs();
+    });
+  }
+
+  showBanner(data = {}) {
+    const title = data.title || data.message || 'EVENT';
+    const subtitle = data.subtitle || '';
+    const duration = data.duration || 3500;
+
+    const html = `
+      <div class="event-banner-title">${title}</div>
+      ${subtitle ? `<div class="event-banner-subtitle">${subtitle}</div>` : ''}
+    `;
+
+    this.$banner
+      .html(html)
+      .stop(true, true)
+      .fadeIn(120);
+
+    clearTimeout(this.bannerTimer);
+
+    this.bannerTimer = setTimeout(() => {
+      this.$banner.fadeOut(180);
+    }, duration);
+  }
+
+  showSubtitle(data = {}) {
+    const title = data.title || data.message || '';
+    const subtitle = data.subtitle || '';
+    const duration = data.duration || 3000;
+    const text = subtitle ? `${title} — ${subtitle}` : title;
+
+    this.$subtitle
+      .text(text)
+      .stop(true, true)
+      .fadeIn(120);
+
+    clearTimeout(this.subtitleTimer);
+
+    this.subtitleTimer = setTimeout(() => {
+      this.$subtitle.fadeOut(180);
+    }, duration);
+  }
+
+  addLog(data = {}) {
+    const event = {
+      type: data.type || data.event_type || 'system',
+      title: data.title || data.message || 'EVENT',
+      body: data.body || data.subtitle || '',
+      round: data.round || $('#game_round').text() || '0'
+    };
+
+    this.logs.unshift(event);
+
+    if (this.logs.length > this.maxLogs) {
+      this.logs.pop();
+    }
+
+    this.renderLogs();
+  }
+
+  renderLogs() {
+    const filtered = this.logs.filter(event => {
+      return this.currentFilter === 'all' || event.type === this.currentFilter;
+    });
+
+    const html = filtered.map(event => {
+      return `
+        <div class="event-log-item event-type-${event.type}">
+          <div class="event-log-icon">${this.iconForType(event.type)}</div>
+          <div>
+            <div class="event-log-title">${event.title}</div>
+            <div class="event-log-text">${event.body}</div>
+          </div>
+          <div class="event-log-time">R${event.round}</div>
+        </div>
+      `;
+    }).join('');
+
+    this.$logList.html(html);
+  }
+
+  iconForType(type) {
+    const icons = {
+      military: '⚔',
+      economy: '★',
+      warart: '✦',
+      diplomacy: '☉',
+      intel: '◇',
+      system: '◆'
+    };
+
+    return icons[type] || '◆';
+  }
+}
+
+let narrationLayer = null;
+
 let pixiRenderer = null;
 let territories = [];
 let toHighLight = [];
@@ -584,6 +703,9 @@ $(document).ready(async function() {
   $('#middle_display').on('click mousemove wheel', function(event) {
       event.stopPropagation();
   });
+
+  narrationLayer = new NarrationLayer();
+  window.narrationLayer = narrationLayer;
 
   await initializeLibraries();
 
@@ -1364,6 +1486,33 @@ socket.on('show_notification_left', function(data) {
         data.text_color || '#ffffff',
         data.bg_color || 'rgba(168, 85, 247, 0.9)'
     );
+});
+
+// Narration layer sockets. These are separate from the old notification system.
+socket.on('show_event_banner', function(data) {
+  if (!window.narrationLayer) return;
+
+  narrationLayer.showBanner(data);
+
+  if (data.log) {
+    narrationLayer.addLog(data);
+  }
+});
+
+socket.on('show_event_subtitle', function(data) {
+  if (!window.narrationLayer) return;
+
+  narrationLayer.showSubtitle(data);
+
+  if (data.log) {
+    narrationLayer.addLog(data);
+  }
+});
+
+socket.on('add_event_log', function(data) {
+  if (!window.narrationLayer) return;
+
+  narrationLayer.addLog(data);
 });
 
 // Legacy function for backward compatibility

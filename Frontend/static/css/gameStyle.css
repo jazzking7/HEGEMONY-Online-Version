@@ -2731,3 +2731,194 @@ html, body {
     border-top: none;
     pointer-events: none;
 }
+
+/* ===================== Narration Layer + Event Log ===================== */
+#narration_layer {
+    position: absolute;
+    inset: 0;
+    z-index: 65;
+    pointer-events: none;
+    font-family: 'Rajdhani', sans-serif;
+}
+
+/* Important banner: below phase announcement, not top-center */
+#event_banner {
+    display: none;
+    position: absolute;
+    top: 16vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(620px, 42vw);
+    min-height: 54px;
+
+    padding: 0.65rem 1.5rem;
+    text-align: center;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(15, 23, 42, 0.96),
+        transparent
+    );
+
+    border-top: 1px solid rgba(251, 191, 36, 0.75);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.75);
+
+    color: rgb(251, 191, 36);
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(251, 191, 36, 0.65);
+
+    pointer-events: none;
+}
+
+.event-banner-subtitle {
+    margin-top: 0.2rem;
+    color: rgb(203, 213, 225);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: none;
+    text-shadow: none;
+}
+
+/* Situational subtitle: above bottom controls, not on top of buttons */
+#event_subtitle_bar {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 9.5rem;
+    transform: translateX(-50%);
+
+    width: min(720px, 48vw);
+    padding: 0.65rem 1.1rem;
+
+    background: rgba(2, 6, 23, 0.72);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+
+    color: rgb(103, 232, 249);
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+
+    pointer-events: none;
+}
+
+/* Event log: right side, above proceed_next_stage */
+#event_log_panel {
+    position: absolute;
+    right: 0;
+    bottom: 5.8rem;
+
+    width: 250px;
+    max-height: 22vh;
+
+    z-index: 32;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(34, 211, 238, 0.45);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+}
+
+#event_log_panel.collapsed {
+    max-height: 34px;
+}
+
+#event_log_panel.collapsed .event-log-filters,
+#event_log_panel.collapsed #event_log_list {
+    display: none;
+}
+
+.event-log-header {
+    height: 34px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 0.6rem;
+    color: rgb(103, 232, 249);
+    border-bottom: 1px solid rgba(34, 211, 238, 0.35);
+
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+#event_log_toggle {
+    background: transparent;
+    border: 1px solid rgba(34, 211, 238, 0.45);
+    color: rgb(103, 232, 249);
+    cursor: pointer;
+    padding: 0 0.35rem;
+}
+
+.event-log-filters {
+    display: flex;
+    gap: 0.2rem;
+    padding: 0.35rem;
+}
+
+.event-log-filters button {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.75);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    color: rgb(226, 232, 240);
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+#event_log_list {
+    max-height: calc(22vh - 68px);
+    overflow-y: auto;
+}
+
+.event-log-item {
+    display: grid;
+    grid-template-columns: 24px 1fr 34px;
+    gap: 0.4rem;
+
+    padding: 0.45rem 0.55rem;
+    border-top: 1px solid rgba(71, 85, 105, 0.35);
+
+    color: rgb(226, 232, 240);
+}
+
+.event-log-title {
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.event-log-text {
+    font-size: 0.68rem;
+    color: rgb(148, 163, 184);
+    line-height: 1.2;
+}
+
+.event-log-time {
+    font-size: 0.65rem;
+    color: rgb(103, 232, 249);
+    text-align: right;
+}
+
+.event-type-military .event-log-icon,
+.event-type-military .event-log-title {
+    color: rgb(248, 113, 113);
+}
+
+.event-type-economy .event-log-icon,
+.event-type-economy .event-log-title {
+    color: rgb(251, 191, 36);
+}
+
+.event-type-warart .event-log-icon,
+.event-type-warart .event-log-title {
+    color: rgb(216, 180, 254);
+}
+
+.event-type-intel .event-log-icon,
+.event-type-intel .event-log-title {
+    color: rgb(103, 232, 249);
+}
