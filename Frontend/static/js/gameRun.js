@@ -551,25 +551,25 @@ class NarrationLayer {
 
     if (!logPanel || !statsPanel) return;
 
-    if (this.$logPanel.hasClass('collapsed')) {
-      const statsRect = statsPanel.getBoundingClientRect();
-      const gap = 7;
-      const safeBottom = 8;
-      const top = Math.min(
-        statsRect.bottom + gap,
-        window.innerHeight - logPanel.offsetHeight - safeBottom
-      );
-
-      this.$logPanel.css({
-        top: `${Math.max(8, top)}px`,
-        bottom: 'auto'
-      });
-      return;
-    }
+    const statsRect = statsPanel.getBoundingClientRect();
+    const gap = 7;
+    const safeTop = 8;
+    const safeBottom = 8;
+    const preferredTop = statsRect.bottom + gap;
+    const currentHeight = logPanel.offsetHeight || 34;
+    const top = Math.min(
+      preferredTop,
+      window.innerHeight - currentHeight - safeBottom
+    );
+    const anchoredTop = Math.max(safeTop, top);
+    const availableHeight = Math.max(34, window.innerHeight - anchoredTop - safeBottom);
 
     this.$logPanel.css({
-      top: 'auto',
-      bottom: '5.8rem'
+      top: `${anchoredTop}px`,
+      bottom: 'auto',
+      maxHeight: this.$logPanel.hasClass('collapsed')
+        ? '34px'
+        : `${Math.min(window.innerHeight * 0.22, availableHeight)}px`
     });
   }
 
