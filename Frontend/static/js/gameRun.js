@@ -487,46 +487,26 @@ class NarrationLayer {
     this.$subtitle = $('#event_subtitle_bar');
     this.$logPanel = $('#event_log_panel');
     this.$logList = $('#event_log_list');
-    this.$filterButtons = $('.event-log-filters button');
 
     this.bindEvents();
-    this.setFilter('all');
     this.queueLogPanelPositionRefresh();
   }
 
   bindEvents() {
     $('#event_log_toggle').on('click', () => {
-      const willExpand = this.$logPanel.hasClass('collapsed');
-
       this.$logPanel.toggleClass('collapsed');
-
-      if (willExpand) {
-        this.setFilter('all');
-      }
-
       this.queueLogPanelPositionRefresh();
     });
 
-    this.$filterButtons.on('click', (event) => {
-      this.setFilter($(event.currentTarget).data('filter') || 'all');
+    $('.event-log-filters button').on('click', (event) => {
+      this.currentFilter = $(event.currentTarget).data('filter') || 'all';
+      this.renderLogs();
+      this.queueLogPanelPositionRefresh();
     });
 
     $(window).on('resize.eventLogPanel', () => {
       this.queueLogPanelPositionRefresh();
     });
-  }
-
-  setFilter(filterType = 'all') {
-    this.currentFilter = filterType;
-    this.updateFilterTabs();
-    this.renderLogs();
-  }
-
-  updateFilterTabs() {
-    this.$filterButtons.removeClass('active');
-    this.$filterButtons
-      .filter(`[data-filter="${this.currentFilter}"]`)
-      .addClass('active');
   }
 
   queueLogPanelPositionRefresh() {
@@ -555,21 +535,51 @@ class NarrationLayer {
     const gap = 7;
     const safeTop = 8;
     const safeBottom = 8;
-    const preferredTop = statsRect.bottom + gap;
-    const currentHeight = logPanel.offsetHeight || 34;
-    const top = Math.min(
-      preferredTop,
-      window.innerHeight - currentHeight - safeBottom
-    );
-    const anchoredTop = Math.max(safeTop, top);
-    const availableHeight = Math.max(34, window.innerHeight - anchoredTop - safeBottom);
+    const headerHeight = 34;
+    const filterHeight = 34;
+    const isCollapsed = this.$logPanel.hasClass('collapsed');
+
+    if (isCollapsed) {
+      const top = Math.min(
+        statsRect.bottom + gap,
+        window.innerHeight - headerHeight - safeBottom
+      );
+
+      this.$logPanel.css({
+        top: `${Math.max(safeTop, top)}px`,
+        bottom: 'auto',
+        height: `${headerHeight}px`,
+        maxHeight: `${headerHeight}px`
+      });
+
+      this.$logList.css({
+        maxHeight: ''
+      });
+
+      return;
+    }
+
+    const proceedButton = document.getElementById('proceed_next_stage');
+    const proceedVisible = proceedButton && window.getComputedStyle(proceedButton).display !== 'none';
+    const proceedRect = proceedVisible ? proceedButton.getBoundingClientRect() : null;
+    const lowerLimit = proceedRect ? proceedRect.top - gap : window.innerHeight - safeBottom;
+
+    const statsOverlap = Math.min(48, Math.max(30, statsRect.height * 0.16));
+    const preferredTop = statsRect.bottom - statsOverlap;
+    const anchoredTop = Math.max(safeTop, preferredTop);
+    const availableHeight = Math.max(headerHeight + filterHeight, lowerLimit - anchoredTop);
+    const panelMaxHeight = Math.min(window.innerHeight * 0.22, availableHeight);
+    const listMaxHeight = Math.max(0, panelMaxHeight - headerHeight - filterHeight);
 
     this.$logPanel.css({
       top: `${anchoredTop}px`,
       bottom: 'auto',
-      maxHeight: this.$logPanel.hasClass('collapsed')
-        ? '34px'
-        : `${Math.min(window.innerHeight * 0.22, availableHeight)}px`
+      height: '',
+      maxHeight: `${panelMaxHeight}px`
+    });
+
+    this.$logList.css({
+      maxHeight: `${listMaxHeight}px`
     });
   }
 
