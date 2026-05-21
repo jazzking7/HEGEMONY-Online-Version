@@ -489,16 +489,66 @@ class NarrationLayer {
     this.$logList = $('#event_log_list');
 
     this.bindEvents();
+    this.queueLogPanelPositionRefresh();
   }
 
   bindEvents() {
     $('#event_log_toggle').on('click', () => {
       this.$logPanel.toggleClass('collapsed');
+      this.queueLogPanelPositionRefresh();
     });
 
     $('.event-log-filters button').on('click', (event) => {
       this.currentFilter = $(event.currentTarget).data('filter') || 'all';
       this.renderLogs();
+    });
+
+    $(window).on('resize.eventLogPanel', () => {
+      this.queueLogPanelPositionRefresh();
+    });
+  }
+
+  queueLogPanelPositionRefresh() {
+    this.positionLogPanel();
+
+    requestAnimationFrame(() => {
+      this.positionLogPanel();
+    });
+
+    setTimeout(() => {
+      this.positionLogPanel();
+    }, 80);
+
+    setTimeout(() => {
+      this.positionLogPanel();
+    }, 250);
+  }
+
+  positionLogPanel() {
+    const logPanel = this.$logPanel[0];
+    const statsPanel = document.getElementById('your_stats');
+
+    if (!logPanel || !statsPanel) return;
+
+    if (this.$logPanel.hasClass('collapsed')) {
+      const statsRect = statsPanel.getBoundingClientRect();
+      const gap = 7;
+      const safeBottom = 8;
+      const top = Math.min(
+        statsRect.bottom + gap,
+        window.innerHeight - logPanel.offsetHeight - safeBottom
+      );
+
+      this.$logPanel.css({
+        top: `${Math.max(8, top)}px`,
+        bottom: 'auto'
+      });
+      return;
+    }
+
+    this.$logPanel.css({
+      top: 'auto',
+      bottom: '5.8rem'
     });
   }
 
@@ -612,7 +662,17 @@ $(document).ready(async function() {
       href: "/static/css/gameStyle.css"
 
   });
+  newLink.on('load', function() {
+    if (window.narrationLayer) {
+      window.narrationLayer.queueLogPanelPositionRefresh();
+    }
+  });
   $('#initial_styling').replaceWith(newLink);
+
+  if (!narrationLayer) {
+    narrationLayer = new NarrationLayer();
+    window.narrationLayer = narrationLayer;
+  }
 
   // Get game settings
   game_settings = await get_game_settings();
@@ -683,6 +743,10 @@ $(document).ready(async function() {
     event.stopPropagation();
   });
 
+  $('#event_log_panel').on('click mousemove wheel', function(event) {
+    event.stopPropagation();
+  });
+
   $('#currentDoctrineInfo').on('click mousemove wheel', function(event) {
     event.stopPropagation();
   });
@@ -704,8 +768,10 @@ $(document).ready(async function() {
       event.stopPropagation();
   });
 
-  narrationLayer = new NarrationLayer();
-  window.narrationLayer = narrationLayer;
+  if (!narrationLayer) {
+    narrationLayer = new NarrationLayer();
+    window.narrationLayer = narrationLayer;
+  }
 
   await initializeLibraries();
 
@@ -5009,6 +5075,7 @@ function isPixiClickBlocked(event) {
     '#laplace_info_display',
     '#stat_info_display',
     '#player_info',
+    '#event_log_panel',
     '#game-chatbox'
   ];
 

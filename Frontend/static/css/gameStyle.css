@@ -2877,6 +2877,7 @@ html, body {
 
     font-family: 'Rajdhani', sans-serif;
     overflow: hidden;
+    transition: top 0.16s ease, bottom 0.16s ease, max-height 0.16s ease;
 }
 
 #event_log_panel.collapsed {
