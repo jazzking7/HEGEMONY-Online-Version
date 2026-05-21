@@ -487,25 +487,46 @@ class NarrationLayer {
     this.$subtitle = $('#event_subtitle_bar');
     this.$logPanel = $('#event_log_panel');
     this.$logList = $('#event_log_list');
+    this.$filterButtons = $('.event-log-filters button');
 
     this.bindEvents();
+    this.setFilter('all');
     this.queueLogPanelPositionRefresh();
   }
 
   bindEvents() {
     $('#event_log_toggle').on('click', () => {
+      const willExpand = this.$logPanel.hasClass('collapsed');
+
       this.$logPanel.toggleClass('collapsed');
+
+      if (willExpand) {
+        this.setFilter('all');
+      }
+
       this.queueLogPanelPositionRefresh();
     });
 
-    $('.event-log-filters button').on('click', (event) => {
-      this.currentFilter = $(event.currentTarget).data('filter') || 'all';
-      this.renderLogs();
+    this.$filterButtons.on('click', (event) => {
+      this.setFilter($(event.currentTarget).data('filter') || 'all');
     });
 
     $(window).on('resize.eventLogPanel', () => {
       this.queueLogPanelPositionRefresh();
     });
+  }
+
+  setFilter(filterType = 'all') {
+    this.currentFilter = filterType;
+    this.updateFilterTabs();
+    this.renderLogs();
+  }
+
+  updateFilterTabs() {
+    this.$filterButtons.removeClass('active');
+    this.$filterButtons
+      .filter(`[data-filter="${this.currentFilter}"]`)
+      .addClass('active');
   }
 
   queueLogPanelPositionRefresh() {
@@ -669,11 +690,6 @@ $(document).ready(async function() {
   });
   $('#initial_styling').replaceWith(newLink);
 
-  if (!narrationLayer) {
-    narrationLayer = new NarrationLayer();
-    window.narrationLayer = narrationLayer;
-  }
-
   // Get game settings
   game_settings = await get_game_settings();
 
@@ -768,10 +784,8 @@ $(document).ready(async function() {
       event.stopPropagation();
   });
 
-  if (!narrationLayer) {
-    narrationLayer = new NarrationLayer();
-    window.narrationLayer = narrationLayer;
-  }
+  narrationLayer = new NarrationLayer();
+  window.narrationLayer = narrationLayer;
 
   await initializeLibraries();
 
@@ -5075,7 +5089,6 @@ function isPixiClickBlocked(event) {
     '#laplace_info_display',
     '#stat_info_display',
     '#player_info',
-    '#event_log_panel',
     '#game-chatbox'
   ];
 
