@@ -477,6 +477,33 @@ class NotificationManager {
 // Initialize notification manager
 const notificationManager = new NotificationManager();
 
+// Event Log selected-tab glow styling. Kept here because this patch only modifies gameRun.js.
+function ensureEventLogTabGlowStyle() {
+  if (document.getElementById('event-log-selected-tab-glow-style')) return;
+
+  const style = document.createElement('style');
+  style.id = 'event-log-selected-tab-glow-style';
+  style.textContent = `
+    .event-log-filters button {
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease, text-shadow 0.18s ease;
+    }
+
+    .event-log-filters button:hover {
+      border-color: rgba(34, 211, 238, 0.65);
+      box-shadow: 0 0 8px rgba(34, 211, 238, 0.25);
+    }
+
+    .event-log-filters button.active {
+      color: rgb(103, 232, 249);
+      border-color: rgba(34, 211, 238, 0.85);
+      background: rgba(34, 211, 238, 0.14);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.38), inset 0 0 8px rgba(34, 211, 238, 0.12);
+      text-shadow: 0 0 8px rgba(34, 211, 238, 0.7);
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 class NarrationLayer {
   constructor() {
     this.logs = [];
@@ -488,7 +515,10 @@ class NarrationLayer {
     this.$logPanel = $('#event_log_panel');
     this.$logList = $('#event_log_list');
 
+    ensureEventLogTabGlowStyle();
     this.bindEvents();
+    $('.event-log-filters button').removeClass('active');
+    $('.event-log-filters button[data-filter="all"]').addClass('active');
     this.queueLogPanelPositionRefresh();
   }
 
@@ -499,7 +529,13 @@ class NarrationLayer {
     });
 
     $('.event-log-filters button').on('click', (event) => {
-      this.currentFilter = $(event.currentTarget).data('filter') || 'all';
+      const $button = $(event.currentTarget);
+
+      this.currentFilter = $button.data('filter') || 'all';
+
+      $('.event-log-filters button').removeClass('active');
+      $button.addClass('active');
+
       this.renderLogs();
       this.queueLogPanelPositionRefresh();
     });
