@@ -364,113 +364,416 @@ class NotificationManager {
             right: [],
             left: []
         };
+
+        this.defaults = {
+            emergency: {
+                placement: 'center',
+                bg: '#991B1B',
+                fg: '#FECACA',
+                accent: '#FCA5A5',
+                kicker: 'Emergency',
+                title: 'Intruder Identified',
+                body: 'Eliminate the invader before reinforcements arrive.',
+                icon: '!',
+                titleSize: 1.42,
+                bodySize: 0.94,
+                duration: 3200
+            },
+            major: {
+                placement: 'center',
+                bg: '#6987D5',
+                fg: '#000000',
+                accent: '#DCE7FF',
+                kicker: 'Doctrine Update',
+                title: 'Doctrine Activated',
+                body: 'Continental Embargo is now in effect. Cross-border economic actions are restricted.',
+                icon: '◆',
+                titleSize: 1.5,
+                bodySize: 0.98,
+                kickerColor: '#DCE7FF',
+                showProgress: true,
+                duration: 3600
+            },
+            dossier: {
+                placement: 'left',
+                bg: '#111827',
+                fg: '#FDE68A',
+                accent: '#FBBF24',
+                kicker: 'Military Report',
+                title: 'Border Breached',
+                body: 'Enemy force crossed into Northern Relay. Defensive response recommended.',
+                icon: '▣',
+                titleSize: 1.42,
+                bodySize: 0.94,
+                kickerColor: '#FBBF24',
+                duration: 3200
+            },
+            sigil: {
+                placement: 'center',
+                bg: '#55185D',
+                fg: '#FFD524',
+                accent: '#E879F9',
+                kicker: 'War Art Effect',
+                title: "Pandora's Box Reward",
+                body: 'A sealed reward has been opened. Unexpected gains have been distributed.',
+                icon: '✦',
+                titleSize: 1.42,
+                bodySize: 0.94,
+                duration: 3200
+            },
+            resource: {
+                placement: 'right',
+                bg: '#FDE68A',
+                fg: '#B45309',
+                accent: '#F59E0B',
+                kicker: '',
+                title: '+240 ★',
+                body: '',
+                icon: '★',
+                titleSize: 1.42,
+                bodySize: 0.94,
+                tickWidth: 238,
+                tickHeight: 46,
+                tickFont: 1,
+                duration: 2200
+            },
+            subtitle: {
+                placement: 'center',
+                bg: '#3F7EB3',
+                fg: '#FAFEFF',
+                accent: '#B8E0FF',
+                kicker: 'World Condition Shift',
+                title: 'World Condition Shift',
+                body: 'Realm of Permafrost expands across affected territories.',
+                icon: '',
+                titleSize: 0.8,
+                bodySize: 1.14,
+                kickerColor: '#B8E0FF',
+                showSubtitleTitle: true,
+                duration: 3200
+            },
+            elimination: {
+                placement: 'center',
+                bg: '#111827',
+                fg: '#F3F4F6',
+                accent: '#EF4444',
+                kicker: 'Player Eliminated',
+                title: 'Helion Has Fallen',
+                body: 'Their final capital has been lost. Remaining territories are now in transition.',
+                icon: '☠',
+                titleSize: 1.42,
+                bodySize: 0.94,
+                duration: 3400
+            }
+        };
+
+        this.aliases = {
+            emergency_banner: 'emergency',
+            emergency: 'emergency',
+            major_ribbon: 'major',
+            major: 'major',
+            doctrine: 'major',
+            dossier_report: 'dossier',
+            dossier: 'dossier',
+            report: 'dossier',
+            war_art_sigil: 'sigil',
+            warart_sigil: 'sigil',
+            sigil: 'sigil',
+            warart: 'sigil',
+            war_art: 'sigil',
+            resource_tick: 'resource',
+            resource: 'resource',
+            tick: 'resource',
+            narrative_subtitle: 'subtitle',
+            subtitle: 'subtitle',
+            elimination_card: 'elimination',
+            elimination: 'elimination',
+            player_elimination: 'elimination'
+        };
+
         this.init();
     }
-    
+
     init() {
-        // Create notification containers
         const positions = [
             { id: 'notif-center', class: 'notification-container-center' },
             { id: 'notif-right', class: 'notification-container-right' },
             { id: 'notif-left', class: 'notification-container-left' }
         ];
-        
+
         positions.forEach(pos => {
-            let container = document.createElement('div');
-            container.id = pos.id;
+            let container = document.getElementById(pos.id);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = pos.id;
+                document.body.appendChild(container);
+            }
             container.className = pos.class;
-            document.body.appendChild(container);
         });
     }
-    
-    show(type, msg, duration, textColor, bgColor) {
-        const containerId = type === 'center' ? 'notif-center' : 
-                           type === 'right' ? 'notif-right' : 'notif-left';
+
+    normalizeTemplate(value) {
+        const key = String(value || 'major')
+            .trim()
+            .toLowerCase()
+            .replace(/[-\s]+/g, '_');
+        return this.aliases[key] || 'major';
+    }
+
+    escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    cssColor(value, fallback) {
+        return value === undefined || value === null || value === '' ? fallback : String(value);
+    }
+
+    rgba(color, alpha = 0.92) {
+        const value = String(color || '').trim();
+        if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return value;
+
+        let hex = value.slice(1);
+        if (hex.length === 3) {
+            hex = hex.split('').map(char => char + char).join('');
+        }
+
+        const number = parseInt(hex, 16);
+        return `rgba(${(number >> 16) & 255},${(number >> 8) & 255},${number & 255},${alpha})`;
+    }
+
+    numberOption(value, fallback, divisor = 1) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed / divisor : fallback;
+    }
+
+    boolOption(value, fallback) {
+        if (value === undefined || value === null) return fallback;
+        if (typeof value === 'string') {
+            return !['false', '0', 'no', 'off'].includes(value.toLowerCase());
+        }
+        return Boolean(value);
+    }
+
+    normalizePayload(data = {}) {
+        const params = data.params || data.options || data.payload || {};
+        const source = Object.assign({}, data, params);
+        const template = this.normalizeTemplate(source.notification_type || source.type || source.template);
+        const base = this.defaults[template];
+
+        const resolved = Object.assign({}, base, {
+            template,
+            title: source.title ?? source.amount_text ?? source.message ?? source.msg ?? source.text ?? base.title,
+            body: source.body ?? source.subtitle ?? source.content ?? base.body,
+            kicker: source.kicker ?? source.label ?? base.kicker,
+            icon: source.icon ?? source.glyph ?? base.icon,
+            bg: this.cssColor(source.bg ?? source.background ?? source.bg_color ?? source.background_color, base.bg),
+            fg: this.cssColor(source.fg ?? source.color ?? source.text_color ?? source.textColor, base.fg),
+            accent: this.cssColor(source.accent ?? source.accent_color, base.accent),
+            kickerColor: this.cssColor(source.kicker_color ?? source.kickerColor, base.kickerColor || base.accent),
+            titleSize: this.numberOption(source.title_size ?? source.titleSize, base.titleSize),
+            bodySize: this.numberOption(source.body_size ?? source.bodySize, base.bodySize),
+            duration: this.numberOption(source.duration ?? source.ms, base.duration),
+            showProgress: this.boolOption(source.show_progress ?? source.showProgress ?? source.progress, base.showProgress),
+            showSubtitleTitle: this.boolOption(source.show_subtitle_title ?? source.showSubtitleTitle, base.showSubtitleTitle),
+            tickWidth: this.numberOption(source.tick_width ?? source.tickWidth, base.tickWidth),
+            tickHeight: this.numberOption(source.tick_height ?? source.tickHeight, base.tickHeight),
+            tickFont: this.numberOption(source.tick_font ?? source.tickFont ?? source.tick_font_size ?? source.tickFontSize, base.tickFont)
+        });
+
+        if (template === 'dossier') {
+            const requestedSide = String(source.side || source.position || source.placement || base.placement).toLowerCase();
+            resolved.placement = requestedSide === 'right' ? 'right' : 'left';
+        } else if (template === 'resource') {
+            resolved.placement = 'right';
+        } else {
+            resolved.placement = 'center';
+        }
+
+        resolved.duration = Math.max(500, resolved.duration || base.duration);
+        return resolved;
+    }
+
+    skinStyle(options) {
+        const bg = this.rgba(options.bg, 0.92);
+        const edge = this.rgba(options.accent, 0.28);
+        return [
+            `--bg:${bg}`,
+            `--fg:${options.fg}`,
+            `--accent:${options.accent}`,
+            `--kicker-color:${options.kickerColor}`,
+            `--edge:${edge}`,
+            `--title-size:${options.titleSize}rem`,
+            `--body-size:${options.bodySize}rem`,
+            `--tick-width:${options.tickWidth || 238}px`,
+            `--tick-height:${options.tickHeight || 46}px`,
+            `--tick-font:${options.tickFont || 1}rem`
+        ].join(';');
+    }
+
+    renderNotification(options) {
+        const kicker = options.kicker ? `<div class="hn-kicker">${this.escapeHtml(options.kicker)}</div>` : '';
+        const title = options.title ? `<div class="hn-title">${this.escapeHtml(options.title)}</div>` : '';
+        const body = options.body ? `<div class="hn-body">${this.escapeHtml(options.body)}</div>` : '';
+        const icon = `<div class="hn-iconbox">${this.escapeHtml(options.icon || '!')}</div>`;
+        const style = this.skinStyle(options);
+
+        if (options.template === 'emergency') {
+            return `
+                <div class="hn-skin hn-emergency-banner" style="${style}">
+                    <div class="hn-emergency-inner">
+                        <div class="hn-emergency-icon">${this.escapeHtml(options.icon || '!')}</div>
+                        ${title}${body}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (options.template === 'major') {
+            const progress = options.showProgress ? `<div class="hn-progress-line"><span style="animation:hn-shrink ${options.duration}ms linear forwards;"></span></div>` : '';
+            return `
+                <div class="hn-skin hn-major-ribbon hn-cornered" style="${style}">
+                    <span class="hn-side-flare hn-side-flare-left"></span>
+                    <span class="hn-side-flare hn-side-flare-right"></span>
+                    <div class="hn-ribbon-row">
+                        ${icon}
+                        <div class="hn-ribbon-text">${kicker}${title}${body}${progress}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (options.template === 'dossier') {
+            const label = this.escapeHtml(options.kicker || 'Military Report');
+            return `
+                <div class="hn-skin hn-dossier hn-cornered" style="${style}">
+                    <span class="hn-label">${label}</span>
+                    ${title}${body}
+                </div>
+            `;
+        }
+
+        if (options.template === 'sigil') {
+            return `
+                <div class="hn-skin hn-sigil hn-cornered" style="${style}">
+                    <div class="hn-sigil-mark">${this.escapeHtml(options.icon || '✦')}</div>
+                    ${kicker}${title}${body}
+                </div>
+            `;
+        }
+
+        if (options.template === 'resource') {
+            return `
+                <div class="hn-skin hn-resource" style="${style}">
+                    <div class="hn-amount">${this.escapeHtml(options.title)}</div>
+                </div>
+            `;
+        }
+
+        if (options.template === 'subtitle') {
+            return `
+                <div class="hn-skin hn-subtitle-bar" style="${style}">
+                    ${options.showSubtitleTitle === false ? '' : title}
+                    ${body}
+                </div>
+            `;
+        }
+
+        if (options.template === 'elimination') {
+            return `
+                <div class="hn-skin hn-elimination hn-cornered" style="${style}">
+                    ${kicker}${title}${body}
+                    <div class="hn-player-pill"><span class="hn-player-dot"></span>Player removed from active play</div>
+                </div>
+            `;
+        }
+
+        return `<div class="hn-skin hn-dossier hn-cornered" style="${style}">${title || body}</div>`;
+    }
+
+    showCustom(data = {}) {
+        const options = this.normalizePayload(data);
+        const type = options.placement;
+        const containerId = type === 'center' ? 'notif-center' : type === 'right' ? 'notif-right' : 'notif-left';
         const container = document.getElementById(containerId);
-        
-        // Create notification element
+
+        if (!container) return null;
+
         const notif = document.createElement('div');
-        notif.className = `notification notification-${type}`;
-        
-        // Apply styles directly to avoid CSS override issues
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'notification-content';
-        contentDiv.textContent = msg;
-        
-        // Set colors with !important via style property
-        contentDiv.style.cssText = `
-            background: ${bgColor} !important;
-            color: ${textColor} !important;
-        `;
-        
-        notif.appendChild(contentDiv);
-        
-        // Start above the viewport for slide-down effect
-        notif.style.transform = 'translateY(-100px)';
+        notif.className = `hegemony-notification hegemony-notification-${type} hegemony-notification-${options.template}`;
+        notif.innerHTML = this.renderNotification(options);
+        notif.style.transform = 'translateY(-12px) scale(0.985)';
         notif.style.opacity = '0';
-        
-        // Add to container at the beginning (so new ones appear on top)
+
         container.insertBefore(notif, container.firstChild);
         this.notifications[type].unshift(notif);
-        
-        // Force reflow
+
         notif.offsetHeight;
-        
-        // Update stacking
         this.updateStack(type);
-        
-        // Trigger slide-in animation
+
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                notif.classList.add('show');
-            });
+            notif.classList.add('show');
+            this.updateStack(type);
         });
-        
-        // Auto-remove after duration
+
         setTimeout(() => {
             this.remove(type, notif);
-        }, duration);
+        }, options.duration);
+
+        return notif;
     }
-    
+
+    show(type, msg, duration, textColor, bgColor) {
+        const legacyTemplate = type === 'right' ? 'resource' : type === 'left' ? 'dossier' : 'major';
+        this.showCustom({
+            template: legacyTemplate,
+            position: type,
+            title: msg,
+            body: '',
+            duration,
+            text_color: textColor,
+            bg_color: bgColor
+        });
+    }
+
     updateStack(type) {
         const notifs = this.notifications[type];
         notifs.forEach((notif, index) => {
             if (index === 0) {
-                // Top notification - fully visible
                 notif.style.transform = 'translateY(0) scale(1)';
                 notif.style.opacity = '1';
                 notif.style.zIndex = '1001';
             } else {
-                // Stacked notifications - slightly offset and scaled down
-                const offset = index * 8;
-                const scale = 1 - index * 0.05;
+                const offset = index * 10;
+                const scale = Math.max(0.86, 1 - index * 0.045);
                 notif.style.transform = `translateY(${offset}px) scale(${scale})`;
-                notif.style.opacity = '0.7';
+                notif.style.opacity = String(Math.max(0.45, 0.76 - index * 0.12));
                 notif.style.zIndex = `${1001 - index}`;
             }
         });
     }
-    
+
     remove(type, notif) {
+        if (!notif) return;
         notif.classList.remove('show');
         notif.classList.add('hide');
-        
+
         setTimeout(() => {
-            const container = document.getElementById(
-                type === 'center' ? 'notif-center' : 
-                type === 'right' ? 'notif-right' : 'notif-left'
-            );
-            container.removeChild(notif);
-            
-            // Remove from tracking array
+            if (notif.parentNode) {
+                notif.parentNode.removeChild(notif);
+            }
+
             const index = this.notifications[type].indexOf(notif);
             if (index > -1) {
                 this.notifications[type].splice(index, 1);
             }
-            
-            // Update remaining stack
+
             this.updateStack(type);
-        }, 300);
+        }, 220);
     }
 }
 
@@ -1612,6 +1915,20 @@ socket.on('show_notification_left', function(data) {
         data.text_color || '#ffffff',
         data.bg_color || 'rgba(168, 85, 247, 0.9)'
     );
+});
+
+// Custom notification design set socket handlers.
+// Payload example: { type: 'major_ribbon', title: 'Doctrine Activated', body: '...', duration: 3600 }
+socket.on('show_hegemony_notification', function(data) {
+    notificationManager.showCustom(data || {});
+});
+
+socket.on('show_tactical_notification', function(data) {
+    notificationManager.showCustom(data || {});
+});
+
+socket.on('show_custom_notification', function(data) {
+    notificationManager.showCustom(data || {});
 });
 
 // Narration layer sockets. These are separate from the old notification system.

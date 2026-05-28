@@ -1824,12 +1824,16 @@ html, body {
 /* Notification Containers */
 .notification-container-center {
     position: fixed;
-    top: 20%;
+    top: 18vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1001;
     pointer-events: none;
-    width: 35vw;
+    width: min(780px, 78vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
 }
 
 .notification-container-right {
@@ -1838,7 +1842,11 @@ html, body {
     right: 18vw;
     z-index: 1001;
     pointer-events: none;
-    width: 16vw;
+    width: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
 }
 
 .notification-container-left {
@@ -1847,140 +1855,473 @@ html, body {
     left: 18vw;
     z-index: 1001;
     pointer-events: none;
-    width: 16vw;
+    width: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
 }
 
-/* Notification Base */
-.notification {
-    transition: all 0.3s ease-out;
-    margin-bottom: 0.5rem;
-    pointer-events: none;
-}
-
-.notification.show {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-}
-
-.notification.hide {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.9);
-    transition: all 0.3s ease-out;
-}
-
-/* Notification Content - Tactical HUD Style */
-.notification-content {
-    padding: 0.75rem 1.25rem;
-    border-radius: 4px;
-    border: 2px solid rgba(255, 255, 255, 0.4); 
-    backdrop-filter: blur(8px);
-    box-shadow: 
-        0 0 20px rgba(0, 0, 0, 0.4);
-        /* inset 0 0 10px rgba(0, 0, 0, 0.3); */
-    text-align: center;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
+.hegemony-notification {
     position: relative;
+    width: 100%;
+    pointer-events: none;
+    transition: transform 0.22s ease-out, opacity 0.22s ease-out;
+    transform-origin: top center;
+}
+
+.hegemony-notification.show {
+    opacity: 1 !important;
+}
+
+.hegemony-notification.hide {
+    opacity: 0 !important;
+    transform: translateY(-20px) scale(0.96) !important;
+}
+
+.hn-skin {
+    --bg: rgba(30, 41, 59, 0.95);
+    --fg: #ffffff;
+    --accent: rgba(255, 255, 255, 0.86);
+    --kicker-color: color-mix(in srgb, var(--fg) 76%, white);
+    --edge: rgba(255, 255, 255, 0.2);
+    --title-size: 1.42rem;
+    --body-size: 0.94rem;
+    --tick-width: 238px;
+    --tick-height: 46px;
+    --tick-font: 1rem;
+    position: relative;
+    width: 100%;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--edge);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.hn-kicker {
+    color: var(--kicker-color, color-mix(in srgb, var(--fg) 76%, white));
+    margin-bottom: 6px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.20em;
     text-transform: uppercase;
 }
 
-/* Corner brackets - tactical style */
-.notification-content::before {
+.hn-title {
+    margin: 0 0 4px;
+    font-size: var(--title-size);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+}
+
+.hn-body {
+    color: color-mix(in srgb, var(--fg) 90%, white);
+    font-size: var(--body-size);
+    font-weight: 600;
+    line-height: 1.34;
+}
+
+.hn-iconbox {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 39px;
+    height: 39px;
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.hn-cornered::before,
+.hn-cornered::after {
     content: '';
     position: absolute;
-    top: -2px;
-    left: -2px;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.7); 
-    border-right: none;
-    border-bottom: none;
+    width: 17px;
+    height: 17px;
+    border-color: color-mix(in srgb, var(--accent) 72%, transparent);
+    border-style: solid;
+    opacity: 0.95;
+    pointer-events: none;
 }
 
-.notification-content::after {
+.hn-cornered::before {
+    left: 7px;
+    top: 7px;
+    border-width: 2px 0 0 2px;
+}
+
+.hn-cornered::after {
+    right: 7px;
+    bottom: 7px;
+    border-width: 0 2px 2px 0;
+}
+
+.hn-emergency-banner {
+    width: 100%;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 28%, transparent), 0 18px 40px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, white 8%), var(--bg)), repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.10) 0 1px, transparent 1px 4px);
+    clip-path: polygon(0 50%, 3.4% 0, 96.6% 0, 100% 50%, 96.6% 100%, 3.4% 100%);
+}
+
+.hn-emergency-banner::before,
+.hn-emergency-banner::after {
     content: '';
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.7); 
-    border-left: none;
-    border-top: none;
+    top: 0;
+    bottom: 0;
+    width: 116px;
+    opacity: 0.38;
+    background: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.52) 0 10px, transparent 10px 20px);
+    pointer-events: none;
 }
 
-/* Scan line effect */
-.notification-content {
-    background-image: 
-        repeating-linear-gradient(
-            0deg,
-            rgba(0, 0, 0, 0.15) 0px,
-            transparent 1px,
-            transparent 2px,
-            rgba(0, 0, 0, 0.15) 3px
-        );
+.hn-emergency-banner::before {
+    left: 0;
+    clip-path: polygon(0 50%, 36% 0, 100% 0, 64% 50%, 100% 100%, 36% 100%);
 }
 
-/* Center notification - larger */
-.notification-center .notification-content {
-    font-size: 1.25rem;
-    padding: 1rem 1.75rem;
-    letter-spacing: 0.1em;
+.hn-emergency-banner::after {
+    right: 0;
+    transform: scaleX(-1);
+    clip-path: polygon(0 50%, 36% 0, 100% 0, 64% 50%, 100% 100%, 36% 100%);
 }
 
-/* Side notifications - compact and closer to center */
-.notification-right .notification-content,
-.notification-left .notification-content {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
-    letter-spacing: 0.03em;
+.hn-emergency-inner {
+    position: relative;
+    padding: 13px 118px 14px;
+    text-align: center;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
 }
 
-/* Hover effect to reveal stack */
-.notification-container-center:hover .notification,
-.notification-container-right:hover .notification,
-.notification-container-left:hover .notification {
-    opacity: 1 !important;
-    transform: translateY(0) scale(1) !important;
-    margin-bottom: 0.75rem;
+.hn-emergency-icon {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 34px;
+    margin: -3px auto 2px;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    color: var(--fg);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    font-size: 1.55rem;
+    font-weight: 800;
 }
 
-/* Pulse glow animation */
-.notification-content {
-    animation: tactical-pulse 2s ease-in-out infinite;
+.hn-emergency-banner .hn-title {
+    margin: 0;
+    font-size: calc(var(--title-size) + 0.58rem);
+    letter-spacing: 0.04em;
 }
 
-@keyframes tactical-pulse {
-    0%, 100% {
-        box-shadow: 
-            0 0 20px rgba(0, 0, 0, 0.4);
-            /* inset 0 0 10px rgba(0, 0, 0, 0.3); */
+.hn-emergency-banner .hn-body {
+    margin-top: 7px;
+    font-size: calc(var(--body-size) + 0.14rem);
+    font-weight: 800;
+}
+
+.hn-major-ribbon {
+    padding: 15px 18px 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, white 20%), color-mix(in srgb, var(--bg) 84%, black 4%)), linear-gradient(90deg, color-mix(in srgb, var(--accent) 26%, transparent), transparent 30%, transparent 70%, color-mix(in srgb, var(--accent) 18%, transparent)), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.10) 0 2px, transparent 2px 4px);
+    border-top: 1px solid color-mix(in srgb, var(--accent) 68%, white 8%);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 36%, black 20%);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 22%, transparent), 0 16px 38px rgba(0, 0, 0, 0.34), inset 0 0 22px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.hn-major-ribbon::before,
+.hn-major-ribbon::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    height: 1px;
+    border: 0;
+    background: linear-gradient(90deg, transparent, var(--accent), rgba(255, 255, 255, 0.38), var(--accent), transparent);
+    opacity: 0.82;
+}
+
+.hn-major-ribbon::before { top: 7px; }
+.hn-major-ribbon::after { bottom: 7px; }
+
+.hn-side-flare {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 54px;
+    opacity: 0.22;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    pointer-events: none;
+}
+
+.hn-side-flare-left { left: 0; }
+.hn-side-flare-right { right: 0; transform: scaleX(-1); }
+
+.hn-ribbon-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.hn-ribbon-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.hn-major-ribbon .hn-title {
+    font-size: var(--title-size);
+    margin-bottom: 2px;
+}
+
+.hn-major-ribbon .hn-body {
+    font-size: var(--body-size);
+    font-weight: 700;
+}
+
+.hn-major-ribbon .hn-kicker {
+    color: var(--kicker-color, var(--accent));
+}
+
+.hn-major-ribbon .hn-iconbox {
+    background: rgba(255, 255, 255, 0.13);
+    border-color: color-mix(in srgb, var(--accent) 35%, white 8%);
+}
+
+.hn-progress-line {
+    margin-top: 10px;
+    height: 3px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+}
+
+.hn-progress-line > span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    background: linear-gradient(90deg, transparent, var(--accent), rgba(255, 255, 255, 0.30));
+}
+
+@keyframes hn-shrink {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+.hn-dossier {
+    padding: 12px 13px 12px 16px;
+    backdrop-filter: blur(10px);
+    border-left: 5px solid var(--accent);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 18%, transparent), 0 18px 44px rgba(0, 0, 0, 0.32);
+}
+
+.hn-dossier .hn-label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--kicker-color, var(--accent));
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.hn-dossier .hn-title,
+.hn-sigil .hn-title {
+    font-size: calc(var(--title-size) - 0.35rem);
+}
+
+.hn-dossier .hn-body,
+.hn-sigil .hn-body {
+    font-size: calc(var(--body-size) - 0.06rem);
+}
+
+.hn-sigil {
+    padding: 13px 15px 13px 56px;
+    backdrop-filter: blur(10px);
+    background-image: radial-gradient(circle at 28px 50%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 32px), linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 46%);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 24%, transparent), 0 18px 44px rgba(0, 0, 0, 0.32);
+}
+
+.hn-sigil-mark {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--accent) 88%, white 10%);
+    color: var(--accent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 55%, transparent);
+    font-weight: 800;
+}
+
+.hn-resource {
+    width: var(--tick-width);
+    min-width: var(--tick-width);
+    max-width: var(--tick-width);
+    height: var(--tick-height);
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    text-align: center;
+    border-radius: 5px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, white 5%), color-mix(in srgb, var(--bg) 98%, black 0.5%)), linear-gradient(90deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent 32%, transparent 68%, color-mix(in srgb, var(--accent) 12%, transparent));
+    border: 1px solid color-mix(in srgb, var(--accent) 56%, white 8%);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14), inset 0 0 8px color-mix(in srgb, var(--accent) 5%, transparent);
+    opacity: 0.98;
+}
+
+.hn-resource::before,
+.hn-resource::after {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-color: color-mix(in srgb, var(--accent) 82%, white 8%);
+    border-style: solid;
+    pointer-events: none;
+    opacity: 0.94;
+}
+
+.hn-resource::before {
+    left: 7px;
+    top: 7px;
+    border-width: 2px 0 0 2px;
+}
+
+.hn-resource::after {
+    right: 7px;
+    bottom: 7px;
+    border-width: 0 2px 2px 0;
+}
+
+.hn-resource .hn-amount {
+    position: relative;
+    z-index: 1;
+    font-size: var(--tick-font);
+    font-weight: 600;
+    letter-spacing: 0.028em;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0.99;
+    text-shadow: none;
+}
+
+.hn-subtitle-bar {
+    padding: 12px 54px;
+    backdrop-filter: blur(8px);
+    text-align: center;
+    border-top: 1px solid color-mix(in srgb, var(--accent) 60%, white 8%);
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 34%, black 20%);
+    border-left-color: transparent;
+    border-right-color: transparent;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 10%, color-mix(in srgb, var(--bg) 92%, white 10%) 50%, color-mix(in srgb, var(--bg) 82%, transparent) 90%, rgba(255, 255, 255, 0) 100%), linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 24%, transparent), transparent);
+    mask-image: linear-gradient(90deg, transparent 0%, black 11%, black 89%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 11%, black 89%, transparent 100%);
+    box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.hn-subtitle-bar::before,
+.hn-subtitle-bar::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    width: 180px;
+    pointer-events: none;
+}
+
+.hn-subtitle-bar::before {
+    left: -12px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), color-mix(in srgb, var(--accent) 48%, transparent), rgba(255, 255, 255, 0));
+}
+
+.hn-subtitle-bar::after {
+    right: -12px;
+    background: linear-gradient(270deg, rgba(255, 255, 255, 0), color-mix(in srgb, var(--accent) 48%, transparent), rgba(255, 255, 255, 0));
+}
+
+.hn-subtitle-bar .hn-title {
+    margin: 0 0 3px;
+    font-size: var(--title-size);
+    letter-spacing: 0.2em;
+    color: var(--kicker-color, color-mix(in srgb, var(--accent) 86%, white));
+    text-shadow: 0 0 10px color-mix(in srgb, var(--accent) 44%, transparent);
+}
+
+.hn-subtitle-bar .hn-body {
+    position: relative;
+    z-index: 1;
+    color: var(--fg);
+    font-size: var(--body-size);
+    font-weight: 800;
+    text-shadow: 0 0 12px rgba(0, 0, 0, 0.28);
+}
+
+.hn-elimination {
+    padding: 16px 16px 14px;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid color-mix(in srgb, var(--accent) 38%, white 14%);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 38%);
+    overflow: hidden;
+}
+
+.hn-elimination .hn-title {
+    font-size: var(--title-size);
+}
+
+.hn-player-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.hn-player-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+@media (max-width: 780px) {
+    .notification-container-center {
+        width: 88vw;
     }
-    50% {
-        box-shadow: 
-            0 0 25px rgba(0, 0, 0, 0.5);
-            /* inset 0 0 15px rgba(0, 0, 0, 0.4); */
+
+    .notification-container-left,
+    .notification-container-right {
+        width: min(86vw, 330px);
+    }
+
+    .hn-emergency-inner {
+        padding: 12px 64px;
+    }
+
+    .hn-emergency-banner .hn-title {
+        font-size: 1.55rem;
     }
 }
-
-/* Add top corners for center notifications */
-.notification-center .notification-content::before {
-    top: -2px;
-    left: -2px;
-}
-
-.notification-center .notification-content::after {
-    bottom: -2px;
-    right: -2px;
-}
-
-
-
-
-
-
 
 /* Game Over Screen Styles */
 
