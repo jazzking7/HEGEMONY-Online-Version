@@ -214,7 +214,9 @@ class Game_State_Manager:
             "Turtle Shield": "+15% Nullification Rate to all defenders."
         }
 
+        # DOCTRINES
         self.applied_doctrine = None
+        self.applied_doctrine_desp = None
         
         self.peaceFirst = False
         self.inflation = False
@@ -227,112 +229,122 @@ class Game_State_Manager:
     def apply_doctrine(self, doctrine):
         if not self.applied_doctrine:
             self.applied_doctrine = doctrine
+
+            def emit_and_return(name, description):
+                self.server.emit(
+                    'update_doctrine_info',
+                    {
+                        'name': name,
+                        'description': description
+                    },
+                    room=self.lobby
+                )
+                self.applied_doctrine_desp = description
+                return description
+
             if doctrine == "Peace Above All":
                 self.peaceFirst = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, not making any conquests max out your chance of getting more stars. The more territories you conquer, the less star you will receive."},
-                                     room=self.lobby)
-                return
+                description = (
+                    "In this Round, not making any conquests max out your chance "
+                    "of getting more stars. The more territories you conquer, "
+                    "the less star you will receive."
+                )
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Prosperity of the Saints":
                 self.copro = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, C-class Agenda holders each receives 1☆ extra at the end of their turn."},
-                                     room=self.lobby)
-                return
+                description = (
+                    "In this Round, C-class Agenda holders each receives 1☆ extra "
+                    "at the end of their turn."
+                )
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Self-Preservation: Authority":
                 self.players[self.SUP].stars += 1
                 self.update_private_status(self.SUP)
                 self.server.emit('show_notification_right', {
-                                'message': f'+ 1☆',
-                                'duration': 3000,
-                                "text_color": "#B45309", "bg_color": "#FDE68A"
-                            }, room=self.SUP)
-                self.server.emit('update_doctrine_info', 
-                                 {'name': "Self-Preservation",
-                                   'description': f"{self.players[self.SUP].name} chose to give themselves 1☆."},
-                                     room=self.lobby)
-                return
+                    'message': '+ 1☆',
+                    'duration': 3000,
+                    "text_color": "#B45309",
+                    "bg_color": "#FDE68A"
+                }, room=self.SUP)
+
+                description = f"{self.players[self.SUP].name} chose to give themselves 1☆."
+                return emit_and_return("Self-Preservation", description)
+
             elif doctrine == "Self-Preservation: Population":
                 self.players[self.SUP].reserves += 7
                 self.update_private_status(self.SUP)
                 self.server.emit('show_notification_right', {
-                                'message': f'+7 Reserves',
-                                'duration': 3000,
-                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
-                            }, room=self.SUP)
-                self.server.emit('update_doctrine_info', 
-                                 {'name': "Self-Preservation",
-                                   'description': f"{self.players[self.SUP].name} chose to give themselves 7 Reserves."},
-                                     room=self.lobby)
-                return
+                    'message': '+7 Reserves',
+                    'duration': 3000,
+                    "text_color": "#1E40AF",
+                    "bg_color": "#BFDBFE"
+                }, room=self.SUP)
+
+                description = f"{self.players[self.SUP].name} chose to give themselves 7 Reserves."
+                return emit_and_return("Self-Preservation", description)
+
             elif doctrine == "War Art Suspension":
                 self.suspension = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, nobody can activate their War Art."},
-                                     room=self.lobby)
-                return
+                description = "In this Round, nobody can activate their War Art."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Continental Embargo":
                 self.embargo = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, nobody can receive Continental Bonus."},
-                                     room=self.lobby)
-                return
+                description = "In this Round, nobody can receive Continental Bonus."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Philanthropist":
                 weakest = self.SUP
                 min_PPI = self.players[self.SUP].PPI
+
                 for player in self.players:
                     if self.players[player].PPI < min_PPI:
                         min_PPI = self.players[player].PPI
                         weakest = player
+
                 self.players[weakest].stars += 1
                 self.server.emit('show_notification_right', {
-                                'message': f'+ 1☆',
-                                'duration': 3000,
-                                "text_color": "#B45309", "bg_color": "#FDE68A"
-                            }, room=weakest)
+                    'message': '+ 1☆',
+                    'duration': 3000,
+                    "text_color": "#B45309",
+                    "bg_color": "#FDE68A"
+                }, room=weakest)
+
                 self.players[weakest].reserves += 7
                 self.server.emit('show_notification_right', {
-                                'message': '+7 Reserves',
-                                'duration': 3000,
-                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
-                            }, room=weakest)
+                    'message': '+7 Reserves',
+                    'duration': 3000,
+                    "text_color": "#1E40AF",
+                    "bg_color": "#BFDBFE"
+                }, room=weakest)
+
                 self.update_private_status(weakest)
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"{self.players[weakest].name} has received 1☆ and 7 Reserves."},
-                                     room=self.lobby)
-                return
+
+                description = f"{self.players[weakest].name} has received 1☆ and 7 Reserves."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Hyperinflation":
                 self.inflation = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, everything cost 1☆ extra."},
-                                     room=self.lobby)
-                return
+                description = "In this Round, everything cost 1☆ extra."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Stability":
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"No special effect, everything proceeds as normal."},
-                                     room=self.lobby)
-                return
+                description = "No special effect, everything proceeds as normal."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Anarchy":
                 self.anarchy = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, all attackers get +1 Damage Multiplier."},
-                                     room=self.lobby)
-                return
+                description = "In this Round, all attackers get +1 Damage Multiplier."
+                return emit_and_return(doctrine, description)
+
             elif doctrine == "Turtle Shield":
                 self.turtle = True
-                self.server.emit('update_doctrine_info', 
-                                 {'name': doctrine,
-                                   'description': f"In this Round, all defenders get +15% Nullification Rate."},
-                                     room=self.lobby)
-                return
+                description = "In this Round, all defenders get +15% Nullification Rate."
+                return emit_and_return(doctrine, description)
+
+        return None
             
     def init_land_exploration(self,):
         total = len(self.map.tnames) // 5
@@ -481,11 +493,17 @@ class Game_State_Manager:
                     'renewed_targets': targets,
                     })  
                     mission.check_conditions()
-        self.server.emit('show_notification_center', {
-                    'message': f'Player {self.players[new_pid].name} connected back to server!',
+        self.server.emit('show_hegemony_notification', {
+                    'type': 'major_ribbon',
+                    'kicker': '',
+                    'title': 'Player Reconnected',
+                    'body': f'Player {self.players[new_pid].name} connected back to the server!',
+                    'icon': '◯',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=self.lobby) 
+                    'accent': '#15803d',
+                    'text_color': '#15803d',
+                    'bg_color': '#bbf7d0'
+                }, room=self.lobby)
         self.players[new_pid].connected = True if not self.players[new_pid].connected else False
         return True
     
@@ -809,11 +827,17 @@ class Game_State_Manager:
             self.players[player].stars -= amt
             self.update_private_status(player)
         else:
-            self.server.emit('show_notification_center', {
-                    'message': f'Cannot use your special authority!',
+            self.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your special authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=player) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=player)
 
     def get_total_troops_of_player(self, player):
         player = self.players[player]
@@ -882,11 +906,17 @@ class Game_State_Manager:
                 if self.players[player].skill.name != 'Arsenal of the Underworld' and self.players[player].skill.active:
                     self.players[player].skill.in_turn_update()
         else:
-            self.server.emit('show_notification_center', {
-                    'message': f'Cannot use your special authority!',
+            self.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your special authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=player) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=player)
 
     # Collusion
     def in_secret_control(self, trty_number, player_id):
@@ -1266,11 +1296,17 @@ class Game_State_Manager:
 
         # Cancel Attack if attacker territory is locked
         if trty_atk.refuseCommand and trty_atk.refuseCommand != a_pid:
-            self.server.emit('show_notification_center', {
-                    'message': f'Unable to command troops in {trty_atk.name}',
+            self.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': f'Unable to command troops in {trty_atk.name}',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=a_pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=a_pid)
             return
 
         # Compute participating forces

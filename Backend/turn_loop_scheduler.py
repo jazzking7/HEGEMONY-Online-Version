@@ -379,10 +379,16 @@ class turn_loop_scheduler:
                             "text_color": "#000000", "bg_color": "#6987D5"
                         }, room=player)
                     gs.server.emit("playSFX", {"sfx": "blessing"}, room=player)
-                    gs.server.emit('show_notification_center', {
-                        'message': 'YOU HAVE RECEIVED LEYLINE BLESSINGS',
+                    gs.server.emit('show_hegemony_notification', {
+                        'type': 'major_ribbon',
+                        'kicker': 'Leyline Effect',
+                        'title': 'You have received leyline blessings',
+                        'body': '',
+                        'icon': '+',
                         'duration': 3000,
-                        "text_color": "#000000", "bg_color": "#6987D5"
+                        'accent': '#6987D5',
+                        'text_color': '#000000',
+                        'bg_color': '#6987D5'
                     }, room=player)
                     gs.server.sleep(1)
 
@@ -974,17 +980,29 @@ class turn_loop_scheduler:
                     if gs.in_ice_age:
                         if turnIceOn:
                             gs.server.emit('ice_age_on', {}, room=gs.lobby)
-                        gs.server.emit('show_notification_center', {
-                                'message': f'ICE AGE ONGOING, NUMBER OF ROUNDS LEFT: {gs.in_ice_age}',
-                                'duration': 5000,
-                                "text_color": "#FAFEFF", "bg_color": "#3F7EB3"
-                            }, room=gs.lobby)
+                        gs.server.emit('show_hegemony_notification', {
+                            'type': 'narrative_subtitle',
+                            'kicker': '',
+                            'title': 'World Condition Shift',
+                            'body': f'ONGOING ICE AGE ╎ NUMBER OF ROUNDS LEFT: {gs.in_ice_age}',
+                            'icon': '',
+                            'duration': 5000,
+                            'accent': '#3F7EB3',
+                            'text_color': '#FAFEFF',
+                            'bg_color': '#3F7EB3'
+                        }, room=gs.lobby)
                     else:
-                        gs.server.emit('show_notification_center', {
-                                'message': f'ICE AGE TERMINATED',
-                                'duration': 5000,
-                                "text_color": "#FAFEFF", "bg_color": "#3F7EB3"
-                            }, room=gs.lobby)
+                        gs.server.emit('show_hegemony_notification', {
+                            'type': 'narrative_subtitle',
+                            'kicker': '',
+                            'title': 'World Condition Shift',
+                            'body': 'ICE AGE TERMINATED',
+                            'icon': '',
+                            'duration': 5000,
+                            'accent': '#3F7EB3',
+                            'text_color': '#FAFEFF',
+                            'bg_color': '#3F7EB3'
+                        }, room=gs.lobby)
                         gs.server.emit('ice_age_off', {}, room=gs.lobby)
                  # nuclear deadzone kill troops
                 for index, t in enumerate(gs.map.territories):
@@ -1020,29 +1038,47 @@ class turn_loop_scheduler:
                         if ms.round == 3 and fl:
                             fl = False
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit('show_notification_center', {
-                                'message': 'PRESENCE OF LOYALISTS DETECTED! PROCEED WITH CAUTION!',
+                            gs.server.emit('show_hegemony_notification', {
+                                'type': 'emergency_banner',
+                                'kicker': '',
+                                'title': 'LOYALISTS DETECTED',
+                                'body': 'PRESENCE OF LOYALISTS DETECTED! PROCEED WITH CAUTION!',
+                                'icon': '!',
                                 'duration': 5000,
-                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                                'accent': '#F0AD4E',
+                                'text_color': '#D9534F',
+                                'bg_color': '#F0AD4E'
                             }, room=gs.lobby)
                             gs.server.sleep(5)
                     if miss.name == "Annihilator":
                         if ms.round == 2:
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit('show_notification_center', {
-                                'message': 'PRESENCE OF ANNIHILATOR DETECTED! HIGH RISK SITUATION!',
+                            gs.server.emit('show_hegemony_notification', {
+                                'type': 'emergency_banner',
+                                'kicker': '',
+                                'title': 'ANNIHILATOR DETECTED',
+                                'body': 'PRESENCE OF ANNIHILATOR DETECTED! HIGH RISK SITUATION!',
+                                'icon': '!',
                                 'duration': 5000,
-                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                                'accent': '#F0AD4E',
+                                'text_color': '#D9534F',
+                                'bg_color': '#F0AD4E'
                             }, room=gs.lobby)
                             gs.server.sleep(5)
                     if miss.name == "Survivalist":
                         if ms.round == 5 and fs:
                             fs = False
                             gs.server.emit('playSFX', {"sfx": "alarm"}, room=gs.lobby)
-                            gs.server.emit('show_notification_center', {
-                                'message': 'PRESENCE OF SURVIVALIST DETECTED! PROCEED WITH CAUTION!',
+                            gs.server.emit('show_hegemony_notification', {
+                                'type': 'emergency_banner',
+                                'kicker': '',
+                                'title': 'SURVIVALIST DETECTED',
+                                'body': 'PRESENCE OF SURVIVALIST DETECTED! PROCEED WITH CAUTION!',
+                                'icon': '!',
                                 'duration': 5000,
-                                "text_color": "#D9534F", "bg_color": "#F0AD4E"
+                                'accent': '#F0AD4E',
+                                'text_color': '#D9534F',
+                                'bg_color': '#F0AD4E'
                             }, room=gs.lobby)
                             gs.server.sleep(5)
                     if miss.name == "Bounty_Hunter" and 3 < ms.round <= 7:
@@ -1054,25 +1090,37 @@ class turn_loop_scheduler:
 
                             if should_report:
                                 gs.server.emit('playSFX', {"sfx": "alarm"}, room=bttarget)
-                                gs.server.emit('show_notification_center', {
-                                    'message': 'YOU ARE THE TARGET OF A BOUNTY-HUNTER!',
+                                gs.server.emit('show_hegemony_notification', {
+                                    'type': 'emergency_banner',
+                                    'kicker': '',
+                                    'title': 'KILLING INTENT DETECTED',
+                                    'body': 'YOU ARE THE TARGET OF A BOUNTY-HUNTER!',
+                                    'icon': '!',
                                     'duration': 5000,
-                                    "text_color": "#D9534F",
-                                    "bg_color": "#F0AD4E"
+                                    'accent': '#F0AD4E',
+                                    'text_color': '#D9534F',
+                                    'bg_color': '#F0AD4E'
                                 }, room=bttarget)
 
                                 miss.reported[bttarget] = True
                                     
                 if gs.doctrineOn and gs.applied_doctrine:
-                    gs.server.emit('show_notification_center', {
-                                'message': 'Doctrine is deactivated',
-                                'duration': 3000,
-                                "text_color": "#000000", "bg_color": "#6987D5"
-                            }, room=gs.lobby)
+                    gs.server.emit('show_hegemony_notification', {
+                    'type': 'major_ribbon',
+                    'kicker': 'Doctrine Effect',
+                    'title': f'Current Doctrine Deactivated',
+                    'body': '',
+                    'icon': '!',
+                    'duration': 3000,
+                    'accent': '#6987D5',
+                    'text_color': '#000000',
+                    'bg_color': '#6987D5'
+                    }, room=gs.lobby)
                     gs.server.emit('update_doctrine_info', 
                                      room=gs.lobby)
                     gs.server.sleep(3)
                     gs.applied_doctrine = None
+                    gs.applied_doctrine_desp = None
                     gs.peaceFirst = False
                     gs.inflation = False
                     gs.anarchy = False
