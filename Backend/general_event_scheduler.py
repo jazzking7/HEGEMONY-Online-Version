@@ -759,10 +759,17 @@ class General_Event_Scheduler:
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
             else:
-                self.gs.server.emit('show_notification_left', {
-                    'message': f'Cannot set up more than {player.skill.max_minefields} minefields!',
+                self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': f'Cannot set up more than {player.skill.max_minefields} minefields!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
     
     def build_silo(self, pid):
@@ -787,10 +794,17 @@ class General_Event_Scheduler:
                 self.gs.server.emit("change_click_event", {'event': None}, room=pid)
                 self.gs.server.emit("clear_view", room=pid)
             else:
-                self.gs.server.emit('show_notification_left', {
-                    'message': 'Cannot build more than 1 silo!',
+                self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': 'Cannot build more than 1 silo!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
 
     # TBH switch from concurr to innerasync
@@ -822,10 +836,17 @@ class General_Event_Scheduler:
             self.gs.server.emit("change_click_event", {'event': None}, room=pid)
             self.gs.server.emit("clear_view", room=pid)
         else:
-            self.gs.server.emit('show_notification_left', {
-                    'message': 'Launching operation has been sealed!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': 'Launching operation has been sealed!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
 
     # concurrent events 
@@ -863,10 +884,17 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
-            self.gs.server.emit('show_notification_left', {
-                    'message': 'Launching operation has been sealed!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': 'Launching operation has been sealed!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
     
     def launch_divine_strike(self, pid):
@@ -904,10 +932,17 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {'async': True, 'msg': "Launching operation cancelled..."}, room=pid)
         else:
-            self.gs.server.emit('show_notification_left', {
-                    'message': 'Launching operation has been sealed!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': 'Launching operation has been sealed!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
 
     def make_ransom_outturn(self, pid):
@@ -943,8 +978,15 @@ class General_Event_Scheduler:
             else:
                 self.gs.server.emit("set_new_announcement", {"async": True, 'msg': "Ransomware cancelled..."}, room=pid)
         else:
-            self.gs.server.emit('show_notification_left', {
-                    'message': 'Ransomeware has been sealed!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'kicker': 'Action Denied',
+                    'title': 'Ransomeware has been sealed!',
+                    'body': '',
+                    'side': 'left',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'kicker_color': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid) 
