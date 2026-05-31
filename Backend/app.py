@@ -245,7 +245,7 @@ def start_quick_game(data):
         'host': sid,
         'players': [sid],
         'game_started': False,
-        'minplayer': "5"
+        'minplayer': "4"
     }
 
     print(lobbies)
