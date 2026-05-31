@@ -67,11 +67,17 @@ def disconnect():
         # disconnect user
         gsm = lobby['gsm']
         gsm.players[sid].connected = False
-        gsm.server.emit('show_notification_center', {
-            'message': f'Player {gsm.players[sid].name} is disconnected.',
-            'duration': 3000,
-            "text_color": "#FECACA", "bg_color": "#991B1B"
-        }, room=gsm.lobby)
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'major_ribbon',
+                    'kicker': '',
+                    'title': 'Player Disconnected',
+                    'body': f'Player {gsm.players[sid].name} is disconnected from the server!',
+                    'icon': 'X',
+                    'duration': 3000,
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=gsm.lobby)
 
 
     # remove sid from lobby own list of players NOT FROM GSM
@@ -239,7 +245,7 @@ def start_quick_game(data):
         'host': sid,
         'players': [sid],
         'game_started': False,
-        'minplayer': "4"
+        'minplayer': "5"
     }
 
     print(lobbies)
@@ -262,13 +268,13 @@ def start_quick_game(data):
 
     # TEMP START GAME SEQUENCE | FOR TESTING ONLY
     lobby['waitlist'] = []
-    lobby['map_name'] = "88world"
+    lobby['map_name'] = "88world" #"123Mega"
     player_list = [{'sid': pid, 'name': players[pid]['username']} for pid in lobby['players'] ]
     lobby['gsm'] = Game_State_Manager(lobby['map_name'], player_list, SES.get_event_scheduler(lobby['setup_mode']), time_settings, lobby['minplayer'], socketio, lobby_code)
     lobby['gsm'].Mdist = MDIS
     lobby['gsm'].egt = EGT
     lobby['gsm'].SDIS = SDIS
-    lobby['gsm'].complexity = "beginner"
+    lobby['gsm'].complexity = "beginner" #"pioneer"
     lobby['gsm'].doctrineOn = False
 
     socketio.emit('quick_game_started', room=lobby_code)
@@ -303,7 +309,7 @@ def startGame(data):
         int(data.get('power_set_time')),
         int(data.get('turn_time'))
     ]
-    lobby['setup_mode'] = "all_manuel"
+    lobby['setup_mode'] = "all_manuel" # "quicksetup" # "all_manuel"
     print(lobby)
     print(time_settings)
 
@@ -645,25 +651,43 @@ def settle_new_cities(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot settle cities during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot settle cities during ice age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot settle cities during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot settle cities during ice age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
 
@@ -700,25 +724,43 @@ def settle_bureau(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set bureau during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set bureau during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set bureau during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set bureau during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
 
@@ -752,25 +794,43 @@ def settle_leyline(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set leyline during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Leyline during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set leyline during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Leyline during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
 
@@ -805,25 +865,43 @@ def settle_nexus(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set nexus during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Nexus during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set nexus during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Nexus during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
 
@@ -856,25 +934,43 @@ def settle_new_halls(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set halls during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Hall during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set halls during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot set Hall during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)                
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)               
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
 
@@ -907,26 +1003,44 @@ def settle_new_forts(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set forts during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot build Forts during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)                
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)              
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot set forts during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot build Forts during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)    
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)    
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid) 
         return
 
     # CM
@@ -961,26 +1075,44 @@ def settle_new_megacities(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message': 'Cannot raise megacities during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot raise Megacity during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)  
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message': 'Cannot raise megacities during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot raise Megacity during Ice Age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
                 return
     
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot use your Special Authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
 
     # CM
@@ -1101,34 +1233,58 @@ def handle_rearrange_data(data):
     choices = data['choice']
     amount = int(data['amount'])
     if choices[0] not in gsm.players[pid].territories or choices[1] not in gsm.players[pid].territories:
-        socketio.emit('show_notification_center', {
-                'message': f'Invalid Transfer of troops',
-                'duration': 3000,
-                "text_color": "#FECACA", "bg_color": "#991B1B"
-            }, room=pid) 
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Invalid Transfer of troops!',
+                    'icon': 'X',
+                    'duration': 3000,
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
     t1 = gsm.map.territories[choices[0]]
     t2 = gsm.map.territories[choices[1]]
     if t1.refuseCommand and t1.refuseCommand != pid:
-        socketio.emit('show_notification_center', {
-                'message': f'Unable to move troops in {t1.name}',
-                'duration': 3000,
-                "text_color": "#FECACA", "bg_color": "#991B1B"
-            }, room=pid) 
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': f'Unable to move troops from {t1.name}',
+                    'icon': 'X',
+                    'duration': 3000,
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
     if t2.refuseCommand and t2.refuseCommand != pid:
-        socketio.emit('show_notification_center', {
-                'message': f'Unable to move troops in {t2.name}',
-                'duration': 3000,
-                "text_color": "#FECACA", "bg_color": "#991B1B"
-            }, room=pid) 
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': f'Unable to move troops to {t2.name}',
+                    'icon': 'X',
+                    'duration': 3000,
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
     if amount >= t1.troops:
-        socketio.emit('show_notification_center', {
-                'message': f'Invalid Transfer of troops',
-                'duration': 3000,
-                "text_color": "#FECACA", "bg_color": "#991B1B"
-            }, room=pid) 
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Invalid Transfer of troops!',
+                    'icon': 'X',
+                    'duration': 3000,
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
     t1.troops -= amount
     t2.troops += amount
@@ -1161,11 +1317,17 @@ def convert_reserves(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.convert_reserves(int(data['amt']), pid)
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot convert reserves outside of your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot convert reserves outside of your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('upgrade_infrastructure')
@@ -1175,11 +1337,17 @@ def upgrade_infrastructure(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.upgrade_infrastructure(int(data['amt']), pid)
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot upgrade infrastructure outside of your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot upgrade infrastructure outside of your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         socketio.emit('signal_show_btns', room=pid)
 
 @socketio.on('send_reserves_deployed')
@@ -1223,11 +1391,17 @@ def handle_summit_request():
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot launch summit outside of your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot launch Summit outside of your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
 
 @socketio.on('request_global_peace')
 def handle_global_peace_request():
@@ -1239,11 +1413,17 @@ def handle_global_peace_request():
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF GLOBAL PEACE PROPOSED!"} ,room=pid)
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot launch Global Ceasefire outside of your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot launch Global Ceasefire outside of your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
 
 @socketio.on('send_summit_choice')
 def handle_summit_choice(data):
@@ -1265,11 +1445,17 @@ def handle_async_event(data):
     if pid == gsm.pids[gsm.GES.current_player]:
         gsm.GES.handle_async_event(data, pid)
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot perform special operation outside of your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot perform special operation outside of your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         socketio.emit('signal_show_btns', room=pid)
 
 # EXIT POINT FOR INNER ASYNC EVENTS
@@ -1317,21 +1503,33 @@ def handle_skill_usage():
     pid = request.sid
     gsm = lobbies[players[pid]['lobby_id']]['gsm']
     if gsm.suspension:
-        socketio.emit('show_notification_center', {
-                    'message': 'War Art activation currently blocked by Doctrine!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'War Art activation currently blocked by Doctrine!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
         return
     if gsm.players[pid].skill:
         if pid == gsm.pids[gsm.GES.current_player] or gsm.players[pid].skill.out_of_turn_activation:
             gsm.players[pid].skill.activate_effect()
         else:
-            socketio.emit('show_notification_center', {
-                    'message': 'Cannot activate War Art outside your turn!',
+            socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot activate War Art outside your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
 
 @socketio.on('signal_skill_usage_with_data')
 def handle_skill_usage_with_data(data):
@@ -1342,11 +1540,17 @@ def handle_skill_usage_with_data(data):
             intset = data.get('intset', None)
             gsm.players[pid].skill.activate_effect(intset)
         else:
-            socketio.emit('show_notification_center', {
-                    'message': 'Cannot activate skill outside your turn!',
+            socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot activate skill outside your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
 
 @socketio.on('build_free_cities')
 def build_free_cities(data):
@@ -1362,42 +1566,72 @@ def land_survey(data):
     if gsm.in_ice_age:
         if gsm.players[pid].skill:
             if gsm.players[pid].skill.name != 'Realm_of_Permafrost':
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot do land survey during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot do land survey during ice age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             elif not gsm.players[pid].skill.active:
-                socketio.emit('show_notification_center', {
-                    'message':'Cannot do land survey during ice age!',
+                socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot do land survey during ice age!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
                 return
             
     if gsm.players[pid].hijacked:
-        socketio.emit('show_notification_center', {
-                    'message':'Cannot use your special authority!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body':'Cannot use your special authority!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
     
     if not data['choice']:
-        socketio.emit('show_notification_center', {
-                    'message': f'Invalid Choices!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body':'Invalid Choices!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
         return
     choices = data['choice']
     for c in choices:
         if c not in gsm.players[pid].territories:
-            socketio.emit('show_notification_center', {
-                    'message': f'Cannot do land survey on territories outside your control!',
+            socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': f'Cannot do land survey on territories outside your control!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
                 }, room=pid)
             return
 
@@ -1466,19 +1700,34 @@ def land_survey(data):
             gsm.players[pid].sunken_cost += 1
 
     if no_reward:
-        socketio.emit('show_notification_center', {
-                    'message': f'No resources detected from land survey!',
-                    'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid)
+        socketio.emit('show_hegemony_notification', {
+            'type': 'dossier_report',
+            'side': 'right',
+            'kicker': 'Survey Report',
+            'title': '',
+            'body': f'No resources detected from land survey!',
+            'icon': 'X',
+            'duration': 3000,
+            'kicker_color': '#FEFEFE',
+            'text_color': '#FECACA',
+            'bg_color': '#991B1B'
+        }, room=pid)
         for trty in choices:
             for n in gsm.map.territories[trty].neighbors:
                 if gsm.map.territories[n].hidden_resources:
-                    gsm.server.emit('show_notification_right', {
-                                'message': f'High strategic territory detected near {gsm.map.territories[trty].name}',
-                                'duration': 3000,
-                                "text_color": "#1E40AF", "bg_color": "#BFDBFE"
-                            }, room=pid)
+                    gsm.server.emit('show_hegemony_notification', {
+                        'type': 'dossier_report',
+                        'side': 'right',
+                        'kicker': 'Survey Result',
+                        'title': '',
+                        'body': f'High strategic territory detected near {gsm.map.territories[trty].name}',
+                        'icon': '!',
+                        'duration': 3000,
+                        'accent': '#444444',
+                        'kicker_color': '#1E40AF',
+                        'text_color': '#1E40AF',
+                        'bg_color': '#BFDBFE'
+                    }, room=pid)
                     break
 
     gsm.players[pid].s_city_amt = 0
@@ -1641,11 +1890,17 @@ def handle_debt_payment(data):
                         curr_p.skill.handle_payment(pid, data['method'])
                         break
     else:
-        socketio.emit('show_notification_center', {
-                    'message': 'Cannot make payment outside your turn!',
+        socketio.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Cannot make payment outside your turn!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
 
 @socketio.on('get_skill_description')
 def handle_skill_description(data):
