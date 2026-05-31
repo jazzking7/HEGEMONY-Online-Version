@@ -255,11 +255,17 @@ class General_Event_Scheduler:
                     self.gs.apply_doctrine(random.choice(options))
                     self.gs.server.emit('clear_view', room=sup)
                 self.gs.server.emit('signal_show_btns', room=sup)
-                self.gs.server.emit('show_notification_center', {
-                            'message': f'The Doctrine: "{self.gs.applied_doctrine}" is chosen',
-                            'duration': 3000,
-                            "text_color": "#000000", "bg_color": "#6987D5"
-                        }, room=self.gs.lobby)
+                self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'major_ribbon',
+                    'kicker': 'Doctrine Activated',
+                    'title': f'The Doctrine: "{self.gs.applied_doctrine}" is chosen',
+                    'body': f'{self.gs.applied_doctrine_desp}',
+                    'icon': '!',
+                    'duration': 5000,
+                    'accent': '#6987D5',
+                    'text_color': '#000000',
+                    'bg_color': '#6987D5'
+                }, room=self.gs.lobby)
 
     # INNER ASYNC EVENTS FROM HERE FORWARD
     def handle_async_event(self, data, pid):
@@ -270,11 +276,17 @@ class General_Event_Scheduler:
         try:
             fn_name, needs_data = EVENT_HANDLERS[n]
         except KeyError:
-            self.gs.server.emit('show_notification_center', {
-                    'message': f'Unknown async event: {n}',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': f'Unknown async event: {n}',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
 
         handler = getattr(self, fn_name)
@@ -318,11 +330,17 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isBureau and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isTransportcenter:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories to build the bureaus!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories to build the bureaus!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Mobilization Bureaux, {data['amt']} under construction"}, room=pid)
@@ -341,11 +359,17 @@ class General_Event_Scheduler:
     def land_survey(self, data, pid):
         flist = [i for i in self.gs.players[pid].territories if i not in self.gs.players[pid].land_explored]
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories to explore!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories to explore!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Exploring for underground resources, select up to {data['amt']} territories"}, room=pid)
@@ -367,11 +391,17 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories to build the leyline cross!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories to build the leyline cross!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling Leyline Cross, {data['amt']} under construction"}, room=pid)
@@ -393,11 +423,17 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isCity and not self.gs.map.territories[t].isTransportcenter and not self.gs.map.territories[t].isDeadZone:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories to build the nexus!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories to build the nexus!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Building Logistic Nexus, {data['amt']} under construction"}, room=pid)
@@ -420,11 +456,17 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isHall and not self.gs.map.territories[t].isCapital and not self.gs.map.territories[t].isDeadZone and not self.gs.map.territories[t].isLeyline:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories that can set hall of governance!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories that can set hall of governance!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Intalling Governance Halls, {data['amt']} under construction"}, room=pid)
@@ -446,11 +488,17 @@ class General_Event_Scheduler:
             if not self.gs.map.territories[t].isFort and not self.gs.map.territories[t].isDeadZone:
                 flist.append(t)
         if len(flist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough territories that can be fortified!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough territories that can be fortified!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Settling new forts, {data['amt']} under construction"}, room=pid)
@@ -487,11 +535,17 @@ class General_Event_Scheduler:
             if self.gs.map.territories[t].isCity and not self.gs.in_secret_control(t, pid) and not self.gs.map.territories[t].isMegacity and not self.gs.map.territories[t].isTransportcenter:
                 clist.append(t)
         if len(clist) < int(data['amt']):
-            self.gs.server.emit('show_notification_center', {
-                    'message': 'Not enough cities that can be upgraded to megacities!',
+            self.gs.server.emit('show_hegemony_notification', {
+                    'type': 'war_art_sigil',
+                    'kicker': '',
+                    'title': 'Action Denied',
+                    'body': 'Not enough cities that can be upgraded to megacities!',
+                    'icon': 'X',
                     'duration': 3000,
-                    "text_color": "#FECACA", "bg_color": "#991B1B"
-                }, room=pid) 
+                    'accent': '#FECACA',
+                    'text_color': '#FECACA',
+                    'bg_color': '#991B1B'
+                }, room=pid)
             return
         self.gs.server.emit('async_terminate_button_setup', room=pid)
         self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"Raising new megacities, {data['amt']} under construction"}, room=pid)
@@ -706,7 +760,7 @@ class General_Event_Scheduler:
                 self.gs.server.emit("clear_view", room=pid)
             else:
                 self.gs.server.emit('show_notification_left', {
-                    'message': 'Cannot set up more than 3 minefields!',
+                    'message': f'Cannot set up more than {player.skill.max_minefields} minefields!',
                     'duration': 3000,
                     "text_color": "#FECACA", "bg_color": "#991B1B"
                 }, room=pid) 
