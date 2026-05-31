@@ -182,7 +182,6 @@ class Iron_Wall(Skill):
     def turn_off_iron_wall(self):
         self.ironwall = False
         self.gs.server.emit('ironDomeOff', room=self.player)
-
     
     def update_current_status(self):
         self.gs.server.emit("update_skill_status", {
@@ -562,6 +561,13 @@ class Industrial_Revolution(Skill):
                     "text_color": "#FECACA", "bg_color": "#991B1B"
                 }, room=self.player)
                 return
+            # if choice in self.gs.map.unknown_TIDs:
+            #     self.gs.server.emit('show_notification_left', {
+            #         'message': "Cannot build on unknown continents!",
+            #         'duration': 3000,
+            #         "text_color": "#FECACA", "bg_color": "#991B1B"
+            #     }, room=self.player)
+            #     return
             for cont in self.gs.map.conts:
                 if choice in self.gs.map.conts[cont]['trtys']:
                     if cont not in tmp_count:
@@ -1429,11 +1435,19 @@ class Collusion(Skill):
         self.finished_choosing = True
         self.secret_control_list.append(choice)
         self.free_usages -= 1
-        self.gs.server.emit('show_notification_left', {
-                            'message': f'Gained secret control over {self.gs.map.territories[choice].name}',
-                            'duration': 3000,
-                            "text_color": "#EAB308", "bg_color": "#0C0A09"
-                        }, room=self.player)
+        self.gs.server.emit('show_hegemony_notification', {
+            'type': 'war_art_sigil',
+            'kicker': 'War Art Effect',
+            'title': f'Gained secret control over {self.gs.map.territories[choice].name}',
+            'body': '',
+            'side': 'left',
+            'icon': '◈',
+            'duration': 3000,
+            'accent': '#EAB308',
+            'kicker_color': '#EAB308',
+            'text_color': '#EAB308',
+            'bg_color': '#0C0A09'
+        }, room=self.player)
         self.gs.update_private_status(self.player)
         self.gs.update_TIP(self.player)
         self.gs.signal_MTrackers('indus')
@@ -2114,117 +2128,89 @@ class Pandora_Box(Skill):
         if num < 56 and self.guarantee >= 4:
             num = random.randint(56, 100)
             self.guarantee = 0
-        if num < 10: # 10%
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Received nothing.....',
+
+        def emit_pandora_notification(message):
+            self.gs.server.emit('show_hegemony_notification', {
+                'type': 'war_art_sigil',
+                'kicker': 'Pandora Box Effect',
+                'title': message,
+                'body': '',
+                'icon': '✦',
                 'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
+                'accent': '#FFD524',
+                'text_color': '#FFD524',
+                'bg_color': '#55185D'
             }, room=self.player)
-        elif num < 30: # 20%
+
+        if num < 10:  # 10%
+            emit_pandora_notification('Received nothing.....')
+
+        elif num < 30:  # 20%
             self.gs.players[self.player].stars += 1
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Received 1★...',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
-        elif num < 55: # 25%
+            emit_pandora_notification('Received 1★...')
+
+        elif num < 55:  # 25%
             self.gs.players[self.player].stars += 3
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Received 3★!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
-        elif num < 58: # 3%
+            emit_pandora_notification('Received 3★!')
+
+        elif num < 58:  # 3%
             self.gs.players[self.player].stars += 7
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'RECEIVED 7★!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
-        elif num < 61: # 3%
+            emit_pandora_notification('RECEIVED 7★!')
+
+        elif num < 61:  # 3%
             self.gs.players[self.player].reserves += 30
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'RECEIVED 30 RESERVES!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
-        elif num < 64: # 3%
+            emit_pandora_notification('RECEIVED 30 RESERVES!')
+
+        elif num < 64:  # 3%
             self.multi += 1
-            self.gs.server.emit('show_notification_center', {
-                'message': 'DAMAGE MULTIPLIER INCREASED BY 1!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('DAMAGE MULTIPLIER INCREASED BY 1!')
             self.receivedBlessings.append('+1 Damage Multiplier')
-        elif num < 70: # 6%
+
+        elif num < 70:  # 6%
             self.gs.players[self.player].reserves += 15
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Received 15 reserves!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
-        elif num < 73: # 3%
+            emit_pandora_notification('Received 15 reserves!')
+
+        elif num < 73:  # 3%
             self.gs.players[self.player].min_roll += 1
             self.gs.update_private_status(self.player)
-            self.gs.server.emit('show_notification_center', {
-                'message': 'MINIMUM ROLL INCREASED BY 1!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('MINIMUM ROLL INCREASED BY 1!')
             self.receivedBlessings.append('+1 Minimum Roll')
-        elif num < 79: # 6%
+
+        elif num < 79:  # 6%
             self.infra += 1
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Infrastructure Level increased by 1!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('Infrastructure Level increased by 1!')
             self.receivedBlessings.append('+1 Infrastructure Level')
-        elif num < 82: # 3%
+
+        elif num < 82:  # 3%
             self.infra += 2
-            self.gs.server.emit('show_notification_center', {
-                'message': 'INFRASTRUCTURE LEVEL INCREASED BY 2!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('INFRASTRUCTURE LEVEL INCREASED BY 2!')
             self.receivedBlessings.append('+2 Infrastructure Level')
-        elif num < 88: # 6%
+
+        elif num < 88:  # 6%
             self.nulrate += 10
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Nullification Rate increased by 10%!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('Nullification Rate increased by 10%!')
             self.receivedBlessings.append('+10% Nullification Rate')
-        elif num < 91: # 3%
+
+        elif num < 91:  # 3%
             self.nulrate += 20
-            self.gs.server.emit('show_notification_center', {
-                'message': 'NULLIFICATION RATE INCREASED BY 20%!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('NULLIFICATION RATE INCREASED BY 20%!')
             self.receivedBlessings.append('+20% Nullification Rate')
-        elif num < 97: # 6%
+
+        elif num < 97:  # 6%
             self.indus += 1
-            self.gs.server.emit('show_notification_center', {
-                'message': 'Industrial Level increased by 1!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('Industrial Level increased by 1!')
             self.receivedBlessings.append('+1 Industrial Level')
-        else: # 3%
+
+        else:  # 3%
             self.indus += 2
-            self.gs.server.emit('show_notification_center', {
-                'message': 'INDUSTRIAL LEVEL INCREASED BY 2!',
-                'duration': 3000,
-                "text_color": "#FFD524", "bg_color": "#55185D"
-            }, room=self.player)
+            emit_pandora_notification('INDUSTRIAL LEVEL INCREASED BY 2!')
             self.receivedBlessings.append('+2 Industrial Level')
+
         if num < 30:
             self.guarantee += 1
         else:
@@ -2321,11 +2307,19 @@ class Revanchism(Skill):
         message = f"+{points} Rage Point"
         if points > 1:
             message = f"+{points} Rage Points"
-        self.gs.server.emit('show_notification_left', {
-                    'message': message,
-                    'duration': 3000,
-                    "text_color": "#991B1B", "bg_color": "#FECACA"
-                }, room=self.player) 
+        self.gs.server.emit('show_hegemony_notification', {
+            'type': 'dossier_report',
+            'kicker': 'War Art Effect',
+            'title': message,
+            'body': '',
+            'side': 'left',
+            'icon': '◈',
+            'duration': 3000,
+            'accent': '#991B1B',
+            'kicker_color': '#991B1B',
+            'text_color': '#991B1B',
+            'bg_color': '#FECACA'
+        }, room=self.player)
 
     def accumulate_rage(self, troop_loss, trty_loss):
         if self.gs.players[self.player].total_troops:
