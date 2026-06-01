@@ -114,7 +114,7 @@ class Game_State_Manager:
         
         # Map
         self.map = Map(mapName)
-        self.total_troops = len(self.map.territories)
+        self.total_troops = len(self.map.territories)        #self.total_troops = len(self.map.tnames) 
 
         # turn victory (for special authority acquisition)
         self.turn_victory = False
@@ -225,6 +225,198 @@ class Game_State_Manager:
         self.embargo = False
         self.suspension = False
         self.copro = False
+
+    #     # EXPLORATION
+    #     self.has_exploration = False  # for now; wire it to lobby later
+
+    #     # Which known territories can be used as exploration origins
+    #     self.explorable_tids = set()          # set of known TIDs
+
+    #     # Global secret links: list of (known_tid, unknown_tid)
+    #     self.secret_links = []
+
+    #     self.player_visible_tids = {}  # pid -> set of tids visible to that player
+    #     self.player_discovered_uconts = {}  # pid -> set of 'ucX' strings
+    #     self.player_unlocked_links = {}       # pid -> set of (known_tid, unknown_tid)
+
+    #     # Initialize visibility: right now everyone sees only the normal map
+    #     for pid in self.pids:
+    #         self.player_visible_tids[pid] = set(
+    #             range(self.map.num_known_nations)
+    #         )
+    #         self.player_discovered_uconts[pid] = set()
+    #         self.player_unlocked_links[pid] = set()
+
+    # def is_visible(self, pid, tid):
+    #     """
+    #     Return True if this player is allowed to see/target this territory.
+    #     If exploration is off, everything is visible.
+    #     """
+    #     if not self.has_exploration:
+    #         return True
+    #     return tid in self.player_visible_tids.get(pid, set())
+
+    # def visible_tids_for(self, pid):
+    #     """
+    #     Return a set of TIDs the player can see.
+    #     """
+    #     if not self.has_exploration:
+    #         # No exploration: whole map is visible
+    #         return set(range(self.map.num_nations))
+    #     return set(self.player_visible_tids.get(pid, set()))
+
+    # def filter_visible(self, pid, tid_list):
+    #     """
+    #     Given a list of TIDs, return only those visible to this player.
+    #     """
+    #     if not self.has_exploration:
+    #         return list(tid_list)
+    #     visible = self.player_visible_tids.get(pid, set())
+    #     return [tid for tid in tid_list if tid in visible]
+
+
+    # def get_neighbors_for_player(self, pid, tid):
+    #     """
+    #     Base neighbors from the map, plus any secret neighbors unlocked by this player.
+    #     Used for movement / adjacency checks when you want exploration-aware behavior.
+    #     """
+    #     base = list(self.map.territories[tid].neighbors)
+
+    #     if not self.has_exploration:
+    #         return base
+
+    #     # Add secret neighbors this player unlocked (both directions A<->B)
+    #     extra = []
+    #     for (k, u) in self.player_unlocked_links.get(pid, set()):
+    #         if k == tid and u not in extra:
+    #             extra.append(u)
+    #         elif u == tid and k not in extra:
+    #             extra.append(k)
+
+    #     result = base + extra
+    #     visible = self.visible_tids_for(pid)
+    #     # Safety: only neighbors the player is allowed to see
+    #     return [n for n in result if n in visible]
+    
+    # def init_exploration_links(self):
+    #     """
+    #     Called once after gsm is created, if has_exploration is True.
+    #     - Picks explorable known territories.
+    #     - For each unknown continent, creates up to 2 secret links
+    #       from explorable known territories to non-landlocked unknown territories.
+    #     """
+    #     if not self.has_exploration:
+    #         return
+
+    #     # 1) Choose explorable known territories.
+    #     #
+    #     # For now: all non-landlocked known territories.
+    #     # (You can later restrict this to "coastal" or "port" ones.)
+    #     known_non_landlocked = []
+    #     for tid in range(self.map.num_known_nations):
+    #         name = self.map.territories[tid].name
+    #         if name not in self.map.landlocked:
+    #             known_non_landlocked.append(tid)
+
+    #     self.explorable_tids = set(known_non_landlocked)
+
+    #     if not self.explorable_tids:
+    #         return  # nothing to link
+
+    #     # 2) Build secret links per unknown continent.
+
+    #     links_set = set()  # to avoid strict duplicates
+
+    #     for ukey, uc_tids in self.map.uConts.items():  # ukey like 'uc1'
+    #         # Unknown territories that are not landlocked
+    #         unknown_candidates = []
+    #         for utid in uc_tids:
+    #             uname = self.map.territories[utid].name
+    #             if uname not in self.map.unknown_landlocked:
+    #                 unknown_candidates.append(utid)
+
+    #         if not unknown_candidates:
+    #             continue
+
+    #         # Pick up to 2 explorable known territories for this continent
+    #         explorable_list = list(self.explorable_tids)
+    #         if not explorable_list:
+    #             break
+
+    #         k = min(2, len(explorable_list))
+    #         chosen_known = random.sample(explorable_list, k=k)
+
+    #         for known_tid in chosen_known:
+    #             unknown_tid = random.choice(unknown_candidates)
+    #             pair = (known_tid, unknown_tid)
+    #             if pair not in links_set:
+    #                 links_set.add(pair)
+
+    #     self.secret_links = list(links_set)
+
+    # def handle_explore_from(self, pid, from_tid):
+    #     """
+    #     Player pid chooses to explore from known territory 'from_tid'.
+    #     Returns a dict you can send back to frontend.
+    #     """
+    #     if not self.has_exploration:
+    #         return {'status': 'disabled'}
+
+    #     # Must be visible and explorable
+    #     if not self.is_visible(pid, from_tid):
+    #         return {'status': 'forbidden'}
+
+    #     if from_tid not in self.explorable_tids:
+    #         return {'status': 'not_explorable'}
+
+    #     # Find all global links that start from this tid
+    #     links_here = [pair for pair in self.secret_links if pair[0] == from_tid]
+    #     if not links_here:
+    #         return {'status': 'no_link'}
+
+    #     newly_visible_tids = set()
+    #     newly_unlocked_links = []
+
+    #     for (known_tid, unknown_tid) in links_here:
+    #         if (known_tid, unknown_tid) in self.player_unlocked_links[pid]:
+    #             # already unlocked for this player
+    #             continue
+
+    #         self.player_unlocked_links[pid].add((known_tid, unknown_tid))
+    #         newly_unlocked_links.append((known_tid, unknown_tid))
+
+    #         # Find which unknown continent this unknown tid belongs to
+    #         ukey = None
+    #         for k, uc_tids in self.map.uConts.items():
+    #             if unknown_tid in uc_tids:
+    #                 ukey = k
+    #                 break
+
+    #         if ukey is None:
+    #             continue  # shouldn't happen
+
+    #         # If this is the first time this player touches this continent
+    #         if ukey not in self.player_discovered_uconts[pid]:
+    #             self.player_discovered_uconts[pid].add(ukey)
+    #             # Reveal all territories in this unknown continent
+    #             for utid in self.map.uConts[ukey]:
+    #                 if utid not in self.player_visible_tids[pid]:
+    #                     self.player_visible_tids[pid].add(utid)
+    #                     newly_visible_tids.add(utid)
+
+    #     if not newly_unlocked_links:
+    #         return {'status': 'already_explored'}
+
+    #     # Build a payload that frontend can use to:
+    #     #  - reveal new territories
+    #     #  - add new edges from A <-> unknown nodes for THIS player
+    #     return {
+    #         'status': 'ok',
+    #         'from_tid': from_tid,
+    #         'newly_visible_tids': list(newly_visible_tids),
+    #         'new_links': newly_unlocked_links,
+    #     }
+
 
     def apply_doctrine(self, doctrine):
         if not self.applied_doctrine:
