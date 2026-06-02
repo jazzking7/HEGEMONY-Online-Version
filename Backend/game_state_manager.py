@@ -1460,6 +1460,318 @@ class Game_State_Manager:
                 def_stats[3] = 0
                 def_stats[4] = 1
 
+    def get_territory_owner_pid(self, tid):
+        for pid in self.players:
+            if tid in self.players[pid].territories:
+                return pid
+        return None
+
+    def get_continents_containing_territory(self, tid):
+        continents = []
+        for cont_name, cont_data in self.map.conts.items():
+            if tid in cont_data['trtys']:
+                continents.append({
+                    'name': cont_name,
+                    'bonus': cont_data.get('bonus', 0),
+                    'trtys': cont_data['trtys'][:]
+                })
+        return continents
+
+    def owns_continent_from_list(self, territory_list, continent_tids):
+        return set(continent_tids).issubset(set(territory_list))
+
+    def get_high_value_node_info(self, tid):
+        trty = self.map.territories[tid]
+        reasons = []
+
+        if trty.isCapital:
+            reasons.append('capital')
+        if trty.isCity:
+            reasons.append('city')
+        if trty.isMegacity:
+            reasons.append('megacity')
+        if trty.isTransportcenter:
+            reasons.append('transport center')
+        if trty.isFort:
+            reasons.append('fort')
+        if trty.isHall:
+            reasons.append('command hall')
+        if trty.isLeyline:
+            reasons.append('leyline')
+        if trty.isBureau:
+            reasons.append('bureau')
+        if trty.isCAD:
+            reasons.append('CAD')
+        if trty.hidden_resources:
+            reasons.append('hidden resources')
+
+        return {
+            'tid': tid,
+            'name': trty.name,
+            'is_high_value': len(reasons) > 0,
+            'reasons': reasons,
+        }
+
+    def determine_continent_control_changes(self, attacker_pid, defender_pid, target_tid, attacker_territories_before=None, defender_territories_before=None, attack_successful=False):
+        if attacker_territories_before is None:
+            attacker_territories_before = self.players[attacker_pid].territories[:]
+        if defender_territories_before is None:
+            defender_territories_before = self.players[defender_pid].territories[:]
+
+        if attack_successful:
+            attacker_territories_after = attacker_territories_before[:]
+            defender_territories_after = defender_territories_before[:]
+
+            if target_tid not in attacker_territories_after:
+                attacker_territories_after.append(target_tid)
+            if target_tid in defender_territories_after:
+                defender_territories_after.remove(target_tid)
+        else:
+            attacker_territories_after = attacker_territories_before[:]
+            defender_territories_after = defender_territories_before[:]
+
+        gained_control = []
+        broken_control = []
+
+        for cont in self.get_continents_containing_territory(target_tid):
+            cont_name = cont['name']
+            cont_tids = cont['trtys']
+            cont_bonus = cont['bonus']
+
+            attacker_had_control = self.owns_continent_from_list(attacker_territories_before, cont_tids)
+            attacker_has_control = self.owns_continent_from_list(attacker_territories_after, cont_tids)
+            defender_had_control = self.owns_continent_from_list(defender_territories_before, cont_tids)
+            defender_has_control = self.owns_continent_from_list(defender_territories_after, cont_tids)
+
+            if not attacker_had_control and attacker_has_control:
+                gained_control.append({
+                    'player': attacker_pid,
+                    'player_name': self.players[attacker_pid].name,
+                    'continent': cont_name,
+                    'bonus': cont_bonus,
+                    'trigger_tid': target_tid,
+                    'trigger_territory': self.map.territories[target_tid].name,
+                })
+
+            if defender_had_control and not defender_has_control:
+                broken_control.append({
+                    'player': defender_pid,
+                    'player_name': self.players[defender_pid].name,
+                    'continent': cont_name,
+                    'bonus': cont_bonus,
+                    'trigger_tid': target_tid,
+                    'trigger_territory': self.map.territories[target_tid].name,
+                })
+
+        return {
+            'gained_control': gained_control,
+            'broken_control': broken_control,
+        }
+
+    def determine_high_value_node_attack(self, target_tid, attack_successful=False):
+        node_info = self.get_high_value_node_info(target_tid)
+
+        if not node_info['is_high_value']:
+            return {
+                'is_high_value_attack': False,
+                'event_type': None,
+                'message': None,
+                'node': node_info,
+            }
+
+        if attack_successful:
+            event_type = 'high_value_node_capture'
+            message = f"High valued node capture: {node_info['name']}"
+        else:
+            event_type = 'dangerous_high_value_node_attempt'
+            message = f"Dangerous attempt to capture {node_info['name']}"
+
+        return {
+            'is_high_value_attack': True,
+            'event_type': event_type,
+            'message': message,
+            'node': node_info,
+        }
+
+    def determine_major_battle(self, attacker_pid, defender_pid, atk_amt, def_amt, min_absolute_troops=8, both_side_ratio=0.15, attacker_commit_ratio=0.25):
+        attacker_total = max(1, self.players[attacker_pid].total_troops)
+        defender_total = max(1, self.players[defender_pid].total_troops)
+
+        attacker_ratio = atk_amt / attacker_total
+        defender_ratio = def_amt / defender_total
+
+        both_sides_large = (
+            atk_amt >= min_absolute_troops and
+            def_amt >= min_absolute_troops and
+            attacker_ratio >= both_side_ratio and
+            defender_ratio >= both_side_ratio
+        )
+        attacker_major_commit = atk_amt >= min_absolute_troops and attacker_ratio >= attacker_commit_ratio
+
+        return {
+            'is_major': both_sides_large or attacker_major_commit,
+            'both_sides_large': both_sides_large,
+            'attacker_major_commit': attacker_major_commit,
+            'attacker_ratio': attacker_ratio,
+            'defender_ratio': defender_ratio,
+            'attacker_total': attacker_total,
+            'defender_total': defender_total,
+            'atk_amt': atk_amt,
+            'def_amt': def_amt,
+            'thresholds': {
+                'min_absolute_troops': min_absolute_troops,
+                'both_side_ratio': both_side_ratio,
+                'attacker_commit_ratio': attacker_commit_ratio,
+            }
+        }
+
+    def determine_unusual_battle_result(self, atk_amt, def_amt, result, lower_side_ratio=0.60, survivor_ratio=0.15, min_difference=5):
+        attacker_survivors = max(0, result[0])
+        defender_survivors = max(0, result[1])
+        attacker_won = attacker_survivors > 0
+        defender_won = not attacker_won
+
+        if atk_amt <= 0 or def_amt <= 0:
+            return {
+                'is_unusual': False,
+                'event_type': None,
+                'winning_side': 'attacker' if attacker_won else 'defender',
+                'reason': None,
+            }
+
+        attacker_exceptional_upset = (
+            attacker_won and
+            atk_amt <= def_amt * lower_side_ratio and
+            def_amt - atk_amt >= min_difference and
+            attacker_survivors >= max(1, int(atk_amt * survivor_ratio))
+        )
+        defender_exceptional_hold = (
+            defender_won and
+            def_amt <= atk_amt * lower_side_ratio and
+            atk_amt - def_amt >= min_difference and
+            defender_survivors >= max(1, int(def_amt * survivor_ratio))
+        )
+
+        if attacker_exceptional_upset:
+            return {
+                'is_unusual': True,
+                'event_type': 'unexpected_attacker_victory',
+                'winning_side': 'attacker',
+                'reason': 'attacker won despite committing exceptionally fewer troops',
+                'atk_amt': atk_amt,
+                'def_amt': def_amt,
+                'attacker_survivors': attacker_survivors,
+                'defender_survivors': defender_survivors,
+            }
+
+        if defender_exceptional_hold:
+            return {
+                'is_unusual': True,
+                'event_type': 'unexpected_defender_victory',
+                'winning_side': 'defender',
+                'reason': 'defender held despite defending with exceptionally fewer troops',
+                'atk_amt': atk_amt,
+                'def_amt': def_amt,
+                'attacker_survivors': attacker_survivors,
+                'defender_survivors': defender_survivors,
+            }
+
+        return {
+            'is_unusual': False,
+            'event_type': None,
+            'winning_side': 'attacker' if attacker_won else 'defender',
+            'reason': None,
+            'atk_amt': atk_amt,
+            'def_amt': def_amt,
+            'attacker_survivors': attacker_survivors,
+            'defender_survivors': defender_survivors,
+        }
+
+    def determine_battle_situation(self, attacker_pid, defender_pid, attack_from_tid, target_tid, atk_amt, def_amt, result, attacker_territories_before=None, defender_territories_before=None):
+        attack_successful = result[0] > 0
+
+        if attacker_territories_before is None:
+            attacker_territories_before = self.players[attacker_pid].territories[:]
+        if defender_territories_before is None:
+            defender_territories_before = self.players[defender_pid].territories[:]
+
+        continent_changes = self.determine_continent_control_changes(
+            attacker_pid,
+            defender_pid,
+            target_tid,
+            attacker_territories_before,
+            defender_territories_before,
+            attack_successful
+        )
+        node_attack = self.determine_high_value_node_attack(target_tid, attack_successful)
+        major_battle = self.determine_major_battle(attacker_pid, defender_pid, atk_amt, def_amt)
+        unusual_result = self.determine_unusual_battle_result(atk_amt, def_amt, result)
+
+        events = []
+
+        for item in continent_changes['gained_control']:
+            events.append({
+                'type': 'continent_control_gained',
+                'priority': 90,
+                'data': item,
+                'message': f"{item['player_name']} gained control of {item['continent']}"
+            })
+
+        for item in continent_changes['broken_control']:
+            events.append({
+                'type': 'continent_control_broken',
+                'priority': 85,
+                'data': item,
+                'message': f"{item['player_name']}'s control of {item['continent']} was broken"
+            })
+
+        if node_attack['is_high_value_attack']:
+            events.append({
+                'type': node_attack['event_type'],
+                'priority': 80 if attack_successful else 70,
+                'data': node_attack,
+                'message': node_attack['message']
+            })
+
+        if major_battle['is_major']:
+            events.append({
+                'type': 'major_battle',
+                'priority': 60,
+                'data': major_battle,
+                'message': 'Major battle detected'
+            })
+
+        if unusual_result['is_unusual']:
+            events.append({
+                'type': unusual_result['event_type'],
+                'priority': 75,
+                'data': unusual_result,
+                'message': unusual_result['reason']
+            })
+
+        events.sort(key=lambda event: event['priority'], reverse=True)
+
+        return {
+            'has_important_event': len(events) > 0,
+            'attack_successful': attack_successful,
+            'attacker_pid': attacker_pid,
+            'attacker_name': self.players[attacker_pid].name,
+            'defender_pid': defender_pid,
+            'defender_name': self.players[defender_pid].name,
+            'attack_from_tid': attack_from_tid,
+            'attack_from_name': self.map.territories[attack_from_tid].name,
+            'target_tid': target_tid,
+            'target_name': self.map.territories[target_tid].name,
+            'atk_amt': atk_amt,
+            'def_amt': def_amt,
+            'result': result[:],
+            'continent_changes': continent_changes,
+            'node_attack': node_attack,
+            'major_battle': major_battle,
+            'unusual_result': unusual_result,
+            'events': events,
+        }
+
     def handle_battle(self, data):
         # Load territories involved
         t1, t2 = data['choice']
@@ -1512,6 +1824,9 @@ class Game_State_Manager:
             entry[1] -= 1
             if entry[1] <= 0:
                 self.forbidden_attack = {}
+
+        attacker_territories_before_battle = atk_p.territories[:]
+        defender_territories_before_battle = def_p.territories[:]
 
         # Compute player battle stats
         atk_stats = atk_p.temp_stats[:]
@@ -1689,6 +2004,19 @@ class Game_State_Manager:
         else: # normal
             result = self.simulate_attack(atk_amt-ld-atk_anu, def_amt-def_anu, atk_stats, def_stats, atkh, defh, acrit, dcrit, acdmg, dcdmg, atroopmul, dtroopmul, AIA, DIA)
         print(result)
+
+        self.last_battle_situation = self.determine_battle_situation(
+            a_pid,
+            d_pid,
+            t1,
+            t2,
+            atk_amt,
+            def_amt,
+            result,
+            attacker_territories_before_battle,
+            defender_territories_before_battle
+        )
+
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
         self.server.emit('update_trty_display', {t1:{'troops': trty_atk.troops}}, room=self.lobby)
@@ -1784,6 +2112,7 @@ class Game_State_Manager:
         # Sound effect
         if def_p.total_troops != 0:
             big_battle = ((atk_amt/atk_p.total_troops > 0.15) and (def_amt/def_p.total_troops > 0.15)) or atk_amt/atk_p.total_troops > 0.25
+            # big_battle = self.last_battle_situation['major_battle']['is_major']
             self.server.emit('battle_propagation', {'battlesize': big_battle}, room=self.lobby)
 
         # visual effect
