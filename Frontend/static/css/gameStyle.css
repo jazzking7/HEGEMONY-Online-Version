@@ -3335,3 +3335,1648 @@ html, body {
 .event-type-intel .event-log-title {
     color: rgb(103, 232, 249);
 }
+
+/* Premium command-interface overlay skin */
+:root {
+    --hg-bg-0: rgba(2, 6, 23, 0.92);
+    --hg-bg-1: rgba(8, 18, 34, 0.86);
+    --hg-bg-2: rgba(15, 23, 42, 0.74);
+    --hg-cyan: rgb(54, 221, 255);
+    --hg-cyan-soft: rgba(54, 221, 255, 0.58);
+    --hg-cyan-dim: rgba(54, 221, 255, 0.20);
+    --hg-blue: rgb(96, 165, 250);
+    --hg-gold: rgb(251, 191, 36);
+    --hg-purple: rgb(192, 132, 252);
+    --hg-red: rgb(248, 113, 113);
+    --hg-green: rgb(74, 222, 128);
+    --hg-text: rgb(226, 242, 255);
+    --hg-muted: rgb(130, 160, 180);
+    --hg-panel-cut: polygon(0 12px, 12px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 18px 100%, 0 calc(100% - 18px));
+    --hg-card-cut: polygon(0 10px, 10px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+#overlay_sections::before {
+    content: 'GLOBAL COMMAND SYSTEM';
+    position: absolute;
+    top: 1.15rem;
+    left: 3.05rem;
+    z-index: 6;
+    pointer-events: none;
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(54, 221, 255, 0.74);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    text-shadow: 0 0 14px rgba(54, 221, 255, 0.38);
+}
+
+#overlay_sections::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(54, 221, 255, 0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54, 221, 255, 0.018) 1px, transparent 1px),
+        radial-gradient(circle at 50% 6%, rgba(54, 221, 255, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(2, 6, 23, 0.02), rgba(2, 6, 23, 0.12));
+    background-size: 34px 34px, 34px 34px, 100% 100%, 100% 100%;
+    mix-blend-mode: screen;
+}
+
+.tactical-panel,
+.tactical-panel-no-header,
+#tracker,
+#player_info,
+#event_log_panel,
+#middle_display,
+#control_mechanism,
+#stat_info_display,
+#laplace_info_display,
+#currentDoctrineInfo,
+.game-chatbox {
+    clip-path: var(--hg-panel-cut);
+    border: 1px solid rgba(54, 221, 255, 0.52) !important;
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.075), transparent 28%),
+        linear-gradient(180deg, rgba(14, 27, 48, 0.88), rgba(2, 6, 23, 0.88)) !important;
+    backdrop-filter: blur(12px) saturate(1.2) !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+        0 0 22px rgba(54, 221, 255, 0.16),
+        0 18px 44px rgba(0, 0, 0, 0.30) !important;
+}
+
+.tactical-panel::before,
+.tactical-panel-no-header::before,
+#tracker::before,
+#player_info::before,
+#event_log_panel::before,
+#middle_display::before,
+#control_mechanism::before,
+#stat_info_display::before,
+#laplace_info_display::before,
+#currentDoctrineInfo::before,
+.game-chatbox::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    width: 22px;
+    height: 22px;
+    border-top: 2px solid rgba(54, 221, 255, 0.76);
+    border-left: 2px solid rgba(54, 221, 255, 0.76);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.tactical-panel::after,
+.tactical-panel-no-header::after,
+#tracker::after,
+#player_info::after,
+#event_log_panel::after,
+#middle_display::after,
+#control_mechanism::after,
+#stat_info_display::after,
+#laplace_info_display::after,
+#currentDoctrineInfo::after,
+.game-chatbox::after {
+    content: '';
+    position: absolute;
+    right: 7px;
+    bottom: 7px;
+    width: 22px;
+    height: 22px;
+    border-right: 2px solid rgba(54, 221, 255, 0.72);
+    border-bottom: 2px solid rgba(54, 221, 255, 0.72);
+    pointer-events: none;
+    z-index: 2;
+}
+
+#btn_show_cont {
+    top: 1%;
+    left: 1%;
+    min-width: 132px;
+    height: 42px;
+    padding: 0.48rem 1.15rem;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+    border: 1px solid rgba(54, 221, 255, 0.50);
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.12), rgba(15, 23, 42, 0.74) 44%, rgba(15, 23, 42, 0.52));
+    box-shadow: 0 0 18px rgba(54, 221, 255, 0.16), inset 0 0 18px rgba(54, 221, 255, 0.035);
+    color: rgb(155, 238, 255);
+    letter-spacing: 0.12em;
+}
+
+#btn_show_cont:hover:not(.active),
+#btn_show_cont.active {
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.22), rgba(15, 23, 42, 0.78) 52%, rgba(34, 211, 238, 0.08));
+    border-color: rgba(103, 232, 249, 0.90);
+    box-shadow: 0 0 24px rgba(54, 221, 255, 0.32), inset 0 0 20px rgba(54, 221, 255, 0.07);
+}
+
+#global_overview {
+    width: 300px;
+    top: 8vh;
+}
+
+#global_overview .panel-content-compact {
+    padding: 0.55rem;
+    gap: 0.42rem;
+}
+
+.global-round-compact {
+    clip-path: var(--hg-card-cut);
+    border: 1px solid rgba(54, 221, 255, 0.52);
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.18), rgba(15, 23, 42, 0.54), rgba(54, 221, 255, 0.08));
+    border-radius: 0;
+    min-height: 34px;
+}
+
+.round-label-compact {
+    color: rgba(155, 238, 255, 0.88);
+    letter-spacing: 0.16em;
+}
+
+.round-value-compact {
+    font-size: 1.32rem;
+    font-family: 'Rajdhani', sans-serif;
+    color: white;
+}
+
+.global-card-compact,
+.player-stat-btn,
+.stat-row,
+.event-log-item,
+.laplace-info-item,
+.winning_condition,
+.losing_condition {
+    border-radius: 0 !important;
+    clip-path: var(--hg-card-cut);
+}
+
+.global-card-compact {
+    min-height: 48px;
+    padding: 0.42rem 0.48rem;
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.08), transparent 42%),
+        rgba(8, 18, 34, 0.62);
+    border: 1px solid rgba(72, 107, 130, 0.56);
+    box-shadow: inset 0 0 18px rgba(54, 221, 255, 0.025);
+}
+
+.global-card-compact:hover {
+    border-color: rgba(54, 221, 255, 0.70);
+    background: rgba(20, 43, 63, 0.62);
+}
+
+.global-card-superpower-compact {
+    border-color: rgba(251, 191, 36, 0.62);
+    background:
+        linear-gradient(135deg, rgba(251, 191, 36, 0.16), transparent 50%),
+        rgba(18, 18, 21, 0.68);
+}
+
+.global-card-label-compact {
+    font-size: 0.58rem;
+    color: rgba(176, 196, 212, 0.84);
+    letter-spacing: 0.085em;
+}
+
+.global-card-value-compact {
+    font-size: 0.78rem;
+    color: rgb(238, 247, 255);
+}
+
+#player_info {
+    max-width: 16vw;
+    max-height: 40vh;
+}
+
+.player-info-header,
+.panel-header,
+.mission-header,
+.laplace-header,
+.event-log-header {
+    min-height: 34px;
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.18), rgba(54, 221, 255, 0.055) 46%, transparent 100%) !important;
+    border-bottom: 1px solid rgba(54, 221, 255, 0.34) !important;
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+    position: relative;
+}
+
+.player-info-header::after,
+.panel-header::after,
+.mission-header::after,
+.laplace-header::after,
+.event-log-header::after {
+    content: 'OPS';
+    margin-left: auto;
+    color: rgba(130, 160, 180, 0.64);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.mission-header::after { content: 'OBJECTIVES'; }
+.event-log-header::after { content: 'LIVE'; color: rgba(248, 113, 113, 0.86); }
+.laplace-header::after { content: 'INTEL'; }
+
+.header-text,
+.laplace-header-text,
+.mission-title,
+.event-log-header span {
+    color: rgb(151, 232, 255) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(54, 221, 255, 0.34);
+}
+
+.header-icon,
+.mission-icon,
+.laplace-icon {
+    color: var(--hg-cyan) !important;
+    filter: drop-shadow(0 0 7px rgba(54, 221, 255, 0.42));
+}
+
+.stats-list {
+    padding: 0.56rem;
+}
+
+.player-stat-btn {
+    position: relative;
+    padding: 0.82rem 0.78rem;
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.055), transparent 50%),
+        rgba(8, 18, 34, 0.62);
+    border: 1px solid rgba(73, 97, 120, 0.62);
+    box-shadow: inset 0 0 16px rgba(54, 221, 255, 0.024);
+}
+
+.player-stat-btn::before {
+    content: '▰';
+    position: absolute;
+    top: 0.42rem;
+    right: 0.52rem;
+    color: rgba(54, 221, 255, 0.36);
+    font-size: 0.62rem;
+}
+
+.player-stat-btn.current-player {
+    border-color: rgba(54, 221, 255, 0.74);
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.12), transparent 58%),
+        rgba(8, 30, 46, 0.70);
+    box-shadow: 0 0 18px rgba(54, 221, 255, 0.16), inset 0 0 20px rgba(54, 221, 255, 0.05);
+}
+
+.player-name {
+    color: rgb(236, 247, 255);
+    font-size: 0.96rem;
+    letter-spacing: 0.04em;
+}
+
+.player-color-square {
+    width: 13px;
+    height: 13px;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-color: rgba(255, 255, 255, 0.62);
+    box-shadow: 0 0 8px currentColor;
+}
+
+.stat-label,
+.global-card-label-compact {
+    text-transform: uppercase;
+}
+
+.stat-value,
+.global-card-value-compact,
+.round-value-compact {
+    text-shadow: 0 0 10px currentColor;
+}
+
+.scroll-arrow {
+    background:
+        linear-gradient(90deg, transparent, rgba(54, 221, 255, 0.12), transparent);
+    border-color: rgba(54, 221, 255, 0.28);
+}
+
+#event_announcement {
+    width: auto;
+    min-width: 420px;
+    max-width: 40vw;
+    min-height: 74px;
+    padding: 0.78rem 2.0rem 0.84rem;
+    gap: 1rem;
+    clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.14), transparent 12%, rgba(2, 6, 23, 0.92) 25%, rgba(2, 6, 23, 0.92) 75%, transparent 88%, rgba(54, 221, 255, 0.11)),
+        linear-gradient(180deg, rgba(14, 27, 48, 0.92), rgba(2, 6, 23, 0.92));
+    border: 1px solid rgba(54, 221, 255, 0.58);
+    box-shadow: 0 0 36px rgba(54, 221, 255, 0.22), inset 0 0 24px rgba(54, 221, 255, 0.04);
+    overflow: hidden;
+}
+
+#event_announcement::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(54, 221, 255, 0.72), transparent);
+    pointer-events: none;
+}
+
+#event_announcement::after {
+    content: 'GLOBAL OPS';
+    position: absolute;
+    top: 0.48rem;
+    right: 1.05rem;
+    color: rgba(54, 221, 255, 0.58);
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+}
+
+.phase-indicators {
+    flex-direction: row;
+    align-self: flex-start;
+    position: absolute;
+    top: 0.55rem;
+    left: 1.05rem;
+    gap: 0.28rem;
+}
+
+.phase-box {
+    width: 20px;
+    height: 6px;
+    border-width: 1px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+.phase-content {
+    padding-top: 0.12rem;
+}
+
+.phase-label {
+    color: rgb(226, 242, 255);
+    font-size: 0.92rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.08rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.26);
+}
+
+.phase-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2.55rem;
+    line-height: 0.9;
+    letter-spacing: 0.08em;
+    color: white;
+    text-shadow: 0 0 16px rgba(54, 221, 255, 0.42), 0 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.async-message {
+    font-size: 1.8rem;
+    color: rgb(226, 242, 255);
+}
+
+#tracker {
+    right: 0;
+    max-width: 25vw;
+}
+
+#tracker .mission-header {
+    background:
+        linear-gradient(90deg, rgba(251, 191, 36, 0.22), rgba(54, 221, 255, 0.05) 58%, transparent) !important;
+    border-bottom-color: rgba(251, 191, 36, 0.42) !important;
+}
+
+#tracker .mission-header .mission-icon,
+#tracker .mission-title {
+    color: var(--hg-gold) !important;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.44);
+}
+
+.mission-content {
+    padding: 0.72rem;
+}
+
+.winning_condition,
+.losing_condition {
+    padding: 0.72rem;
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.08), transparent 46%),
+        rgba(8, 18, 34, 0.62);
+    border: 1px solid rgba(54, 221, 255, 0.34);
+    border-left: 3px solid rgba(54, 221, 255, 0.72);
+}
+
+.losing_condition {
+    background:
+        linear-gradient(135deg, rgba(248, 113, 113, 0.10), transparent 50%),
+        rgba(21, 10, 18, 0.70);
+    border-color: rgba(248, 113, 113, 0.34);
+    border-left-color: rgba(248, 113, 113, 0.78);
+}
+
+.mission-targets > div {
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(54, 221, 255, 0.08);
+}
+
+.mission-progress {
+    height: 9px;
+    border-radius: 0;
+    background: rgba(226, 242, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.55);
+}
+
+#your_stats {
+    right: 0;
+    top: 35vh;
+    width: 250px;
+}
+
+#your_stats .panel-content {
+    padding: 0.52rem 0.5rem 0.62rem;
+}
+
+#your_stats .stat-row {
+    min-height: 31px;
+    padding: 0.35rem 0.48rem;
+    margin-bottom: 0.22rem;
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.07), rgba(15, 23, 42, 0.28));
+    border-left: 2px solid rgba(54, 221, 255, 0.42);
+    box-shadow: inset 0 0 14px rgba(54, 221, 255, 0.018);
+}
+
+#your_stats .stat-row:hover,
+#your_stats .stat-row.active-stat-row {
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.16), rgba(15, 23, 42, 0.36));
+    border-left-color: rgba(251, 191, 36, 0.86);
+}
+
+#your_stats .stat-label {
+    color: rgba(196, 215, 232, 0.78);
+    font-size: 0.66rem;
+    letter-spacing: 0.055em;
+}
+
+#your_stats .stat-value {
+    font-size: 0.9rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 900;
+}
+
+#event_log_panel {
+    width: 250px;
+    bottom: 5.8rem;
+}
+
+#event_log_panel.collapsed {
+    max-height: 36px;
+}
+
+.event-log-header {
+    height: 36px;
+    padding: 0 0.75rem;
+}
+
+#event_log_toggle {
+    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    background: rgba(54, 221, 255, 0.08);
+    border: 1px solid rgba(54, 221, 255, 0.50);
+}
+
+.event-log-filters {
+    background: rgba(2, 6, 23, 0.26);
+}
+
+.event-log-filters button {
+    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    background: rgba(8, 18, 34, 0.68);
+}
+
+.event-log-item {
+    grid-template-columns: 26px 1fr 38px;
+    padding: 0.48rem 0.6rem;
+    background: rgba(8, 18, 34, 0.30);
+    border-top: 1px solid rgba(54, 221, 255, 0.12);
+}
+
+.event-log-time {
+    color: rgba(54, 221, 255, 0.84);
+}
+
+#bottom-action-buttons-container {
+    bottom: 1rem;
+    left: 1rem;
+    gap: 0.58rem;
+    z-index: 24;
+}
+
+.bottom-action-button {
+    position: relative;
+    min-width: 118px;
+    min-height: 72px;
+    padding: 0.62rem 1rem 0.54rem;
+    clip-path: polygon(0 14px, 14px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, currentColor 16%, transparent), transparent 48%),
+        linear-gradient(180deg, rgba(13, 18, 31, 0.88), rgba(2, 6, 23, 0.86));
+    border-width: 1px;
+    backdrop-filter: blur(12px);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.025) inset,
+        0 12px 28px rgba(0, 0, 0, 0.30),
+        0 0 18px color-mix(in srgb, currentColor 16%, transparent);
+    overflow: hidden;
+}
+
+.bottom-action-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, color-mix(in srgb, currentColor 18%, transparent), transparent 42%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 8px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.bottom-action-button::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    width: 18px;
+    height: 18px;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+    opacity: 0.56;
+    pointer-events: none;
+}
+
+.bottom-action-button:hover {
+    transform: translateY(-3px);
+    background:
+        linear-gradient(135deg, color-mix(in srgb, currentColor 25%, transparent), transparent 52%),
+        linear-gradient(180deg, rgba(16, 27, 44, 0.92), rgba(2, 6, 23, 0.88));
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, currentColor 22%, transparent) inset,
+        0 16px 30px rgba(0, 0, 0, 0.34),
+        0 0 24px color-mix(in srgb, currentColor 32%, transparent);
+}
+
+.bottom-action-button .flex {
+    position: relative;
+    z-index: 1;
+}
+
+.action-icon {
+    width: 28px;
+    height: 28px;
+    filter: brightness(1.3) drop-shadow(0 0 8px currentColor);
+}
+
+.action-label {
+    position: relative;
+    font-size: 0.8rem;
+    letter-spacing: 0.10em;
+    line-height: 1;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.action-label::after {
+    display: block;
+    margin-top: 0.28rem;
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: rgba(226, 242, 255, 0.62);
+    text-shadow: none;
+    white-space: nowrap;
+}
+
+#btn-diplomatic { color: rgb(121, 222, 255); border-color: rgba(121, 222, 255, 0.52); }
+#btn-diplomatic .action-label::after { content: 'NEGOTIATION'; }
+#btn-sep-auth { color: rgb(251, 191, 36); border-color: rgba(251, 191, 36, 0.58); }
+#btn-sep-auth .action-label::after { content: 'COMMAND'; }
+#btn-skill { color: rgb(216, 180, 254); border-color: rgba(216, 180, 254, 0.56); }
+#btn-skill .action-label::after { content: 'DOCTRINE'; }
+#btn-reserve { color: rgb(248, 113, 113); border-color: rgba(248, 113, 113, 0.56); }
+#btn-reserve .action-label::after { content: 'DEPLOYMENT'; }
+#btn-debt { color: rgb(74, 222, 128); border-color: rgba(74, 222, 128, 0.54); }
+#btn-debt .action-label::after { content: 'LIABILITY'; }
+
+#middle_display {
+    min-width: 280px;
+    clip-path: polygon(0 20px, 20px 0, calc(100% - 24px) 0, 100% 24px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 24px 100%, 0 calc(100% - 24px));
+    opacity: 0.98;
+}
+
+#middle_title {
+    min-height: 44px;
+    padding: 0.75rem 1.6rem;
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.22), rgba(54, 221, 255, 0.06) 55%, rgba(54, 221, 255, 0.16)) !important;
+    border-bottom: 1px solid rgba(54, 221, 255, 0.45) !important;
+    color: rgb(226, 242, 255);
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    text-shadow: 0 0 14px rgba(54, 221, 255, 0.36);
+}
+
+#middle_content {
+    padding: 1rem 1.12rem !important;
+    background:
+        radial-gradient(circle at 50% 0, rgba(54, 221, 255, 0.08), transparent 52%),
+        linear-gradient(to bottom, rgba(2, 6, 23, 0.58), rgba(15, 23, 42, 0.30)) !important;
+}
+
+#middle_content button.hg-skinned,
+.action-button {
+    clip-path: var(--hg-card-cut);
+    border-radius: 0 !important;
+    border: 1px solid rgba(54, 221, 255, 0.42) !important;
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.08), transparent 48%),
+        rgba(8, 18, 34, 0.72) !important;
+    color: rgb(226, 242, 255) !important;
+    box-shadow: 0 0 16px rgba(54, 221, 255, 0.08), inset 0 0 12px rgba(54, 221, 255, 0.025) !important;
+}
+
+#middle_content button.hg-skinned:hover,
+.action-button:hover {
+    border-color: rgba(54, 221, 255, 0.78) !important;
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.16), transparent 52%),
+        rgba(13, 33, 52, 0.82) !important;
+    transform: translateY(-2px);
+}
+
+#control_mechanism {
+    clip-path: var(--hg-panel-cut);
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.16), rgba(8, 18, 34, 0.88), rgba(54, 221, 255, 0.10)) !important;
+}
+
+#control_confirm,
+#control_cancel,
+#proceed_next_stage {
+    clip-path: polygon(0 12px, 12px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    border-width: 1px;
+    border-radius: 0;
+    text-shadow: 0 0 10px currentColor;
+}
+
+#control_confirm {
+    background:
+        linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(8, 18, 34, 0.86)) !important;
+}
+
+#control_cancel {
+    background:
+        linear-gradient(135deg, rgba(248, 113, 113, 0.24), rgba(8, 18, 34, 0.86)) !important;
+}
+
+#proceed_next_stage {
+    background:
+        linear-gradient(135deg, rgba(54, 221, 255, 0.18), rgba(8, 18, 34, 0.88)) !important;
+    border-color: rgba(54, 221, 255, 0.70) !important;
+    box-shadow: 0 0 24px rgba(54, 221, 255, 0.25) !important;
+}
+
+.game-chatbox {
+    background:
+        linear-gradient(180deg, rgba(8, 18, 34, 0.86), rgba(2, 6, 23, 0.86)) !important;
+}
+
+.chat-input,
+.chat-display {
+    background: rgba(2, 6, 23, 0.42) !important;
+    border-color: rgba(54, 221, 255, 0.20) !important;
+}
+
+.chat-channels button,
+.chat-channels .channel-button {
+    clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+    border-radius: 0 !important;
+}
+
+#event_banner {
+    width: min(680px, 44vw);
+    min-height: 64px;
+    clip-path: polygon(0 50%, 4% 0, 96% 0, 100% 50%, 96% 100%, 4% 100%);
+    background:
+        linear-gradient(90deg, transparent, rgba(2, 6, 23, 0.92) 12%, rgba(51, 20, 20, 0.90) 50%, rgba(2, 6, 23, 0.92) 88%, transparent),
+        repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.10) 0 1px, transparent 1px 9px);
+    border-top-color: rgba(248, 113, 113, 0.86);
+    border-bottom-color: rgba(248, 113, 113, 0.86);
+    color: rgb(255, 210, 160);
+    text-shadow: 0 0 18px rgba(248, 113, 113, 0.62);
+}
+
+#event_subtitle_bar {
+    color: rgb(171, 242, 255);
+    letter-spacing: 0.12em;
+}
+
+.tactical-tooltip,
+.skill-tooltip-content,
+.hn-skin {
+    clip-path: var(--hg-panel-cut);
+    border-radius: 0 !important;
+}
+
+.hn-dossier,
+.hn-major-ribbon,
+.hn-sigil,
+.hn-elimination {
+    clip-path: polygon(0 14px, 14px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 18px 100%, 0 calc(100% - 18px));
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent 40%),
+        linear-gradient(180deg, color-mix(in srgb, var(--bg) 86%, #0a1628 14%), var(--bg));
+    border-color: color-mix(in srgb, var(--accent) 54%, transparent);
+}
+
+
+.event-log-header span { order: 0; }
+.event-log-header::after {
+    order: 1;
+    margin-left: auto;
+    margin-right: 0.45rem;
+}
+#event_log_toggle {
+    order: 2;
+}
+
+/* =========================================================
+   Premium overlay surgical fix pass - 2026-06-06
+   Scope: visual-only corrections for generated HUD skin.
+   ========================================================= */
+
+/* 1 / 5 / 8 / 9: prevent decorative HUD labels/brackets from colliding with real content */
+#overlay_sections::before {
+    content: '' !important;
+    display: none !important;
+}
+
+.tactical-panel::before,
+.tactical-panel-no-header::before,
+#tracker::before,
+#player_info::before,
+#event_log_panel::before,
+#middle_display::before,
+#control_mechanism::before,
+#stat_info_display::before,
+#laplace_info_display::before,
+#currentDoctrineInfo::before {
+    left: 10px !important;
+    top: 10px !important;
+    width: 16px !important;
+    height: 16px !important;
+    opacity: 0.75 !important;
+    z-index: 1 !important;
+}
+
+.tactical-panel::after,
+.tactical-panel-no-header::after,
+#tracker::after,
+#player_info::after,
+#event_log_panel::after,
+#middle_display::after,
+#control_mechanism::after,
+#stat_info_display::after,
+#laplace_info_display::after,
+#currentDoctrineInfo::after {
+    right: 9px !important;
+    bottom: 9px !important;
+    width: 18px !important;
+    height: 18px !important;
+    opacity: 0.75 !important;
+    z-index: 1 !important;
+}
+
+.player-info-header,
+.panel-header,
+.mission-header,
+.event-log-header,
+.laplace-header {
+    padding-left: 1.55rem !important;
+}
+
+#btn_show_cont {
+    padding-left: 1.85rem !important;
+    letter-spacing: 0.08em !important;
+}
+
+#btn_show_cont::before {
+    left: 0.45rem !important;
+    opacity: 0.55 !important;
+}
+
+/* 2: remove upper-right micro labels from always-visible main cards only.
+   Keep the top-middle phase announcement label untouched. */
+.player-info-header::after,
+.panel-header::after,
+.mission-header::after,
+.event-log-header::after {
+    content: '' !important;
+    display: none !important;
+}
+
+/* 9: slightly reduce global overview footprint and move player status away from it */
+#global_overview {
+    top: 7.8vh !important;
+    max-height: 22.5vh !important;
+}
+
+#global_overview .panel-content-compact {
+    padding: 0.42rem !important;
+    gap: 0.32rem !important;
+}
+
+.global-round-compact {
+    min-height: 30px !important;
+    padding: 0.22rem 0.45rem !important;
+}
+
+.global-card-compact {
+    min-height: 42px !important;
+    padding: 0.32rem 0.38rem !important;
+}
+
+#player_info {
+    top: 54% !important;
+    max-height: 38.5vh !important;
+}
+
+/* 4: event log selected filter buttons should keep the tactical angle but not lose the corner */
+.event-log-filters {
+    gap: 0.24rem !important;
+    padding: 0.36rem 0.42rem !important;
+}
+
+.event-log-filters button {
+    min-height: 24px !important;
+    padding: 0.22rem 0.28rem !important;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 3px) 100%, 0 100%) !important;
+}
+
+.event-log-filters button.active {
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.32), inset 0 0 8px rgba(34, 211, 238, 0.12) !important;
+}
+
+/* 5: chatbox gets right-side brackets only so the upper-left text/input stays clean */
+.game-chatbox {
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%) !important;
+}
+
+.game-chatbox::before {
+    left: auto !important;
+    right: 7px !important;
+    top: 7px !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-left: 0 !important;
+    border-top: 2px solid rgba(54, 221, 255, 0.72) !important;
+    border-right: 2px solid rgba(54, 221, 255, 0.72) !important;
+    border-bottom: 0 !important;
+}
+
+.game-chatbox::after {
+    left: auto !important;
+    right: 7px !important;
+    bottom: 7px !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-left: 0 !important;
+    border-top: 0 !important;
+    border-right: 2px solid rgba(54, 221, 255, 0.72) !important;
+    border-bottom: 2px solid rgba(54, 221, 255, 0.72) !important;
+}
+
+.chat-display,
+.chat-input-wrapper,
+.chat-channels {
+    padding-left: 0.62rem !important;
+}
+
+/* 6: slider / confirm / cancel should feel present, not ghosted */
+#control_mechanism {
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.24), rgba(8, 18, 34, 0.96) 28%, rgba(8, 18, 34, 0.96) 72%, rgba(54, 221, 255, 0.18)) !important;
+    border-color: rgba(54, 221, 255, 0.82) !important;
+    box-shadow: 0 0 28px rgba(54, 221, 255, 0.30), inset 0 0 18px rgba(54, 221, 255, 0.07) !important;
+}
+
+.tactical-slider::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.45), rgba(15, 23, 42, 0.95)) !important;
+    border: 1px solid rgba(34, 211, 238, 0.45) !important;
+}
+
+.tactical-slider::-moz-range-track {
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.45), rgba(15, 23, 42, 0.95)) !important;
+    border: 1px solid rgba(34, 211, 238, 0.45) !important;
+}
+
+#control_confirm {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.76), rgba(6, 38, 22, 0.94)) !important;
+    border-color: rgba(74, 222, 128, 0.92) !important;
+    box-shadow: 0 0 24px rgba(34, 197, 94, 0.44), inset 0 0 16px rgba(74, 222, 128, 0.10) !important;
+}
+
+#control_cancel {
+    background: linear-gradient(135deg, rgba(185, 28, 28, 0.78), rgba(45, 10, 18, 0.94)) !important;
+    border-color: rgba(248, 113, 113, 0.92) !important;
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.44), inset 0 0 16px rgba(248, 113, 113, 0.10) !important;
+}
+
+#control_confirm:hover {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.92), rgba(6, 78, 35, 0.98)) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 0 36px rgba(34, 197, 94, 0.62), inset 0 0 20px rgba(187, 247, 208, 0.14) !important;
+}
+
+#control_cancel:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.92), rgba(91, 17, 27, 0.98)) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 0 36px rgba(239, 68, 68, 0.62), inset 0 0 20px rgba(254, 202, 202, 0.14) !important;
+}
+
+#control_confirm:active,
+#control_cancel:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* 7 / 11: secondary menu buttons restore original color identity and normal option size */
+#middle_content .action-button {
+    width: 8vw !important;
+    height: 8vw !important;
+    min-width: 104px !important;
+    min-height: 104px !important;
+    max-width: 150px !important;
+    max-height: 150px !important;
+    padding: 0.58rem !important;
+    border-width: 1px !important;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.24), inset 0 0 12px rgba(255, 255, 255, 0.05) !important;
+}
+
+#middle_content .action-button img {
+    max-height: 54px !important;
+    max-width: 62px !important;
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.55)) brightness(1.06) !important;
+}
+
+#middle_content .action-button .small,
+#middle_content .action-button span.small {
+    margin-top: 0.34rem !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.06em !important;
+    line-height: 1.05 !important;
+}
+
+#btn-ui { background: linear-gradient(135deg, rgba(88, 166, 128, 0.94), rgba(30, 83, 62, 0.92)) !important; border-color: rgba(149, 239, 190, 0.58) !important; color: #fff !important; }
+#btn-ui:hover { background: linear-gradient(135deg, rgba(63, 128, 94, 0.98), rgba(24, 71, 52, 0.98)) !important; }
+#btn-bc { background: linear-gradient(135deg, rgba(96, 103, 161, 0.94), rgba(48, 54, 112, 0.92)) !important; border-color: rgba(171, 178, 255, 0.58) !important; color: #fff !important; }
+#btn-bc:hover { background: linear-gradient(135deg, rgba(72, 78, 128, 0.98), rgba(38, 43, 96, 0.98)) !important; }
+#btn-mob { background: linear-gradient(135deg, rgba(161, 96, 108, 0.95), rgba(99, 43, 55, 0.94)) !important; border-color: rgba(255, 177, 190, 0.58) !important; color: #fff !important; }
+#btn-mob:hover { background: linear-gradient(135deg, rgba(129, 75, 86, 0.98), rgba(90, 35, 46, 0.98)) !important; }
+#btn-mega { background: linear-gradient(135deg, rgba(253, 177, 63, 0.96), rgba(132, 76, 13, 0.94)) !important; border-color: rgba(255, 220, 138, 0.70) !important; color: #070707 !important; }
+#btn-mega:hover { background: linear-gradient(135deg, rgba(253, 187, 78, 1), rgba(151, 88, 14, 0.98)) !important; }
+#btn-fort { background: linear-gradient(135deg, rgba(135, 135, 135, 0.96), rgba(47, 51, 57, 0.94)) !important; border-color: rgba(229, 231, 235, 0.54) !important; color: #fff !important; }
+#btn-fort:hover { background: linear-gradient(135deg, rgba(68, 68, 68, 0.98), rgba(25, 30, 36, 0.98)) !important; }
+#btn-hall { background: linear-gradient(135deg, rgba(108, 59, 170, 0.96), rgba(54, 27, 94, 0.94)) !important; border-color: rgba(216, 180, 254, 0.60) !important; color: #fff !important; }
+#btn-hall:hover { background: linear-gradient(135deg, rgba(204, 136, 153, 0.96), rgba(104, 52, 96, 0.96)) !important; }
+#btn-nexus { background: linear-gradient(135deg, rgba(168, 220, 171, 0.96), rgba(72, 116, 76, 0.94)) !important; border-color: rgba(219, 255, 222, 0.68) !important; color: #050805 !important; }
+#btn-nexus:hover { background: linear-gradient(135deg, rgba(140, 184, 142, 1), rgba(57, 94, 61, 0.98)) !important; }
+#btn-leyline { background: linear-gradient(135deg, rgba(105, 135, 213, 0.96), rgba(45, 69, 132, 0.94)) !important; border-color: rgba(187, 223, 250, 0.66) !important; color: #05080f !important; }
+#btn-leyline:hover { background: linear-gradient(135deg, rgba(187, 223, 250, 1), rgba(75, 111, 190, 0.98)) !important; }
+#btn-bureau { background: linear-gradient(135deg, rgba(44, 95, 52, 0.96), rgba(18, 61, 27, 0.94)) !important; border-color: rgba(134, 239, 172, 0.58) !important; color: #fff !important; }
+#btn-bureau:hover { background: linear-gradient(135deg, rgba(93, 101, 50, 0.98), rgba(49, 65, 31, 0.98)) !important; }
+#btn-survey { background: linear-gradient(135deg, rgba(100, 116, 139, 0.96), rgba(39, 52, 73, 0.94)) !important; border-color: rgba(203, 213, 225, 0.56) !important; color: #fff !important; }
+#btn-survey:hover { background: linear-gradient(135deg, rgba(51, 65, 85, 0.98), rgba(24, 34, 49, 0.98)) !important; }
+
+#middle_content .action-button .hover-label {
+    opacity: 0 !important;
+    transform: translateY(7px) !important;
+    transition: opacity 0.18s ease, transform 0.18s ease !important;
+}
+
+#middle_content .action-button:hover .hover-label {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Diplomatic action modal: distinct red diplomatic command cards instead of flat dark buttons */
+#btn-summit,
+#btn-globalpeace {
+    min-width: 132px !important;
+    min-height: 108px !important;
+    padding: 0.72rem 0.86rem !important;
+    background: linear-gradient(135deg, rgba(186, 104, 104, 0.92), rgba(82, 29, 42, 0.94)) !important;
+    border-color: rgba(255, 170, 170, 0.55) !important;
+    color: #fff !important;
+    box-shadow: 0 0 20px rgba(186, 104, 104, 0.22), inset 0 0 14px rgba(255, 255, 255, 0.045) !important;
+}
+
+#btn-summit:hover,
+#btn-globalpeace:hover {
+    background: linear-gradient(135deg, rgba(158, 84, 84, 0.98), rgba(96, 28, 42, 0.98)) !important;
+    border-color: rgba(255, 210, 210, 0.82) !important;
+    transform: translateY(-2px) !important;
+}
+
+#btn-action-cancel {
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, rgba(185, 28, 28, 0.92), rgba(69, 10, 10, 0.94)) !important;
+    border: 1px solid rgba(248, 113, 113, 0.70) !important;
+    color: rgb(254, 226, 226) !important;
+}
+
+/* War Art / doctrine selections: restore selected red state and give the grid richer color */
+#middle_content .skill-icon-button {
+    width: 100px !important;
+    height: 100px !important;
+    min-width: 100px !important;
+    min-height: 100px !important;
+    padding: 0 !important;
+    margin: 8px !important;
+    background: linear-gradient(135deg, rgba(88, 28, 135, 0.58), rgba(8, 18, 34, 0.88)) !important;
+    border: 1px solid rgba(168, 85, 247, 0.46) !important;
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.12), inset 0 0 18px rgba(34, 211, 238, 0.035) !important;
+}
+
+#middle_content .skill-icon-button:hover {
+    border-color: rgba(34, 211, 238, 0.90) !important;
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.35), inset 0 0 16px rgba(34, 211, 238, 0.06) !important;
+    transform: scale(1.05) !important;
+}
+
+#middle_content .skill-icon-button.selected {
+    border: 3px solid rgb(239, 68, 68) !important;
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.68), rgba(22, 9, 18, 0.90)) !important;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.72), inset 0 0 24px rgba(239, 68, 68, 0.18) !important;
+    transform: scale(1.06) !important;
+}
+
+#middle_content .skill-icon-button.selected::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border: 2px solid rgba(254, 202, 202, 0.65) !important;
+    box-shadow: inset 0 0 28px rgba(239, 68, 68, 0.28) !important;
+    pointer-events: none !important;
+}
+
+#middle_content .skill-icon-button.selected::before {
+    content: 'SELECTED' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    padding: 2px 0 !important;
+    background: rgba(127, 29, 29, 0.92) !important;
+    color: rgb(254, 226, 226) !important;
+    font-size: 0.56rem !important;
+    letter-spacing: 0.14em !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    pointer-events: none !important;
+}
+
+#middle_content .doctrine-card.selected {
+    border: 3px solid rgba(239, 68, 68, 0.95) !important;
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.46), rgba(30, 41, 59, 0.86)) !important;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.66), inset 0 0 22px rgba(239, 68, 68, 0.12) !important;
+}
+
+#middle_content .doctrine-card.selected::before,
+#middle_content .doctrine-card.selected::after {
+    border-color: rgba(239, 68, 68, 0.96) !important;
+}
+
+/* 10: emergency_banner and narrative_subtitle notifications should not inherit the new panel cut skin */
+.hn-emergency-banner {
+    clip-path: polygon(0 50%, 3.4% 0, 96.6% 0, 100% 50%, 96.6% 100%, 3.4% 100%) !important;
+    border-radius: 0 !important;
+}
+
+.hn-subtitle-bar {
+    clip-path: none !important;
+    border-radius: 0 !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+    mask-image: linear-gradient(90deg, transparent 0%, black 11%, black 89%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 11%, black 89%, transparent 100%) !important;
+}
+
+/* =========================================================
+   Premium overlay correction pass - focused fixes
+   Scope: CSS-only; fixes panel corner clutter, menu colors/sizing,
+   map info centering, next phase opacity, and left-column spacing.
+   ========================================================= */
+
+/* 1 / 3 / 8: replace noisy corner brackets on main always-visible cards with clean HUD edges */
+#global_overview::before,
+#global_overview::after,
+#player_info::before,
+#player_info::after,
+#tracker::before,
+#tracker::after,
+#your_stats::before,
+#your_stats::after,
+#event_log_panel::before,
+#event_log_panel::after,
+.game-chatbox::before,
+.game-chatbox::after {
+    content: none !important;
+    display: none !important;
+}
+
+#global_overview,
+#player_info,
+#tracker,
+#your_stats,
+#event_log_panel,
+.game-chatbox {
+    overflow: hidden !important;
+    background:
+        linear-gradient(90deg, rgba(54, 221, 255, 0.82) 0 26px, transparent 26px calc(100% - 26px), rgba(54, 221, 255, 0.62) calc(100% - 26px) 100%) top left / 100% 1px no-repeat,
+        linear-gradient(90deg, rgba(54, 221, 255, 0.56) 0 20px, transparent 20px calc(100% - 20px), rgba(54, 221, 255, 0.50) calc(100% - 20px) 100%) bottom left / 100% 1px no-repeat,
+        linear-gradient(180deg, rgba(54, 221, 255, 0.78) 0 18px, transparent 18px calc(100% - 18px), rgba(54, 221, 255, 0.55) calc(100% - 18px) 100%) left top / 1px 100% no-repeat,
+        linear-gradient(180deg, rgba(54, 221, 255, 0.54) 0 20px, transparent 20px calc(100% - 20px), rgba(54, 221, 255, 0.62) calc(100% - 20px) 100%) right top / 1px 100% no-repeat,
+        linear-gradient(135deg, rgba(54, 221, 255, 0.075), transparent 28%),
+        linear-gradient(180deg, rgba(14, 27, 48, 0.90), rgba(2, 6, 23, 0.90)) !important;
+}
+
+.player-info-header,
+.panel-header,
+.mission-header,
+.event-log-header {
+    padding-left: 0.82rem !important;
+    padding-right: 0.82rem !important;
+    min-height: 34px !important;
+}
+
+.player-info-header .header-icon,
+.panel-header .header-icon,
+.mission-header .mission-icon,
+.event-log-header span {
+    margin-left: 0 !important;
+}
+
+/* 2: no upper-right micro-labels on main cards; announcement remains untouched. */
+.player-info-header::after,
+.panel-header::after,
+.mission-header::after,
+.event-log-header::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* 1: less see-through proceed/next phase button */
+#proceed_next_stage {
+    background:
+        linear-gradient(135deg, rgba(21, 184, 218, 0.48), rgba(8, 18, 34, 0.98) 58%, rgba(34, 211, 238, 0.32)) !important;
+    border-color: rgba(103, 232, 249, 0.95) !important;
+    color: rgb(177, 248, 255) !important;
+    box-shadow: 0 0 28px rgba(54, 221, 255, 0.38), inset 0 0 22px rgba(54, 221, 255, 0.12) !important;
+}
+
+#proceed_next_stage:hover {
+    background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.66), rgba(10, 30, 48, 0.99) 55%, rgba(103, 232, 249, 0.42)) !important;
+    box-shadow: 0 0 36px rgba(54, 221, 255, 0.58), inset 0 0 26px rgba(103, 232, 249, 0.18) !important;
+}
+
+/* 2: Map Info content centered and no accidental spacing drift */
+#btn_show_cont {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 1.05rem !important;
+    text-align: center !important;
+    line-height: 1 !important;
+}
+
+#btn_show_cont > div,
+#btn_show_cont .flex {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.45rem !important;
+}
+
+#btn_show_cont .globe-icon {
+    flex: 0 0 auto !important;
+}
+
+/* 5: left-column spacing: player list sits directly under global overview, not near chatbox */
+#global_overview {
+    top: 7.3vh !important;
+    max-height: 22.5vh !important;
+}
+
+#player_info {
+    top: 30.8vh !important;
+    transform: none !important;
+    max-height: 38.7vh !important;
+}
+
+.game-chatbox {
+    top: 72vh !important;
+}
+
+.game-chatbox.expanded {
+    top: 47vh !important;
+}
+
+/* 4: Authority menu option sizing restored to original compact grid size */
+#middle_content .button-grid .action-button,
+#middle_content button.action-button {
+    width: 120px !important;
+    height: 72px !important;
+    min-width: 120px !important;
+    min-height: 72px !important;
+    max-width: 120px !important;
+    max-height: 72px !important;
+    padding: 3px 4px !important;
+    overflow: hidden !important;
+    clip-path: polygon(0 9px, 9px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)) !important;
+}
+
+#middle_content .button-grid .action-button img,
+#middle_content button.action-button img {
+    max-height: 38px !important;
+    max-width: 53px !important;
+}
+
+#middle_content .button-grid .action-button span.small,
+#middle_content button.action-button span.small {
+    margin-top: 2px !important;
+    font-size: 0.76rem !important;
+    line-height: 1 !important;
+}
+
+#middle_content .button-grid {
+    gap: 8px !important;
+}
+
+/* 4 / 7: Authority colors restored with selectors strong enough to beat the global button skin */
+#middle_content #btn-ui { background: #58A680 !important; border-color: rgba(149, 239, 190, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-ui:hover { background: #3F805E !important; }
+#middle_content #btn-bc { background: #6067A1 !important; border-color: rgba(171, 178, 255, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-bc:hover { background: #484E80 !important; }
+#middle_content #btn-mob { background: #A1606C !important; border-color: rgba(255, 177, 190, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-mob:hover { background: #814B56 !important; }
+#middle_content #btn-mega { background: #FDB13F !important; border-color: rgba(255, 220, 138, 0.82) !important; color: #000000 !important; }
+#middle_content #btn-mega:hover { background: #FDBB4E !important; }
+#middle_content #btn-fort { background: #878787 !important; border-color: rgba(229, 231, 235, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-fort:hover { background: #444444 !important; }
+#middle_content #btn-hall { background: #6C3BAA !important; border-color: rgba(216, 180, 254, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-hall:hover { background: #CC8899 !important; }
+#middle_content #btn-nexus { background: #A8DCAB !important; border-color: rgba(219, 255, 222, 0.82) !important; color: #000000 !important; }
+#middle_content #btn-nexus:hover { background: #8CB88E !important; }
+#middle_content #btn-leyline { background: #6987D5 !important; border-color: rgba(187, 223, 250, 0.82) !important; color: #000000 !important; }
+#middle_content #btn-leyline:hover { background: #BBDFFA !important; }
+#middle_content #btn-bureau { background: #2C5F34 !important; border-color: rgba(134, 239, 172, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-bureau:hover { background: #5D6532 !important; }
+#middle_content #btn-survey { background: #64748b !important; border-color: rgba(203, 213, 225, 0.72) !important; color: #FFFFFF !important; }
+#middle_content #btn-survey:hover { background: #334155 !important; }
+
+#middle_content .action-button .price-tag,
+#middle_content .action-button span,
+#middle_content .action-button .small {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72) !important;
+}
+
+/* 4 / 7: Diplomatic command cards get obvious red command-card color and compact size */
+#middle_content #btn-summit,
+#middle_content #btn-globalpeace {
+    width: 132px !important;
+    height: 104px !important;
+    min-width: 132px !important;
+    min-height: 104px !important;
+    max-width: 132px !important;
+    max-height: 104px !important;
+    background: linear-gradient(135deg, rgba(186, 104, 104, 0.98), rgba(82, 29, 42, 0.98)) !important;
+    border: 1px solid rgba(255, 170, 170, 0.78) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 22px rgba(186, 104, 104, 0.38), inset 0 0 14px rgba(255, 255, 255, 0.07) !important;
+}
+
+#middle_content #btn-summit:hover,
+#middle_content #btn-globalpeace:hover {
+    background: linear-gradient(135deg, rgba(210, 112, 112, 1), rgba(112, 32, 50, 1)) !important;
+    border-color: rgba(255, 218, 218, 0.92) !important;
+}
+
+#middle_content #btn-summit img,
+#middle_content #btn-globalpeace img,
+#middle_content #btn-summit svg,
+#middle_content #btn-globalpeace svg {
+    opacity: 0.72 !important;
+    filter: brightness(1.7) drop-shadow(0 0 8px rgba(255, 210, 210, 0.28)) !important;
+}
+
+/* 4 / 7: War Art grid keeps visual color but not oversized by the generic action-button fix */
+#middle_content .skill-icon-button {
+    width: 96px !important;
+    height: 96px !important;
+    min-width: 96px !important;
+    min-height: 96px !important;
+    max-width: 96px !important;
+    max-height: 96px !important;
+    background: linear-gradient(135deg, rgba(76, 29, 149, 0.72), rgba(8, 18, 34, 0.94)) !important;
+    border-color: rgba(192, 132, 252, 0.58) !important;
+}
+
+#middle_content .skill-icon-button.selected {
+    border: 3px solid rgb(239, 68, 68) !important;
+    background: linear-gradient(135deg, rgba(153, 27, 27, 0.88), rgba(28, 12, 26, 0.96)) !important;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.72), inset 0 0 24px rgba(239, 68, 68, 0.18) !important;
+}
+
+
+/* =========================================================
+   Final targeted overlay fix pass
+   Purpose: stop generic middle-display button skin from erasing
+   original menu colors, clean option shadows, and repair diplomatic text.
+   ========================================================= */
+
+/* Let normal modal buttons keep their original inline / Bootstrap / utility colors.
+   The premium skin should only apply to explicit action-button/card systems. */
+#middle_content button:not(.action-button):not(.skill-icon-button):not(#btn-action-cancel):not(#btn-summit):not(#btn-globalpeace) {
+    clip-path: none !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+}
+
+#middle_content button:not(.action-button):not(.skill-icon-button):not(#btn-action-cancel):not(#btn-summit):not(#btn-globalpeace):hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Restore common decision/action colors so future middle-display buttons do not go colorless. */
+#middle_content .btn-success,
+#middle_content .bg-green-500,
+#middle_content #btn_yes,
+#middle_content #convertBtn {
+    background: #198754 !important;
+    background-color: #198754 !important;
+    border-color: #157347 !important;
+    color: #ffffff !important;
+}
+
+#middle_content .btn-success:hover,
+#middle_content .bg-green-500:hover,
+#middle_content #btn_yes:hover,
+#middle_content #convertBtn:hover {
+    background: #157347 !important;
+    background-color: #157347 !important;
+    border-color: #146c43 !important;
+    color: #ffffff !important;
+}
+
+#middle_content .btn-danger,
+#middle_content .bg-red-500,
+#middle_content .bg-red-700,
+#middle_content #btn_no,
+#middle_content #btn-action-cancel {
+    background: #dc3545 !important;
+    background-color: #dc3545 !important;
+    border-color: #bb2d3b !important;
+    color: #ffffff !important;
+}
+
+#middle_content .btn-danger:hover,
+#middle_content .bg-red-500:hover,
+#middle_content .bg-red-700:hover,
+#middle_content #btn_no:hover,
+#middle_content #btn-action-cancel:hover {
+    background: #bb2d3b !important;
+    background-color: #bb2d3b !important;
+    border-color: #b02a37 !important;
+    color: #ffffff !important;
+}
+
+#middle_content .btn-warning,
+#middle_content .bg-yellow-500,
+#middle_content #btn_abs,
+#middle_content #btn-skill-activate,
+#middle_content #btn-skill-activate-sep {
+    background: #ffc107 !important;
+    background-color: #ffc107 !important;
+    border-color: #ffca2c !important;
+    color: #111827 !important;
+}
+
+#middle_content .btn-warning:hover,
+#middle_content .bg-yellow-500:hover,
+#middle_content #btn_abs:hover,
+#middle_content #btn-skill-activate:hover,
+#middle_content #btn-skill-activate-sep:hover {
+    background: #ffca2c !important;
+    background-color: #ffca2c !important;
+    border-color: #ffc720 !important;
+    color: #111827 !important;
+}
+
+/* Keep the colored Authority cards, but remove the dirty/heavy shadow layer. */
+#middle_content .button-grid .action-button,
+#middle_content button.action-button {
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+#middle_content .button-grid .action-button:hover,
+#middle_content button.action-button:hover {
+    box-shadow: 0 0 14px rgba(54, 221, 255, 0.22) !important;
+    filter: brightness(1.05) !important;
+}
+
+#middle_content .action-button img,
+#middle_content .button-grid .action-button img,
+#middle_content button.action-button img {
+    filter: none !important;
+}
+
+#middle_content .action-button span,
+#middle_content .action-button .small,
+#middle_content .action-button span.small,
+#middle_content .action-button .price-tag {
+    text-shadow: none !important;
+}
+
+/* Diplomatic cards: keep color, clean shadow, and allow full two-line labels. */
+#middle_content #btn-summit,
+#middle_content #btn-globalpeace {
+    width: 136px !important;
+    height: 122px !important;
+    min-width: 136px !important;
+    min-height: 122px !important;
+    max-width: 136px !important;
+    max-height: 122px !important;
+    padding: 0.58rem 0.5rem !important;
+    overflow: hidden !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0.24rem !important;
+    background: #BA6868 !important;
+    background-color: #BA6868 !important;
+    border: 1px solid rgba(255, 178, 178, 0.68) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+#middle_content #btn-summit:hover,
+#middle_content #btn-globalpeace:hover {
+    background: #9E5454 !important;
+    background-color: #9E5454 !important;
+    border-color: rgba(255, 216, 216, 0.88) !important;
+    box-shadow: 0 0 14px rgba(186, 104, 104, 0.28) !important;
+}
+
+#middle_content #btn-summit img,
+#middle_content #btn-globalpeace img {
+    max-height: 56px !important;
+    max-width: 76px !important;
+    flex: 0 0 auto !important;
+    filter: none !important;
+    opacity: 0.9 !important;
+}
+
+#middle_content #btn-summit span,
+#middle_content #btn-globalpeace span {
+    display: block !important;
+    width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.06 !important;
+    font-size: 0.76rem !important;
+    margin-top: 0.16rem !important;
+    text-align: center !important;
+    text-shadow: none !important;
+}
+
+/* Voting buttons keep their readable original size and colors. */
+#middle_content #btn_yes,
+#middle_content #btn_no,
+#middle_content #btn_abs {
+    width: 8vw !important;
+    height: 8vw !important;
+    min-width: 92px !important;
+    min-height: 92px !important;
+    max-width: 150px !important;
+    max-height: 150px !important;
+    font-weight: 800 !important;
+    font-size: 1rem !important;
+}
+
+/* Small generated modal buttons such as skill activation and survey should stay colored and visible. */
+#middle_content #convertBtn,
+#middle_content #btn-skill-activate,
+#middle_content #btn-skill-activate-sep {
+    padding: 0.45rem 0.9rem !important;
+    min-height: 36px !important;
+    font-weight: 800 !important;
+}
+
+/* =========================================================
+   Final corner-crowding cleanup pass
+   Scope: only the elements called out in the screenshots.
+   ========================================================= */
+
+/* 1: Current doctrine display - remove corner bracket overlay that crowds the label/name. */
+#currentDoctrineInfo::before,
+#currentDoctrineInfo::after {
+    content: none !important;
+    display: none !important;
+}
+
+#currentDoctrineInfo {
+    clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px)) !important;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+}
+
+/* 2: Event log panel - keep the tactical shape, but make the clipped corners much smaller. */
+#event_log_panel {
+    clip-path: polygon(0 7px, 7px 0, calc(100% - 7px) 0, 100% 7px, 100% calc(100% - 7px), calc(100% - 7px) 100%, 7px 100%, 0 calc(100% - 7px)) !important;
+}
+
+/* 3: Middle-display menus - remove the decorative upper/right corner brackets that crowd menu headers. */
+#middle_display::before,
+#middle_display::after {
+    content: none !important;
+    display: none !important;
+}
+
+#middle_display {
+    clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px)) !important;
+}
+
+#middle_title {
+    padding-left: 1.35rem !important;
+    padding-right: 1.35rem !important;
+}
+
+/* 4: Slider/control modal - remove brackets so the slider/value area has clean breathing room. */
+#control_mechanism::before,
+#control_mechanism::after {
+    content: none !important;
+    display: none !important;
+}
+
+#control_mechanism {
+    clip-path: polygon(0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px)) !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/* 5: Intel / stat tooltip panels - remove header-crowding brackets around the icon. */
+#stat_info_display::before,
+#stat_info_display::after,
+#laplace_info_display::before,
+#laplace_info_display::after {
+    content: none !important;
+    display: none !important;
+}
+
+#stat_info_display,
+#laplace_info_display {
+    clip-path: polygon(0 9px, 9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px)) !important;
+}
+
+.laplace-header {
+    padding-left: 0.75rem !important;
+}
+
+.laplace-icon {
+    margin-left: 0 !important;
+}
