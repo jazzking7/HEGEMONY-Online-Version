@@ -1000,7 +1000,20 @@ class Zealous_Expansion(Skill):
                 'bg_color': '#991B1B'
             }, room=self.player) 
             return
-        
+        if self.gs.players[self.player].stars < 2:
+            self.gs.server.emit('show_hegemony_notification', {
+                'type': 'dossier_report',
+                'kicker': 'Action Denied',
+                'title': 'Not Enough Stars!',
+                'body': '',
+                'side': 'left',
+                'duration': 3000,
+                'accent': '#FECACA',
+                'kicker_color': '#FECACA',
+                'text_color': '#FECACA',
+                'bg_color': '#991B1B'
+            }, room=self.player) 
+            return
         self.gs.players[self.player].stars -= 2
         self.gs.players[self.player].infrastructure_upgrade += 1
         self.bonus_level += 1
