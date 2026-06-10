@@ -1502,8 +1502,6 @@ class Game_State_Manager:
             reasons.append('bureau')
         if trty.isCAD:
             reasons.append('CAD')
-        if trty.hidden_resources:
-            reasons.append('hidden resources')
 
         return {
             'tid': tid,
@@ -1772,6 +1770,122 @@ class Game_State_Manager:
             'events': events,
         }
 
+    def get_battle_narration_payload(self, event, situation, channel):
+        event_type = event.get('type')
+        data = event.get('data', {})
+        title = event.get('message', 'Battle Event')
+        subtitle = ''
+        log_type = 'military'
+        duration = 3500
+
+        if event_type == 'continent_control_gained':
+            title = 'Continental Control Secured'
+            subtitle = event.get('message', '')
+            duration = 3200
+        elif event_type == 'continent_control_broken':
+            title = 'Continental Control Broken'
+            subtitle = event.get('message', '')
+            duration = 3200
+        elif event_type == 'high_value_node_capture':
+            node = data.get('node', {})
+            title = 'High Value Node Captured'
+            subtitle = f"{situation['attacker_name']} captured {node.get('name', situation['target_name'])}"
+            duration = 3600
+        elif event_type == 'dangerous_high_value_node_attempt':
+            node = data.get('node', {})
+            title = 'Dangerous Assault Repelled'
+            subtitle = f"{situation['attacker_name']} failed to capture {node.get('name', situation['target_name'])}"
+            duration = 3600
+        elif event_type == 'major_battle':
+            title = 'Major Battle'
+            subtitle = f"{situation['attacker_name']} attacked {situation['target_name']} with {situation['atk_amt']} troops against {situation['def_amt']} defenders"
+            duration = 3400
+        elif event_type == 'unexpected_attacker_victory':
+            title = 'Unexpected Breakthrough'
+            subtitle = f"{situation['attacker_name']} captured {situation['target_name']} against the odds"
+            duration = 3600
+        elif event_type == 'unexpected_defender_victory':
+            title = 'Unexpected Defensive Hold'
+            subtitle = f"{situation['defender_name']} held {situation['target_name']} against the odds"
+            duration = 3600
+
+        return {
+            'type': log_type,
+            'event_type': event_type,
+            'title': title,
+            'subtitle': subtitle,
+            'body': subtitle,
+            'priority': event.get('priority', 0),
+            'duration': duration,
+            'log': True,
+            'round': self.GES.round,
+            'channel': channel,
+            'battle': {
+                'attacker': situation['attacker_name'],
+                'defender': situation['defender_name'],
+                'from_tid': situation['attack_from_tid'],
+                'from_name': situation['attack_from_name'],
+                'target_tid': situation['target_tid'],
+                'target_name': situation['target_name'],
+                'atk_amt': situation['atk_amt'],
+                'def_amt': situation['def_amt'],
+                'result': situation['result'][:],
+                'attack_successful': situation['attack_successful'],
+            }
+        }
+
+    def emit_battle_narration_events(self, situation):
+        if not situation or not situation.get('has_important_event'):
+            return
+
+        subtitle_types = {
+            'continent_control_gained',
+            'continent_control_broken',
+        }
+        banner_types = {
+            'high_value_node_capture',
+            'dangerous_high_value_node_attempt',
+            'major_battle',
+            'unexpected_attacker_victory',
+            'unexpected_defender_victory',
+        }
+
+        best_by_type = {}
+        for event in situation.get('events', []):
+            event_type = event.get('type')
+            if not event_type:
+                continue
+
+            previous = best_by_type.get(event_type)
+            if previous is None or event.get('priority', 0) > previous.get('priority', 0):
+                best_by_type[event_type] = event
+
+        subtitle_candidates = [
+            event for event in best_by_type.values()
+            if event.get('type') in subtitle_types
+        ]
+        banner_candidates = [
+            event for event in best_by_type.values()
+            if event.get('type') in banner_types
+        ]
+
+        if subtitle_candidates:
+            subtitle_event = max(subtitle_candidates, key=lambda event: event.get('priority', 0))
+            self.server.emit(
+                'show_event_subtitle',
+                self.get_battle_narration_payload(subtitle_event, situation, 'subtitle'),
+                room=self.lobby
+            )
+
+        if banner_candidates:
+            banner_event = max(banner_candidates, key=lambda event: event.get('priority', 0))
+            self.server.emit(
+                'show_event_banner',
+                self.get_battle_narration_payload(banner_event, situation, 'banner'),
+                room=self.lobby
+            )
+
+
     def handle_battle(self, data):
         # Load territories involved
         t1, t2 = data['choice']
@@ -2016,6 +2130,7 @@ class Game_State_Manager:
             attacker_territories_before_battle,
             defender_territories_before_battle
         )
+        self.emit_battle_narration_events(self.last_battle_situation)
 
         # Remove troops from attacking territory
         trty_atk.troops -= atk_amt
