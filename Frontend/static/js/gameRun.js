@@ -825,6 +825,15 @@ class NarrationLayer {
     this.queueLogPanelPositionRefresh();
   }
 
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   bindEvents() {
     $('#event_log_toggle').on('click', () => {
       this.$logPanel.toggleClass('collapsed');
@@ -922,6 +931,30 @@ class NarrationLayer {
     });
   }
 
+  fitSubtitle() {
+    const subtitle = this.$subtitle[0];
+    if (!subtitle) return;
+
+    const content = subtitle.querySelector('.event-subtitle-content');
+    if (!content) return;
+
+    subtitle.classList.remove('event-subtitle-wrap', 'event-subtitle-compact');
+
+    requestAnimationFrame(() => {
+      const safeWidth = subtitle.clientWidth - 72;
+
+      if (content.scrollWidth > safeWidth) {
+        subtitle.classList.add('event-subtitle-wrap');
+      }
+
+      requestAnimationFrame(() => {
+        if (content.scrollHeight > subtitle.clientHeight + 2 || content.scrollWidth > subtitle.clientWidth - 40) {
+          subtitle.classList.add('event-subtitle-compact');
+        }
+      });
+    });
+  }
+
   showBanner(data = {}) {
     const title = data.title || data.message || 'EVENT';
     const subtitle = data.subtitle || '';
@@ -945,15 +978,28 @@ class NarrationLayer {
   }
 
   showSubtitle(data = {}) {
-    const title = data.title || data.message || '';
-    const subtitle = data.subtitle || '';
+    const title = this.escapeHtml(data.title || data.message || '');
+    const subtitle = this.escapeHtml(data.subtitle || data.body || '');
     const duration = data.duration || 3000;
-    const text = subtitle ? `${title} — ${subtitle}` : title;
+    const message = subtitle || title;
+    const kicker = subtitle ? title : '';
+
+    const html = `
+      <div class="event-subtitle-chrome"></div>
+      <div class="event-subtitle-bevel"></div>
+      <div class="event-subtitle-content">
+        ${kicker ? `<div class="event-subtitle-kicker">${kicker}</div><div class="event-subtitle-divider" aria-hidden="true"></div>` : ''}
+        <div class="event-subtitle-message">${message}</div>
+      </div>
+    `;
 
     this.$subtitle
-      .text(text)
+      .html(html)
+      .removeClass('event-subtitle-wrap event-subtitle-compact')
       .stop(true, true)
-      .fadeIn(120);
+      .fadeIn(120, () => this.fitSubtitle());
+
+    requestAnimationFrame(() => this.fitSubtitle());
 
     clearTimeout(this.subtitleTimer);
 
