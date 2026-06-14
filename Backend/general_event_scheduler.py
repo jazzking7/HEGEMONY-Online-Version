@@ -575,7 +575,7 @@ class General_Event_Scheduler:
         for player in self.gs.players:
             if self.gs.players[player].alive:
                 c += 1
-                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} has proposed a summit"}, room=player)
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} proposes a summit"}, room=player)
                 self.gs.server.emit('summit_voting', room=player)
         self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         self.selection_time_out(20, c)
@@ -595,7 +595,7 @@ class General_Event_Scheduler:
         for player in self.gs.players:
             if self.gs.players[player].alive:
                 c += 1
-                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} has proposed a global ceasefire. The game ends immediately if nobody refuse."}, room=player)
+                self.gs.server.emit('set_new_announcement', {'async' : True, 'msg':f"{self.gs.players[pid].name} proposes a Global Ceasefire. If no one refuses, the game ends now."}, room=player)
                 self.gs.server.emit('summit_voting', room=player)
         self.gs.server.emit('signal_hide_btns', room=self.gs.lobby)
         if self.gs.hasBot:

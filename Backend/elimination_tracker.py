@@ -3,6 +3,20 @@ class Elimination_tracker:
     def __init__(self, ):
         return
 
+    def emit_elimination_notification(self, gs, attacker, victim):
+        gs.server.emit('show_hegemony_notification', {
+            'type': 'elimination_card',
+            'event_type': 'military',
+            'log': True,
+            'kicker': 'Player Eliminated',
+            'title': 'Player Eliminated',
+            'body': f'{attacker.name} has eliminated {victim.name}',
+            'duration': 5600,
+            'accent': '#EF4444',
+            'text_color': '#F3F4F6',
+            'bg_color': '#111827'
+        }, room=gs.lobby)
+
     def determine_elimination(self, gs, a_pid, d_pid):
 
         attacker = gs.players[a_pid]
@@ -66,6 +80,7 @@ class Elimination_tracker:
             gs.update_private_status(a_pid)
             gs.update_private_status(d_pid)
             print(f"{victim.name} has been eliminated by {attacker.name}")
+            self.emit_elimination_notification(gs, attacker, victim)
             # victim is one of original players
             # if d_pid in gs.oriPlayers and d_pid not in gs.perm_elims:
             #     gs.perm_elims.append(d_pid)
@@ -136,6 +151,7 @@ class Elimination_tracker:
             gs.update_private_status(a_pid)
             gs.update_private_status(d_pid)
             print(f"{victim.name} has been eliminated by {attacker.name}")
+            self.emit_elimination_notification(gs, attacker, victim)
             # victim is one of original players
             if d_pid in gs.oriPlayers and d_pid not in gs.perm_elims:
                 gs.perm_elims.append(d_pid)
@@ -146,5 +162,3 @@ class Elimination_tracker:
                 print(f"The kill is executed at round {gs.GES.round}")
             # check death dependent mission
             gs.signal_MTrackers('death')
-
-        

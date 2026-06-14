@@ -32,8 +32,24 @@ class Mission:
     def update_tracker_view(self, updates):
         self.gs.server.emit('update_tracker', updates, room=self.player)
 
+    def emit_mission_failure_elimination_notification(self):
+        player = self.gs.players[self.player]
+        self.gs.server.emit('show_hegemony_notification', {
+            'type': 'elimination_card',
+            'event_type': 'system',
+            'log': True,
+            'kicker': 'Player Eliminated',
+            'title': 'Player Eliminated',
+            'body': f'{player.name} is eliminated due to mission failure',
+            'duration': 5600,
+            'accent': '#EF4444',
+            'text_color': '#F3F4F6',
+            'bg_color': '#111827'
+        }, room=self.gs.lobby)
+
     def signal_mission_failure(self, ):
         if self.gs.players[self.player].alive:
+            self.emit_mission_failure_elimination_notification()
             self.gs.players[self.player].alive = False
             if self.gs.players[self.player].skill:
                 self.gs.players[self.player].skill.active = False

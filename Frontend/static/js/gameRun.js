@@ -1966,7 +1966,12 @@ socket.on('show_notification_left', function(data) {
 // Custom notification design set socket handlers.
 // Payload example: { type: 'major_ribbon', title: 'Doctrine Activated', body: '...', duration: 3600 }
 socket.on('show_hegemony_notification', function(data) {
-    notificationManager.showCustom(data || {});
+    const payload = data || {};
+    notificationManager.showCustom(payload);
+
+    if (payload.log && window.narrationLayer) {
+      window.narrationLayer.addLog(payload);
+    }
 });
 
 socket.on('show_tactical_notification', function(data) {

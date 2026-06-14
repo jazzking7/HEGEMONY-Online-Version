@@ -19,6 +19,25 @@ EGT = End_game_tracker()
 SDIS = Skill_Distributor()
 TUTORIAL_RUNNER = Tutorial_Manager("8CMAP", socketio)
 
+def emit_dossier_notification(target, title, body='', side='right', kicker='Dossier', event_type='economy'):
+    socketio.emit('show_hegemony_notification', {
+        'type': 'dossier_report',
+        'event_type': event_type,
+        'log': True,
+        'kicker': kicker,
+        'title': title,
+        'body': body,
+        'side': side,
+        'duration': 3000,
+        'accent': '#FBBF24',
+        'kicker_color': '#FBBF24',
+        'text_color': '#FDE68A',
+        'bg_color': '#111827'
+    }, room=target)
+
+def count_label(count, singular, plural=None):
+    return f"{count} {singular if count == 1 else (plural or singular + 's')}"
+
 def generate_unique_code(length):
     while True:
         code = ""
@@ -695,6 +714,7 @@ def settle_new_cities(data):
     for trty in choices:
         gsm.map.territories[trty].isCity = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'city'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "City", "Cities")} built.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -768,6 +788,7 @@ def settle_bureau(data):
     for trty in choices:
         gsm.map.territories[trty].isBureau = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'bureau'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Mobilization Bureau", "Mobilization Bureaux")} set up.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -838,6 +859,7 @@ def settle_leyline(data):
     for trty in choices:
         gsm.map.territories[trty].isLeyline = True
         socketio.emit('update_trty_display', {trty: {'hasEffect': 'leyline'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Leyline Cross", "Leyline Crosses")} set up.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -909,6 +931,7 @@ def settle_nexus(data):
     for trty in choices:
         gsm.map.territories[trty].isTransportcenter = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'nexus'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Logistic Nexus", "Logistic Nexus")} built.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -978,6 +1001,7 @@ def settle_new_halls(data):
     for trty in choices:
         gsm.map.territories[trty].isHall = True
         socketio.emit('update_trty_display', {trty: {'hasEffect': 'hall'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Hall of Governance", "Halls of Governance")} set up.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -1047,6 +1071,7 @@ def settle_new_forts(data):
     for trty in choices:
         gsm.map.territories[trty].isFort = True
         socketio.emit('update_trty_display', {trty: {'hasEffect': 'fort'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Fort")} set up.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -1119,6 +1144,7 @@ def settle_new_megacities(data):
     for trty in choices:
         gsm.map.territories[trty].isMegacity = True
         socketio.emit('update_trty_display', {trty: {'hasDev': 'megacity'}}, room=gsm.lobby)
+    emit_dossier_notification(pid, f'{count_label(len(choices), "Megacity", "Megacities")} raised.', side='right')
 
     # city building sfx
     socketio.emit('cityBuildingSFX', room=gsm.lobby)
@@ -1388,6 +1414,7 @@ def handle_summit_request():
     if pid == gsm.pids[gsm.GES.current_player]:
         if gsm.players[pid].num_summit > 0:
             gsm.GES.summit_requested = True
+            emit_dossier_notification(pid, 'Summit request is sent.', side='right', event_type='intel')
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF SUMMIT LAUNCHED!"} ,room=pid)
     else:
@@ -1410,6 +1437,7 @@ def handle_global_peace_request():
     if pid == gsm.pids[gsm.GES.current_player]:
         if gsm.players[pid].num_summit > 0:
             gsm.GES.global_peace_proposed = True
+            emit_dossier_notification(pid, 'Global Ceasefire request is sent.', side='right', event_type='intel')
         else:
             socketio.emit('summit_failed', {'msg': "MAX AMOUNT OF GLOBAL PEACE PROPOSED!"} ,room=pid)
     else:

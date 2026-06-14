@@ -1089,6 +1089,20 @@ class Game_State_Manager:
         if not self.players[player].hijacked:
             self.players[player].stars -= amt*self.starPrice(3,player)
             self.players[player].infrastructure_upgrade += amt
+            self.server.emit('show_hegemony_notification', {
+                    'type': 'dossier_report',
+                    'event_type': 'economy',
+                    'log': True,
+                    'kicker': 'Dossier',
+                    'title': f'Infrastructure Level +{amt}',
+                    'body': '',
+                    'side': 'right',
+                    'duration': 3000,
+                    'accent': '#FBBF24',
+                    'kicker_color': '#FBBF24',
+                    'text_color': '#FDE68A',
+                    'bg_color': '#111827'
+                }, room=player)
             self.update_private_status(player)
             self.update_HIP(player)
             self.get_SUP()
